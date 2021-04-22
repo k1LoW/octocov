@@ -1,0 +1,98 @@
+before:
+  hooks:
+    - go mod download
+    - go mod tidy
+builds:
+  -
+    id: octocov-darwin
+    ldflags:
+      - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+  -
+    id: octocov-linux
+    ldflags:
+      - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+archives:
+  -
+    id: octocov-archive
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format_overrides:
+      - goos: darwin
+        format: zip
+    files:
+      - CREDITS
+      - README.md
+      - CHANGELOG.md
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Version }}-next"
+changelog:
+  skip: true
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - 'ghcr.io/k1low/octocov:v{{ .Version }}'
+      - 'ghcr.io/k1low/octocov:latest'
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://github.com/k1LoW/octocov"
+    extra_files:
+      - scripts/entrypoint.sh
+brews:
+  -
+    name: octocov
+    tap:
+      owner: k1LoW
+      name: homebrew-tap
+    commit_author:
+      name: k1LoW
+      email: k1lowxb@gmail.com
+    homepage: https://github.com/k1LoW/octocov
+    description: octocov is a tool for collecting code coverage.
+    license: MIT
+    install: |
+      system './octocov', 'completion', 'bash', '--out', 'octocov.bash'
+      system './octocov', 'completion', 'zsh', '--out', 'octocov.zsh'
+      bin.install 'octocov'
+      bash_completion.install 'octocov.bash' => 'octocov'
+      zsh_completion.install 'octocov.zsh' => '_octocov'
+nfpms:
+  -
+    id: octocov-nfpms
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
+    builds:
+      - octocov-linux
+    homepage: https://github.com/k1LoW/octocov
+    maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
+    description: octocov is a tool for collecting code coverage.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    epoch: 1

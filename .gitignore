@@ -1,0 +1,7 @@
+octocov
+/dist/
+coverage.txt
+.envrc
+.go-version
+.DS_Store
+dist/
