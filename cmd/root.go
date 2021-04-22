@@ -23,46 +23,40 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
+	"io/ioutil"
+	"log"
 	"os"
+
+	"github.com/k1LoW/octocov/version"
+	"github.com/spf13/cobra"
 )
 
+var out string
 
-
-// rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "octocov",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//	Run: func(cmd *cobra.Command, args []string) { },
+	Use:          "octocov",
+	Short:        "octocov is a tool for collecting code coverage",
+	Long:         `octocov is a tool for collecting code coverage.`,
+	Version:      version.Version,
+	SilenceUsage: true,
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	rootCmd.SetOut(os.Stdout)
+	rootCmd.SetErr(os.Stderr)
+
+	log.SetOutput(ioutil.Discard)
+	if env := os.Getenv("DEBUG"); env != "" {
+		debug, err := os.Create(fmt.Sprintf("%s.debug", version.Name))
+		if err != nil {
+			rootCmd.PrintErrln(err)
+			os.Exit(1)
+		}
+		log.SetOutput(debug)
+	}
+
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
+		rootCmd.PrintErrln(err)
 		os.Exit(1)
 	}
 }
-
-func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.octocov.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
-
