@@ -3,11 +3,11 @@ package coverage
 type Type int
 
 const (
-	TypeLine Type = iota + 1
+	TypeLOC Type = iota + 1
 	TypeStatement
 )
 
-var typeNames = [...]string{"", "line", "statement"}
+var typeNames = [...]string{"", "loc", "statement"}
 
 func (t Type) String() string {
 	return typeNames[t]
@@ -36,11 +36,7 @@ type Processor interface {
 
 func New() *Coverage {
 	return &Coverage{
-		Type:    TypeStatement,
-		Format:  "Golang txt",
-		Total:   0,
-		Covered: 0,
-		Files:   FileCoverages{},
+		Files: FileCoverages{},
 	}
 }
 
