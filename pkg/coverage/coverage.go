@@ -1,5 +1,7 @@
 package coverage
 
+import "fmt"
+
 type Type int
 
 const (
@@ -28,6 +30,15 @@ type FileCoverage struct {
 }
 
 type FileCoverages []*FileCoverage
+
+func (coverages FileCoverages) FindByFileName(fileName string) (*FileCoverage, error) {
+	for _, c := range coverages {
+		if c.FileName == fileName {
+			return c, nil
+		}
+	}
+	return nil, fmt.Errorf("file name not found: %s", fileName)
+}
 
 type Processor interface {
 	Name() string
