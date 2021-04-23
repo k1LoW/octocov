@@ -1,6 +1,6 @@
 octocov
 /dist/
-coverage.txt
+/coverage.out
 .envrc
 .go-version
 .DS_Store

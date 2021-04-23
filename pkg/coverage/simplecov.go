@@ -1,10 +1,11 @@
 package coverage
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/goccy/go-json"
 )
 
 var SimplecovDefaultPath = []string{"coverage", ".resultset.json"}

@@ -2,31 +2,25 @@ package coverage
 
 import "fmt"
 
-type Type int
+type Type string
 
 const (
-	TypeLOC Type = iota + 1
-	TypeStatement
+	TypeLOC       Type = "loc"
+	TypeStatement      = "statement"
 )
 
-var typeNames = [...]string{"", "loc", "statement"}
-
-func (t Type) String() string {
-	return typeNames[t]
-}
-
 type Coverage struct {
-	Type    Type
-	Format  string
-	Total   int
-	Covered int
-	Files   FileCoverages
+	Type    Type          `json:"type"`
+	Format  string        `json:"format"`
+	Total   int           `json:"total"`
+	Covered int           `json:"covered"`
+	Files   FileCoverages `json:"files"`
 }
 
 type FileCoverage struct {
-	FileName string
-	Total    int
-	Covered  int
+	FileName string `json:"file"`
+	Total    int    `json:"total"`
+	Covered  int    `json:"covered"`
 }
 
 type FileCoverages []*FileCoverage

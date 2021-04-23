@@ -22,8 +22,8 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/goccy/go-json"
+	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
 
@@ -33,7 +33,15 @@ var showCmd = &cobra.Command{
 	Short: "Show coverage report",
 	Long:  `Show coverage report.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("show not implemented.")
+		r := report.New()
+		if err := r.MeasureCoverage("."); err != nil {
+			return err
+		}
+		b, err := json.MarshalIndent(r, "", "  ")
+		if err != nil {
+			return err
+		}
+		cmd.Println(string(b))
 		return nil
 	},
 }
