@@ -22,8 +22,11 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
+	"context"
 
+	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
 
@@ -33,11 +36,27 @@ var pushCmd = &cobra.Command{
 	Short: "Push coverage report",
 	Long:  `Push coverage report.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("push not implemented.")
+		r := report.New()
+		if err := r.MeasureCoverage("."); err != nil {
+			return err
+		}
+		c := config.New()
+		if err := c.Load(configPath, r); err != nil {
+			return err
+		}
+		g, err := datastore.NewGithub(c)
+		if err != nil {
+			return err
+		}
+		ctx := context.Background()
+		if err := g.Push(ctx, r); err != nil {
+			return err
+		}
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(pushCmd)
+	pushCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 }

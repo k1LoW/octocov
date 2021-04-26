@@ -31,7 +31,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var out string
+var (
+	out        string
+	configPath string
+)
 
 var rootCmd = &cobra.Command{
 	Use:          "octocov",
@@ -56,7 +59,6 @@ func Execute() {
 	}
 
 	if err := rootCmd.Execute(); err != nil {
-		rootCmd.PrintErrln(err)
 		os.Exit(1)
 	}
 }

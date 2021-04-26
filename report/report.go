@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/octocov/pkg/coverage"
 )
 
@@ -20,6 +21,14 @@ func New() *Report {
 		Ref:        os.Getenv("GITHUB_REF"),
 		Commit:     os.Getenv("GITHUB_SHA"),
 	}
+}
+
+func (r *Report) String() string {
+	b, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return string(b)
 }
 
 func (r *Report) MeasureCoverage(path string) error {
