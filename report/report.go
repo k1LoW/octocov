@@ -2,7 +2,10 @@ package report
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/octocov/pkg/coverage"
@@ -16,10 +19,28 @@ type Report struct {
 }
 
 func New() *Report {
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	ref := os.Getenv("GITHUB_REF")
+	if ref == "" {
+		b, err := ioutil.ReadFile(".git/HEAD")
+		if err == nil {
+			splitted := strings.Split(strings.TrimSuffix(string(b), "\n"), " ")
+			ref = splitted[1]
+		}
+	}
+	commit := os.Getenv("GITHUB_SHA")
+	if commit == "" {
+		cmd := exec.Command("git", "rev-parse", "HEAD")
+		b, err := cmd.Output()
+		if err == nil {
+			commit = strings.TrimSuffix(string(b), "\n")
+		}
+	}
+
 	return &Report{
-		Repository: os.Getenv("GITHUB_REPOSITORY"),
-		Ref:        os.Getenv("GITHUB_REF"),
-		Commit:     os.Getenv("GITHUB_SHA"),
+		Repository: repo,
+		Ref:        ref,
+		Commit:     commit,
 	}
 }
 
