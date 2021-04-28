@@ -19,7 +19,8 @@ var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
 	Report ConfigReport `yaml:"report,omitempty"`
-	Push   ConfigPush   `yaml:"push"`
+	Push   ConfigPush   `yaml:"push,omitempty"`
+	Badge  ConfigBadge  `yaml:"badge,omitempty"`
 }
 
 type ConfigReport struct {
@@ -30,6 +31,10 @@ type ConfigPush struct {
 	Repository string `yaml:"repository"`
 	Branch     string `yaml:"branch"`
 	Path       string `yaml:"path"`
+}
+
+type ConfigBadge struct {
+	Path string `yaml:"path"`
 }
 
 func New() *Config {

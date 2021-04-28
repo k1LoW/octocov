@@ -10,5 +10,5 @@ require (
 	github.com/spf13/cobra v1.1.3
 	golang.org/x/exp v0.0.0-20191030013958-a1ab85dbe136
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
-	golang.org/x/tools v0.0.0-20191112195655-aa38f8e97acc
+	golang.org/x/tools v0.1.1-0.20210408155258-593413344da1
 )

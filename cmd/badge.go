@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
@@ -45,11 +46,17 @@ var badgeCmd = &cobra.Command{
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
-		c := float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+		c := config.New()
+		_ = c.Load(configPath, r)
+
+		cover := float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
 		var (
 			o   *os.File
 			err error
 		)
+		if out == "" {
+			out = c.Badge.Path
+		}
 		if out == "" {
 			o = os.Stdout
 		} else {
@@ -58,7 +65,7 @@ var badgeCmd = &cobra.Command{
 				return err
 			}
 		}
-		b := badge.New("coverage", fmt.Sprintf("%.1f%%", c))
+		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cover))
 		if err := b.Render(o); err != nil {
 			return err
 		}
@@ -69,4 +76,5 @@ var badgeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(badgeCmd)
 	badgeCmd.Flags().StringVarP(&out, "out", "o", "", "output file path")
+	badgeCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 }

@@ -28,7 +28,7 @@ build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
 coverage: build test
-	./octocov badge > docs/coverage.svg
+	./octocov badge
 
 depsdev:
 	go get github.com/Songmu/ghch/cmd/ghch
