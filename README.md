@@ -4,7 +4,7 @@
 
 `octocov` is a tool for collecting code coverage.
 
-## Supported Coverage Report Format
+## Supported coverage report formats
 
 ### Go coverage
 
