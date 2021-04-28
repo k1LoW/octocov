@@ -1,7 +1,6 @@
 package report
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -53,20 +52,10 @@ func (r *Report) String() string {
 }
 
 func (r *Report) MeasureCoverage(path string) error {
-	// gocover
-	if cov, err := coverage.NewGocover().ParseReport(path); err == nil {
-		r.Coverage = cov
-		return nil
+	cov, err := coverage.Measure(path)
+	if err != nil {
+		return err
 	}
-	// lcov
-	if cov, err := coverage.NewLcov().ParseReport(path); err == nil {
-		r.Coverage = cov
-		return nil
-	}
-	// simplecov
-	if cov, err := coverage.NewSimplecov().ParseReport(path); err == nil {
-		r.Coverage = cov
-		return nil
-	}
-	return fmt.Errorf("coverage report not found: %s", path)
+	r.Coverage = cov
+	return nil
 }

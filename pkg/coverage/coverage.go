@@ -52,3 +52,19 @@ func NewFileCoverage(fileName string) *FileCoverage {
 		Covered:  0,
 	}
 }
+
+func Measure(path string) (*Coverage, error) {
+	// gocover
+	if cov, err := NewGocover().ParseReport(path); err == nil {
+		return cov, nil
+	}
+	// lcov
+	if cov, err := NewLcov().ParseReport(path); err == nil {
+		return cov, nil
+	}
+	// simplecov
+	if cov, err := NewSimplecov().ParseReport(path); err == nil {
+		return cov, nil
+	}
+	return nil, fmt.Errorf("coverage report not found: %s", path)
+}
