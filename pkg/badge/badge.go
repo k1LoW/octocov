@@ -14,6 +14,8 @@ import (
 
 const defaultKeyColor = "#24292E"
 const defaultValueColor = "#28A745"
+const fontSize = 11
+const dpi = 72
 
 type Badge struct {
 	Key        string
@@ -35,22 +37,20 @@ func New(k, v string) *Badge {
 	if err != nil {
 		panic(err)
 	}
-	drawer := &font.Drawer{
-		Face: truetype.NewFace(ttf, &truetype.Options{
-			Size:    11,
-			DPI:     72,
-			Hinting: font.HintingFull,
-		}),
-	}
 
 	return &Badge{
 		Key:        k,
 		Value:      v,
 		KeyColor:   defaultKeyColor,
 		ValueColor: defaultValueColor,
-		drawer:     drawer,
+		drawer: &font.Drawer{
+			Face: truetype.NewFace(ttf, &truetype.Options{
+				Size:    fontSize,
+				DPI:     dpi,
+				Hinting: font.HintingFull,
+			}),
+		},
 	}
-
 }
 
 func (b *Badge) Render(wr io.Writer) error {
@@ -86,7 +86,7 @@ func (b *Badge) stringWidth(s string) float64 {
 		if utf8string.NewString(string([]rune{c})).IsASCII() {
 			converted = append(converted, c)
 		} else {
-			converted = append(converted, '%') // Because the width of the `%` character is wider
+			converted = append(converted, '%') // because the width of the `%` character is wider
 		}
 	}
 	w := b.drawer.MeasureString(string(converted))
