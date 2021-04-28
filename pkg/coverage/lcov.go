@@ -2,6 +2,7 @@ package coverage
 
 import (
 	"bufio"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,6 +36,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, error) {
 	cov := New()
 	cov.Type = TypeLOC
 	cov.Format = "LCOV"
+	parsed := false
 	for scanner.Scan() {
 		l := scanner.Text()
 		if l == "end_of_record" {
@@ -49,6 +51,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, error) {
 			cov.Files = append(cov.Files, fcov)
 			total = 0
 			covered = 0
+			parsed = true
 			continue
 		}
 		splitted := strings.Split(l, ":")
@@ -66,6 +69,9 @@ func (l *Lcov) ParseReport(path string) (*Coverage, error) {
 		default:
 			// not implemented
 		}
+	}
+	if !parsed {
+		return nil, errors.New("can not parse")
 	}
 	return cov, nil
 }
