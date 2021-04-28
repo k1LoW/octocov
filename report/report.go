@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/goccy/go-json"
@@ -54,7 +55,7 @@ func (r *Report) String() string {
 func (r *Report) MeasureCoverage(path string) error {
 	cov, cerr := coverage.Measure(path)
 	if cerr != nil {
-		b, err := ioutil.ReadFile(path)
+		b, err := ioutil.ReadFile(filepath.Clean(path))
 		if err != nil {
 			return err
 		}
