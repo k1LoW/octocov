@@ -32,8 +32,12 @@ var showCmd = &cobra.Command{
 	Short: "Show coverage report",
 	Long:  `Show coverage report.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		path := "."
+		if len(args) > 0 {
+			path = args[0]
+		}
 		r := report.New()
-		if err := r.MeasureCoverage("."); err != nil {
+		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
 		cmd.Println(r.String())
