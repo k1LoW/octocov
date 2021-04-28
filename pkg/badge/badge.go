@@ -7,7 +7,9 @@ import (
 	"io"
 	"text/template"
 
-	"github.com/mattn/go-runewidth"
+	"github.com/golang/freetype/truetype"
+	"golang.org/x/exp/utf8string"
+	"golang.org/x/image/font"
 )
 
 const defaultKeyColor = "#24292E"
@@ -18,26 +20,45 @@ type Badge struct {
 	Value      string
 	KeyColor   string
 	ValueColor string
+	drawer     *font.Drawer
 }
 
 //go:embed badge.svg.tmpl
 var badgeTmpl []byte
 
+// https://github.com/googlefonts/noto-fonts/blob/main/hinted/ttf/NotoSans/NotoSans-Medium.ttf
+//go:embed NotoSans-Medium.ttf
+var noto []byte
+
 func New(k, v string) *Badge {
+	ttf, err := truetype.Parse(noto)
+	if err != nil {
+		panic(err)
+	}
+	drawer := &font.Drawer{
+		Face: truetype.NewFace(ttf, &truetype.Options{
+			Size:    11,
+			DPI:     72,
+			Hinting: font.HintingFull,
+		}),
+	}
+
 	return &Badge{
 		Key:        k,
 		Value:      v,
 		KeyColor:   defaultKeyColor,
 		ValueColor: defaultValueColor,
+		drawer:     drawer,
 	}
+
 }
 
 func (b *Badge) Render(wr io.Writer) error {
 	tmpl := template.Must(template.New("badge").Parse(string(badgeTmpl)))
 
 	// https://github.com/badges/shields/tree/master/spec
-	kw := 6 + stringWidth(b.Key) + 4
-	vw := 4 + stringWidth(b.Value) + 6
+	kw := 6 + b.stringWidth(b.Key) + 4
+	vw := 4 + b.stringWidth(b.Value) + 6
 	kx := kw * 10 / 2
 	vx := (kw * 10) + (vw * 10 / 2)
 
@@ -59,8 +80,17 @@ func (b *Badge) Render(wr io.Writer) error {
 	return nil
 }
 
-func stringWidth(s string) int {
-	return runewidth.StringWidth(s) * 8 // TODO: 8 is heuristic
+func (b *Badge) stringWidth(s string) float64 {
+	converted := []rune{}
+	for _, c := range s {
+		if utf8string.NewString(string([]rune{c})).IsASCII() {
+			converted = append(converted, c)
+		} else {
+			converted = append(converted, '%') // Because the width of the `%` character is wider
+		}
+	}
+	w := b.drawer.MeasureString(string(converted))
+	return float64(w)/64 + 10 // 10 is heuristic
 }
 
 func ColorToHexRGB(c color.Color) string {
