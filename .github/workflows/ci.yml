@@ -1,0 +1,29 @@
+name: build
+
+on: push
+
+jobs:
+  job-test:
+    name: Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version: [1.16]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Check out source code
+        uses: actions/checkout@v2
+
+      - name: Run tests and generate coverage badge
+        run: make ci
+
+      - name: Commit badge
+        uses: EndBug/add-and-commit@v7
+        with:
+          add: 'docs/coverage.svg'

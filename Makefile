@@ -13,7 +13,7 @@ BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
 default: test
 
-ci: depsdev test sec
+ci: depsdev test sec coverage
 
 test:
 	go test ./... -coverprofile=coverage.out -covermode=count
@@ -26,6 +26,9 @@ lint:
 
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
+
+coverage: build test
+	./octocov badge > docs/coverage.svg
 
 depsdev:
 	go get github.com/Songmu/ghch/cmd/ghch
