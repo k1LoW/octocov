@@ -20,11 +20,13 @@ func (l *Lcov) ParseReport(path string) (*Coverage, error) {
 	if err != nil {
 		return nil, err
 	}
-	r, err := os.Open(path)
+	r, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
+	defer func() {
+		_ = r.Close()
+	}()
 	scanner := bufio.NewScanner(r)
 	var (
 		fileName       string

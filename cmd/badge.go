@@ -53,7 +53,7 @@ var badgeCmd = &cobra.Command{
 		if out == "" {
 			o = os.Stdout
 		} else {
-			o, err = os.OpenFile(filepath.Clean(out), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+			o, err = os.OpenFile(filepath.Clean(out), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 			if err != nil {
 				return err
 			}
