@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
@@ -32,7 +33,11 @@ var showCmd = &cobra.Command{
 	Short: "Show coverage report",
 	Long:  `Show coverage report.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		path := "."
+		c := config.New()
+		if err := c.Load(configPath); err != nil {
+			return err
+		}
+		path := c.Coverage.Path
 		if len(args) > 0 {
 			path = args[0]
 		}
@@ -47,4 +52,5 @@ var showCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(showCmd)
+	showCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
 }

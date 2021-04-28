@@ -36,16 +36,16 @@ var pushCmd = &cobra.Command{
 	Short: "Push coverage report",
 	Long:  `Push coverage report.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		path := "."
+		c := config.New()
+		if err := c.Load(configPath); err != nil {
+			return err
+		}
+		path := c.Coverage.Path
 		if len(args) > 0 {
 			path = args[0]
 		}
 		r := report.New()
 		if err := r.MeasureCoverage(path); err != nil {
-			return err
-		}
-		c := config.New()
-		if err := c.Load(configPath); err != nil {
 			return err
 		}
 		if err := c.SetReport(r); err != nil {

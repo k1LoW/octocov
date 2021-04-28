@@ -22,8 +22,6 @@ type Config struct {
 	Report   ConfigReport   `yaml:"report,omitempty"`
 	Push     ConfigPush     `yaml:"push,omitempty"`
 	Badge    ConfigBadge    `yaml:"badge,omitempty"`
-
-	root string
 }
 
 type ConfigCoverage struct {
@@ -59,12 +57,23 @@ func (c *Config) Load(path string) error {
 			}
 		}
 	}
+	if path == "" {
+		p, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		c.Coverage.Path = p
+		return nil
+	}
 	buf, err := ioutil.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return err
 	}
 	if err := yaml.Unmarshal(buf, c); err != nil {
 		return err
+	}
+	if c.Coverage.Path == "" {
+		c.Coverage.Path = filepath.Dir(path)
 	}
 	return nil
 }

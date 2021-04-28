@@ -38,7 +38,11 @@ var badgeCmd = &cobra.Command{
 	Short: "Generate coverage report badge",
 	Long:  `Generate coverage report badge.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		path := "."
+		c := config.New()
+		if err := c.Load(configPath); err != nil {
+			return err
+		}
+		path := c.Coverage.Path
 		if len(args) > 0 {
 			path = args[0]
 		}
@@ -46,8 +50,6 @@ var badgeCmd = &cobra.Command{
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
-		c := config.New()
-		_ = c.Load(configPath)
 
 		cover := float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
 		var (
