@@ -52,9 +52,16 @@ func (r *Report) String() string {
 }
 
 func (r *Report) MeasureCoverage(path string) error {
-	cov, err := coverage.Measure(path)
-	if err != nil {
-		return err
+	cov, cerr := coverage.Measure(path)
+	if cerr != nil {
+		b, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		if err := json.Unmarshal(b, r); err != nil {
+			return cerr
+		}
+		return nil
 	}
 	r.Coverage = cov
 	return nil
