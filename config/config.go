@@ -13,14 +13,21 @@ import (
 )
 
 const defaultBranch = "main"
-const defaultReportDir = "report"
+const defaultPushDir = "report"
 
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
-	Report ConfigReport `yaml:"report,omitempty"`
-	Push   ConfigPush   `yaml:"push,omitempty"`
-	Badge  ConfigBadge  `yaml:"badge,omitempty"`
+	Coverage ConfigCoverage `yaml:"coverage,omitempty"`
+	Report   ConfigReport   `yaml:"report,omitempty"`
+	Push     ConfigPush     `yaml:"push,omitempty"`
+	Badge    ConfigBadge    `yaml:"badge,omitempty"`
+
+	root string
+}
+
+type ConfigCoverage struct {
+	Path string `yaml:"path"`
 }
 
 type ConfigReport struct {
@@ -88,7 +95,7 @@ func (c *Config) BuildPushConfig() error {
 		if c.Report.Repository == "" {
 			return errors.New("report.repository not set")
 		}
-		c.Push.Path = fmt.Sprintf("%s/%s.json", defaultReportDir, c.Report.Repository)
+		c.Push.Path = fmt.Sprintf("%s/%s.json", defaultPushDir, c.Report.Repository)
 	}
 
 	return nil
