@@ -23,7 +23,11 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
+	"github.com/k1LoW/octocov/pkg/badge"
+	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
 
@@ -33,11 +37,36 @@ var badgeCmd = &cobra.Command{
 	Short: "Generate coverage report badge",
 	Long:  `Generate coverage report badge.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Println("badge not implemented.")
+		path := "."
+		if len(args) > 0 {
+			path = args[0]
+		}
+		r := report.New()
+		if err := r.MeasureCoverage(path); err != nil {
+			return err
+		}
+		c := float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+		var (
+			o   *os.File
+			err error
+		)
+		if out == "" {
+			o = os.Stdout
+		} else {
+			o, err = os.OpenFile(filepath.Clean(out), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+			if err != nil {
+				return err
+			}
+		}
+		b := badge.New("coverage", fmt.Sprintf("%.1f%%", c))
+		if err := b.Render(o); err != nil {
+			return err
+		}
 		return nil
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(badgeCmd)
+	badgeCmd.Flags().StringVarP(&out, "out", "o", "", "output file path")
 }
