@@ -99,6 +99,9 @@ func (g *Github) Push(ctx context.Context, r *report.Report) error {
 		}
 	} else {
 		tree, _, err = srv.GetTree(ctx, owner, repo, *parent.Tree.SHA, false)
+		if err != nil {
+			return err
+		}
 	}
 
 	commit := &github.Commit{
