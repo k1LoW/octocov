@@ -23,6 +23,9 @@ jobs:
       - name: Run tests and generate coverage badge
         run: make ci
 
+      - name: Run lint
+        uses: golangci/golangci-lint-action@v2
+
       - name: Commit badge
         uses: EndBug/add-and-commit@v7
         with:
