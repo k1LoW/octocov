@@ -47,7 +47,7 @@ var badgeCmd = &cobra.Command{
 			return err
 		}
 		c := config.New()
-		_ = c.Load(configPath, r)
+		_ = c.Load(configPath)
 
 		cover := float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
 		var (

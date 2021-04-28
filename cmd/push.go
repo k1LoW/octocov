@@ -45,7 +45,13 @@ var pushCmd = &cobra.Command{
 			return err
 		}
 		c := config.New()
-		if err := c.Load(configPath, r); err != nil {
+		if err := c.Load(configPath); err != nil {
+			return err
+		}
+		if err := c.SetReport(r); err != nil {
+			return err
+		}
+		if err := c.BuildPushConfig(); err != nil {
 			return err
 		}
 		g, err := datastore.NewGithub(c)

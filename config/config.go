@@ -41,7 +41,7 @@ func New() *Config {
 	return &Config{}
 }
 
-func (c *Config) Load(path string, r *report.Report) error {
+func (c *Config) Load(path string) error {
 	if path == "" {
 		for _, p := range DefaultConfigFilePaths {
 			if f, err := os.Stat(p); err == nil && !f.IsDir() {
@@ -59,18 +59,17 @@ func (c *Config) Load(path string, r *report.Report) error {
 	if err := yaml.Unmarshal(buf, c); err != nil {
 		return err
 	}
+	return nil
+}
 
+func (c *Config) SetReport(r *report.Report) error {
 	if c.Report.Repository == "" {
 		c.Report.Repository = r.Repository
-	}
-
-	if err := c.buildPushConfig(); err != nil {
-		return err
 	}
 	return nil
 }
 
-func (c *Config) buildPushConfig() error {
+func (c *Config) BuildPushConfig() error {
 	c.Push.Repository = os.ExpandEnv(c.Push.Repository)
 	if c.Push.Repository == "" {
 		return errors.New("push.repository not set")
