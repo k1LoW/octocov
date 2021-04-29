@@ -20,6 +20,6 @@ Support `SF` `DA` only
 
 **Default path:** `coverage/.resultset.json`
 
-### PHPUnit
+### Clover
 
 :construction:
