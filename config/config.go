@@ -33,6 +33,10 @@ type ConfigReport struct {
 }
 
 type ConfigPush struct {
+	Github ConfigPushGithub `yaml:"github,omitempty"`
+}
+
+type ConfigPushGithub struct {
 	Repository string `yaml:"repository"`
 	Branch     string `yaml:"branch"`
 	Path       string `yaml:"path"`
@@ -78,34 +82,33 @@ func (c *Config) Load(path string) error {
 	return nil
 }
 
-func (c *Config) SetReport(r *report.Report) error {
-	if c.Report.Repository == "" {
+func (c *Config) Build(r *report.Report) {
+	if r != nil && c.Report.Repository == "" {
 		c.Report.Repository = r.Repository
 	}
-	return nil
+	c.Push.Github.Repository = os.ExpandEnv(c.Push.Github.Repository)
+	c.Push.Github.Branch = os.ExpandEnv(c.Push.Github.Branch)
+	if c.Push.Github.Branch == "" {
+		c.Push.Github.Branch = defaultBranch
+	}
+	c.Push.Github.Path = os.ExpandEnv(c.Push.Github.Path)
+	if c.Push.Github.Path == "" && c.Report.Repository != "" {
+		c.Push.Github.Path = fmt.Sprintf("%s/%s.json", defaultPushDir, c.Report.Repository)
+	}
 }
 
-func (c *Config) BuildPushConfig() error {
-	c.Push.Repository = os.ExpandEnv(c.Push.Repository)
-	if c.Push.Repository == "" {
+func (c *Config) ValidatePushConfig() error {
+	if c.Push.Github.Repository == "" {
 		return errors.New("push.repository not set")
 	}
-	if strings.Count(c.Push.Repository, "/") != 1 {
+	if strings.Count(c.Push.Github.Repository, "/") != 1 {
 		return errors.New("push.repository should be 'owner/repo'")
 	}
-
-	c.Push.Branch = os.ExpandEnv(c.Push.Branch)
-	if c.Push.Branch == "" {
-		c.Push.Branch = defaultBranch
+	if c.Push.Github.Branch == "" {
+		return errors.New("push.branch not set")
 	}
-
-	c.Push.Path = os.ExpandEnv(c.Push.Path)
-	if c.Push.Path == "" {
-		if c.Report.Repository == "" {
-			return errors.New("report.repository not set")
-		}
-		c.Push.Path = fmt.Sprintf("%s/%s.json", defaultPushDir, c.Report.Repository)
+	if c.Push.Github.Path == "" {
+		return errors.New("push.path not set")
 	}
-
 	return nil
 }

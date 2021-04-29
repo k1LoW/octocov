@@ -48,15 +48,15 @@ func NewGithub(c *config.Config) (*Github, error) {
 
 func (g *Github) Push(ctx context.Context, r *report.Report) error {
 	srv := g.client.Git
-	branch := g.config.Push.Branch
+	branch := g.config.Push.Github.Branch
 	content := r.String()
-	rPath := g.config.Push.Path
+	rPath := g.config.Push.Github.Path
 	from := r.Repository
 	if g.config.Report.Repository != "" {
 		from = g.config.Report.Repository
 	}
 	message := fmt.Sprintf("Push coverage report of %s", from)
-	splitted := strings.Split(g.config.Push.Repository, "/")
+	splitted := strings.Split(g.config.Push.Github.Repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]
 

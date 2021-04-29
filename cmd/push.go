@@ -48,10 +48,8 @@ var pushCmd = &cobra.Command{
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
-		if err := c.SetReport(r); err != nil {
-			return err
-		}
-		if err := c.BuildPushConfig(); err != nil {
+		c.Build(r)
+		if err := c.ValidatePushConfig(); err != nil {
 			return err
 		}
 		g, err := datastore.NewGithub(c)
