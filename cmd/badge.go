@@ -33,6 +33,7 @@ import (
 )
 
 const (
+	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
 	green       = "#97CA00"
 	yellowgreen = "#A4A61D"
 	yellow      = "#DFB317"
