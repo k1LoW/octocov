@@ -32,6 +32,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	green       = "#97CA00"
+	yellowgreen = "#A4A61D"
+	yellow      = "#DFB317"
+	orange      = "#FE7D37"
+	red         = "#E05D44"
+)
+
 // badgeCmd represents the badge command
 var badgeCmd = &cobra.Command{
 	Use:   "badge",
@@ -68,6 +76,7 @@ var badgeCmd = &cobra.Command{
 			}
 		}
 		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cover))
+		b.ValueColor = coverageColor(cover)
 		if err := b.Render(o); err != nil {
 			return err
 		}
@@ -79,4 +88,19 @@ func init() {
 	rootCmd.AddCommand(badgeCmd)
 	badgeCmd.Flags().StringVarP(&out, "out", "o", "", "output file path")
 	badgeCmd.Flags().StringVarP(&configPath, "config", "c", "", "config file path")
+}
+
+func coverageColor(cover float64) string {
+	switch {
+	case cover >= 80.0:
+		return green
+	case cover >= 60.0:
+		return yellowgreen
+	case cover >= 40.0:
+		return yellow
+	case cover >= 20.0:
+		return orange
+	default:
+		return red
+	}
 }

@@ -13,7 +13,7 @@ import (
 )
 
 const defaultKeyColor = "#24292E"
-const defaultValueColor = "#28A745"
+const defaultValueColor = "#007EC6"
 const fontSize = 11
 const dpi = 72
 
