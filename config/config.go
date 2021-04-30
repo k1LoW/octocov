@@ -13,37 +13,35 @@ import (
 )
 
 const defaultBranch = "main"
-const defaultPushDir = "report"
+const defaultReportDir = "report"
 
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
 	Coverage ConfigCoverage `yaml:"coverage,omitempty"`
-	Report   ConfigReport   `yaml:"report,omitempty"`
-	Push     ConfigPush     `yaml:"push,omitempty"`
-	Badge    ConfigBadge    `yaml:"badge,omitempty"`
+	// CodeToTestRatio ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
+	Report ConfigReport `yaml:"report,omitempty"`
 }
 
 type ConfigCoverage struct {
-	Path string `yaml:"path"`
+	Path  string `yaml:"path"`
+	Badge string `yaml:"badge"`
 }
+
+// type ConfigCodeToTestRatio struct {
+// 	Enable bool `yaml:"enable"`
+//  Badge string `yaml:"badge"`
+// }
 
 type ConfigReport struct {
-	Repository string `yaml:"repository"`
+	Repository string             `yaml:"repository,omitempty"`
+	Github     ConfigReportGithub `yaml:"github,omitempty"`
 }
 
-type ConfigPush struct {
-	Github ConfigPushGithub `yaml:"github,omitempty"`
-}
-
-type ConfigPushGithub struct {
+type ConfigReportGithub struct {
 	Repository string `yaml:"repository"`
 	Branch     string `yaml:"branch"`
 	Path       string `yaml:"path"`
-}
-
-type ConfigBadge struct {
-	Path string `yaml:"path"`
 }
 
 func New() *Config {
@@ -86,29 +84,29 @@ func (c *Config) Build(r *report.Report) {
 	if r != nil && c.Report.Repository == "" {
 		c.Report.Repository = r.Repository
 	}
-	c.Push.Github.Repository = os.ExpandEnv(c.Push.Github.Repository)
-	c.Push.Github.Branch = os.ExpandEnv(c.Push.Github.Branch)
-	if c.Push.Github.Branch == "" {
-		c.Push.Github.Branch = defaultBranch
+	c.Report.Github.Repository = os.ExpandEnv(c.Report.Github.Repository)
+	c.Report.Github.Branch = os.ExpandEnv(c.Report.Github.Branch)
+	if c.Report.Github.Branch == "" {
+		c.Report.Github.Branch = defaultBranch
 	}
-	c.Push.Github.Path = os.ExpandEnv(c.Push.Github.Path)
-	if c.Push.Github.Path == "" && c.Report.Repository != "" {
-		c.Push.Github.Path = fmt.Sprintf("%s/%s.json", defaultPushDir, c.Report.Repository)
+	c.Report.Github.Path = os.ExpandEnv(c.Report.Github.Path)
+	if c.Report.Github.Path == "" && c.Report.Repository != "" {
+		c.Report.Github.Path = fmt.Sprintf("%s/%s.json", defaultReportDir, c.Report.Repository)
 	}
 }
 
-func (c *Config) ValidatePushConfig() error {
-	if c.Push.Github.Repository == "" {
-		return errors.New("push.repository not set")
+func (c *Config) ValidateReportConfig() error {
+	if c.Report.Github.Repository == "" {
+		return errors.New("report.github.repository not set")
 	}
-	if strings.Count(c.Push.Github.Repository, "/") != 1 {
-		return errors.New("push.repository should be 'owner/repo'")
+	if strings.Count(c.Report.Github.Repository, "/") != 1 {
+		return errors.New("report.github.repository should be 'owner/repo'")
 	}
-	if c.Push.Github.Branch == "" {
-		return errors.New("push.branch not set")
+	if c.Report.Github.Branch == "" {
+		return errors.New("report.github.branch not set")
 	}
-	if c.Push.Github.Path == "" {
-		return errors.New("push.path not set")
+	if c.Report.Github.Path == "" {
+		return errors.New("report.github.path not set")
 	}
 	return nil
 }

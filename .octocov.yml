@@ -1,2 +1,2 @@
-badge:
-  path: docs/coverage.svg
+coverage:
+  badge: docs/coverage.svg

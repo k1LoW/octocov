@@ -66,7 +66,7 @@ var badgeCmd = &cobra.Command{
 			err error
 		)
 		if out == "" {
-			out = c.Badge.Path
+			out = c.Coverage.Badge
 		}
 		if out == "" {
 			o = os.Stdout

@@ -21,7 +21,6 @@ type Github struct {
 	client *github.Client
 }
 
-// NewGithub ...
 func NewGithub(c *config.Config) (*Github, error) {
 	// GITHUB_TOKEN
 	token := os.Getenv("GITHUB_TOKEN")
@@ -48,15 +47,15 @@ func NewGithub(c *config.Config) (*Github, error) {
 
 func (g *Github) Push(ctx context.Context, r *report.Report) error {
 	srv := g.client.Git
-	branch := g.config.Push.Github.Branch
+	branch := g.config.Report.Github.Branch
 	content := r.String()
-	rPath := g.config.Push.Github.Path
+	rPath := g.config.Report.Github.Path
 	from := r.Repository
 	if g.config.Report.Repository != "" {
 		from = g.config.Report.Repository
 	}
 	message := fmt.Sprintf("Push coverage report of %s", from)
-	splitted := strings.Split(g.config.Push.Github.Repository, "/")
+	splitted := strings.Split(g.config.Report.Github.Repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]
 
