@@ -49,7 +49,7 @@ var pushCmd = &cobra.Command{
 			return err
 		}
 		c.Build(r)
-		if err := c.ValidatePushConfig(); err != nil {
+		if err := c.ValidateReportConfig(); err != nil {
 			return err
 		}
 		g, err := datastore.NewGithub(c)
