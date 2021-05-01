@@ -17,11 +17,11 @@ func NewLcov() *Lcov {
 }
 
 func (l *Lcov) ParseReport(path string) (*Coverage, error) {
-	path, err := l.detectReportPath(path)
+	rp, err := l.detectReportPath(path)
 	if err != nil {
 		return nil, err
 	}
-	r, err := os.Open(filepath.Clean(path))
+	r, err := os.Open(filepath.Clean(rp))
 	if err != nil {
 		return nil, err
 	}

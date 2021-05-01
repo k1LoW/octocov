@@ -27,11 +27,11 @@ func NewSimplecov() *Simplecov {
 }
 
 func (s *Simplecov) ParseReport(path string) (*Coverage, error) {
-	path, err := s.detectReportPath(path)
+	rp, err := s.detectReportPath(path)
 	if err != nil {
 		return nil, err
 	}
-	b, err := ioutil.ReadFile(filepath.Clean(path))
+	b, err := ioutil.ReadFile(filepath.Clean(rp))
 	if err != nil {
 		return nil, err
 	}
