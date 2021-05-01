@@ -90,7 +90,9 @@ func (c *Clover) ParseReport(path string) (*Coverage, error) {
 		return nil, err
 	}
 	r := CloverReport{}
-	xml.Unmarshal(b, &r)
+	if err := xml.Unmarshal(b, &r); err != nil {
+		return nil, err
+	}
 	cov := New()
 	cov.Type = TypeStatement
 	cov.Format = "Clover"
