@@ -22,4 +22,4 @@ Support `SF` `DA` only
 
 ### Clover
 
-:construction:
+**Default path:** `coverage.xml`
