@@ -86,16 +86,21 @@ func (c *Config) Build(r *report.Report) {
 	}
 	c.Report.Github.Repository = os.ExpandEnv(c.Report.Github.Repository)
 	c.Report.Github.Branch = os.ExpandEnv(c.Report.Github.Branch)
+	c.Report.Github.Path = os.ExpandEnv(c.Report.Github.Path)
+	c.Coverage.Badge = os.ExpandEnv(c.Coverage.Badge)
+}
+
+func (c *Config) PushOrNot() bool {
+	return c.Report.Github.Repository != "" || c.Report.Github.Branch != "" || c.Report.Github.Path != ""
+}
+
+func (c *Config) BuildPushConfig() error {
 	if c.Report.Github.Branch == "" {
 		c.Report.Github.Branch = defaultBranch
 	}
-	c.Report.Github.Path = os.ExpandEnv(c.Report.Github.Path)
 	if c.Report.Github.Path == "" && c.Repository != "" {
 		c.Report.Github.Path = fmt.Sprintf("%s/%s.json", defaultReportDir, c.Repository)
 	}
-}
-
-func (c *Config) ValidateReportConfig() error {
 	if c.Report.Github.Repository == "" {
 		return errors.New("report.github.repository not set")
 	}
@@ -109,4 +114,8 @@ func (c *Config) ValidateReportConfig() error {
 		return errors.New("report.github.path not set")
 	}
 	return nil
+}
+
+func (c *Config) BadgeOrNot() bool {
+	return c.Coverage.Badge != ""
 }

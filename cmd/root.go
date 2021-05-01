@@ -22,18 +22,25 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 
+	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/pkg/badge"
+	"github.com/k1LoW/octocov/report"
 	"github.com/k1LoW/octocov/version"
 	"github.com/spf13/cobra"
 )
 
 var (
-	out        string
 	configPath string
+	dump       bool
+	genbadge   bool
 )
 
 var rootCmd = &cobra.Command{
@@ -42,6 +49,80 @@ var rootCmd = &cobra.Command{
 	Long:         `octocov is a tool for collecting code coverage.`,
 	Version:      version.Version,
 	SilenceUsage: true,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) > 0 && args[0] == "completion" {
+			return completionCmd(cmd, args)
+		}
+		c := config.New()
+		if err := c.Load(configPath); err != nil {
+			return err
+		}
+		path := c.Coverage.Path
+		r := report.New()
+		if err := r.MeasureCoverage(path); err != nil {
+			return err
+		}
+		c.Build(r)
+
+		if dump {
+			cmd.Println(r.String())
+			return nil
+		}
+
+		// Generate badge
+		if c.BadgeOrNot() || genbadge {
+			var (
+				out *os.File
+				err error
+			)
+			cp := r.CoveragePercent()
+			if c.Coverage.Badge == "" {
+				out = os.Stdout
+			} else {
+				cmd.PrintErrln("Generate coverage report badge...")
+				if err := os.MkdirAll(filepath.Dir(c.Coverage.Badge), 0644); err != nil {
+					return err
+				}
+				out, err = os.OpenFile(filepath.Clean(c.Coverage.Badge), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				if err != nil {
+					return err
+				}
+			}
+
+			b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
+			b.ValueColor = coverageColor(cp)
+			if err := b.Render(out); err != nil {
+				return err
+			}
+			if genbadge {
+				return nil
+			}
+		}
+
+		// Push report
+		if c.PushOrNot() {
+			cmd.PrintErrln("Push coverage report...")
+			if err := c.BuildPushConfig(); err != nil {
+				return err
+			}
+			g, err := datastore.NewGithub(c)
+			if err != nil {
+				return err
+			}
+			ctx := context.Background()
+			if err := g.Push(ctx, r); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	},
+}
+
+func init() {
+	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
+	rootCmd.Flags().BoolVarP(&dump, "dump", "", false, "dump coverage report")
+	rootCmd.Flags().BoolVarP(&genbadge, "badge", "", false, "generate coverage report badge")
 }
 
 func Execute() {

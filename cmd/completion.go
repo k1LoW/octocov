@@ -28,77 +28,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// completionCmd represents the completion command
-var completionCmd = &cobra.Command{
-	Use:   "completion",
-	Short: "Output shell completion code",
-	Long: `Output shell completion code.
-To configure your shell to load completions for each session
-
-# bash
-echo '. <(octocov completion bash)' > ~/.bashrc
-
-# zsh
-octocov completion zsh > $fpath[1]/_octocov
-
-# fish
-octocov completion fish ~/.config/fish/completions/octocov.fish
-`,
-	ValidArgs: []string{"bash", "zsh", "fish", "powershell"},
-	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) != 1 {
-			return fmt.Errorf("accepts 1 arg, received %d", len(args))
-		}
-		if err := cobra.OnlyValidArgs(cmd, args); err != nil {
+func completionCmd(cmd *cobra.Command, args []string) error {
+	if len(args) != 2 {
+		return fmt.Errorf("accepts 1 arg, received %d", len(args)-1)
+	}
+	sh := args[1]
+	o := os.Stdout
+	switch sh {
+	case "bash":
+		if err := cmd.Root().GenBashCompletion(o); err != nil {
 			return err
 		}
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		var (
-			o   *os.File
-			err error
-		)
-		sh := args[0]
-		if out == "" {
-			o = os.Stdout
-		} else {
-			o, err = os.Create(out)
-			if err != nil {
-				return err
-			}
-		}
-
-		switch sh {
-		case "bash":
-			if err := cmd.Root().GenBashCompletion(o); err != nil {
-				_ = o.Close()
-				return err
-			}
-		case "zsh":
-			if err := cmd.Root().GenZshCompletion(o); err != nil {
-				_ = o.Close()
-				return err
-			}
-		case "fish":
-			if err := cmd.Root().GenFishCompletion(o, true); err != nil {
-				_ = o.Close()
-				return err
-			}
-		case "powershell":
-			if err := cmd.Root().GenPowerShellCompletion(o); err != nil {
-				_ = o.Close()
-				return err
-			}
-		}
-		if err := o.Close(); err != nil {
+	case "zsh":
+		if err := cmd.Root().GenZshCompletion(o); err != nil {
 			return err
 		}
-		return nil
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(completionCmd)
-	completionCmd.Flags().StringVarP(&out, "out", "o", "", "output file path")
+	case "fish":
+		if err := cmd.Root().GenFishCompletion(o, true); err != nil {
+			return err
+		}
+	case "powershell":
+		if err := cmd.Root().GenPowerShellCompletion(o); err != nil {
+			return err
+		}
+	}
+	return nil
 }

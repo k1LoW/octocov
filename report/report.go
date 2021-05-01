@@ -67,3 +67,7 @@ func (r *Report) MeasureCoverage(path string) error {
 	r.Coverage = cov
 	return nil
 }
+
+func (r *Report) CoveragePercent() float64 {
+	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+}
