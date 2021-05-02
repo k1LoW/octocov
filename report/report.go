@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/octocov/pkg/coverage"
@@ -16,6 +17,7 @@ type Report struct {
 	Ref        string             `json:"ref"`
 	Commit     string             `json:"commit"`
 	Coverage   *coverage.Coverage `json:"coverage"`
+	Timestamp  time.Time          `yaml:"timestamp"`
 }
 
 func New() *Report {
@@ -41,6 +43,7 @@ func New() *Report {
 		Repository: repo,
 		Ref:        ref,
 		Commit:     commit,
+		Timestamp:  time.Now().UTC(),
 	}
 }
 
