@@ -21,7 +21,7 @@ type Config struct {
 	Repository string         `yaml:"repository"`
 	Coverage   ConfigCoverage `yaml:"coverage,omitempty"`
 	// CodeToTestRatio ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
-	Report ConfigReport `yaml:"report,omitempty"`
+	Datastore ConfigDatastore `yaml:"datastore,omitempty"`
 }
 
 type ConfigCoverage struct {
@@ -34,11 +34,11 @@ type ConfigCoverage struct {
 //  Badge string `yaml:"badge"`
 // }
 
-type ConfigReport struct {
-	Github ConfigReportGithub `yaml:"github,omitempty"`
+type ConfigDatastore struct {
+	Github ConfigDatastoreGithub `yaml:"github,omitempty"`
 }
 
-type ConfigReportGithub struct {
+type ConfigDatastoreGithub struct {
 	Repository string `yaml:"repository"`
 	Branch     string `yaml:"branch"`
 	Path       string `yaml:"path"`
@@ -84,38 +84,38 @@ func (c *Config) Build(r *report.Report) {
 	if r != nil && c.Repository == "" {
 		c.Repository = r.Repository
 	}
-	c.Report.Github.Repository = os.ExpandEnv(c.Report.Github.Repository)
-	c.Report.Github.Branch = os.ExpandEnv(c.Report.Github.Branch)
-	c.Report.Github.Path = os.ExpandEnv(c.Report.Github.Path)
+	c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
+	c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
+	c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
 	c.Coverage.Badge = os.ExpandEnv(c.Coverage.Badge)
 }
 
-func (c *Config) PushOrNot() bool {
-	return c.Report.Github.Repository != "" || c.Report.Github.Branch != "" || c.Report.Github.Path != ""
+func (c *Config) DatastoreConfigReady() bool {
+	return c.Datastore.Github.Repository != "" || c.Datastore.Github.Branch != "" || c.Datastore.Github.Path != ""
 }
 
-func (c *Config) BuildPushConfig() error {
-	if c.Report.Github.Branch == "" {
-		c.Report.Github.Branch = defaultBranch
+func (c *Config) BuildDatastoreConfig() error {
+	if c.Datastore.Github.Branch == "" {
+		c.Datastore.Github.Branch = defaultBranch
 	}
-	if c.Report.Github.Path == "" && c.Repository != "" {
-		c.Report.Github.Path = fmt.Sprintf("%s/%s.json", defaultReportDir, c.Repository)
+	if c.Datastore.Github.Path == "" && c.Repository != "" {
+		c.Datastore.Github.Path = fmt.Sprintf("%s/%s.json", defaultReportDir, c.Repository)
 	}
-	if c.Report.Github.Repository == "" {
+	if c.Datastore.Github.Repository == "" {
 		return errors.New("report.github.repository not set")
 	}
-	if strings.Count(c.Report.Github.Repository, "/") != 1 {
+	if strings.Count(c.Datastore.Github.Repository, "/") != 1 {
 		return errors.New("report.github.repository should be 'owner/repo'")
 	}
-	if c.Report.Github.Branch == "" {
+	if c.Datastore.Github.Branch == "" {
 		return errors.New("report.github.branch not set")
 	}
-	if c.Report.Github.Path == "" {
+	if c.Datastore.Github.Path == "" {
 		return errors.New("report.github.path not set")
 	}
 	return nil
 }
 
-func (c *Config) BadgeOrNot() bool {
+func (c *Config) BadgeConfigReady() bool {
 	return c.Coverage.Badge != ""
 }

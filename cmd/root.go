@@ -70,7 +70,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Generate badge
-		if c.BadgeOrNot() || genbadge {
+		if c.BadgeConfigReady() || genbadge {
 			var (
 				out *os.File
 				err error
@@ -100,9 +100,9 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Push report
-		if c.PushOrNot() {
+		if c.DatastoreConfigReady() {
 			cmd.PrintErrln("Push coverage report...")
-			if err := c.BuildPushConfig(); err != nil {
+			if err := c.BuildDatastoreConfig(); err != nil {
 				return err
 			}
 			g, err := datastore.NewGithub(c)
