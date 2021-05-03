@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/goccy/go-yaml"
@@ -25,8 +26,9 @@ type Config struct {
 }
 
 type ConfigCoverage struct {
-	Path  string `yaml:"path"`
-	Badge string `yaml:"badge"`
+	Path       string `yaml:"path,omitempty"`
+	Badge      string `yaml:"badge,omitempty"`
+	Acceptable string `yaml:"acceptable,omitempty"`
 }
 
 // type ConfigCodeToTestRatio struct {
@@ -118,4 +120,19 @@ func (c *Config) BuildDatastoreConfig() error {
 
 func (c *Config) BadgeConfigReady() bool {
 	return c.Coverage.Badge != ""
+}
+
+func (c *Config) Accepptable(r *report.Report) error {
+	if c.Coverage.Acceptable == "" {
+		return nil
+	}
+	a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
+	if err != nil {
+		return err
+	}
+
+	if r.CoveragePercent() < a {
+		return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
+	}
+	return nil
 }
