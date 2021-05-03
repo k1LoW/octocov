@@ -26,7 +26,7 @@ By setting `coverage.acceptable:`, the minimum acceptable coverage is specified.
 
 If it is less than that value, the command will exit with exit status `1`.
 
-```
+``` yaml
 # .octocov.yml
 coverage:
   acceptable: 60%
@@ -41,7 +41,7 @@ Error: code coverage is 54.9%, which is below the accepted 60.0%
 
 By setting `coverage.badge:`, generate the coverage report badge self.
 
-```
+``` yaml
 # .octocov.yml
 coverage:
   badge: docs/coverage.svg
@@ -63,7 +63,7 @@ By setting `datastore:`, store the coverage reports.
 
 #### GitHub
 
-```
+``` yaml
 # .octocov.yml
 datastore:
   github:
