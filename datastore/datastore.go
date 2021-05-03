@@ -7,5 +7,5 @@ import (
 )
 
 type Datastore interface {
-	Push(ctx context.Context, r *report.Report) error
+	Store(ctx context.Context, r *report.Report) error
 }

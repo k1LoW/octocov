@@ -99,9 +99,9 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		// Push report
+		// Store report
 		if c.DatastoreConfigReady() {
-			cmd.PrintErrln("Push coverage report...")
+			cmd.PrintErrln("Store coverage report...")
 			if err := c.BuildDatastoreConfig(); err != nil {
 				return err
 			}
@@ -110,7 +110,7 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			ctx := context.Background()
-			if err := g.Push(ctx, r); err != nil {
+			if err := g.Store(ctx, r); err != nil {
 				return err
 			}
 		}

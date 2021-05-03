@@ -45,7 +45,7 @@ func NewGithub(c *config.Config) (*Github, error) {
 	}, nil
 }
 
-func (g *Github) Push(ctx context.Context, r *report.Report) error {
+func (g *Github) Store(ctx context.Context, r *report.Report) error {
 	srv := g.client.Git
 	branch := g.config.Datastore.Github.Branch
 	content := r.String()
@@ -54,7 +54,7 @@ func (g *Github) Push(ctx context.Context, r *report.Report) error {
 	if g.config.Repository != "" {
 		from = g.config.Repository
 	}
-	message := fmt.Sprintf("Push coverage report of %s", from)
+	message := fmt.Sprintf("Store coverage report of %s", from)
 	splitted := strings.Split(g.config.Datastore.Github.Repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]
