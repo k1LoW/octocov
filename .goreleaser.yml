@@ -75,8 +75,8 @@ brews:
     description: octocov is a tool for collecting code coverage.
     license: MIT
     install: |
-      system './octocov', 'completion', 'bash', '--out', 'octocov.bash'
-      system './octocov', 'completion', 'zsh', '--out', 'octocov.zsh'
+      system './octocov', 'completion', 'bash', '>', 'octocov.bash'
+      system './octocov', 'completion', 'zsh', '>', 'octocov.zsh'
       bin.install 'octocov'
       bash_completion.install 'octocov.bash' => 'octocov'
       zsh_completion.install 'octocov.zsh' => '_octocov'
