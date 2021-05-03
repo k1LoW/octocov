@@ -4,6 +4,12 @@
 
 `octocov` is a tool for collecting code coverage.
 
+Key features of `octocov` are:
+
+- **[Support multiple coverage report formats](#supported-coverage-report-formats).**
+- **Support for even generating coverage report badge.**
+- **[Selectable coverage datastore](#store-coverage-report-to-datastore).**
+
 ## Usage
 
 First, run test with coverage report output.
