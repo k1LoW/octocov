@@ -7,7 +7,7 @@
 Key features of `octocov` are:
 
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
-- **Support for even generating coverage report badge.**
+- **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
 - **[Selectable coverage datastore](#store-coverage-report-to-datastore).**
 
 ## Usage
@@ -101,3 +101,52 @@ Support `SF` `DA` only
 ### Clover
 
 **Default path:** `coverage.xml`
+
+## Install
+
+**deb:**
+
+Use [dpkg-i-from-url](https://github.com/k1LoW/dpkg-i-from-url)
+
+``` console
+$ export OCTOCOV_VERSION=X.X.X
+$ curl -L https://git.io/dpkg-i-from-url | bash -s -- https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.deb
+```
+
+**RPM:**
+
+``` console
+$ export OCTOCOV_VERSION=X.X.X
+$ yum install https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.rpm
+```
+
+**apk:**
+
+Use [apk-add-from-url](https://github.com/k1LoW/apk-add-from-url)
+
+``` console
+$ export OCTOCOV_VERSION=X.X.X
+$ curl -L https://git.io/apk-add-from-url | sh -s -- https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.apk
+```
+
+**homebrew tap:**
+
+```console
+$ brew install k1LoW/tap/octocov
+```
+
+**manually:**
+
+Download binary from [releases page](https://github.com/k1LoW/octocov/releases)
+
+**go get:**
+
+```console
+$ go get github.com/k1LoW/octocov
+```
+
+**docker:**
+
+```console
+$ docker pull ghcr.io/k1low/octocov:latest
+```
