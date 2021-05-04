@@ -51,7 +51,7 @@ var rootCmd = &cobra.Command{
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) > 0 && args[0] == "completion" {
-			return completionCmd(cmd, args)
+			return completionCmd(cmd, args[1:])
 		}
 		c := config.New()
 		if err := c.Load(configPath); err != nil {
