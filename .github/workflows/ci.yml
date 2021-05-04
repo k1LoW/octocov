@@ -20,7 +20,7 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v2
 
-      - name: Run tests and generate coverage badge
+      - name: Run tests
         run: make ci
 
       - name: Run lint
