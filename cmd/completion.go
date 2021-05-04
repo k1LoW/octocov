@@ -29,11 +29,25 @@ import (
 )
 
 func completionCmd(cmd *cobra.Command, args []string) error {
-	if len(args) != 2 {
-		return fmt.Errorf("accepts 1 arg, received %d", len(args)-1)
+	var (
+		o   *os.File
+		err error
+	)
+	if len(args) != 1 && len(args) != 2 {
+		return fmt.Errorf("accepts 1 or 2 args, received %d", len(args))
 	}
-	sh := args[1]
-	o := os.Stdout
+	sh := args[0]
+	if len(args) == 2 {
+		o, err = os.Create(args[1])
+		if err != nil {
+			return err
+		}
+		defer func() {
+			_ = o.Close()
+		}()
+	} else {
+		o = os.Stdout
+	}
 	switch sh {
 	case "bash":
 		if err := cmd.Root().GenBashCompletion(o); err != nil {
