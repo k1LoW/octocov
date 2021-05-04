@@ -62,7 +62,7 @@ var rootCmd = &cobra.Command{
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
-		c.Build(r)
+		c.Build()
 
 		if dump {
 			cmd.Println(r.String())

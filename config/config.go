@@ -82,9 +82,10 @@ func (c *Config) Load(path string) error {
 	return nil
 }
 
-func (c *Config) Build(r *report.Report) {
-	if r != nil && c.Repository == "" {
-		c.Repository = r.Repository
+func (c *Config) Build() {
+	c.Repository = os.ExpandEnv(c.Repository)
+	if c.Repository == "" {
+		c.Repository = os.Getenv("GITHUB_REPOSITORY")
 	}
 	c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
 	c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
