@@ -80,7 +80,7 @@ var rootCmd = &cobra.Command{
 				out = os.Stdout
 			} else {
 				cmd.PrintErrln("Generate coverage report badge...")
-				if err := os.MkdirAll(filepath.Dir(c.Coverage.Badge), 0644); err != nil {
+				if err := os.MkdirAll(filepath.Dir(c.Coverage.Badge), 0755); err != nil { // #nosec
 					return err
 				}
 				out, err = os.OpenFile(filepath.Clean(c.Coverage.Badge), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
