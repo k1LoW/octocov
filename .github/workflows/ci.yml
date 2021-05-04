@@ -26,6 +26,9 @@ jobs:
       - name: Run lint
         uses: golangci/golangci-lint-action@v2
 
+      - name: Run octocov
+        uses: k1LoW/octocov-action@main
+
       - name: Commit badge
         uses: EndBug/add-and-commit@v7
         with:
