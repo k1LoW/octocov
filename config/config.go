@@ -14,7 +14,7 @@ import (
 )
 
 const defaultBranch = "main"
-const defaultReportDir = "report"
+const defaultReportDir = "reports"
 
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 

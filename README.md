@@ -75,7 +75,7 @@ datastore:
   github:
     repository: owner/repo # datastore repository
     branch: main # default: main
-    path: # default: report/${GITHUB_REPOSITORY}.json
+    path: # default: reports/${GITHUB_REPOSITORY}.json
 ```
 
 #### S3
