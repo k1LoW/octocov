@@ -23,6 +23,8 @@ type Config struct {
 	Coverage   ConfigCoverage `yaml:"coverage,omitempty"`
 	// CodeToTestRatio ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
 	Datastore ConfigDatastore `yaml:"datastore,omitempty"`
+
+	root string
 }
 
 type ConfigCoverage struct {
@@ -47,13 +49,16 @@ type ConfigDatastoreGithub struct {
 }
 
 func New() *Config {
-	return &Config{}
+	p, _ := os.Getwd()
+	return &Config{
+		root: p,
+	}
 }
 
 func (c *Config) Load(path string) error {
 	if path == "" {
 		for _, p := range DefaultConfigFilePaths {
-			if f, err := os.Stat(p); err == nil && !f.IsDir() {
+			if f, err := os.Stat(filepath.Join(c.root, p)); err == nil && !f.IsDir() {
 				if path != "" {
 					return fmt.Errorf("duplicate config file [%s, %s]", path, p)
 				}
@@ -62,11 +67,7 @@ func (c *Config) Load(path string) error {
 		}
 	}
 	if path == "" {
-		p, err := os.Getwd()
-		if err != nil {
-			return err
-		}
-		c.Coverage.Path = p
+		c.Coverage.Path = c.root
 		return nil
 	}
 	buf, err := ioutil.ReadFile(filepath.Clean(path))
