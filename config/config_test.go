@@ -60,7 +60,7 @@ func TestDatasourceGithubPath(t *testing.T) {
 	if err := c.BuildDatastoreConfig(); err != nil {
 		t.Fatal(err)
 	}
-	want := "reports/foo/bar.json"
+	want := "reports/foo/bar/report.json"
 	if got := c.Datastore.Github.Path; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
