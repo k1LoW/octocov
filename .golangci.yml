@@ -1,3 +1,5 @@
+linters:
+  fast: false
 linters-settings:
   staticcheck:
     go: 1.16
