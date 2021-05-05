@@ -110,7 +110,7 @@ func (c *Config) BuildDatastoreConfig() error {
 		c.Datastore.Github.Branch = defaultBranch
 	}
 	if c.Datastore.Github.Path == "" && c.Repository != "" {
-		c.Datastore.Github.Path = fmt.Sprintf("%s/%s.json", defaultReportDir, c.Repository)
+		c.Datastore.Github.Path = fmt.Sprintf("%s/%s/report.json", defaultReportDir, c.Repository)
 	}
 	if c.Datastore.Github.Repository == "" {
 		return errors.New("report.github.repository not set")
