@@ -23,8 +23,10 @@ type Config struct {
 	Coverage   ConfigCoverage `yaml:"coverage,omitempty"`
 	// CodeToTestRatio ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
 	Datastore ConfigDatastore `yaml:"datastore,omitempty"`
-
+	// current directory
 	root string
+	// config file path
+	path string
 }
 
 type ConfigCoverage struct {
@@ -70,6 +72,7 @@ func (c *Config) Load(path string) error {
 		c.Coverage.Path = c.root
 		return nil
 	}
+	c.path = path
 	buf, err := ioutil.ReadFile(filepath.Clean(path))
 	if err != nil {
 		return err
@@ -81,6 +84,10 @@ func (c *Config) Load(path string) error {
 		c.Coverage.Path = filepath.Dir(path)
 	}
 	return nil
+}
+
+func (c *Config) Loaded() bool {
+	return c.path != ""
 }
 
 func (c *Config) Build() {

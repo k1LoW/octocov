@@ -28,6 +28,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
@@ -67,6 +68,10 @@ var rootCmd = &cobra.Command{
 		if dump {
 			cmd.Println(r.String())
 			return nil
+		}
+
+		if !c.Loaded() {
+			return fmt.Errorf("%s are not found", strings.Join(config.DefaultConfigFilePaths, " and "))
 		}
 
 		// Generate badge
