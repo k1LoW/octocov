@@ -93,7 +93,7 @@ var rootCmd = &cobra.Command{
 			}
 
 			b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
-			b.ValueColor = coverageColor(cp)
+			b.ValueColor = c.CoverageColor(cp)
 			if err := b.Render(out); err != nil {
 				return err
 			}

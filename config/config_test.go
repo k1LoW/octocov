@@ -52,7 +52,12 @@ func TestDatasourceGithubPath(t *testing.T) {
 	os.Setenv("GITHUB_REPOSITORY", "foo/bar")
 
 	c := New()
-	c.Datastore.Github.Repository = "report/dest"
+	c.Datastore = &ConfigDatastore{
+		Github: &ConfigDatastoreGithub{
+			Repository: "report/dest",
+		},
+	}
+
 	c.Build()
 	if got := c.DatastoreConfigReady(); got != true {
 		t.Errorf("got %v\nwant %v", got, true)
