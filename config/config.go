@@ -113,16 +113,16 @@ func (c *Config) BuildDatastoreConfig() error {
 		c.Datastore.Github.Path = fmt.Sprintf("%s/%s/report.json", defaultReportDir, c.Repository)
 	}
 	if c.Datastore.Github.Repository == "" {
-		return errors.New("report.github.repository not set")
+		return errors.New("datastore.github.repository not set")
 	}
 	if strings.Count(c.Datastore.Github.Repository, "/") != 1 {
-		return errors.New("report.github.repository should be 'owner/repo'")
+		return errors.New("datastore.github.repository should be 'owner/repo'")
 	}
 	if c.Datastore.Github.Branch == "" {
-		return errors.New("report.github.branch not set")
+		return errors.New("datastore.github.branch not set")
 	}
 	if c.Datastore.Github.Path == "" {
-		return errors.New("report.github.path not set")
+		return errors.New("datastore.github.path not set")
 	}
 	return nil
 }
