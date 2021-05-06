@@ -60,7 +60,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, error) {
 		}
 		switch splitted[0] {
 		case "SF":
-			fileName = splitted[0]
+			fileName = splitted[1]
 		case "DA":
 			total += 1
 			if !strings.HasSuffix(splitted[1], ",0") {
