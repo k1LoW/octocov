@@ -30,6 +30,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/pkg/badge"
@@ -58,12 +59,22 @@ var rootCmd = &cobra.Command{
 		if err := c.Load(configPath); err != nil {
 			return err
 		}
+		c.Build()
+
+		if c.CentralConfigReady() {
+			cmd.PrintErrln("Central mode enabled")
+			if err := c.BuildCentralConfig(); err != nil {
+				return err
+			}
+			ctr := central.New(c)
+			return ctr.Generate()
+		}
+
 		path := c.Coverage.Path
 		r := report.New()
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
-		c.Build()
 
 		if dump {
 			cmd.Println(r.String())
