@@ -105,6 +105,9 @@ var rootCmd = &cobra.Command{
 		// Store report
 		if c.DatastoreConfigReady() {
 			cmd.PrintErrln("Store coverage report...")
+			if err := r.Validate(); err != nil {
+				return err
+			}
 			if err := c.BuildDatastoreConfig(); err != nil {
 				return err
 			}
