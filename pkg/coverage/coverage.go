@@ -66,5 +66,9 @@ func Measure(path string) (*Coverage, error) {
 	if cov, err := NewSimplecov().ParseReport(path); err == nil {
 		return cov, nil
 	}
+	// clover
+	if cov, err := NewClover().ParseReport(path); err == nil {
+		return cov, nil
+	}
 	return nil, fmt.Errorf("coverage report not found: %s", path)
 }
