@@ -84,7 +84,7 @@ datastore:
 
 ### Central mode
 
-By enabling `central:`, `octocov` acts as a central repository for collecting coverage reports.
+By enabling `central:`, `octocov` acts as a central repository for collecting coverage reports ( [example](example/central/README.md) ).
 
 ``` yaml
 # .octocov.yml
