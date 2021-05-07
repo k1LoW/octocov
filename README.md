@@ -8,7 +8,7 @@ Key features of `octocov` are:
 
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
 - **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
-- **[Selectable coverage datastore](#store-coverage-report-to-datastore).**
+- **[Selectable coverage datastore](#store-coverage-report-to-central-datastore).**
 
 ## Usage
 
@@ -63,9 +63,9 @@ You can display the coverage badge without external communication by setting a l
 
 ![coverage](docs/coverage.svg)
 
-### Store coverage report to datastore
+### Store coverage report to central datastore
 
-By setting `datastore:`, store the coverage reports.
+By setting `datastore:`, store the coverage reports to central datastore.
 
 #### GitHub
 
@@ -73,14 +73,29 @@ By setting `datastore:`, store the coverage reports.
 # .octocov.yml
 datastore:
   github:
-    repository: owner/repo # datastore repository
-    branch: main # default: main
-    path: # default: reports/${GITHUB_REPOSITORY}/report.json
+    repository: owner/coverages # central datastore repository
+    branch: main                # default: main
+    path:                       # default: reports/${GITHUB_REPOSITORY}/report.json
 ```
 
 #### S3
 
 :construction:
+
+### Central mode
+
+By enabling `central:`, `octocov` acts as a central repository for collecting coverage reports.
+
+``` yaml
+# .octocov.yml
+central:
+  enable: true
+  root: .          # root directory or index file path of collected coverage reports pages. default: .
+  reports: reports # directory where reports are stored. default: reports
+  badges: badges   # directory where badges are generated. default: badges
+```
+
+When central mode is enabled, other functions are automatically turned off.
 
 ## Supported coverage report formats
 
