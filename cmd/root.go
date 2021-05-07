@@ -89,15 +89,15 @@ var rootCmd = &cobra.Command{
 		if c.BadgeConfigReady() || genbadge {
 			var out *os.File
 			cp := r.CoveragePercent()
-			if c.Coverage.Badge == "" {
+			if c.Coverage.Badge.Path == "" {
 				out = os.Stdout
 			} else {
 				cmd.PrintErrln("Generate coverage report badge...")
-				err := os.MkdirAll(filepath.Dir(c.Coverage.Badge), 0755) // #nosec
+				err := os.MkdirAll(filepath.Dir(c.Coverage.Badge.Path), 0755) // #nosec
 				if err != nil {
 					return err
 				}
-				out, err = os.OpenFile(filepath.Clean(c.Coverage.Badge), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				out, err = os.OpenFile(filepath.Clean(c.Coverage.Badge.Path), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 				if err != nil {
 					return err
 				}
