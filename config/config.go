@@ -91,8 +91,8 @@ func (c *Config) Load(path string) error {
 		c.Coverage.Path = c.wd
 		return nil
 	}
-	c.path = path
-	buf, err := ioutil.ReadFile(filepath.Clean(path))
+	c.path = filepath.Join(c.wd, path)
+	buf, err := ioutil.ReadFile(filepath.Clean(c.path))
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (c *Config) Load(path string) error {
 		return err
 	}
 	if c.Coverage.Path == "" {
-		c.Coverage.Path = filepath.Dir(path)
+		c.Coverage.Path = filepath.Dir(c.path)
 	}
 	return nil
 }
