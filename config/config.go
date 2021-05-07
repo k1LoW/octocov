@@ -41,9 +41,13 @@ type Config struct {
 }
 
 type ConfigCoverage struct {
-	Path       string `yaml:"path,omitempty"`
-	Badge      string `yaml:"badge,omitempty"`
-	Acceptable string `yaml:"acceptable,omitempty"`
+	Path       string              `yaml:"path,omitempty"`
+	Badge      ConfigCoverageBadge `yaml:"badge,omitempty"`
+	Acceptable string              `yaml:"acceptable,omitempty"`
+}
+
+type ConfigCoverageBadge struct {
+	Path string `yaml:"path,omitempty"`
 }
 
 // type ConfigCodeToTestRatio struct {
@@ -127,7 +131,7 @@ func (c *Config) Build() {
 		c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
 	}
 	if c.Coverage != nil {
-		c.Coverage.Badge = os.ExpandEnv(c.Coverage.Badge)
+		c.Coverage.Badge.Path = os.ExpandEnv(c.Coverage.Badge.Path)
 	}
 	if c.Central != nil {
 		c.Central.Root = os.ExpandEnv(c.Central.Root)
@@ -167,7 +171,7 @@ func (c *Config) BuildDatastoreConfig() error {
 }
 
 func (c *Config) BadgeConfigReady() bool {
-	return c.Coverage.Badge != ""
+	return c.Coverage.Badge.Path != ""
 }
 
 func (c *Config) Accepptable(r *report.Report) error {

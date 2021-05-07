@@ -45,12 +45,13 @@ Error: code coverage is 54.9%, which is below the accepted 60.0%
 
 ### Generate coverage report badge self.
 
-By setting `coverage.badge:`, generate the coverage report badge self.
+By setting `coverage.badge.path:`, generate the coverage report badge self.
 
 ``` yaml
 # .octocov.yml
 coverage:
-  badge: docs/coverage.svg
+  badge:
+    path: docs/coverage.svg
 ```
 
 You can display the coverage badge without external communication by setting a link to this badge image in README.md, etc.
