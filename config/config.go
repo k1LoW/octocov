@@ -34,8 +34,8 @@ type Config struct {
 	// CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
 	Datastore *ConfigDatastore `yaml:"datastore,omitempty"`
 	Central   *ConfigCentral   `yaml:"central,omitempty"`
-	// current directory
-	root string
+	// working directory
+	wd string
 	// config file path
 	path string
 }
@@ -69,17 +69,17 @@ type ConfigCentral struct {
 }
 
 func New() *Config {
-	p, _ := os.Getwd()
+	wd, _ := os.Getwd()
 	return &Config{
 		Coverage: &ConfigCoverage{},
-		root:     p,
+		wd:       wd,
 	}
 }
 
 func (c *Config) Load(path string) error {
 	if path == "" {
 		for _, p := range DefaultConfigFilePaths {
-			if f, err := os.Stat(filepath.Join(c.root, p)); err == nil && !f.IsDir() {
+			if f, err := os.Stat(filepath.Join(c.wd, p)); err == nil && !f.IsDir() {
 				if path != "" {
 					return fmt.Errorf("duplicate config file [%s, %s]", path, p)
 				}
@@ -88,7 +88,7 @@ func (c *Config) Load(path string) error {
 		}
 	}
 	if path == "" {
-		c.Coverage.Path = c.root
+		c.Coverage.Path = c.wd
 		return nil
 	}
 	c.path = path
@@ -103,6 +103,13 @@ func (c *Config) Load(path string) error {
 		c.Coverage.Path = filepath.Dir(path)
 	}
 	return nil
+}
+
+func (c *Config) Root() string {
+	if c.path != "" {
+		return filepath.Dir(c.path)
+	}
+	return c.wd
 }
 
 func (c *Config) Loaded() bool {

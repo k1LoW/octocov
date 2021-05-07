@@ -22,7 +22,7 @@ func TestMain(m *testing.M) {
 
 func TestLoad(t *testing.T) {
 	tests := []struct {
-		root    string
+		wd      string
 		path    string
 		wantErr bool
 	}{
@@ -32,7 +32,7 @@ func TestLoad(t *testing.T) {
 	}
 	for _, tt := range tests {
 		c := New()
-		c.root = tt.root
+		c.wd = tt.wd
 		if err := c.Load(tt.path); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
