@@ -22,17 +22,18 @@ func TestMain(m *testing.M) {
 
 func TestLoad(t *testing.T) {
 	tests := []struct {
-		root    string
+		wd      string
 		path    string
 		wantErr bool
 	}{
 		{testdataDir(t), "", false},
 		{filepath.Join(testdataDir(t), "config"), "", false},
+		{filepath.Join(testdataDir(t), "config"), ".octocov.yml", false},
 		{filepath.Join(testdataDir(t), "config"), "no.yml", true},
 	}
 	for _, tt := range tests {
 		c := New()
-		c.root = tt.root
+		c.wd = tt.wd
 		if err := c.Load(tt.path); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
@@ -52,7 +53,12 @@ func TestDatasourceGithubPath(t *testing.T) {
 	os.Setenv("GITHUB_REPOSITORY", "foo/bar")
 
 	c := New()
-	c.Datastore.Github.Repository = "report/dest"
+	c.Datastore = &ConfigDatastore{
+		Github: &ConfigDatastoreGithub{
+			Repository: "report/dest",
+		},
+	}
+
 	c.Build()
 	if got := c.DatastoreConfigReady(); got != true {
 		t.Errorf("got %v\nwant %v", got, true)
@@ -126,7 +132,7 @@ func testdataDir(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dir, err := filepath.Abs(filepath.Join(filepath.Dir(filepath.Dir(wd)), "testdata"))
+	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "testdata"))
 	if err != nil {
 		t.Fatal(err)
 	}

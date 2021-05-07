@@ -1,0 +1,5 @@
+central:
+  enable: true
+  root: ../example/central
+  reports: reports
+  badges: ../example/central/badges

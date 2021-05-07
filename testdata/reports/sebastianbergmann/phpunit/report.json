@@ -1,0 +1,2354 @@
+{
+  "repository": "sebastianbergmann/phpunit",
+  "ref": "refs/heads/central",
+  "commit": "7de91c5baf5be1dcfed2c16c2bacdf403152aa9c",
+  "coverage": {
+    "type": "statement",
+    "format": "Clover",
+    "total": 11707,
+    "covered": 9430,
+    "files": [
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Assert.php",
+        "total": 586,
+        "covered": 544
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/After.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/AfterClass.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/BackupGlobals.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/BackupStaticProperties.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Before.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/BeforeClass.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/CodeCoverageIgnore.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/CoversClass.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/CoversFunction.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/CoversNothing.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DataProvider.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DataProviderExternal.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Depends.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DependsExternal.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DependsExternalUsingDeepClone.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DependsExternalUsingShallowClone.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DependsUsingDeepClone.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DependsUsingShallowClone.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/DoesNotPerformAssertions.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Group.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Large.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Medium.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/PostCondition.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/PreCondition.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/PreserveGlobalState.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresFunction.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresMethod.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresOperatingSystem.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresOperatingSystemFamily.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresPhp.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresPhpExtension.php",
+        "total": 6,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresPhpunit.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RequiresSetting.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RunClassInSeparateProcess.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RunInSeparateProcess.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/RunTestsInSeparateProcesses.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Small.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Test.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/TestDox.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/TestWith.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/TestWithJson.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/Ticket.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/UsesClass.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Attributes/UsesFunction.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Boolean/IsFalse.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Boolean/IsTrue.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Callback.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Cardinality/Count.php",
+        "total": 37,
+        "covered": 33
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Cardinality/GreaterThan.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Cardinality/IsEmpty.php",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Cardinality/LessThan.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Cardinality/SameSize.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Constraint.php",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Equality/IsEqual.php",
+        "total": 36,
+        "covered": 36
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Equality/IsEqualCanonicalizing.php",
+        "total": 27,
+        "covered": 16
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Equality/IsEqualIgnoringCase.php",
+        "total": 27,
+        "covered": 20
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Equality/IsEqualWithDelta.php",
+        "total": 21,
+        "covered": 14
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Exception/Exception.php",
+        "total": 19,
+        "covered": 19
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Exception/ExceptionCode.php",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Exception/ExceptionMessage.php",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Exception/ExceptionMessageRegularExpression.php",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Filesystem/DirectoryExists.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Filesystem/FileExists.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Filesystem/IsReadable.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Filesystem/IsWritable.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/IsAnything.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/IsIdentical.php",
+        "total": 33,
+        "covered": 33
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/JsonMatches.php",
+        "total": 28,
+        "covered": 27
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/JsonMatchesErrorMessageProvider.php",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Math/IsFinite.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Math/IsInfinite.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Math/IsNan.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Object/ClassHasAttribute.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Object/ClassHasStaticAttribute.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Object/ObjectEquals.php",
+        "total": 53,
+        "covered": 47
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Object/ObjectHasAttribute.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/BinaryOperator.php",
+        "total": 34,
+        "covered": 34
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/LogicalAnd.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/LogicalNot.php",
+        "total": 28,
+        "covered": 28
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/LogicalOr.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/LogicalXor.php",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/Operator.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Operator/UnaryOperator.php",
+        "total": 28,
+        "covered": 27
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/String/IsJson.php",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/String/RegularExpression.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/String/StringContains.php",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/String/StringEndsWith.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/String/StringMatchesFormatDescription.php",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/String/StringStartsWith.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Traversable/ArrayHasKey.php",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Traversable/TraversableContains.php",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Traversable/TraversableContainsEqual.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Traversable/TraversableContainsIdentical.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Traversable/TraversableContainsOnly.php",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Type/IsInstanceOf.php",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Type/IsNull.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Constraint/Type/IsType.php",
+        "total": 43,
+        "covered": 42
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/DataProviderTestSuite.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/ErrorTestCase.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ActualValueIsNotAnObjectException.php",
+        "total": 6,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/AssertionFailedError.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/CodeCoverageException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ComparisonMethodDoesNotAcceptParameterTypeException.php",
+        "total": 10,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ComparisonMethodDoesNotDeclareBoolReturnTypeException.php",
+        "total": 9,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ComparisonMethodDoesNotDeclareExactlyOneParameterException.php",
+        "total": 9,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ComparisonMethodDoesNotDeclareParameterTypeException.php",
+        "total": 9,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ComparisonMethodDoesNotExistException.php",
+        "total": 9,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/CoveredCodeNotExecutedException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/Error.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/Exception.php",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/ExpectationFailedException.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/IncompleteTestError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/InvalidArgumentException.php",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/InvalidCoversTargetException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/InvalidDataProviderException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/MissingCoversAnnotationException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/NoChildTestSuiteException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/OutputError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/PHPTAssertionFailedError.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/RiskyTestError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/SkippedTestError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/SkippedTestSuiteError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/SyntheticError.php",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/SyntheticSkippedError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/UnintentionallyCoveredCodeError.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/Exception/Warning.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/ExceptionWrapper.php",
+        "total": 29,
+        "covered": 29
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/ExecutionOrderDependency.php",
+        "total": 63,
+        "covered": 63
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/IncompleteTest.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/IncompleteTestCase.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/InvalidParameterGroupException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Api/Api.php",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Api/Method.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Api/MockedCloneMethod.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Api/UnmockedCloneMethod.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Builder/Identity.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Builder/InvocationMocker.php",
+        "total": 68,
+        "covered": 63
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Builder/InvocationStubber.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Builder/MethodNameMatch.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Builder/ParametersMatch.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Builder/Stub.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/ConfigurableMethod.php",
+        "total": 8,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/BadMethodCallException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/CannotUseAddMethodsException.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/CannotUseOnlyMethodsException.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/ClassAlreadyExistsException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/ClassIsFinalException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/ConfigurableMethodsAlreadyInitializedException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/DuplicateMethodException.php",
+        "total": 6,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/IncompatibleReturnValueException.php",
+        "total": 7,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/InvalidMethodNameException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/MatchBuilderNotFoundException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/MatcherAlreadyRegisteredException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/MethodCannotBeConfiguredException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/MethodNameAlreadyConfiguredException.php",
+        "total": 2,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/MethodNameNotConfiguredException.php",
+        "total": 2,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/MethodParametersAlreadyConfiguredException.php",
+        "total": 2,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/OriginalConstructorInvocationRequiredException.php",
+        "total": 2,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/ReflectionException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/ReturnValueNotConfiguredException.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/RuntimeException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/SoapExtensionNotAvailableException.php",
+        "total": 3,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/UnknownClassException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/UnknownTraitException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Exception/UnknownTypeException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Generator.php",
+        "total": 317,
+        "covered": 295
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Invocation.php",
+        "total": 76,
+        "covered": 60
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/InvocationHandler.php",
+        "total": 52,
+        "covered": 41
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Matcher.php",
+        "total": 92,
+        "covered": 50
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MethodNameConstraint.php",
+        "total": 8,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockBuilder.php",
+        "total": 94,
+        "covered": 68
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockClass.php",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockMethod.php",
+        "total": 130,
+        "covered": 118
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockMethodSet.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockObject.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockTrait.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/MockType.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/AnyInvokedCount.php",
+        "total": 4,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/AnyParameters.php",
+        "total": 3,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/ConsecutiveParameters.php",
+        "total": 37,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/InvocationOrder.php",
+        "total": 4,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/InvokedAtLeastCount.php",
+        "total": 11,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/InvokedAtLeastOnce.php",
+        "total": 8,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/InvokedAtMostCount.php",
+        "total": 11,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/InvokedCount.php",
+        "total": 28,
+        "covered": 22
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/MethodName.php",
+        "total": 9,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/Parameters.php",
+        "total": 43,
+        "covered": 36
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Rule/ParametersRule.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ConsecutiveCalls.php",
+        "total": 10,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/Exception.php",
+        "total": 7,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ReturnArgument.php",
+        "total": 6,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ReturnCallback.php",
+        "total": 16,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ReturnReference.php",
+        "total": 7,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ReturnSelf.php",
+        "total": 2,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ReturnStub.php",
+        "total": 7,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/ReturnValueMap.php",
+        "total": 11,
+        "covered": 10
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Stub/Stub.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/TemplateLoader.php",
+        "total": 8,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/MockObject/Verifiable.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/SkippedTest.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/SkippedTestCase.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestBuilder.php",
+        "total": 130,
+        "covered": 122
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestCase.php",
+        "total": 630,
+        "covered": 543
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestFailure.php",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestListener.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestResult.php",
+        "total": 168,
+        "covered": 145
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestRunner.php",
+        "total": 284,
+        "covered": 224
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSize/Known.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSize/Large.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSize/Medium.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSize/Small.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSize/TestSize.php",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSize/Unknown.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Error.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Failure.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Incomplete.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Known.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Risky.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Skipped.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Success.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/TestStatus.php",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Unknown.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestStatus/Warning.php",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSuite.php",
+        "total": 229,
+        "covered": 197
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/TestSuiteIterator.php",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Framework/WarningTestCase.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/After.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/AfterClass.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/BackupGlobals.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/BackupStaticProperties.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Before.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/BeforeClass.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/CodeCoverageIgnore.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Covers.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/CoversClass.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/CoversDefaultClass.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/CoversFunction.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/CoversMethod.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/CoversNothing.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/DataProvider.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Depends.php",
+        "total": 10,
+        "covered": 10
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/DoesNotPerformAssertions.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Exception/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Exception/InvalidVersionRequirementException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Exception/NoVersionRequirementException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Facade/CodeCoverageFacade.php",
+        "total": 103,
+        "covered": 42
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Facade/DataProviderFacade.php",
+        "total": 73,
+        "covered": 58
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Facade/GroupsFacade.php",
+        "total": 28,
+        "covered": 24
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Facade/HookFacade.php",
+        "total": 33,
+        "covered": 24
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Facade/RequirementsFacade.php",
+        "total": 59,
+        "covered": 55
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Group.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Metadata.php",
+        "total": 40,
+        "covered": 40
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/MetadataCollection.php",
+        "total": 252,
+        "covered": 252
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/MetadataCollectionIterator.php",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/Annotation/DocBlock.php",
+        "total": 93,
+        "covered": 90
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/Annotation/Registry.php",
+        "total": 10,
+        "covered": 10
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/AnnotationParser.php",
+        "total": 224,
+        "covered": 219
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/AttributeParser.php",
+        "total": 164,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/CachingParser.php",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/InlineAnnotationParser.php",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/Parser.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/ParserChain.php",
+        "total": 13,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Parser/Registry.php",
+        "total": 8,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/PostCondition.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/PreCondition.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/PreserveGlobalState.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresFunction.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresMethod.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresOperatingSystem.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresOperatingSystemFamily.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresPhp.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresPhpExtension.php",
+        "total": 9,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresPhpunit.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RequiresSetting.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RunClassInSeparateProcess.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RunInSeparateProcess.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/RunTestsInSeparateProcesses.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Test.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/TestDox.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/TestWith.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Todo.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/Uses.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/UsesClass.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/UsesDefaultClass.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/UsesFunction.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/UsesMethod.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/VersionComparisonRequirement.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/VersionConstraintRequirement.php",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Metadata/VersionRequirement.php",
+        "total": 10,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/CodeCoverage.php",
+        "total": 35,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/DefaultTestResultCache.php",
+        "total": 61,
+        "covered": 55
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Extension/ExtensionHandler.php",
+        "total": 27,
+        "covered": 10
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Extension/PharLoader.php",
+        "total": 22,
+        "covered": 14
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Filter/ExcludeGroupFilterIterator.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Filter/Factory.php",
+        "total": 12,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Filter/GroupFilterIterator.php",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Filter/IncludeGroupFilterIterator.php",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Filter/NameFilterIterator.php",
+        "total": 47,
+        "covered": 43
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterIncompleteTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterLastTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterRiskyTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterSkippedTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterSuccessfulTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterTestErrorHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterTestFailureHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/AfterTestWarningHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/BeforeFirstTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/BeforeTestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/Hook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/TestHook.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Hook/TestListenerAdapter.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/NullTestResultCache.php",
+        "total": 6,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/PhptTestCase.php",
+        "total": 315,
+        "covered": 253
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/ResultCacheExtension.php",
+        "total": 37,
+        "covered": 25
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/TestResultCache.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/TestSuiteLoader.php",
+        "total": 38,
+        "covered": 33
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/TestSuiteSorter.php",
+        "total": 110,
+        "covered": 110
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Runner/Version.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/CliArguments/Builder.php",
+        "total": 428,
+        "covered": 341
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/CliArguments/Configuration.php",
+        "total": 448,
+        "covered": 283
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/CliArguments/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/CliArguments/Mapper.php",
+        "total": 164,
+        "covered": 128
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Command.php",
+        "total": 331,
+        "covered": 246
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/DefaultResultPrinter.php",
+        "total": 223,
+        "covered": 217
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Exception/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Exception/ReflectionException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Exception/RuntimeException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Exception/TestDirectoryNotFoundException.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Exception/TestFileNotFoundException.php",
+        "total": 5,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/Help.php",
+        "total": 50,
+        "covered": 50
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/ResultPrinter.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/TestRunner.php",
+        "total": 604,
+        "covered": 386
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/TestSuiteMapper.php",
+        "total": 36,
+        "covered": 29
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/CodeCoverage.php",
+        "total": 63,
+        "covered": 48
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Filter/Directory.php",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Filter/DirectoryCollection.php",
+        "total": 6,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Filter/DirectoryCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/FilterMapper.php",
+        "total": 15,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Clover.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Cobertura.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Crap4j.php",
+        "total": 5,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Html.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Php.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Text.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/CodeCoverage/Report/Xml.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Configuration.php",
+        "total": 22,
+        "covered": 21
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Filesystem/Directory.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Filesystem/DirectoryCollection.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Filesystem/DirectoryCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Filesystem/File.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Filesystem/FileCollection.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Filesystem/FileCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Generator.php",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Group/Group.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Group/GroupCollection.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Group/GroupCollectionIterator.php",
+        "total": 10,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Group/Groups.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Loader.php",
+        "total": 485,
+        "covered": 471
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/Junit.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/Logging.php",
+        "total": 31,
+        "covered": 25
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/TeamCity.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/TestDox/Html.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/TestDox/Text.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/TestDox/Xml.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Logging/Text.php",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/MigrationBuilder.php",
+        "total": 12,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/MigrationBuilderException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/MigrationException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/ConvertLogTypes.php",
+        "total": 14,
+        "covered": 13
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/CoverageCloverToReport.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/CoverageCrap4jToReport.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/CoverageHtmlToReport.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/CoveragePhpToReport.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/CoverageTextToReport.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/CoverageXmlToReport.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/IntroduceCacheDirectoryAttribute.php",
+        "total": 5,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/IntroduceCoverageElement.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/LogToReportMigration.php",
+        "total": 25,
+        "covered": 23
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/Migration.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/MoveAttributesFromFilterWhitelistToCoverage.php",
+        "total": 13,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/MoveAttributesFromRootToCoverage.php",
+        "total": 11,
+        "covered": 10
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/MoveWhitelistDirectoriesToCoverage.php",
+        "total": 13,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/MoveWhitelistExcludesToCoverage.php",
+        "total": 23,
+        "covered": 19
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveCacheResultFileAttribute.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveCacheTokensAttribute.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveCoverageElementCacheDirectoryAttribute.php",
+        "total": 6,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveEmptyFilter.php",
+        "total": 14,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveListeners.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveLogTypes.php",
+        "total": 9,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RemoveTestSuiteLoaderAttributes.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/RenameBackupStaticAttributesAttribute.php",
+        "total": 7,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrations/UpdateSchemaLocation.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/Migration/Migrator.php",
+        "total": 16,
+        "covered": 12
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/Constant.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/ConstantCollection.php",
+        "total": 6,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/ConstantCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/IniSetting.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/IniSettingCollection.php",
+        "total": 6,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/IniSettingCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/Php.php",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/PhpHandler.php",
+        "total": 51,
+        "covered": 50
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/Variable.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/VariableCollection.php",
+        "total": 6,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHP/VariableCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHPUnit/Extension.php",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHPUnit/ExtensionCollection.php",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHPUnit/ExtensionCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/PHPUnit/PHPUnit.php",
+        "total": 118,
+        "covered": 112
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestDirectory.php",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestDirectoryCollection.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestDirectoryCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestFile.php",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestFileCollection.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestFileCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestSuite.php",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestSuiteCollection.php",
+        "total": 7,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/TextUI/XmlConfiguration/TestSuite/TestSuiteCollectionIterator.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Color.php",
+        "total": 35,
+        "covered": 35
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Error/Deprecation.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Error/Error.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Error/Handler.php",
+        "total": 41,
+        "covered": 36
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Error/Notice.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Error/Warning.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/ExcludeList.php",
+        "total": 28,
+        "covered": 18
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Filesystem.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Filter.php",
+        "total": 45,
+        "covered": 43
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/GlobalState.php",
+        "total": 68,
+        "covered": 62
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/InvalidDataSetException.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Json.php",
+        "total": 19,
+        "covered": 19
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Log/JUnit.php",
+        "total": 140,
+        "covered": 135
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Log/TeamCity.php",
+        "total": 133,
+        "covered": 78
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/PHP/AbstractPhpProcess.php",
+        "total": 139,
+        "covered": 101
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/PHP/DefaultPhpProcess.php",
+        "total": 89,
+        "covered": 37
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/PHP/WindowsPhpProcess.php",
+        "total": 8,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Printer.php",
+        "total": 33,
+        "covered": 16
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/RegularExpression.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Test.php",
+        "total": 27,
+        "covered": 23
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/CliTestDoxPrinter.php",
+        "total": 123,
+        "covered": 115
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/HtmlResultPrinter.php",
+        "total": 20,
+        "covered": 19
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/NamePrettifier.php",
+        "total": 116,
+        "covered": 109
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/ResultPrinter.php",
+        "total": 86,
+        "covered": 50
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/TestDoxPrinter.php",
+        "total": 116,
+        "covered": 95
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/TextResultPrinter.php",
+        "total": 10,
+        "covered": 8
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TestDox/XmlResultPrinter.php",
+        "total": 108,
+        "covered": 83
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/TextTestListRenderer.php",
+        "total": 14,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Type.php",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/VersionComparisonOperator.php",
+        "total": 10,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Warning.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml.php",
+        "total": 61,
+        "covered": 56
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/Exception.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/FailedSchemaDetectionResult.php",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/Loader.php",
+        "total": 43,
+        "covered": 36
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/SchemaDetectionResult.php",
+        "total": 2,
+        "covered": 0
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/SchemaDetector.php",
+        "total": 10,
+        "covered": 9
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/SchemaFinder.php",
+        "total": 12,
+        "covered": 11
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/SnapshotNodeList.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/SuccessfulSchemaDetectionResult.php",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/ValidationResult.php",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/Xml/Validator.php",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "/Users/k1low/src/github.com/sebastianbergmann/phpunit/src/Util/XmlTestListRenderer.php",
+        "total": 36,
+        "covered": 28
+      }
+    ]
+  },
+  "Timestamp": "2021-05-06T20:37:52.198948Z"
+}

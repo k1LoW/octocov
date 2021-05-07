@@ -9,14 +9,14 @@
     </clipPath>
     <g clip-path="url(#r)">
         <rect width="68" height="20" fill="#24292E"/>
-        <rect x="68" width="50" height="20" fill="#A4A61D"/>
+        <rect x="68" width="50" height="20" fill="#FE7D37"/>
         <rect width="118" height="20" fill="url(#s)"/>
     </g>
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
         <!-- <image x="5" y="3" width="14" height="14" xlink:href=""/> -->
         <text aria-hidden="true" x="340" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">coverage</text>
         <text x="340" y="140" transform="scale(.1)" fill="#fff">coverage</text>
-        <text aria-hidden="true" x="930" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">71.1%</text>
-        <text x="930" y="140" transform="scale(.1)" fill="#fff">71.1%</text>
+        <text aria-hidden="true" x="930" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">38.8%</text>
+        <text x="930" y="140" transform="scale(.1)" fill="#fff">38.8%</text>
     </g>
 </svg>

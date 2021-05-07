@@ -1,0 +1,164 @@
+{
+  "repository": "k1LoW/tbls",
+  "ref": "refs/heads/main",
+  "commit": "c81700c4a0e03acdc2ce1fb5148ffdc863220011",
+  "coverage": {
+    "type": "statement",
+    "format": "Go coverage",
+    "total": 2661,
+    "covered": 1810,
+    "files": [
+      {
+        "file": "github.com/k1LoW/tbls/cmdutil/option.go",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "github.com/k1LoW/tbls/cmdutil/when.go",
+        "total": 23,
+        "covered": 18
+      },
+      {
+        "file": "github.com/k1LoW/tbls/config/config.go",
+        "total": 271,
+        "covered": 189
+      },
+      {
+        "file": "github.com/k1LoW/tbls/config/lint.go",
+        "total": 259,
+        "covered": 251
+      },
+      {
+        "file": "github.com/k1LoW/tbls/config/naming.go",
+        "total": 13,
+        "covered": 9
+      },
+      {
+        "file": "github.com/k1LoW/tbls/config/yaml.go",
+        "total": 12,
+        "covered": 5
+      },
+      {
+        "file": "github.com/k1LoW/tbls/coverage/coverage.go",
+        "total": 42,
+        "covered": 37
+      },
+      {
+        "file": "github.com/k1LoW/tbls/datasource/aws.go",
+        "total": 27,
+        "covered": 0
+      },
+      {
+        "file": "github.com/k1LoW/tbls/datasource/datasource.go",
+        "total": 101,
+        "covered": 67
+      },
+      {
+        "file": "github.com/k1LoW/tbls/datasource/gcp.go",
+        "total": 57,
+        "covered": 25
+      },
+      {
+        "file": "github.com/k1LoW/tbls/dict/dict.go",
+        "total": 32,
+        "covered": 14
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/bq/bq.go",
+        "total": 48,
+        "covered": 41
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/dynamo/dynamo.go",
+        "total": 58,
+        "covered": 52
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/mariadb/mariadb.go",
+        "total": 5,
+        "covered": 4
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/mssql/mssql.go",
+        "total": 183,
+        "covered": 151
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/mysql/mysql.go",
+        "total": 197,
+        "covered": 142
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/postgres/postgres.go",
+        "total": 202,
+        "covered": 167
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/spanner/spanner.go",
+        "total": 132,
+        "covered": 0
+      },
+      {
+        "file": "github.com/k1LoW/tbls/drivers/sqlite/sqlite.go",
+        "total": 206,
+        "covered": 185
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/config/config.go",
+        "total": 40,
+        "covered": 20
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/dot/dot.go",
+        "total": 38,
+        "covered": 29
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/gviz/gviz.go",
+        "total": 51,
+        "covered": 17
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/json/json.go",
+        "total": 15,
+        "covered": 6
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/md/md.go",
+        "total": 302,
+        "covered": 236
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/output.go",
+        "total": 16,
+        "covered": 0
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/plantuml/plantuml.go",
+        "total": 61,
+        "covered": 44
+      },
+      {
+        "file": "github.com/k1LoW/tbls/output/yaml/yaml.go",
+        "total": 10,
+        "covered": 4
+      },
+      {
+        "file": "github.com/k1LoW/tbls/schema/json.go",
+        "total": 57,
+        "covered": 28
+      },
+      {
+        "file": "github.com/k1LoW/tbls/schema/schema.go",
+        "total": 147,
+        "covered": 53
+      },
+      {
+        "file": "github.com/k1LoW/tbls/schema/yaml.go",
+        "total": 40,
+        "covered": 0
+      }
+    ]
+  },
+  "Timestamp": "2021-05-06T20:21:51.273057Z"
+}

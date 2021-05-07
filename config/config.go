@@ -14,17 +14,28 @@ import (
 )
 
 const defaultBranch = "main"
-const defaultReportDir = "reports"
+const defaultReportsDir = "reports"
+const defaultBadgesDir = "badges"
+
+const (
+	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
+	green       = "#97CA00"
+	yellowgreen = "#A4A61D"
+	yellow      = "#DFB317"
+	orange      = "#FE7D37"
+	red         = "#E05D44"
+)
 
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
-	Repository string         `yaml:"repository"`
-	Coverage   ConfigCoverage `yaml:"coverage,omitempty"`
-	// CodeToTestRatio ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
-	Datastore ConfigDatastore `yaml:"datastore,omitempty"`
-	// current directory
-	root string
+	Repository string          `yaml:"repository"`
+	Coverage   *ConfigCoverage `yaml:"coverage"`
+	// CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
+	Datastore *ConfigDatastore `yaml:"datastore,omitempty"`
+	Central   *ConfigCentral   `yaml:"central,omitempty"`
+	// working directory
+	wd string
 	// config file path
 	path string
 }
@@ -41,7 +52,7 @@ type ConfigCoverage struct {
 // }
 
 type ConfigDatastore struct {
-	Github ConfigDatastoreGithub `yaml:"github,omitempty"`
+	Github *ConfigDatastoreGithub `yaml:"github,omitempty"`
 }
 
 type ConfigDatastoreGithub struct {
@@ -50,17 +61,25 @@ type ConfigDatastoreGithub struct {
 	Path       string `yaml:"path"`
 }
 
+type ConfigCentral struct {
+	Enable  bool   `yaml:"enable"`
+	Reports string `yaml:"reports"`
+	Badges  string `yaml:"badges"`
+	Root    string `yaml:"root"`
+}
+
 func New() *Config {
-	p, _ := os.Getwd()
+	wd, _ := os.Getwd()
 	return &Config{
-		root: p,
+		Coverage: &ConfigCoverage{},
+		wd:       wd,
 	}
 }
 
 func (c *Config) Load(path string) error {
 	if path == "" {
 		for _, p := range DefaultConfigFilePaths {
-			if f, err := os.Stat(filepath.Join(c.root, p)); err == nil && !f.IsDir() {
+			if f, err := os.Stat(filepath.Join(c.wd, p)); err == nil && !f.IsDir() {
 				if path != "" {
 					return fmt.Errorf("duplicate config file [%s, %s]", path, p)
 				}
@@ -69,11 +88,11 @@ func (c *Config) Load(path string) error {
 		}
 	}
 	if path == "" {
-		c.Coverage.Path = c.root
+		c.Coverage.Path = c.wd
 		return nil
 	}
-	c.path = path
-	buf, err := ioutil.ReadFile(filepath.Clean(path))
+	c.path = filepath.Join(c.wd, path)
+	buf, err := ioutil.ReadFile(filepath.Clean(c.path))
 	if err != nil {
 		return err
 	}
@@ -81,9 +100,16 @@ func (c *Config) Load(path string) error {
 		return err
 	}
 	if c.Coverage.Path == "" {
-		c.Coverage.Path = filepath.Dir(path)
+		c.Coverage.Path = filepath.Dir(c.path)
 	}
 	return nil
+}
+
+func (c *Config) Root() string {
+	if c.path != "" {
+		return filepath.Dir(c.path)
+	}
+	return c.wd
 }
 
 func (c *Config) Loaded() bool {
@@ -95,22 +121,35 @@ func (c *Config) Build() {
 	if c.Repository == "" {
 		c.Repository = os.Getenv("GITHUB_REPOSITORY")
 	}
-	c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
-	c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
-	c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
-	c.Coverage.Badge = os.ExpandEnv(c.Coverage.Badge)
+	if c.Datastore != nil && c.Datastore.Github != nil {
+		c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
+		c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
+		c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
+	}
+	if c.Coverage != nil {
+		c.Coverage.Badge = os.ExpandEnv(c.Coverage.Badge)
+	}
+	if c.Central != nil {
+		c.Central.Root = os.ExpandEnv(c.Central.Root)
+		c.Central.Reports = os.ExpandEnv(c.Central.Reports)
+		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
+	}
 }
 
 func (c *Config) DatastoreConfigReady() bool {
-	return c.Datastore.Github.Repository != "" || c.Datastore.Github.Branch != "" || c.Datastore.Github.Path != ""
+	return c.Datastore != nil
 }
 
 func (c *Config) BuildDatastoreConfig() error {
+	if c.Datastore.Github == nil {
+		return errors.New("datastore.github not set")
+	}
+	// GitHub
 	if c.Datastore.Github.Branch == "" {
 		c.Datastore.Github.Branch = defaultBranch
 	}
 	if c.Datastore.Github.Path == "" && c.Repository != "" {
-		c.Datastore.Github.Path = fmt.Sprintf("%s/%s/report.json", defaultReportDir, c.Repository)
+		c.Datastore.Github.Path = fmt.Sprintf("%s/%s/report.json", defaultReportsDir, c.Repository)
 	}
 	if c.Datastore.Github.Repository == "" {
 		return errors.New("datastore.github.repository not set")
@@ -144,4 +183,19 @@ func (c *Config) Accepptable(r *report.Report) error {
 		return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
 	}
 	return nil
+}
+
+func (c *Config) CoverageColor(cover float64) string {
+	switch {
+	case cover >= 80.0:
+		return green
+	case cover >= 60.0:
+		return yellowgreen
+	case cover >= 40.0:
+		return yellow
+	case cover >= 20.0:
+		return orange
+	default:
+		return red
+	}
 }

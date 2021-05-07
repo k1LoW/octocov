@@ -1,6 +1,7 @@
 package report
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -68,6 +69,19 @@ func (r *Report) MeasureCoverage(path string) error {
 		return nil
 	}
 	r.Coverage = cov
+	return nil
+}
+
+func (r *Report) Validate() error {
+	if r.Repository == "" {
+		return fmt.Errorf("coverage report '%s' is not set", "repository")
+	}
+	if r.Ref == "" {
+		return fmt.Errorf("coverage report '%s' is not set", "ref")
+	}
+	if r.Commit == "" {
+		return fmt.Errorf("coverage report '%s' is not set", "commit")
+	}
 	return nil
 }
 
