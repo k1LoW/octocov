@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.4.0](https://github.com/k1LoW/octocov/compare/v0.3.1...v0.4.0) (2021-05-10)
+
+* Support `datastore.if:` section [#11](https://github.com/k1LoW/octocov/pull/11) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.3.1](https://github.com/k1LoW/octocov/compare/v0.3.0...v0.3.1) (2021-05-10)
 
 * Fix badge path rel [#10](https://github.com/k1LoW/octocov/pull/10) ([k1LoW](https://github.com/k1LoW))
