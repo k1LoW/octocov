@@ -128,7 +128,13 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	if host == "" {
 		host = defaultHost
 	}
-	badgesRel, err := filepath.Rel(c.config.Central.Root, c.config.Central.Badges)
+
+	root := c.config.Central.Root
+	if strings.HasSuffix(root, ".md") {
+		root = filepath.Dir(c.config.Central.Root)
+	}
+
+	badgesRel, err := filepath.Rel(root, c.config.Central.Badges)
 	if err != nil {
 		return err
 	}
