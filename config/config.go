@@ -8,8 +8,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/ghdag/env"
+	"github.com/k1LoW/ghdag/runner"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -56,6 +60,7 @@ type ConfigCoverageBadge struct {
 // }
 
 type ConfigDatastore struct {
+	If     string                 `yaml:"if,omitempty"`
 	Github *ConfigDatastoreGithub `yaml:"github,omitempty"`
 }
 
@@ -141,7 +146,37 @@ func (c *Config) Build() {
 }
 
 func (c *Config) DatastoreConfigReady() bool {
-	return c.Datastore != nil
+	if c.Datastore == nil {
+		return false
+	}
+	if c.Datastore.If == "" {
+		return true
+	}
+	cond := c.Datastore.If
+	e, _ := runner.DecodeGitHubEvent()
+	now := time.Now()
+	variables := map[string]interface{}{
+		"year":    now.UTC().Year(),
+		"month":   now.UTC().Month(),
+		"day":     now.UTC().Day(),
+		"hour":    now.UTC().Hour(),
+		"weekday": int(now.UTC().Weekday()),
+		"github": map[string]interface{}{
+			"event_name": e.Name,
+			"event":      e.Payload,
+		},
+		"env": env.EnvMap(),
+	}
+	doOrNot, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		return false
+	}
+	if !doOrNot.(bool) {
+		_, _ = fmt.Fprintf(os.Stderr, "the condition in the `if` section is not met (%s)\n", cond)
+		return false
+	}
+	return true
 }
 
 func (c *Config) BuildDatastoreConfig() error {
