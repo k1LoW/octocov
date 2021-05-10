@@ -52,6 +52,7 @@ var rootCmd = &cobra.Command{
 	Version:      version.Version,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
 		if len(args) > 0 && args[0] == "completion" {
 			return completionCmd(cmd, args[1:])
 		}
