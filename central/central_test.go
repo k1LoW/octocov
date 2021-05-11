@@ -71,6 +71,7 @@ func TestRenderIndex(t *testing.T) {
 	c.Central = &config.ConfigCentral{
 		Enable:  true,
 		Reports: filepath.Join(testdataDir(t), "reports"),
+		Badges:  "badges",
 	}
 
 	ctr := New(c)

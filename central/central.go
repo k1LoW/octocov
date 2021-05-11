@@ -155,7 +155,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		"Host":       host,
 		"Reports":    c.reports,
 		"BadgesRel":  badgesRel,
-		"RawRootURL": rawRootURL,
+		"RawRootURL": strings.TrimRight(fmt.Sprintf("%s/%s", rawRootURL, root), "/."),
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err
