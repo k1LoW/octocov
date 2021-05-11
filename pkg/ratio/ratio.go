@@ -95,11 +95,11 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		}
 		cf := gocloc.AnalyzeFile(path, defined.Langs[l], opts)
 		if isCode {
-			log.Printf("code: %s", path)
+			log.Printf("code: %s,%d", path, cf.Code)
 			ratio.Code += int(cf.Code)
 		}
 		if isTest {
-			log.Printf("test: %s", path)
+			log.Printf("test: %s,%d", path, cf.Code)
 			ratio.Test += int(cf.Code)
 		}
 		return nil
