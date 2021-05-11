@@ -76,6 +76,11 @@ var rootCmd = &cobra.Command{
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
+		if c.CodeToTestRatioReady() {
+			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
+				return err
+			}
+		}
 
 		if dump {
 			cmd.Println(r.String())

@@ -33,11 +33,11 @@ const (
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
-	Repository string          `yaml:"repository"`
-	Coverage   *ConfigCoverage `yaml:"coverage"`
-	// CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
-	Datastore *ConfigDatastore `yaml:"datastore,omitempty"`
-	Central   *ConfigCentral   `yaml:"central,omitempty"`
+	Repository      string                 `yaml:"repository"`
+	Coverage        *ConfigCoverage        `yaml:"coverage"`
+	CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
+	Datastore       *ConfigDatastore       `yaml:"datastore,omitempty"`
+	Central         *ConfigCentral         `yaml:"central,omitempty"`
 	// working directory
 	wd string
 	// config file path
@@ -54,10 +54,12 @@ type ConfigCoverageBadge struct {
 	Path string `yaml:"path,omitempty"`
 }
 
-// type ConfigCodeToTestRatio struct {
-// 	Enable bool `yaml:"enable"`
-//  Badge string `yaml:"badge"`
-// }
+type ConfigCodeToTestRatio struct {
+	Code []string `yaml:"code"`
+	Test []string `yaml:"test"`
+	// Badge ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
+	// Acceptable string   `yaml:"acceptable,omitempty"`
+}
 
 type ConfigDatastore struct {
 	If     string                 `yaml:"if,omitempty"`
@@ -146,11 +148,29 @@ func (c *Config) Build() {
 	if c.Coverage != nil {
 		c.Coverage.Badge.Path = os.ExpandEnv(c.Coverage.Badge.Path)
 	}
+	if c.CodeToTestRatio != nil {
+		if c.CodeToTestRatio.Code == nil {
+			c.CodeToTestRatio.Code = []string{}
+		}
+		if c.CodeToTestRatio.Test == nil {
+			c.CodeToTestRatio.Test = []string{}
+		}
+	}
 	if c.Central != nil {
 		c.Central.Root = os.ExpandEnv(c.Central.Root)
 		c.Central.Reports = os.ExpandEnv(c.Central.Reports)
 		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
 	}
+}
+
+func (c *Config) CodeToTestRatioReady() bool {
+	if c.CodeToTestRatio == nil {
+		return false
+	}
+	if len(c.CodeToTestRatio.Test) == 0 {
+		return false
+	}
+	return true
 }
 
 func (c *Config) DatastoreConfigReady() bool {
@@ -241,6 +261,21 @@ func (c *Config) CoverageColor(cover float64) string {
 	case cover >= 40.0:
 		return yellow
 	case cover >= 20.0:
+		return orange
+	default:
+		return red
+	}
+}
+
+func (c *Config) CodeToTestRatioColor(ratio float64) string {
+	switch {
+	case cover >= 1.2:
+		return green
+	case cover >= 1.0:
+		return yellowgreen
+	case cover >= 0.8:
+		return yellow
+	case cover >= 0.6:
 		return orange
 	default:
 		return red
