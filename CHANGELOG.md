@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.5.0](https://github.com/k1LoW/octocov/compare/v0.4.0...v0.5.0) (2021-05-11)
+
+* Show badge markdown link [#12](https://github.com/k1LoW/octocov/pull/12) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.4.0](https://github.com/k1LoW/octocov/compare/v0.3.1...v0.4.0) (2021-05-10)
 
 * Support `datastore.if:` section [#11](https://github.com/k1LoW/octocov/pull/11) ([k1LoW](https://github.com/k1LoW))
