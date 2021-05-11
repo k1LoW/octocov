@@ -2,10 +2,10 @@
 
 | Repository | Coverage | Badge |
 | --- | --- | --- |
-| [k1LoW/awspec](https://github.com/k1LoW/awspec) | 38.8% | ![k1LoW/awspec](badges/k1LoW/awspec/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main//Users/k1low/src/github.com/k1LoW/octocov/example/central/badges/k1LoW/awspec/coverage.svg)``` |
-| [k1LoW/tbls](https://github.com/k1LoW/tbls) | 68.0% | ![k1LoW/tbls](badges/k1LoW/tbls/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main//Users/k1low/src/github.com/k1LoW/octocov/example/central/badges/k1LoW/tbls/coverage.svg)``` |
-| [sebastianbergmann/phpunit](https://github.com/sebastianbergmann/phpunit) | 80.6% | ![sebastianbergmann/phpunit](badges/sebastianbergmann/phpunit/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main//Users/k1low/src/github.com/k1LoW/octocov/example/central/badges/sebastianbergmann/phpunit/coverage.svg)``` |
-| [winebarrel/ridgepole](https://github.com/winebarrel/ridgepole) | 95.4% | ![winebarrel/ridgepole](badges/winebarrel/ridgepole/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main//Users/k1low/src/github.com/k1LoW/octocov/example/central/badges/winebarrel/ridgepole/coverage.svg)``` |
+| [k1LoW/awspec](https://github.com/k1LoW/awspec) | 38.8% | ![k1LoW/awspec](badges/k1LoW/awspec/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main/example/central/badges/k1LoW/awspec/coverage.svg)``` |
+| [k1LoW/tbls](https://github.com/k1LoW/tbls) | 68.0% | ![k1LoW/tbls](badges/k1LoW/tbls/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main/example/central/badges/k1LoW/tbls/coverage.svg)``` |
+| [sebastianbergmann/phpunit](https://github.com/sebastianbergmann/phpunit) | 80.6% | ![sebastianbergmann/phpunit](badges/sebastianbergmann/phpunit/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main/example/central/badges/sebastianbergmann/phpunit/coverage.svg)``` |
+| [winebarrel/ridgepole](https://github.com/winebarrel/ridgepole) | 95.4% | ![winebarrel/ridgepole](badges/winebarrel/ridgepole/coverage.svg) ```![Coverage](https://raw.githubusercontent.com/k1LoW/octocov/main/example/central/badges/winebarrel/ridgepole/coverage.svg)``` |
 
 ---
 

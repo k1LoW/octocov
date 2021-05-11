@@ -141,21 +141,36 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		return err
 	}
 
-	root := c.config.Central.Root
-	if strings.HasSuffix(root, ".md") {
-		root = filepath.Dir(c.config.Central.Root)
+	// Get project root dir
+	proot := os.Getenv("GITHUB_WORKSPACE")
+	if proot == "" {
+		proot, err = os.Getwd()
+		if err != nil {
+			return err
+		}
 	}
 
-	badgesRel, err := filepath.Rel(root, c.config.Central.Badges)
+	croot := c.config.Central.Root
+	if strings.HasSuffix(croot, ".md") {
+		croot = filepath.Dir(c.config.Central.Root)
+	}
+
+	badgesLinkRel, err := filepath.Rel(croot, c.config.Central.Badges)
+	if err != nil {
+		return err
+	}
+
+	badgesURLRel, err := filepath.Rel(proot, c.config.Central.Badges)
 	if err != nil {
 		return err
 	}
 
 	d := map[string]interface{}{
-		"Host":       host,
-		"Reports":    c.reports,
-		"BadgesRel":  badgesRel,
-		"RawRootURL": strings.TrimRight(fmt.Sprintf("%s/%s", rawRootURL, root), "/."),
+		"Host":          host,
+		"Reports":       c.reports,
+		"BadgesLinkRel": badgesLinkRel,
+		"BadgesURLRel":  badgesURLRel,
+		"RawRootURL":    rawRootURL,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err

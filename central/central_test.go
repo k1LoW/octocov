@@ -73,6 +73,9 @@ func TestRenderIndex(t *testing.T) {
 		Reports: filepath.Join(testdataDir(t), "reports"),
 		Badges:  "badges",
 	}
+	if err := c.BuildCentralConfig(); err != nil {
+		t.Fatal(err)
+	}
 
 	ctr := New(c)
 	if err := ctr.collectReports(); err != nil {
