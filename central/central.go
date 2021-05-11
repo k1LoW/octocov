@@ -142,13 +142,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	}
 
 	// Get project root dir
-	proot := os.Getenv("GITHUB_WORKSPACE")
-	if proot == "" {
-		proot, err = os.Getwd()
-		if err != nil {
-			return err
-		}
-	}
+	proot := c.config.Getwd()
 
 	croot := c.config.Central.Root
 	if strings.HasSuffix(croot, ".md") {

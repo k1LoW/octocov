@@ -66,7 +66,12 @@ func TestGenerateBadges(t *testing.T) {
 }
 
 func TestRenderIndex(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
 	c := config.New()
+	c.Setwd(filepath.Dir(wd))
 	c.Repository = "k1LoW/octocov"
 	c.Central = &config.ConfigCentral{
 		Enable:  true,
