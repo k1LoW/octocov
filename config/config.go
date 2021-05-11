@@ -173,7 +173,7 @@ func (c *Config) DatastoreConfigReady() bool {
 		return false
 	}
 	if !doOrNot.(bool) {
-		_, _ = fmt.Fprintf(os.Stderr, "the condition in the `if` section is not met (%s)\n", cond)
+		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", cond)
 		return false
 	}
 	return true
