@@ -19,8 +19,6 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-const defaultHost = "https://github.com"
-
 //go:embed index.md.tmpl
 var indexTmpl []byte
 
@@ -128,7 +126,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	tmpl := template.Must(template.New("index").Funcs(funcs()).Parse(string(indexTmpl)))
 	host := os.Getenv("GITHUB_SERVER_URL")
 	if host == "" {
-		host = defaultHost
+		host = datastore.DefaultGithubServerURL
 	}
 
 	ctx := context.Background()

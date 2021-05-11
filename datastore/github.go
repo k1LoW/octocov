@@ -16,6 +16,8 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
+const DefaultGithubServerURL = "https://github.com"
+
 type Github struct {
 	config *config.Config
 	client *github.Client
@@ -135,7 +137,14 @@ func (g *Github) GetRawRootURL(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	baseRef := fmt.Sprintf("refs/heads/%s", r.GetDefaultBranch())
+	b := r.GetDefaultBranch()
+
+	if os.Getenv("GITHUB_SERVER_URL") != "" && os.Getenv("GITHUB_SERVER_URL") != DefaultGithubServerURL {
+		// GitHub Enterprise Server
+		return fmt.Sprintf("%s/%s/%s/raw/%s", os.Getenv("GITHUB_SERVER_URL"), owner, repo, b), nil
+	}
+
+	baseRef := fmt.Sprintf("refs/heads/%s", b)
 	ref, _, err := g.client.Git.GetRef(ctx, owner, repo, baseRef)
 	if err != nil {
 		return "", err
