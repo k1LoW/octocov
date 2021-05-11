@@ -25,9 +25,8 @@ const defaultHost = "https://github.com"
 var indexTmpl []byte
 
 type Central struct {
-	config     *config.Config
-	rawURLRoot string
-	reports    []*report.Report
+	config  *config.Config
+	reports []*report.Report
 }
 
 func New(c *config.Config) *Central {
