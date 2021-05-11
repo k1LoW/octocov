@@ -1,6 +1,7 @@
 package central
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -13,11 +14,10 @@ import (
 	"text/template"
 
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 )
-
-const defaultHost = "https://github.com"
 
 //go:embed index.md.tmpl
 var indexTmpl []byte
@@ -126,23 +126,43 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	tmpl := template.Must(template.New("index").Funcs(funcs()).Parse(string(indexTmpl)))
 	host := os.Getenv("GITHUB_SERVER_URL")
 	if host == "" {
-		host = defaultHost
+		host = datastore.DefaultGithubServerURL
 	}
 
-	root := c.config.Central.Root
-	if strings.HasSuffix(root, ".md") {
-		root = filepath.Dir(c.config.Central.Root)
+	ctx := context.Background()
+	g, err := datastore.NewGithub(c.config)
+	if err != nil {
+		return err
+	}
+	rawRootURL, err := g.GetRawRootURL(ctx)
+	if err != nil {
+		return err
 	}
 
-	badgesRel, err := filepath.Rel(root, c.config.Central.Badges)
+	// Get project root dir
+	proot := c.config.Getwd()
+
+	croot := c.config.Central.Root
+	if strings.HasSuffix(croot, ".md") {
+		croot = filepath.Dir(c.config.Central.Root)
+	}
+
+	badgesLinkRel, err := filepath.Rel(croot, c.config.Central.Badges)
+	if err != nil {
+		return err
+	}
+
+	badgesURLRel, err := filepath.Rel(proot, c.config.Central.Badges)
 	if err != nil {
 		return err
 	}
 
 	d := map[string]interface{}{
-		"Host":      host,
-		"Reports":   c.reports,
-		"BadgesRel": badgesRel,
+		"Host":          host,
+		"Reports":       c.reports,
+		"BadgesLinkRel": badgesLinkRel,
+		"BadgesURLRel":  badgesURLRel,
+		"RawRootURL":    rawRootURL,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err

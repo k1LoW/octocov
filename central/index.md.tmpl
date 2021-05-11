@@ -3,7 +3,7 @@
 | Repository | Coverage | Badge |
 | --- | --- | --- |
 {{- range $r := .Reports }}
-| [{{ $r.Repository }}]({{ $.Host }}/{{ $r.Repository }}) | {{ $r | coverage }} | ![{{ $r.Repository }}]({{ $.BadgesRel }}/{{ $r.Repository}}/coverage.svg) |
+| [{{ $r.Repository }}]({{ $.Host }}/{{ $r.Repository }}) | {{ $r | coverage }} | ![{{ $r.Repository }}]({{ $.BadgesLinkRel }}/{{ $r.Repository}}/coverage.svg)<br>```![Coverage]({{ $.RawRootURL }}/{{ $.BadgesURLRel }}/{{ $r.Repository}}/coverage.svg)``` |
 {{- end }}
 
 ---

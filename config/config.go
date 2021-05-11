@@ -85,6 +85,14 @@ func New() *Config {
 	}
 }
 
+func (c *Config) Getwd() string {
+	return c.wd
+}
+
+func (c *Config) Setwd(path string) {
+	c.wd = path
+}
+
 func (c *Config) Load(path string) error {
 	if path == "" {
 		for _, p := range DefaultConfigFilePaths {
