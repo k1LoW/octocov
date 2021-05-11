@@ -29,7 +29,7 @@ jobs:
       - name: Run octocov
         uses: k1LoW/octocov-action@v0
 
-      - name: Commit badge
+      - name: Commit badge and example
         uses: EndBug/add-and-commit@v7
         with:
-          add: 'docs/coverage.svg'
+          add: 'docs/coverage.svg example/**'
