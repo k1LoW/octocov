@@ -1,6 +1,7 @@
 package central
 
 import (
+	"context"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -13,6 +14,7 @@ import (
 	"text/template"
 
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 )
@@ -23,8 +25,9 @@ const defaultHost = "https://github.com"
 var indexTmpl []byte
 
 type Central struct {
-	config  *config.Config
-	reports []*report.Report
+	config     *config.Config
+	rawURLRoot string
+	reports    []*report.Report
 }
 
 func New(c *config.Config) *Central {
@@ -129,6 +132,16 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		host = defaultHost
 	}
 
+	ctx := context.Background()
+	g, err := datastore.NewGithub(c.config)
+	if err != nil {
+		return err
+	}
+	rawRootURL, err := g.GetRawRootURL(ctx)
+	if err != nil {
+		return err
+	}
+
 	root := c.config.Central.Root
 	if strings.HasSuffix(root, ".md") {
 		root = filepath.Dir(c.config.Central.Root)
@@ -140,9 +153,10 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	}
 
 	d := map[string]interface{}{
-		"Host":      host,
-		"Reports":   c.reports,
-		"BadgesRel": badgesRel,
+		"Host":       host,
+		"Reports":    c.reports,
+		"BadgesRel":  badgesRel,
+		"RawRootURL": rawRootURL,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err

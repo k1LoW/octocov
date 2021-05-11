@@ -127,6 +127,37 @@ func (g *Github) Store(ctx context.Context, r *report.Report) error {
 	return nil
 }
 
+func (g *Github) GetRawRootURL(ctx context.Context) (string, error) {
+	splitted := strings.Split(g.config.Repository, "/")
+	owner := splitted[0]
+	repo := splitted[1]
+	r, _, err := g.client.Repositories.Get(ctx, owner, repo)
+	if err != nil {
+		return "", err
+	}
+	baseRef := fmt.Sprintf("refs/heads/%s", r.GetDefaultBranch())
+	ref, _, err := g.client.Git.GetRef(ctx, owner, repo, baseRef)
+	if err != nil {
+		return "", err
+	}
+	tree, _, err := g.client.Git.GetTree(ctx, owner, repo, ref.GetObject().GetSHA(), false)
+	if err != nil {
+		return "", err
+	}
+	for _, e := range tree.Entries {
+		if e.GetType() != "blob" {
+			continue
+		}
+		path := e.GetPath()
+		fc, _, _, err := g.client.Repositories.GetContents(ctx, owner, repo, path, &github.RepositoryContentGetOptions{})
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSuffix(strings.TrimSuffix(fc.GetDownloadURL(), path), "/"), nil
+	}
+	return "", fmt.Errorf("not found files. please commit file to root directory and push: %s", g.config.Repository)
+}
+
 type roundTripper struct {
 	transport   *http.Transport
 	accessToken string

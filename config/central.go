@@ -10,6 +10,9 @@ func (c *Config) CentralConfigReady() bool {
 }
 
 func (c *Config) BuildCentralConfig() error {
+	if c.Repository == "" {
+		return errors.New("repository: not set (or env GITHUB_REPOSITORY is not set)")
+	}
 	if c.Central == nil {
 		return errors.New("central: not set")
 	}
