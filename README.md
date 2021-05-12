@@ -43,7 +43,29 @@ $ octocov
 Error: code coverage is 54.9%, which is below the accepted 60.0%
 ```
 
-### Generate coverage report badge self.
+### Check for acceptable code to test ratio
+
+By setting `codeToTestRatio.accepptable:`, the minimum acceptable "Code to Test Ratio" is specified.
+
+If it is less than that value, the command will exit with exit status `1`.
+
+``` yaml
+# .octocov.yml
+codeToTestRatio:
+  code:
+    - '**/*.go'
+    - '!**/*_test.go'
+  test:
+    - '**/*_test.go'
+  acceptable: 1:1.2
+```
+
+``` console
+$ octocov
+Error: code to test ratio is 1:1.1, which is below the accepted 1:1.2
+```
+
+### Generate report badges self.
 
 By setting `coverage.badge.path:`, generate the coverage report badge self.
 
@@ -52,6 +74,15 @@ By setting `coverage.badge.path:`, generate the coverage report badge self.
 coverage:
   badge:
     path: docs/coverage.svg
+```
+
+By setting `codeToTestRatio.badge.path:`, generate the code-to-test-ratio report badge self.
+
+``` yaml
+# .octocov.yml
+codeToTestRatio:
+  badge:
+    path: docs/ratio.svg
 ```
 
 You can display the coverage badge without external communication by setting a link to this badge image in README.md, etc.
@@ -64,7 +95,7 @@ You can display the coverage badge without external communication by setting a l
 
 ![coverage](docs/coverage.svg)
 
-### Store coverage report to central datastore
+### Store report to central datastore
 
 By setting `datastore:`, store the coverage reports to central datastore.
 
