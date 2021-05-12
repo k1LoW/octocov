@@ -56,7 +56,7 @@ func getFileType(path string) (ext string, ok bool) {
 
 	switch ext {
 	case ".m", ".v", ".fs", ".r", ".ts":
-		content, err := ioutil.ReadFile(path)
+		content, err := ioutil.ReadFile(filepath.Clean(path))
 		if err != nil {
 			return "", false
 		}
@@ -101,11 +101,13 @@ func getFileType(path string) (ext string, ok bool) {
 }
 
 func getFileTypeByShebang(path string) (shebangLang string, ok bool) {
-	f, err := os.Open(path)
+	f, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return // ignore error
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	reader := bufio.NewReader(f)
 	line, err := reader.ReadBytes('\n')
