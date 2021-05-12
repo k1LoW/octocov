@@ -8,7 +8,7 @@ Key features of `octocov` are:
 
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
 - **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
-- **[Selectable coverage datastore](#store-coverage-report-to-central-datastore).**
+- **[Selectable coverage datastore](#store-report-to-central-datastore).**
 
 ## Usage
 
