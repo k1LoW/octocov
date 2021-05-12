@@ -130,10 +130,7 @@ var ignores = []string{
 }
 
 func ignore(path string) bool {
-	if contains(ignores, filepath.Base(path)) {
-		return true
-	}
-	return false
+	return contains(ignores, filepath.Base(path))
 }
 
 func contains(s []string, e string) bool {

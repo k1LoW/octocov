@@ -15,7 +15,7 @@ import (
 	enry "github.com/go-enry/go-enry/v2"
 )
 
-var reShebangEnv = regexp.MustCompile("^#! *(\\S+/env) ([a-zA-Z]+)")
+var reShebangEnv = regexp.MustCompile(`^#! *(\S+/env) ([a-zA-Z]+)`)
 var reShebangLang = regexp.MustCompile("^#! *[.a-zA-Z/]+/([a-zA-Z]+)")
 
 var shebang2ext = map[string]string{
