@@ -1,0 +1,7 @@
+codeToTestRatio:
+  code:
+    - '**/*.php'
+    - '!tests/**'
+    - '!vendor/**'
+  test:
+    - 'tests/**/*.php'

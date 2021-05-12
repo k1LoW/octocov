@@ -33,11 +33,11 @@ const (
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
-	Repository string          `yaml:"repository"`
-	Coverage   *ConfigCoverage `yaml:"coverage"`
-	// CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
-	Datastore *ConfigDatastore `yaml:"datastore,omitempty"`
-	Central   *ConfigCentral   `yaml:"central,omitempty"`
+	Repository      string                 `yaml:"repository"`
+	Coverage        *ConfigCoverage        `yaml:"coverage"`
+	CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
+	Datastore       *ConfigDatastore       `yaml:"datastore,omitempty"`
+	Central         *ConfigCentral         `yaml:"central,omitempty"`
 	// working directory
 	wd string
 	// config file path
@@ -54,10 +54,16 @@ type ConfigCoverageBadge struct {
 	Path string `yaml:"path,omitempty"`
 }
 
-// type ConfigCodeToTestRatio struct {
-// 	Enable bool `yaml:"enable"`
-//  Badge string `yaml:"badge"`
-// }
+type ConfigCodeToTestRatio struct {
+	Code       []string                   `yaml:"code"`
+	Test       []string                   `yaml:"test"`
+	Badge      ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
+	Acceptable string                     `yaml:"acceptable,omitempty"`
+}
+
+type ConfigCodeToTestRatioBadge struct {
+	Path string `yaml:"path,omitempty"`
+}
 
 type ConfigDatastore struct {
 	If     string                 `yaml:"if,omitempty"`
@@ -146,11 +152,29 @@ func (c *Config) Build() {
 	if c.Coverage != nil {
 		c.Coverage.Badge.Path = os.ExpandEnv(c.Coverage.Badge.Path)
 	}
+	if c.CodeToTestRatio != nil {
+		if c.CodeToTestRatio.Code == nil {
+			c.CodeToTestRatio.Code = []string{}
+		}
+		if c.CodeToTestRatio.Test == nil {
+			c.CodeToTestRatio.Test = []string{}
+		}
+	}
 	if c.Central != nil {
 		c.Central.Root = os.ExpandEnv(c.Central.Root)
 		c.Central.Reports = os.ExpandEnv(c.Central.Reports)
 		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
 	}
+}
+
+func (c *Config) CodeToTestRatioReady() bool {
+	if c.CodeToTestRatio == nil {
+		return false
+	}
+	if len(c.CodeToTestRatio.Test) == 0 {
+		return false
+	}
+	return true
 }
 
 func (c *Config) DatastoreConfigReady() bool {
@@ -213,22 +237,35 @@ func (c *Config) BuildDatastoreConfig() error {
 	return nil
 }
 
-func (c *Config) BadgeConfigReady() bool {
+func (c *Config) CoverageBadgeConfigReady() bool {
 	return c.Coverage.Badge.Path != ""
 }
 
+func (c *Config) CodeToTestRatioBadgeConfigReady() bool {
+	return c.CodeToTestRatioReady() && c.CodeToTestRatio.Badge.Path != ""
+}
+
 func (c *Config) Accepptable(r *report.Report) error {
-	if c.Coverage.Acceptable == "" {
-		return nil
-	}
-	a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
-	if err != nil {
-		return err
+	if c.Coverage.Acceptable != "" {
+		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
+		if err != nil {
+			return err
+		}
+		if r.CoveragePercent() < a {
+			return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
+		}
 	}
 
-	if r.CoveragePercent() < a {
-		return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
+	if c.CodeToTestRatioReady() && c.CodeToTestRatio.Acceptable != "" {
+		a, err := strconv.ParseFloat(strings.TrimPrefix(c.CodeToTestRatio.Acceptable, "1:"), 64)
+		if err != nil {
+			return err
+		}
+		if r.CodeToTestRatioRatio() < a {
+			return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", r.CodeToTestRatioRatio(), a)
+		}
 	}
+
 	return nil
 }
 
@@ -241,6 +278,21 @@ func (c *Config) CoverageColor(cover float64) string {
 	case cover >= 40.0:
 		return yellow
 	case cover >= 20.0:
+		return orange
+	default:
+		return red
+	}
+}
+
+func (c *Config) CodeToTestRatioColor(ratio float64) string {
+	switch {
+	case ratio >= 1.2:
+		return green
+	case ratio >= 1.0:
+		return yellowgreen
+	case ratio >= 0.8:
+		return yellow
+	case ratio >= 0.6:
 		return orange
 	default:
 		return red

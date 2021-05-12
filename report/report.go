@@ -11,14 +11,16 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/octocov/pkg/coverage"
+	"github.com/k1LoW/octocov/pkg/ratio"
 )
 
 type Report struct {
-	Repository string             `json:"repository"`
-	Ref        string             `json:"ref"`
-	Commit     string             `json:"commit"`
-	Coverage   *coverage.Coverage `json:"coverage"`
-	Timestamp  time.Time          `yaml:"timestamp"`
+	Repository      string             `json:"repository"`
+	Ref             string             `json:"ref"`
+	Commit          string             `json:"commit"`
+	Coverage        *coverage.Coverage `json:"coverage"`
+	CodeToTestRatio *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
+	Timestamp       time.Time          `json:"timestamp"`
 }
 
 func New() *Report {
@@ -72,6 +74,15 @@ func (r *Report) MeasureCoverage(path string) error {
 	return nil
 }
 
+func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
+	ratio, err := ratio.Measure(".", code, test)
+	if err != nil {
+		return err
+	}
+	r.CodeToTestRatio = ratio
+	return nil
+}
+
 func (r *Report) Validate() error {
 	if r.Repository == "" {
 		return fmt.Errorf("coverage report '%s' is not set", "repository")
@@ -87,4 +98,8 @@ func (r *Report) Validate() error {
 
 func (r *Report) CoveragePercent() float64 {
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+}
+
+func (r *Report) CodeToTestRatioRatio() float64 {
+	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
 }

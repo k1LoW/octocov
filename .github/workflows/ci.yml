@@ -26,10 +26,13 @@ jobs:
       - name: Run lint
         uses: golangci/golangci-lint-action@v2
 
-      - name: Run octocov
+      - name: Run octocov-action
         uses: k1LoW/octocov-action@v0
+
+      - name: Run build octocov
+        run: make coverage
 
       - name: Commit badge and example
         uses: EndBug/add-and-commit@v7
         with:
-          add: 'docs/coverage.svg example/**'
+          add: 'docs/coverage.svg docs/ratio.svg example/**'

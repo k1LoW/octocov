@@ -118,6 +118,22 @@ func (c *Central) generateBadges() error {
 		if err := b.Render(out); err != nil {
 			return err
 		}
+		if r.CodeToTestRatio != nil {
+			tr := r.CodeToTestRatioRatio()
+			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			if err != nil {
+				return err
+			}
+			out, err = os.OpenFile(filepath.Join(c.config.Central.Badges, r.Repository, "ratio.svg"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+			if err != nil {
+				return err
+			}
+			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
+			b.ValueColor = c.config.CodeToTestRatioColor(tr)
+			if err := b.Render(out); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -175,6 +191,12 @@ func funcs() map[string]interface{} {
 	return template.FuncMap{
 		"coverage": func(r *report.Report) string {
 			return fmt.Sprintf("%.1f%%", r.CoveragePercent())
+		},
+		"ratio": func(r *report.Report) string {
+			if r.CodeToTestRatio == nil {
+				return "-"
+			}
+			return fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())
 		},
 	}
 }
