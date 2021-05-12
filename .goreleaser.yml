@@ -19,6 +19,7 @@ builds:
       - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
     env:
       - CGO_ENABLED=1
+      - CC=/usr/local/bin/x86_64-linux-musl-cc # brew install FiloSottile/musl-cross/musl-cross
     goos:
       - linux
     goarch:

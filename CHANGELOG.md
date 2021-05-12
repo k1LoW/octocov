@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.0](https://github.com/k1LoW/octocov/compare/v0.5.0...v0.6.0) (2021-05-12)
+
+* Fix pkg/badge field names [#14](https://github.com/k1LoW/octocov/pull/14) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING]Support code to test ratio [#13](https://github.com/k1LoW/octocov/pull/13) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.5.0](https://github.com/k1LoW/octocov/compare/v0.4.0...v0.5.0) (2021-05-11)
 
 * Show badge markdown link [#12](https://github.com/k1LoW/octocov/pull/12) ([k1LoW](https://github.com/k1LoW))
