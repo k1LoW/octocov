@@ -12,8 +12,10 @@ import (
 )
 
 type Ratio struct {
-	Code int `json:"code"`
-	Test int `json:"test"`
+	Code      int      `json:"code"`
+	Test      int      `json:"test"`
+	CodeFiles []string `json:"-"`
+	TestFiles []string `json:"-"`
 }
 
 func New() *Ratio {
@@ -97,14 +99,27 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		if isCode {
 			log.Printf("code: %s,%d", path, cf.Code)
 			ratio.Code += int(cf.Code)
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			ratio.CodeFiles = append(ratio.CodeFiles, rel)
 		}
 		if isTest {
 			log.Printf("test: %s,%d", path, cf.Code)
 			ratio.Test += int(cf.Code)
+			rel, err := filepath.Rel(root, path)
+			if err != nil {
+				return err
+			}
+			ratio.TestFiles = append(ratio.TestFiles, rel)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
+	}
+	if ratio.Code == 0 {
+		return nil, fmt.Errorf("could not count code: %s", code)
 	}
 	return ratio, nil
 }
