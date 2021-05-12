@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.1](https://github.com/k1LoW/octocov/compare/v0.6.0...v0.6.1) (2021-05-12)
+
+* Fix template of central mode [#15](https://github.com/k1LoW/octocov/pull/15) ([k1LoW](https://github.com/k1LoW))
+* Fix build option [#16](https://github.com/k1LoW/octocov/pull/16) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.0](https://github.com/k1LoW/octocov/compare/v0.5.0...v0.6.0) (2021-05-12)
 
 * Fix pkg/badge field names [#14](https://github.com/k1LoW/octocov/pull/14) ([k1LoW](https://github.com/k1LoW))
