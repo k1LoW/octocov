@@ -55,10 +55,10 @@ type ConfigCoverageBadge struct {
 }
 
 type ConfigCodeToTestRatio struct {
-	Code  []string                   `yaml:"code"`
-	Test  []string                   `yaml:"test"`
-	Badge ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
-	// Acceptable string   `yaml:"acceptable,omitempty"`
+	Code       []string                   `yaml:"code"`
+	Test       []string                   `yaml:"test"`
+	Badge      ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
+	Acceptable string                     `yaml:"acceptable,omitempty"`
 }
 
 type ConfigCodeToTestRatioBadge struct {
@@ -246,17 +246,26 @@ func (c *Config) CodeToTestRatioBadgeConfigReady() bool {
 }
 
 func (c *Config) Accepptable(r *report.Report) error {
-	if c.Coverage.Acceptable == "" {
-		return nil
-	}
-	a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
-	if err != nil {
-		return err
+	if c.Coverage.Acceptable != "" {
+		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
+		if err != nil {
+			return err
+		}
+		if r.CoveragePercent() < a {
+			return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
+		}
 	}
 
-	if r.CoveragePercent() < a {
-		return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
+	if c.CodeToTestRatioReady() && c.CodeToTestRatio.Acceptable != "" {
+		a, err := strconv.ParseFloat(strings.TrimPrefix(c.CodeToTestRatio.Acceptable, "1:"), 64)
+		if err != nil {
+			return err
+		}
+		if r.CodeToTestRatioRatio() < a {
+			return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", r.CodeToTestRatioRatio(), a)
+		}
 	}
+
 	return nil
 }
 
