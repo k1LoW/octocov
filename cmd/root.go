@@ -111,7 +111,7 @@ var rootCmd = &cobra.Command{
 			}
 
 			b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
-			b.ValueColor = c.CoverageColor(cp)
+			b.MessageColor = c.CoverageColor(cp)
 			if err := b.Render(out); err != nil {
 				return err
 			}
@@ -140,7 +140,7 @@ var rootCmd = &cobra.Command{
 			}
 
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
-			b.ValueColor = c.CodeToTestRatioColor(tr)
+			b.MessageColor = c.CodeToTestRatioColor(tr)
 			if err := b.Render(out); err != nil {
 				return err
 			}

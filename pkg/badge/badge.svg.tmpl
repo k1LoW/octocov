@@ -8,15 +8,15 @@
         <rect width="{{ .Width }}" height="20" rx="3" fill="#fff"/>
     </clipPath>
     <g clip-path="url(#r)">
-        <rect width="{{ .KeyWidth }}" height="20" fill="{{ .KeyColor }}"/>
-        <rect x="{{ .KeyWidth }}" width="{{ .ValueWidth }}" height="20" fill="{{ .ValueColor }}"/>
+        <rect width="{{ .LabelWidth }}" height="20" fill="{{ .LabelColor }}"/>
+        <rect x="{{ .LabelWidth }}" width="{{ .MessageWidth }}" height="20" fill="{{ .MessageColor }}"/>
         <rect width="{{ .Width }}" height="20" fill="url(#s)"/>
     </g>
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
         <!-- <image x="5" y="3" width="14" height="14" xlink:href=""/> -->
-        <text aria-hidden="true" x="{{ .KeyX }}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{{ .Key }}</text>
-        <text x="{{ .KeyX }}" y="140" transform="scale(.1)" fill="#fff">{{ .Key }}</text>
-        <text aria-hidden="true" x="{{ .ValueX }}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{{ .Value }}</text>
-        <text x="{{ .ValueX }}" y="140" transform="scale(.1)" fill="#fff">{{ .Value }}</text>
+        <text aria-hidden="true" x="{{ .LabelX }}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{{ .Label }}</text>
+        <text x="{{ .LabelX }}" y="140" transform="scale(.1)" fill="#fff">{{ .Label }}</text>
+        <text aria-hidden="true" x="{{ .MessageX }}" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">{{ .Message }}</text>
+        <text x="{{ .MessageX }}" y="140" transform="scale(.1)" fill="#fff">{{ .Message }}</text>
     </g>
 </svg>

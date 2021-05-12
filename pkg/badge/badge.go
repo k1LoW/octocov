@@ -12,17 +12,17 @@ import (
 	"golang.org/x/image/font"
 )
 
-const defaultKeyColor = "#24292E"
-const defaultValueColor = "#007EC6"
+const defaultLabelColor = "#24292E"
+const defaultMessageColor = "#007EC6"
 const fontSize = 11
 const dpi = 72
 
 type Badge struct {
-	Key        string
-	Value      string
-	KeyColor   string
-	ValueColor string
-	drawer     *font.Drawer
+	Label        string
+	Message      string
+	LabelColor   string
+	MessageColor string
+	drawer       *font.Drawer
 }
 
 //go:embed badge.svg.tmpl
@@ -32,17 +32,17 @@ var badgeTmpl []byte
 //go:embed NotoSans-Medium.ttf
 var noto []byte
 
-func New(k, v string) *Badge {
+func New(l, m string) *Badge {
 	ttf, err := truetype.Parse(noto)
 	if err != nil {
 		panic(err)
 	}
 
 	return &Badge{
-		Key:        k,
-		Value:      v,
-		KeyColor:   defaultKeyColor,
-		ValueColor: defaultValueColor,
+		Label:        l,
+		Message:      m,
+		LabelColor:   defaultLabelColor,
+		MessageColor: defaultMessageColor,
 		drawer: &font.Drawer{
 			Face: truetype.NewFace(ttf, &truetype.Options{
 				Size:    fontSize,
@@ -57,21 +57,21 @@ func (b *Badge) Render(wr io.Writer) error {
 	tmpl := template.Must(template.New("badge").Parse(string(badgeTmpl)))
 
 	// https://github.com/badges/shields/tree/master/spec
-	kw := 6 + b.stringWidth(b.Key) + 4
-	vw := 4 + b.stringWidth(b.Value) + 6
-	kx := kw * 10 / 2
-	vx := (kw * 10) + (vw * 10 / 2)
+	lw := 6 + b.stringWidth(b.Label) + 4
+	mw := 4 + b.stringWidth(b.Message) + 6
+	lx := lw * 10 / 2
+	mx := (lw * 10) + (mw * 10 / 2)
 
 	d := map[string]interface{}{
-		"Key":        b.Key,
-		"Value":      b.Value,
-		"KeyColor":   b.KeyColor,
-		"ValueColor": b.ValueColor,
-		"Width":      kw + vw,
-		"KeyWidth":   kw,
-		"ValueWidth": vw,
-		"KeyX":       kx,
-		"ValueX":     vx,
+		"Label":        b.Label,
+		"Message":      b.Message,
+		"LabelColor":   b.LabelColor,
+		"MessageColor": b.MessageColor,
+		"Width":        lw + mw,
+		"LabelWidth":   lw,
+		"MessageWidth": mw,
+		"LabelX":       lx,
+		"MessageX":     mx,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err

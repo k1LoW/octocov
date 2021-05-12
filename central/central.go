@@ -114,7 +114,7 @@ func (c *Central) generateBadges() error {
 			return err
 		}
 		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
-		b.ValueColor = c.config.CoverageColor(cp)
+		b.MessageColor = c.config.CoverageColor(cp)
 		if err := b.Render(out); err != nil {
 			return err
 		}
@@ -129,7 +129,7 @@ func (c *Central) generateBadges() error {
 				return err
 			}
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
-			b.ValueColor = c.config.CodeToTestRatioColor(tr)
+			b.MessageColor = c.config.CodeToTestRatioColor(tr)
 			if err := b.Render(out); err != nil {
 				return err
 			}
