@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/k1LoW/octocov/pkg/coverage"
+	"github.com/k1LoW/octocov/pkg/ratio"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -72,7 +73,7 @@ func TestDatasourceGithubPath(t *testing.T) {
 	}
 }
 
-func TestAcceptable(t *testing.T) {
+func TestCoverageAcceptable(t *testing.T) {
 	tests := []struct {
 		in      string
 		wantErr bool
@@ -80,6 +81,7 @@ func TestAcceptable(t *testing.T) {
 		{"60%", true},
 		{"50%", false},
 		{"49.9%", false},
+		{"49.9", false},
 	}
 	for _, tt := range tests {
 		c := New()
@@ -90,6 +92,40 @@ func TestAcceptable(t *testing.T) {
 		r.Coverage = &coverage.Coverage{
 			Covered: 50,
 			Total:   100,
+		}
+		if err := c.Accepptable(r); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+			}
+		} else {
+			if tt.wantErr {
+				t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+			}
+		}
+	}
+}
+
+func TestCodeToTestRatioAcceptable(t *testing.T) {
+	tests := []struct {
+		in      string
+		wantErr bool
+	}{
+		{"1:1", false},
+		{"1:1.1", true},
+		{"1", false},
+		{"1.1", true},
+	}
+	for _, tt := range tests {
+		c := New()
+		c.CodeToTestRatio = &ConfigCodeToTestRatio{
+			Acceptable: tt.in,
+			Test:       []string{"*_test.go"},
+		}
+		c.Build()
+		r := report.New()
+		r.CodeToTestRatio = &ratio.Ratio{
+			Code: 100,
+			Test: 100,
 		}
 		if err := c.Accepptable(r); err != nil {
 			if !tt.wantErr {
