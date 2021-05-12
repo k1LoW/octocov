@@ -2,7 +2,7 @@
 
 ![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg)
 
-`octocov` is a tool for collecting code coverage.
+`octocov` is a tool for collecting code coverage and code to test ratio.
 
 Key features of `octocov` are:
 
@@ -139,7 +139,7 @@ The variables available in the `if` section are as follows
 
 ### Central mode
 
-By enabling `central:`, `octocov` acts as a central repository for collecting coverage reports ( [example](example/central/README.md) ).
+By enabling `central:`, `octocov` acts as a central repository for collecting reports ( [example](example/central/README.md) ).
 
 ``` yaml
 # .octocov.yml

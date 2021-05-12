@@ -72,7 +72,7 @@ brews:
       name: k1LoW
       email: k1lowxb@gmail.com
     homepage: https://github.com/k1LoW/octocov
-    description: octocov is a tool for collecting code coverage.
+    description: octocov is a tool for collecting code coverage and code to test ratio.
     license: MIT
     install: |
       system './octocov', 'completion', 'bash', 'octocov.bash'
@@ -88,7 +88,7 @@ nfpms:
       - octocov-linux
     homepage: https://github.com/k1LoW/octocov
     maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
-    description: octocov is a tool for collecting code coverage.
+    description: octocov is a tool for collecting code coverage and code to test ratio.
     license: MIT
     formats:
       - deb
