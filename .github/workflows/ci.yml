@@ -26,7 +26,7 @@ jobs:
       - name: Run lint
         uses: golangci/golangci-lint-action@v2
 
-      - name: Run octocov
+      - name: Run octocov-action
         uses: k1LoW/octocov-action@v0
 
       - name: Run build octocov
