@@ -1,6 +1,6 @@
 # octocov
 
-![coverage](docs/coverage.svg)
+![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg)
 
 `octocov` is a tool for collecting code coverage.
 

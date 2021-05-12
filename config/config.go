@@ -55,10 +55,14 @@ type ConfigCoverageBadge struct {
 }
 
 type ConfigCodeToTestRatio struct {
-	Code []string `yaml:"code"`
-	Test []string `yaml:"test"`
-	// Badge ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
+	Code  []string                   `yaml:"code"`
+	Test  []string                   `yaml:"test"`
+	Badge ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
 	// Acceptable string   `yaml:"acceptable,omitempty"`
+}
+
+type ConfigCodeToTestRatioBadge struct {
+	Path string `yaml:"path,omitempty"`
 }
 
 type ConfigDatastore struct {
@@ -233,8 +237,12 @@ func (c *Config) BuildDatastoreConfig() error {
 	return nil
 }
 
-func (c *Config) BadgeConfigReady() bool {
+func (c *Config) CoverageBadgeConfigReady() bool {
 	return c.Coverage.Badge.Path != ""
+}
+
+func (c *Config) CodeToTestRatioBadgeConfigReady() bool {
+	return c.CodeToTestRatioReady() && c.CodeToTestRatio.Badge.Path != ""
 }
 
 func (c *Config) Accepptable(r *report.Report) error {
@@ -269,13 +277,13 @@ func (c *Config) CoverageColor(cover float64) string {
 
 func (c *Config) CodeToTestRatioColor(ratio float64) string {
 	switch {
-	case cover >= 1.2:
+	case ratio >= 1.2:
 		return green
-	case cover >= 1.0:
+	case ratio >= 1.0:
 		return yellowgreen
-	case cover >= 0.8:
+	case ratio >= 0.8:
 		return yellow
-	case cover >= 0.6:
+	case ratio >= 0.6:
 		return orange
 	default:
 		return red

@@ -99,3 +99,7 @@ func (r *Report) Validate() error {
 func (r *Report) CoveragePercent() float64 {
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
 }
+
+func (r *Report) CodeToTestRatioRatio() float64 {
+	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
+}

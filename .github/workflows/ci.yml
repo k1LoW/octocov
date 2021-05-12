@@ -32,4 +32,4 @@ jobs:
       - name: Commit badge and example
         uses: EndBug/add-and-commit@v7
         with:
-          add: 'docs/coverage.svg example/**'
+          add: 'docs/coverage.svg docs/ratio.svg example/**'

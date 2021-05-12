@@ -40,9 +40,10 @@ import (
 )
 
 var (
-	configPath string
-	dump       bool
-	genbadge   bool
+	configPath    string
+	dump          bool
+	coverageBadge bool
+	ratioBadge    bool
 )
 
 var rootCmd = &cobra.Command{
@@ -91,8 +92,8 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("%s are not found", strings.Join(config.DefaultConfigFilePaths, " and "))
 		}
 
-		// Generate badge
-		if c.BadgeConfigReady() || genbadge {
+		// Generate coverage report badge
+		if c.CoverageBadgeConfigReady() || coverageBadge {
 			var out *os.File
 			cp := r.CoveragePercent()
 			if c.Coverage.Badge.Path == "" {
@@ -114,7 +115,37 @@ var rootCmd = &cobra.Command{
 			if err := b.Render(out); err != nil {
 				return err
 			}
-			if genbadge {
+
+			if coverageBadge {
+				return nil
+			}
+		}
+
+		// Generate code-to-test-ratio report badge
+		if c.CodeToTestRatioBadgeConfigReady() || ratioBadge {
+			var out *os.File
+			tr := r.CodeToTestRatioRatio()
+			if c.CodeToTestRatio.Badge.Path == "" {
+				out = os.Stdout
+			} else {
+				cmd.PrintErrln("Generate code-to-test-ratio report badge...")
+				err := os.MkdirAll(filepath.Dir(c.CodeToTestRatio.Badge.Path), 0755) // #nosec
+				if err != nil {
+					return err
+				}
+				out, err = os.OpenFile(filepath.Clean(c.CodeToTestRatio.Badge.Path), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				if err != nil {
+					return err
+				}
+			}
+
+			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
+			b.ValueColor = c.CodeToTestRatioColor(tr)
+			if err := b.Render(out); err != nil {
+				return err
+			}
+
+			if ratioBadge {
 				return nil
 			}
 		}
@@ -150,7 +181,8 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	rootCmd.Flags().BoolVarP(&dump, "dump", "", false, "dump coverage report")
-	rootCmd.Flags().BoolVarP(&genbadge, "badge", "", false, "generate coverage report badge")
+	rootCmd.Flags().BoolVarP(&coverageBadge, "coverrage-badge", "", false, "generate coverage report badge")
+	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
 }
 
 func Execute() {

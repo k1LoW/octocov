@@ -3,6 +3,8 @@ coverage:
   badge:
     path: docs/coverage.svg
 codeToTestRatio:
+  badge:
+    path: docs/ratio.svg
   code:
     - '**/*.go'
     - '!**/*_test.go'
