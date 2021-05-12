@@ -20,7 +20,7 @@ type Report struct {
 	Commit          string             `json:"commit"`
 	Coverage        *coverage.Coverage `json:"coverage"`
 	CodeToTestRatio *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
-	Timestamp       time.Time          `yaml:"timestamp"`
+	Timestamp       time.Time          `json:"timestamp"`
 }
 
 func New() *Report {
