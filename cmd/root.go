@@ -181,7 +181,7 @@ var rootCmd = &cobra.Command{
 func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	rootCmd.Flags().BoolVarP(&dump, "dump", "", false, "dump coverage report")
-	rootCmd.Flags().BoolVarP(&coverageBadge, "coverrage-badge", "", false, "generate coverage report badge")
+	rootCmd.Flags().BoolVarP(&coverageBadge, "coverage-badge", "", false, "generate coverage report badge")
 	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
 }
 
