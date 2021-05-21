@@ -13,6 +13,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/go-git/go-git/v5"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/pkg/badge"
@@ -23,8 +24,9 @@ import (
 var indexTmpl []byte
 
 type Central struct {
-	config  *config.Config
-	reports []*report.Report
+	config         *config.Config
+	reports        []*report.Report
+	generatedPaths []string
 }
 
 func New(c *config.Config) *Central {
@@ -57,6 +59,14 @@ func (c *Central) Generate() error {
 	}
 	if err := c.renderIndex(i); err != nil {
 		return err
+	}
+	c.generatedPaths = append(c.generatedPaths, p)
+
+	// git push
+	if c.config.Central.Push.Enable {
+		if err := c.gitPush(); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -109,7 +119,8 @@ func (c *Central) generateBadges() error {
 		if err != nil {
 			return err
 		}
-		out, err := os.OpenFile(filepath.Join(c.config.Central.Badges, r.Repository, "coverage.svg"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+		bp := filepath.Join(c.config.Central.Badges, r.Repository, "coverage.svg")
+		out, err := os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 		if err != nil {
 			return err
 		}
@@ -118,13 +129,15 @@ func (c *Central) generateBadges() error {
 		if err := b.Render(out); err != nil {
 			return err
 		}
+		c.generatedPaths = append(c.generatedPaths, bp)
 		if r.CodeToTestRatio != nil {
 			tr := r.CodeToTestRatioRatio()
 			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
 			if err != nil {
 				return err
 			}
-			out, err = os.OpenFile(filepath.Join(c.config.Central.Badges, r.Repository, "ratio.svg"), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+			bp := filepath.Join(c.config.Central.Badges, r.Repository, "ratio.svg")
+			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 			if err != nil {
 				return err
 			}
@@ -133,6 +146,7 @@ func (c *Central) generateBadges() error {
 			if err := b.Render(out); err != nil {
 				return err
 			}
+			c.generatedPaths = append(c.generatedPaths, bp)
 		}
 	}
 	return nil
@@ -181,6 +195,49 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		"RawRootURL":    rawRootURL,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Central) gitPush() error {
+	r, err := git.PlainOpen(filepath.Join(c.config.Central.Push.Root))
+	if err != nil {
+		return err
+	}
+	w, err := r.Worktree()
+	if err != nil {
+		return err
+	}
+	status, err := w.Status()
+	if err != nil {
+		return err
+	}
+	push := false
+	for _, p := range c.generatedPaths {
+		rel, err := filepath.Rel(c.config.Central.Push.Root, p)
+		if err != nil {
+			return err
+		}
+		if _, ok := status[rel]; ok {
+			push = true
+			_, err := w.Add(rel)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if !push {
+		return nil
+	}
+
+	if _, err := w.Commit("Update by octocov", &git.CommitOptions{}); err != nil {
+		return err
+	}
+
+	if err := r.Push(&git.PushOptions{}); err != nil {
 		return err
 	}
 

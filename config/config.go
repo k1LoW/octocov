@@ -77,10 +77,16 @@ type ConfigDatastoreGithub struct {
 }
 
 type ConfigCentral struct {
-	Enable  bool   `yaml:"enable"`
-	Reports string `yaml:"reports"`
-	Badges  string `yaml:"badges"`
-	Root    string `yaml:"root"`
+	Enable  bool              `yaml:"enable"`
+	Root    string            `yaml:"root"`
+	Reports string            `yaml:"reports"`
+	Badges  string            `yaml:"badges"`
+	Push    ConfigCentralPush `yaml:"push"`
+}
+
+type ConfigCentralPush struct {
+	Enable bool   `yaml:"enable"`
+	Root   string `yaml:"-"`
 }
 
 func New() *Config {

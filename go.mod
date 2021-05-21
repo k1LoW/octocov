@@ -6,6 +6,7 @@ require (
 	github.com/antonmedv/expr v1.8.9
 	github.com/bmatcuk/doublestar/v4 v4.0.1
 	github.com/go-enry/go-enry/v2 v2.7.0
+	github.com/go-git/go-git/v5 v5.3.0
 	github.com/goccy/go-json v0.4.13
 	github.com/goccy/go-yaml v1.8.9
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
