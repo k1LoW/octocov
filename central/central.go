@@ -233,8 +233,7 @@ func (c *Central) gitPush() error {
 		return nil
 	}
 
-	_, err := w.Commit("Update by octocov", &git.CommitOptions{})
-	if err != nil {
+	if _, err := w.Commit("Update by octocov", &git.CommitOptions{}); err != nil {
 		return err
 	}
 
