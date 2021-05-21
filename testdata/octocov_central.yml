@@ -3,3 +3,5 @@ central:
   root: ../example/central
   reports: reports
   badges: ../example/central/badges
+  push:
+    enable: true
