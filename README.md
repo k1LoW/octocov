@@ -148,6 +148,8 @@ central:
   root: .          # root directory or index file path of collected coverage reports pages. default: .
   reports: reports # directory where reports are stored. default: reports
   badges: badges   # directory where badges are generated. default: badges
+  push:
+    enable: true   # enable self git push
 ```
 
 When central mode is enabled, other functions are automatically turned off.
