@@ -66,7 +66,10 @@ func traverseGitPath(base string) (string, error) {
 		if fi, err := os.Stat(gitConfig); err == nil && !fi.IsDir() {
 			return p, nil
 		}
+		if p == "/" {
+			break
+		}
 		p = filepath.Dir(p)
 	}
-	return "", fmt.Errorf("failed to scan the Git root path: %s", base)
+	return "", fmt.Errorf("failed to traverse the Git root path: %s", base)
 }
