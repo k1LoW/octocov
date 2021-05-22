@@ -16,14 +16,14 @@ func NewLcov() *Lcov {
 	return &Lcov{}
 }
 
-func (l *Lcov) ParseReport(path string) (*Coverage, error) {
+func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := l.detectReportPath(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	r, err := os.Open(filepath.Clean(rp))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	defer func() {
 		_ = r.Close()
@@ -71,9 +71,9 @@ func (l *Lcov) ParseReport(path string) (*Coverage, error) {
 		}
 	}
 	if !parsed {
-		return nil, errors.New("can not parse")
+		return nil, "", errors.New("can not parse")
 	}
-	return cov, nil
+	return cov, rp, nil
 }
 
 func (s *Lcov) detectReportPath(path string) (string, error) {

@@ -8,7 +8,7 @@ import (
 func TestClover(t *testing.T) {
 	path := filepath.Join(testdataDir(t), "clover")
 	clover := NewClover()
-	got, err := clover.ParseReport(path)
+	got, _, err := clover.ParseReport(path)
 	if err != nil {
 		t.Fatal(err)
 	}
