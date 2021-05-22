@@ -33,6 +33,7 @@ import (
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 	"github.com/k1LoW/octocov/version"
@@ -159,7 +160,11 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildDatastoreConfig(); err != nil {
 				return err
 			}
-			g, err := datastore.NewGithub(c)
+			gh, err := gh.New()
+			if err != nil {
+				return err
+			}
+			g, err := datastore.NewGithub(c, gh)
 			if err != nil {
 				return err
 			}

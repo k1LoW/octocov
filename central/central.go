@@ -15,7 +15,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 )
@@ -156,15 +156,18 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	tmpl := template.Must(template.New("index").Funcs(funcs()).Parse(string(indexTmpl)))
 	host := os.Getenv("GITHUB_SERVER_URL")
 	if host == "" {
-		host = datastore.DefaultGithubServerURL
+		host = gh.DefaultGithubServerURL
 	}
 
 	ctx := context.Background()
-	g, err := datastore.NewGithub(c.config)
+	gh, err := gh.New()
 	if err != nil {
 		return err
 	}
-	rawRootURL, err := g.GetRawRootURL(ctx)
+	splitted := strings.Split(c.config.Repository, "/")
+	owner := splitted[0]
+	repo := splitted[1]
+	rawRootURL, err := gh.GetRawRootURL(ctx, owner, repo)
 	if err != nil {
 		return err
 	}
