@@ -83,6 +83,9 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 		}
+		if err := r.MeasureTestExecutionTime(); err != nil {
+			return err
+		}
 
 		if dump {
 			cmd.Println(r.String())
