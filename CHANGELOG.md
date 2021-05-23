@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.7.0](https://github.com/k1LoW/octocov/compare/v0.6.1...v0.7.0) (2021-05-23)
+
+* Support test execution time [#20](https://github.com/k1LoW/octocov/pull/20) ([k1LoW](https://github.com/k1LoW))
+* Add gh.Gh and inject gh.Gh to datastore.Github [#19](https://github.com/k1LoW/octocov/pull/19) ([k1LoW](https://github.com/k1LoW))
+* Support self git push in central mode [#18](https://github.com/k1LoW/octocov/pull/18) ([k1LoW](https://github.com/k1LoW))
+* Fix option name [#17](https://github.com/k1LoW/octocov/pull/17) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.6.1](https://github.com/k1LoW/octocov/compare/v0.6.0...v0.6.1) (2021-05-12)
 
 * Fix template of central mode [#15](https://github.com/k1LoW/octocov/pull/15) ([k1LoW](https://github.com/k1LoW))
