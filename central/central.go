@@ -14,8 +14,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/go-git/go-git/plumbing/object"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
