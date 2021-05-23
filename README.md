@@ -89,6 +89,15 @@ codeToTestRatio:
     path: docs/ratio.svg
 ```
 
+By setting `testExecutionTime.badge.path:`, generate the test-execution-time report badge self (on GitHub Actions only).
+
+``` yaml
+# .octocov.yml
+testExecutionTime:
+  badge:
+    path: docs/time.svg
+```
+
 You can display the coverage badge without external communication by setting a link to this badge image in README.md, etc.
 
 ``` markdown
@@ -182,7 +191,7 @@ Support `SF` `DA` only
 
 - **Code Coverage**
 - **Code to Test Ratio**
-- **Test Execution Time** (GitHub Action only)
+- **Test Execution Time** (on GitHub Actions only)
 
 ## Install
 
