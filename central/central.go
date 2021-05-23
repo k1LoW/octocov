@@ -261,14 +261,7 @@ func (c *Central) gitPush() error {
 	}
 
 	opts := &git.CommitOptions{}
-	switch {
-	case os.Getenv("GITHUB_SERVER_URL") == gh.DefaultGithubServerURL:
-		opts.Author = &object.Signature{
-			Name:  "github-actions",
-			Email: "41898282+github-actions[bot]@users.noreply.github.com",
-			When:  time.Now(),
-		}
-	case os.Getenv("GITHUB_ACTOR") != "":
+	if os.Getenv("GITHUB_ACTOR") != "" {
 		opts.Author = &object.Signature{
 			Name:  os.Getenv("GITHUB_ACTOR"),
 			Email: fmt.Sprintf("%s@users.noreply.github.com", os.Getenv("GITHUB_ACTOR")),
