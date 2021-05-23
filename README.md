@@ -2,13 +2,17 @@
 
 [![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions) ![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg) ![time](docs/time.svg)
 
-`octocov` is a tool for collecting code coverage and code to test ratio.
+`octocov` is a tool for collecting code metrics.
 
 Key features of `octocov` are:
 
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
+- **[Support multiple code metrics](#supported-metrics).**
+    - Code Coverage
+    - Code to Test Ratio
+    - Test Execution Time
 - **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
-- **[Selectable coverage datastore](#store-report-to-central-datastore).**
+- **[Have a mechanism to aggregate reports from multiple repositories](#store-report-to-central-datastore).**
 
 ## Usage
 
@@ -173,6 +177,12 @@ Support `SF` `DA` only
 ### Clover
 
 **Default path:** `coverage.xml`
+
+## Supported code metrics
+
+- **Code Coverage**
+- **Code to Test Ratio**
+- **Test Execution Time** (GitHub Action only)
 
 ## Install
 
