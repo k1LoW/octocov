@@ -16,6 +16,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/influxdata/flux/stdlib/http"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
@@ -261,7 +262,14 @@ func (c *Central) gitPush() error {
 	}
 
 	opts := &git.CommitOptions{}
-	if os.Getenv("GITHUB_ACTOR") != "" {
+	switch {
+	case os.Getenv("GITHUB_SERVER_URL") == gh.DefaultGithubServerURL:
+		opts.Author = &object.Signature{
+			Name:  "github-actions",
+			Email: "41898282+github-actions[bot]@users.noreply.github.com",
+			When:  time.Now(),
+		}
+	case os.Getenv("GITHUB_ACTOR") != "":
 		opts.Author = &object.Signature{
 			Name:  os.Getenv("GITHUB_ACTOR"),
 			Email: fmt.Sprintf("%s@users.noreply.github.com", os.Getenv("GITHUB_ACTOR")),
@@ -272,7 +280,12 @@ func (c *Central) gitPush() error {
 		return err
 	}
 
-	if err := r.Push(&git.PushOptions{}); err != nil {
+	if err := r.Push(&git.PushOptions{
+		Auth: &http.BasicAuth{
+			Username: "octocov",
+			Password: os.Getenv("GITHUB_TOKEN"),
+		},
+	}); err != nil {
 		return err
 	}
 
