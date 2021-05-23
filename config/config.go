@@ -319,5 +319,17 @@ func (c *Config) CodeToTestRatioColor(ratio float64) string {
 }
 
 func (c *Config) TestExecutionTimeColor(d time.Duration) string {
+	switch {
+	case d < 5*time.Minute:
+		return green
+	case d < 10*time.Minute:
+		return yellowgreen
+	case d < 15*time.Minute:
+		return yellow
+	case d < 20*time.Minute:
+		return orange
+	default:
+		return red
+	}
 	return green
 }
