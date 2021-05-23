@@ -14,7 +14,7 @@ Key features of `octocov` are:
 - **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
 - **[Have a mechanism to aggregate reports from multiple repositories](#store-report-to-central-datastore).**
 
-**[GitHub Actions for octocov is here](https://github.com/k1LoW/octocov-action)**
+**:octocat: GitHub Actions for octocov is [here](https://github.com/k1LoW/octocov-action)**
 
 ## Usage
 
