@@ -7,7 +7,7 @@
 Key features of `octocov` are:
 
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
-- **[Support multiple code metrics](#supported-metrics).**
+- **[Support multiple code metrics](#supported-code-metrics).**
     - Code Coverage
     - Code to Test Ratio
     - Test Execution Time
