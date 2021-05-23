@@ -281,5 +281,11 @@ func funcs() map[string]interface{} {
 			}
 			return fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())
 		},
+		"time": func(r *report.Report) string {
+			if r.TestExecutionTime == nil {
+				return "-"
+			}
+			return time.Duration(*r.TestExecutionTime).String()
+		},
 	}
 }

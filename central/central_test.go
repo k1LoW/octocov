@@ -60,7 +60,7 @@ func TestGenerateBadges(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if want := 8; len(got) != want {
+	if want := 9; len(got) != want {
 		t.Errorf("got %v\nwant %v", len(got), want)
 	}
 }
