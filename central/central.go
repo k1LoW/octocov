@@ -14,6 +14,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/go-git/go-git/plumbing/object"
 	"github.com/go-git/go-git/v5"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
@@ -259,7 +260,22 @@ func (c *Central) gitPush() error {
 		return nil
 	}
 
-	if _, err := w.Commit("Update by octocov", &git.CommitOptions{}); err != nil {
+	opts := &git.CommitOptions{}
+	switch {
+	case os.Getenv("GITHUB_SERVER_URL") == gh.DefaultGithubServerURL:
+		opts.Author = &object.Signature{
+			Name:  "github-actions",
+			Email: "41898282+github-actions[bot]@users.noreply.github.com",
+			When:  time.Now(),
+		}
+	case os.Getenv("GITHUB_ACTOR") != "":
+		opts.Author = &object.Signature{
+			Name:  os.Getenv("GITHUB_ACTOR"),
+			Email: fmt.Sprintf("%s@users.noreply.github.com", os.Getenv("GITHUB_ACTOR")),
+			When:  time.Now(),
+		}
+	}
+	if _, err := w.Commit("Update by octocov", opts); err != nil {
 		return err
 	}
 
