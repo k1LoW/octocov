@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	"github.com/k1LoW/octocov/config"
@@ -130,6 +131,8 @@ func (c *Central) generateBadges() error {
 			return err
 		}
 		c.generatedPaths = append(c.generatedPaths, bp)
+
+		// Code to Test Ratio
 		if r.CodeToTestRatio != nil {
 			tr := r.CodeToTestRatioRatio()
 			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
@@ -143,6 +146,26 @@ func (c *Central) generateBadges() error {
 			}
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
 			b.MessageColor = c.config.CodeToTestRatioColor(tr)
+			if err := b.Render(out); err != nil {
+				return err
+			}
+			c.generatedPaths = append(c.generatedPaths, bp)
+		}
+
+		// Test Execution Time
+		if r.TestExecutionTime != nil {
+			d := time.Duration(*r.TestExecutionTime)
+			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			if err != nil {
+				return err
+			}
+			bp := filepath.Join(c.config.Central.Badges, r.Repository, "time.svg")
+			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+			if err != nil {
+				return err
+			}
+			b := badge.New("test execution time", d.String())
+			b.MessageColor = c.config.TestExecutionTimeColor(d)
 			if err := b.Render(out); err != nil {
 				return err
 			}
