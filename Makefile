@@ -31,7 +31,7 @@ lint:
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
-coverage: build test
+coverage: build
 	./octocov
 
 depsdev:

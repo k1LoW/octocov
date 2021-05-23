@@ -1,9 +1,9 @@
 ## Repositories
 
-| Repository | Coverage | Code to Test Ratio | Badges |
-| --- | --- | --- | --- |
+| Repository | Coverage | Code to Test Ratio | Time Execution Time | Badges |
+| --- | --- | --- | --- | --- |
 {{- range $r := .Reports }}
-| [{{ $r.Repository }}]({{ $.Host }}/{{ $r.Repository }}) | {{ $r | coverage }} | {{ $r | ratio }} | ![{{ $r.Repository }}]({{ $.BadgesLinkRel }}/{{ $r.Repository}}/coverage.svg)<br>```![Coverage]({{ $.RawRootURL }}/{{ $.BadgesURLRel }}/{{ $r.Repository}}/coverage.svg)```{{ if $r.CodeToTestRatio }}<br>![{{ $r.Repository }}]({{ $.BadgesLinkRel }}/{{ $r.Repository}}/ratio.svg)<br>```![Code to Test Ratio]({{ $.RawRootURL }}/{{ $.BadgesURLRel }}/{{ $r.Repository}}/ratio.svg)```{{ end }} |
+| [{{ $r.Repository }}]({{ $.Host }}/{{ $r.Repository }}) | {{ $r | coverage }} | {{ $r | ratio }} | {{ $r | time }} | ![{{ $r.Repository }}]({{ $.BadgesLinkRel }}/{{ $r.Repository}}/coverage.svg)<br>```![Coverage]({{ $.RawRootURL }}/{{ $.BadgesURLRel }}/{{ $r.Repository}}/coverage.svg)```{{ if $r.CodeToTestRatio }}<br>![{{ $r.Repository }}]({{ $.BadgesLinkRel }}/{{ $r.Repository}}/ratio.svg)<br>```![Code to Test Ratio]({{ $.RawRootURL }}/{{ $.BadgesURLRel }}/{{ $r.Repository}}/ratio.svg)```{{ end }}{{ if $r.TestExecutionTime }}<br>![{{ $r.Repository }}]({{ $.BadgesLinkRel }}/{{ $r.Repository}}/time.svg)<br>```![Test Execution Time]({{ $.RawRootURL }}/{{ $.BadgesURLRel }}/{{ $r.Repository}}/time.svg)```{{ end }} |
 {{- end }}
 
 ---

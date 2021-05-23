@@ -27,7 +27,7 @@ type FileCoverages []*FileCoverage
 
 type Processor interface {
 	Name() string
-	ParseReport(path string) (*Coverage, error)
+	ParseReport(path string) (*Coverage, string, error)
 }
 
 func New() *Coverage {
@@ -53,22 +53,22 @@ func (coverages FileCoverages) FindByFileName(fileName string) (*FileCoverage, e
 	return nil, fmt.Errorf("file name not found: %s", fileName)
 }
 
-func Measure(path string) (*Coverage, error) {
+func Measure(path string) (*Coverage, string, error) {
 	// gocover
-	if cov, err := NewGocover().ParseReport(path); err == nil {
-		return cov, nil
+	if cov, rp, err := NewGocover().ParseReport(path); err == nil {
+		return cov, rp, nil
 	}
 	// lcov
-	if cov, err := NewLcov().ParseReport(path); err == nil {
-		return cov, nil
+	if cov, rp, err := NewLcov().ParseReport(path); err == nil {
+		return cov, rp, nil
 	}
 	// simplecov
-	if cov, err := NewSimplecov().ParseReport(path); err == nil {
-		return cov, nil
+	if cov, rp, err := NewSimplecov().ParseReport(path); err == nil {
+		return cov, rp, nil
 	}
 	// clover
-	if cov, err := NewClover().ParseReport(path); err == nil {
-		return cov, nil
+	if cov, rp, err := NewClover().ParseReport(path); err == nil {
+		return cov, rp, nil
 	}
-	return nil, fmt.Errorf("coverage report not found: %s", path)
+	return nil, "", fmt.Errorf("coverage report not found: %s", path)
 }

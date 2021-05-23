@@ -33,11 +33,12 @@ const (
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
-	Repository      string                 `yaml:"repository"`
-	Coverage        *ConfigCoverage        `yaml:"coverage"`
-	CodeToTestRatio *ConfigCodeToTestRatio `yaml:"codeToTestRatio,omitempty"`
-	Datastore       *ConfigDatastore       `yaml:"datastore,omitempty"`
-	Central         *ConfigCentral         `yaml:"central,omitempty"`
+	Repository        string                   `yaml:"repository"`
+	Coverage          *ConfigCoverage          `yaml:"coverage"`
+	CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
+	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
+	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
+	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	// working directory
 	wd string
 	// config file path
@@ -62,6 +63,14 @@ type ConfigCodeToTestRatio struct {
 }
 
 type ConfigCodeToTestRatioBadge struct {
+	Path string `yaml:"path,omitempty"`
+}
+
+type ConfigTestExecutionTime struct {
+	Badge ConfigTestExecutionTimeBadge `yaml:"badge,omitempty"`
+}
+
+type ConfigTestExecutionTimeBadge struct {
 	Path string `yaml:"path,omitempty"`
 }
 
@@ -244,11 +253,15 @@ func (c *Config) BuildDatastoreConfig() error {
 }
 
 func (c *Config) CoverageBadgeConfigReady() bool {
-	return c.Coverage.Badge.Path != ""
+	return c.Coverage != nil && c.Coverage.Badge.Path != ""
 }
 
 func (c *Config) CodeToTestRatioBadgeConfigReady() bool {
 	return c.CodeToTestRatioReady() && c.CodeToTestRatio.Badge.Path != ""
+}
+
+func (c *Config) TestExecutionTimeBadgeConfigReady() bool {
+	return c.TestExecutionTime != nil && c.TestExecutionTime.Badge.Path != ""
 }
 
 func (c *Config) Accepptable(r *report.Report) error {
@@ -299,6 +312,21 @@ func (c *Config) CodeToTestRatioColor(ratio float64) string {
 	case ratio >= 0.8:
 		return yellow
 	case ratio >= 0.6:
+		return orange
+	default:
+		return red
+	}
+}
+
+func (c *Config) TestExecutionTimeColor(d time.Duration) string {
+	switch {
+	case d < 5*time.Minute:
+		return green
+	case d < 10*time.Minute:
+		return yellowgreen
+	case d < 15*time.Minute:
+		return yellow
+	case d < 20*time.Minute:
 		return orange
 	default:
 		return red

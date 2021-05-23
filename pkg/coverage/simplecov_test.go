@@ -8,7 +8,7 @@ import (
 func TestSimplecov(t *testing.T) {
 	path := filepath.Join(testdataDir(t), "simplecov")
 	scov := NewSimplecov()
-	got, err := scov.ParseReport(path)
+	got, _, err := scov.ParseReport(path)
 	if err != nil {
 		t.Fatal(err)
 	}

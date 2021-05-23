@@ -15,14 +15,14 @@ func NewGocover() *Gocover {
 	return &Gocover{}
 }
 
-func (g *Gocover) ParseReport(path string) (*Coverage, error) {
+func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := g.detectReportPath(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	profiles, err := cover.ParseProfiles(rp)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	cov := New()
 	cov.Type = TypeStatement
@@ -36,7 +36,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, error) {
 		cov.Covered += covered
 		cov.Files = append(cov.Files, fcov)
 	}
-	return cov, nil
+	return cov, rp, nil
 }
 
 func (g *Gocover) detectReportPath(path string) (string, error) {

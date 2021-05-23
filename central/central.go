@@ -12,8 +12,11 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"time"
 
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
@@ -130,6 +133,8 @@ func (c *Central) generateBadges() error {
 			return err
 		}
 		c.generatedPaths = append(c.generatedPaths, bp)
+
+		// Code to Test Ratio
 		if r.CodeToTestRatio != nil {
 			tr := r.CodeToTestRatioRatio()
 			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
@@ -143,6 +148,26 @@ func (c *Central) generateBadges() error {
 			}
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
 			b.MessageColor = c.config.CodeToTestRatioColor(tr)
+			if err := b.Render(out); err != nil {
+				return err
+			}
+			c.generatedPaths = append(c.generatedPaths, bp)
+		}
+
+		// Test Execution Time
+		if r.TestExecutionTime != nil {
+			d := time.Duration(*r.TestExecutionTime)
+			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			if err != nil {
+				return err
+			}
+			bp := filepath.Join(c.config.Central.Badges, r.Repository, "time.svg")
+			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+			if err != nil {
+				return err
+			}
+			b := badge.New("test execution time", d.String())
+			b.MessageColor = c.config.TestExecutionTimeColor(d)
 			if err := b.Render(out); err != nil {
 				return err
 			}
@@ -236,11 +261,31 @@ func (c *Central) gitPush() error {
 		return nil
 	}
 
-	if _, err := w.Commit("Update by octocov", &git.CommitOptions{}); err != nil {
+	opts := &git.CommitOptions{}
+	switch {
+	case os.Getenv("GITHUB_SERVER_URL") == gh.DefaultGithubServerURL:
+		opts.Author = &object.Signature{
+			Name:  "github-actions",
+			Email: "41898282+github-actions[bot]@users.noreply.github.com",
+			When:  time.Now(),
+		}
+	case os.Getenv("GITHUB_ACTOR") != "":
+		opts.Author = &object.Signature{
+			Name:  os.Getenv("GITHUB_ACTOR"),
+			Email: fmt.Sprintf("%s@users.noreply.github.com", os.Getenv("GITHUB_ACTOR")),
+			When:  time.Now(),
+		}
+	}
+	if _, err := w.Commit("Update by octocov", opts); err != nil {
 		return err
 	}
 
-	if err := r.Push(&git.PushOptions{}); err != nil {
+	if err := r.Push(&git.PushOptions{
+		Auth: &http.BasicAuth{
+			Username: "octocov",
+			Password: os.Getenv("GITHUB_TOKEN"),
+		},
+	}); err != nil {
 		return err
 	}
 
@@ -257,6 +302,12 @@ func funcs() map[string]interface{} {
 				return "-"
 			}
 			return fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())
+		},
+		"time": func(r *report.Report) string {
+			if r.TestExecutionTime == nil {
+				return "-"
+			}
+			return time.Duration(*r.TestExecutionTime).String()
 		},
 	}
 }

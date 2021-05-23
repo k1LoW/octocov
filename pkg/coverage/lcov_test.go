@@ -8,7 +8,7 @@ import (
 func TestLcov(t *testing.T) {
 	path := filepath.Join(testdataDir(t), "lcov")
 	lcov := NewLcov()
-	got, err := lcov.ParseReport(path)
+	got, _, err := lcov.ParseReport(path)
 	if err != nil {
 		t.Fatal(err)
 	}

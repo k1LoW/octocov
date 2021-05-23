@@ -2,19 +2,25 @@ package gh
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/google/go-github/v35/github"
+	"github.com/lestrrat-go/backoff/v2"
 )
 
 const DefaultGithubServerURL = "https://github.com"
+
+var octocovNameRe = regexp.MustCompile(`(?i)(octocov|coverage)`)
 
 type Gh struct {
 	client *github.Client
@@ -146,6 +152,68 @@ func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, err
 		return strings.TrimSuffix(strings.TrimSuffix(fc.GetDownloadURL(), path), "/"), nil
 	}
 	return "", fmt.Errorf("not found files. please commit file to root directory and push: %s/%s", owner, repo)
+}
+
+func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string, nameRe *regexp.Regexp) (int64, error) {
+	if os.Getenv("GITHUB_RUN_ID") == "" {
+		return 0, fmt.Errorf("env %s is not set", "GITHUB_RUN_ID")
+	}
+	runID, err := strconv.ParseInt(os.Getenv("GITHUB_RUN_ID"), 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	// Although it would be nice if we could get the job_id from an environment variable,
+	// there is no way to get it at this time, so it uses a heuristic.
+	p := backoff.Exponential(
+		backoff.WithMinInterval(time.Second),
+		backoff.WithMaxInterval(30*time.Second),
+		backoff.WithJitterFactor(0.05),
+		backoff.WithMaxRetries(5),
+	)
+	b := p.Start(ctx)
+	for backoff.Continue(b) {
+		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
+		if err != nil {
+			return 0, err
+		}
+		if len(jobs.Jobs) == 1 {
+			return jobs.Jobs[0].GetID(), nil
+		}
+		for _, j := range jobs.Jobs {
+			if j.GetName() == os.Getenv("GTIHUB_JOB") {
+				return j.GetID(), nil
+			}
+			for _, s := range j.Steps {
+				if nameRe != nil {
+					if nameRe.MatchString(s.GetName()) {
+						return j.GetID(), nil
+					}
+				}
+				if s.StartedAt != nil && s.CompletedAt == nil && octocovNameRe.MatchString(s.GetName()) {
+					return j.GetID(), nil
+				}
+			}
+		}
+	}
+
+	return 0, errors.New("could not detect id of current job")
+}
+
+func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
+	job, _, err := g.client.Actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
+	if err != nil {
+		return 0, err
+	}
+	for _, s := range job.Steps {
+		if s.StartedAt == nil || s.CompletedAt == nil {
+			continue
+		}
+		if s.GetStartedAt().Time.Before(t) && s.GetCompletedAt().Time.After(t) {
+			return s.GetCompletedAt().Time.Sub(s.GetStartedAt().Time), nil
+		}
+	}
+	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
 }
 
 type roundTripper struct {

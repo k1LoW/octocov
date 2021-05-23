@@ -9,7 +9,7 @@ import (
 func TestGocover(t *testing.T) {
 	path := filepath.Join(testdataDir(t), "gocover")
 	gcov := NewGocover()
-	got, err := gcov.ParseReport(path)
+	got, _, err := gcov.ParseReport(path)
 	if err != nil {
 		t.Fatal(err)
 	}

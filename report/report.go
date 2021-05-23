@@ -1,6 +1,7 @@
 package report
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -10,17 +11,22 @@ import (
 	"time"
 
 	"github.com/goccy/go-json"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
 )
 
 type Report struct {
-	Repository      string             `json:"repository"`
-	Ref             string             `json:"ref"`
-	Commit          string             `json:"commit"`
-	Coverage        *coverage.Coverage `json:"coverage"`
-	CodeToTestRatio *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
-	Timestamp       time.Time          `json:"timestamp"`
+	Repository        string             `json:"repository"`
+	Ref               string             `json:"ref"`
+	Commit            string             `json:"commit"`
+	Coverage          *coverage.Coverage `json:"coverage"`
+	CodeToTestRatio   *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
+	TestExecutionTime *float64           `json:"test_execution_time,omitempty"`
+
+	Timestamp time.Time `json:"timestamp"`
+	// coverage report path
+	rp string
 }
 
 func New() *Report {
@@ -59,7 +65,7 @@ func (r *Report) String() string {
 }
 
 func (r *Report) MeasureCoverage(path string) error {
-	cov, cerr := coverage.Measure(path)
+	cov, rp, cerr := coverage.Measure(path)
 	if cerr != nil {
 		b, err := ioutil.ReadFile(filepath.Clean(path))
 		if err != nil {
@@ -68,9 +74,11 @@ func (r *Report) MeasureCoverage(path string) error {
 		if err := json.Unmarshal(b, r); err != nil {
 			return cerr
 		}
+		r.rp = path
 		return nil
 	}
 	r.Coverage = cov
+	r.rp = rp
 	return nil
 }
 
@@ -80,6 +88,35 @@ func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
 		return err
 	}
 	r.CodeToTestRatio = ratio
+	return nil
+}
+
+func (r *Report) MeasureTestExecutionTime() error {
+	if os.Getenv("GITHUB_RUN_ID") == "" {
+		return nil
+	}
+	fi, err := os.Stat(r.rp)
+	if err != nil {
+		return err
+	}
+	splitted := strings.Split(r.Repository, "/")
+	owner := splitted[0]
+	repo := splitted[1]
+	gh, err := gh.New()
+	if err != nil {
+		return err
+	}
+	ctx := context.Background()
+	jobID, err := gh.DetectCurrentJobID(ctx, owner, repo, nil)
+	if err != nil {
+		return err
+	}
+	d, err := gh.GetStepExecutionTimeByTime(ctx, owner, repo, jobID, fi.ModTime())
+	if err != nil {
+		return err
+	}
+	t := float64(d)
+	r.TestExecutionTime = &t
 	return nil
 }
 

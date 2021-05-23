@@ -26,18 +26,18 @@ func NewSimplecov() *Simplecov {
 	return &Simplecov{}
 }
 
-func (s *Simplecov) ParseReport(path string) (*Coverage, error) {
+func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := s.detectReportPath(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	b, err := ioutil.ReadFile(filepath.Clean(rp))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	r := SimplecovReport{}
 	if err := json.Unmarshal(b, &r); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	cov := New()
 	cov.Type = TypeLOC
@@ -59,7 +59,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, error) {
 			cov.Files = append(cov.Files, fcov)
 		}
 	}
-	return cov, nil
+	return cov, rp, nil
 }
 
 func (s *Simplecov) detectReportPath(path string) (string, error) {

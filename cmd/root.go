@@ -29,6 +29,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
@@ -45,6 +46,7 @@ var (
 	dump          bool
 	coverageBadge bool
 	ratioBadge    bool
+	timeBadge     bool
 )
 
 var rootCmd = &cobra.Command{
@@ -82,6 +84,9 @@ var rootCmd = &cobra.Command{
 			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 				return err
 			}
+		}
+		if err := r.MeasureTestExecutionTime(); err != nil {
+			return err
 		}
 
 		if dump {
@@ -151,6 +156,38 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Generate test-execution-time report badge
+		if c.TestExecutionTimeBadgeConfigReady() || timeBadge {
+			var out *os.File
+			if r.TestExecutionTime == nil {
+				cmd.PrintErrln("Skip generating test-execution-time badge: in order to generate the test-execution-time badge, it is necessary to measure the code coverage on GitHub Actions.")
+			} else {
+				if c.TestExecutionTime.Badge.Path == "" {
+					out = os.Stdout
+				} else {
+					cmd.PrintErrln("Generate test-execution-time report badge...")
+					err := os.MkdirAll(filepath.Dir(c.TestExecutionTime.Badge.Path), 0755) // #nosec
+					if err != nil {
+						return err
+					}
+					out, err = os.OpenFile(filepath.Clean(c.TestExecutionTime.Badge.Path), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+					if err != nil {
+						return err
+					}
+				}
+
+				d := time.Duration(*r.TestExecutionTime)
+				b := badge.New("test execution time", d.String())
+				b.MessageColor = c.TestExecutionTimeColor(d)
+				if err := b.Render(out); err != nil {
+					return err
+				}
+			}
+			if timeBadge {
+				return nil
+			}
+		}
+
 		// Store report
 		if c.DatastoreConfigReady() {
 			cmd.PrintErrln("Store coverage report...")
@@ -188,6 +225,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&dump, "dump", "", false, "dump coverage report")
 	rootCmd.Flags().BoolVarP(&coverageBadge, "coverage-badge", "", false, "generate coverage report badge")
 	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
+	rootCmd.Flags().BoolVarP(&timeBadge, "test-execution-time-badge", "", false, "generate test-execution-time report badge")
 }
 
 func Execute() {

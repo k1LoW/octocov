@@ -80,18 +80,18 @@ func NewClover() *Clover {
 	return &Clover{}
 }
 
-func (c *Clover) ParseReport(path string) (*Coverage, error) {
+func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := c.detectReportPath(path)
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	b, err := ioutil.ReadFile(filepath.Clean(rp))
 	if err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	r := CloverReport{}
 	if err := xml.Unmarshal(b, &r); err != nil {
-		return nil, err
+		return nil, "", err
 	}
 	cov := New()
 	cov.Type = TypeStatement
@@ -105,7 +105,7 @@ func (c *Clover) ParseReport(path string) (*Coverage, error) {
 		cov.Files = append(cov.Files, fcov)
 	}
 
-	return cov, nil
+	return cov, rp, nil
 }
 
 func (c *Clover) detectReportPath(path string) (string, error) {
