@@ -331,5 +331,4 @@ func (c *Config) TestExecutionTimeColor(d time.Duration) string {
 	default:
 		return red
 	}
-	return green
 }
