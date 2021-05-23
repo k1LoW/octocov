@@ -22,7 +22,7 @@ type Report struct {
 	Commit            string             `json:"commit"`
 	Coverage          *coverage.Coverage `json:"coverage"`
 	CodeToTestRatio   *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
-	TestExecutionTime *int               `json:"test_execution_time,omitempty"`
+	TestExecutionTime *float64           `json:"test_execution_time,omitempty"`
 
 	Timestamp time.Time `json:"timestamp"`
 	// coverage report path
@@ -115,7 +115,7 @@ func (r *Report) MeasureTestExecutionTime() error {
 	if err != nil {
 		return err
 	}
-	t := int(d.Seconds())
+	t := float64(d)
 	r.TestExecutionTime = &t
 	return nil
 }

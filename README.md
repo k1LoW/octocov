@@ -1,6 +1,6 @@
 # octocov
 
-[![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions) ![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg)
+[![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions) ![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg) ![time](docs/time.svg)
 
 `octocov` is a tool for collecting code coverage and code to test ratio.
 

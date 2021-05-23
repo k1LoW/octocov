@@ -10,3 +10,6 @@ codeToTestRatio:
     - '!**/*_test.go'
   test:
     - '**/*_test.go'
+testExecutionTime:
+  badge:
+    path: docs/time.svg
