@@ -109,11 +109,13 @@ func (r *Report) MeasureTestExecutionTime() error {
 	ctx := context.Background()
 	jobID, err := gh.DetectCurrentJobID(ctx, owner, repo, nil)
 	if err != nil {
-		return err
+		_, _ = fmt.Fprintf(os.Stderr, "skip: %v\n", err)
+		return nil
 	}
 	d, err := gh.GetStepExecutionTimeByTime(ctx, owner, repo, jobID, fi.ModTime())
 	if err != nil {
-		return err
+		_, _ = fmt.Fprintf(os.Stderr, "skip: %v\n", err)
+		return nil
 	}
 	t := float64(d)
 	r.TestExecutionTime = &t
