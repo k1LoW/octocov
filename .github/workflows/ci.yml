@@ -34,5 +34,6 @@ jobs:
 
       - name: Commit badge and example
         uses: EndBug/add-and-commit@v7
+        if: github.ref == 'refs/heads/main'
         with:
           add: 'docs/coverage.svg docs/ratio.svg docs/time.svg example/**'
