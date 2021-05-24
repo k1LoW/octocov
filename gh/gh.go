@@ -217,7 +217,7 @@ func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string,
 		}
 		l := len(job.Steps)
 		for i, s := range job.Steps {
-			log.Printf("job step [%d/%d]: %s %v-%v", i, l, s.GetName(), s.GetStartedAt(), s.GetCompletedAt())
+			log.Printf("job step [%d/%d]: %s %v-%v", i+1, l, s.GetName(), s.GetStartedAt(), s.GetCompletedAt())
 			if s.StartedAt == nil || s.CompletedAt == nil {
 				continue
 			}
