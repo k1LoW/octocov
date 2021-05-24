@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.7.2](https://github.com/k1LoW/octocov/compare/v0.7.1...v0.7.2) (2021-05-24)
+
+* Fix log output [#23](https://github.com/k1LoW/octocov/pull/23) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.7.1](https://github.com/k1LoW/octocov/compare/v0.7.0...v0.7.1) (2021-05-24)
 
 * Skip measuring test execution time when fail to detect test time [#22](https://github.com/k1LoW/octocov/pull/22) ([k1LoW](https://github.com/k1LoW))
