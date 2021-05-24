@@ -201,16 +201,25 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string, nameRe 
 }
 
 func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
-	job, _, err := g.client.Actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
-	if err != nil {
-		return 0, err
-	}
-	for _, s := range job.Steps {
-		if s.StartedAt == nil || s.CompletedAt == nil {
-			continue
+	p := backoff.Exponential(
+		backoff.WithMinInterval(time.Second),
+		backoff.WithMaxInterval(30*time.Second),
+		backoff.WithJitterFactor(0.05),
+		backoff.WithMaxRetries(5),
+	)
+	b := p.Start(ctx)
+	for backoff.Continue(b) {
+		job, _, err := g.client.Actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
+		if err != nil {
+			return 0, err
 		}
-		if s.GetStartedAt().Time.Before(t) && s.GetCompletedAt().Time.After(t) {
-			return s.GetCompletedAt().Time.Sub(s.GetStartedAt().Time), nil
+		for _, s := range job.Steps {
+			if s.StartedAt == nil || s.CompletedAt == nil {
+				continue
+			}
+			if s.GetStartedAt().Time.Before(t) && s.GetCompletedAt().Time.After(t) {
+				return s.GetCompletedAt().Time.Sub(s.GetStartedAt().Time), nil
+			}
 		}
 	}
 	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
