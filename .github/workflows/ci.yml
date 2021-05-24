@@ -21,17 +21,17 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v2
 
-      - name: Run tests
-        run: make ci
-
       - name: Run lint
         uses: golangci/golangci-lint-action@v2
 
-      - name: Run octocov-action
-        uses: k1LoW/octocov-action@v0
+      - name: Run tests
+        run: make ci
 
       - name: Run build octocov
         run: make coverage
+
+      - name: Run octocov-action
+        uses: k1LoW/octocov-action@v0
 
       - name: Commit badge and example
         uses: EndBug/add-and-commit@v7
