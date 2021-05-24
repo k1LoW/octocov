@@ -11,6 +11,7 @@ jobs:
         go_version: [1.16]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEBUG: 1
     steps:
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v2

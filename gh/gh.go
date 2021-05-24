@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -208,16 +209,20 @@ func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string,
 		backoff.WithMaxRetries(5),
 	)
 	b := p.Start(ctx)
+	log.Printf("target time: %v", t)
 	for backoff.Continue(b) {
 		job, _, err := g.client.Actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
 		if err != nil {
 			return 0, err
 		}
-		for _, s := range job.Steps {
+		l := len(job.Steps)
+		for i, s := range job.Steps {
+			log.Printf("job step [%d/%d]: %s %v-%v", i, l, s.GetName(), s.GetStartedAt(), s.GetCompletedAt())
 			if s.StartedAt == nil || s.CompletedAt == nil {
 				continue
 			}
 			if s.GetStartedAt().Time.Before(t) && s.GetCompletedAt().Time.After(t) {
+				log.Print("detect step")
 				return s.GetCompletedAt().Time.Sub(s.GetStartedAt().Time), nil
 			}
 		}
