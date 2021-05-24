@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.7.1](https://github.com/k1LoW/octocov/compare/v0.7.0...v0.7.1) (2021-05-24)
+
+* Skip measuring test execution time when fail to detect test time [#22](https://github.com/k1LoW/octocov/pull/22) ([k1LoW](https://github.com/k1LoW))
+* Add backoff logic to GetStepExecutionTimeByTime [#21](https://github.com/k1LoW/octocov/pull/21) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.7.0](https://github.com/k1LoW/octocov/compare/v0.6.1...v0.7.0) (2021-05-23)
 
 * Support test execution time [#20](https://github.com/k1LoW/octocov/pull/20) ([k1LoW](https://github.com/k1LoW))
