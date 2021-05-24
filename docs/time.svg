@@ -1,22 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="166" height="20" role="img" aria-label="octocov::badge">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="156" height="20" role="img" aria-label="octocov::badge">
     <title>octocov::badge</title>
     <linearGradient id="s" x2="0" y2="100%">
         <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
         <stop offset="1" stop-opacity=".1"/>
     </linearGradient>
     <clipPath id="r">
-        <rect width="166" height="20" rx="3" fill="#fff"/>
+        <rect width="156" height="20" rx="3" fill="#fff"/>
     </clipPath>
     <g clip-path="url(#r)">
         <rect width="119" height="20" fill="#24292E"/>
-        <rect x="119" width="47" height="20" fill="#97CA00"/>
-        <rect width="166" height="20" fill="url(#s)"/>
+        <rect x="119" width="37" height="20" fill="#97CA00"/>
+        <rect width="156" height="20" fill="url(#s)"/>
     </g>
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
         <!-- <image x="5" y="3" width="14" height="14" xlink:href=""/> -->
         <text aria-hidden="true" x="595" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">test execution time</text>
         <text x="595" y="140" transform="scale(.1)" fill="#fff">test execution time</text>
-        <text aria-hidden="true" x="1425" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">1m8s</text>
-        <text x="1425" y="140" transform="scale(.1)" fill="#fff">1m8s</text>
+        <text aria-hidden="true" x="1375" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">51s</text>
+        <text x="1375" y="140" transform="scale(.1)" fill="#fff">51s</text>
     </g>
 </svg>
