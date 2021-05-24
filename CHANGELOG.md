@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.7.3](https://github.com/k1LoW/octocov/compare/v0.7.2...v0.7.3) (2021-05-24)
+
+* Fix logic of detect step [#24](https://github.com/k1LoW/octocov/pull/24) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.7.2](https://github.com/k1LoW/octocov/compare/v0.7.1...v0.7.2) (2021-05-24)
 
 * Fix log output [#23](https://github.com/k1LoW/octocov/pull/23) ([k1LoW](https://github.com/k1LoW))
