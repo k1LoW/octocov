@@ -212,7 +212,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check for acceptable coverage
-		if err := c.Accepptable(r); err != nil {
+		if err := c.Acceptable(r); err != nil {
 			return err
 		}
 

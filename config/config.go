@@ -266,7 +266,7 @@ func (c *Config) TestExecutionTimeBadgeConfigReady() bool {
 	return c.TestExecutionTime != nil && c.TestExecutionTime.Badge.Path != ""
 }
 
-func (c *Config) Accepptable(r *report.Report) error {
+func (c *Config) Acceptable(r *report.Report) error {
 	if c.Coverage.Acceptable != "" {
 		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
 		if err != nil {
