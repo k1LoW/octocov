@@ -12,6 +12,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-github/v35 v35.1.0
 	github.com/hhatto/gocloc v0.4.1
+	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/ghdag v0.15.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/spf13/cobra v1.1.3

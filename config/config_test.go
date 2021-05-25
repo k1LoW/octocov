@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
@@ -127,6 +128,36 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 			Code: 100,
 			Test: 100,
 		}
+		if err := c.Accepptable(r); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+			}
+		} else {
+			if tt.wantErr {
+				t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+			}
+		}
+	}
+}
+
+func TestTestExecutionTimeAcceptable(t *testing.T) {
+	tests := []struct {
+		in      string
+		wantErr bool
+	}{
+		{"1min", false},
+		{"59s", true},
+		{"61sec", false},
+	}
+	for _, tt := range tests {
+		c := New()
+		c.TestExecutionTime = &ConfigTestExecutionTime{
+			Acceptable: tt.in,
+		}
+		c.Build()
+		r := report.New()
+		e := float64(time.Minute)
+		r.TestExecutionTime = &e
 		if err := c.Accepptable(r); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
