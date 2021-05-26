@@ -12,6 +12,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/duration"
 	"github.com/k1LoW/ghdag/env"
 	"github.com/k1LoW/ghdag/runner"
 	"github.com/k1LoW/octocov/report"
@@ -67,7 +68,8 @@ type ConfigCodeToTestRatioBadge struct {
 }
 
 type ConfigTestExecutionTime struct {
-	Badge ConfigTestExecutionTimeBadge `yaml:"badge,omitempty"`
+	Badge      ConfigTestExecutionTimeBadge `yaml:"badge,omitempty"`
+	Acceptable string                       `yaml:"acceptable,omitempty"`
 }
 
 type ConfigTestExecutionTimeBadge struct {
@@ -264,7 +266,7 @@ func (c *Config) TestExecutionTimeBadgeConfigReady() bool {
 	return c.TestExecutionTime != nil && c.TestExecutionTime.Badge.Path != ""
 }
 
-func (c *Config) Accepptable(r *report.Report) error {
+func (c *Config) Acceptable(r *report.Report) error {
 	if c.Coverage.Acceptable != "" {
 		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
 		if err != nil {
@@ -282,6 +284,16 @@ func (c *Config) Accepptable(r *report.Report) error {
 		}
 		if r.CodeToTestRatioRatio() < a {
 			return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", r.CodeToTestRatioRatio(), a)
+		}
+	}
+
+	if r.TestExecutionTime != nil && c.TestExecutionTime != nil && c.TestExecutionTime.Acceptable != "" {
+		a, err := duration.Parse(c.TestExecutionTime.Acceptable)
+		if err != nil {
+			return err
+		}
+		if *r.TestExecutionTime > float64(a) {
+			return fmt.Errorf("test execution time is %v, which is below the accepted %v", time.Duration(*r.TestExecutionTime), a)
 		}
 	}
 

@@ -48,7 +48,7 @@ Error: code coverage is 54.9%, which is below the accepted 60.0%
 
 ### Check for acceptable code to test ratio
 
-By setting `codeToTestRatio.accepptable:`, the minimum acceptable "Code to Test Ratio" is specified.
+By setting `codeToTestRatio.acceptable:`, the minimum acceptable "Code to Test Ratio" is specified.
 
 If it is less than that value, the command will exit with exit status `1`.
 
