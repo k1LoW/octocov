@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.8.0](https://github.com/k1LoW/octocov/compare/v0.7.3...v0.8.0) (2021-05-26)
+
+* Add testExecutionTime.acceptable: ( and fix typo ) [#25](https://github.com/k1LoW/octocov/pull/25) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.7.3](https://github.com/k1LoW/octocov/compare/v0.7.2...v0.7.3) (2021-05-24)
 
 * Fix logic of detect step [#24](https://github.com/k1LoW/octocov/pull/24) ([k1LoW](https://github.com/k1LoW))
