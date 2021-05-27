@@ -68,6 +68,25 @@ $ octocov
 Error: code to test ratio is 1:1.1, which is below the accepted 1:1.2
 ```
 
+### Check for acceptable test execution time
+
+**(on GitHub Actions only)**
+
+By setting `testExecutionTime.acceptable:`, the maximum acceptable "Test Execution Time" is specified.
+
+If it is greater than that value, the command will exit with exit status `1`.
+
+``` yaml
+# .octocov.yml
+testExecutionTime:
+  acceptable: 1 min
+```
+
+``` console
+$ octocov
+Error: test execution time is 1m15s, which is below the accepted 1m
+```
+
 ### Generate report badges self.
 
 By setting `coverage.badge.path:`, generate the coverage report badge self.
