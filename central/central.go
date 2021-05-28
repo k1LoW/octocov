@@ -14,9 +14,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
-	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
@@ -39,7 +36,7 @@ func New(c *config.Config) *Central {
 	}
 }
 
-func (c *Central) Generate() error {
+func (c *Central) Generate(ctx context.Context) error {
 	// collect reports
 	if err := c.collectReports(); err != nil {
 		return err
@@ -67,7 +64,7 @@ func (c *Central) Generate() error {
 
 	// git push
 	if c.config.Central.Push.Enable {
-		if err := c.gitPush(); err != nil {
+		if err := gh.PushUsingLocalGit(ctx, c.config.GitRoot, c.generatedPaths, "Update by octocov"); err != nil {
 			return err
 		}
 	}
@@ -223,69 +220,6 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		"RawRootURL":    rawRootURL,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *Central) gitPush() error {
-	r, err := git.PlainOpen(filepath.Join(c.config.GitRoot))
-	if err != nil {
-		return err
-	}
-	w, err := r.Worktree()
-	if err != nil {
-		return err
-	}
-	status, err := w.Status()
-	if err != nil {
-		return err
-	}
-	push := false
-	for _, p := range c.generatedPaths {
-		rel, err := filepath.Rel(c.config.GitRoot, p)
-		if err != nil {
-			return err
-		}
-		if _, ok := status[rel]; ok {
-			push = true
-			_, err := w.Add(rel)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	if !push {
-		return nil
-	}
-
-	opts := &git.CommitOptions{}
-	switch {
-	case os.Getenv("GITHUB_SERVER_URL") == gh.DefaultGithubServerURL:
-		opts.Author = &object.Signature{
-			Name:  "github-actions",
-			Email: "41898282+github-actions[bot]@users.noreply.github.com",
-			When:  time.Now(),
-		}
-	case os.Getenv("GITHUB_ACTOR") != "":
-		opts.Author = &object.Signature{
-			Name:  os.Getenv("GITHUB_ACTOR"),
-			Email: fmt.Sprintf("%s@users.noreply.github.com", os.Getenv("GITHUB_ACTOR")),
-			When:  time.Now(),
-		}
-	}
-	if _, err := w.Commit("Update by octocov", opts); err != nil {
-		return err
-	}
-
-	if err := r.Push(&git.PushOptions{
-		Auth: &http.BasicAuth{
-			Username: "octocov",
-			Password: os.Getenv("GITHUB_TOKEN"),
-		},
-	}); err != nil {
 		return err
 	}
 

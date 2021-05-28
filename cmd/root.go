@@ -56,6 +56,7 @@ var rootCmd = &cobra.Command{
 	Version:      version.Version,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
 		if len(args) > 0 && args[0] == "completion" {
 			return completionCmd(cmd, args[1:])
@@ -72,7 +73,7 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			ctr := central.New(c)
-			return ctr.Generate()
+			return ctr.Generate(ctx)
 		}
 
 		path := c.Coverage.Path
@@ -205,7 +206,6 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			ctx := context.Background()
 			if err := g.Store(ctx, r); err != nil {
 				return err
 			}

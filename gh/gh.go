@@ -10,11 +10,15 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/google/go-github/v35/github"
 	"github.com/lestrrat-go/backoff/v2"
 )
@@ -229,6 +233,69 @@ func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string,
 		}
 	}
 	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
+}
+
+func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, message string) error {
+	r, err := git.PlainOpen(gitRoot)
+	if err != nil {
+		return err
+	}
+	w, err := r.Worktree()
+	if err != nil {
+		return err
+	}
+	status, err := w.Status()
+	if err != nil {
+		return err
+	}
+	push := false
+	for _, p := range addPaths {
+		rel, err := filepath.Rel(gitRoot, p)
+		if err != nil {
+			return err
+		}
+		if _, ok := status[rel]; ok {
+			push = true
+			_, err := w.Add(rel)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	if !push {
+		return nil
+	}
+
+	opts := &git.CommitOptions{}
+	switch {
+	case os.Getenv("GITHUB_SERVER_URL") == DefaultGithubServerURL:
+		opts.Author = &object.Signature{
+			Name:  "github-actions",
+			Email: "41898282+github-actions[bot]@users.noreply.github.com",
+			When:  time.Now(),
+		}
+	case os.Getenv("GITHUB_ACTOR") != "":
+		opts.Author = &object.Signature{
+			Name:  os.Getenv("GITHUB_ACTOR"),
+			Email: fmt.Sprintf("%s@users.noreply.github.com", os.Getenv("GITHUB_ACTOR")),
+			When:  time.Now(),
+		}
+	}
+	if _, err := w.Commit(message, opts); err != nil {
+		return err
+	}
+
+	if err := r.PushContext(ctx, &git.PushOptions{
+		Auth: &ghttp.BasicAuth{
+			Username: "octocov",
+			Password: os.Getenv("GITHUB_TOKEN"),
+		},
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 type roundTripper struct {
