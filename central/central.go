@@ -230,7 +230,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 }
 
 func (c *Central) gitPush() error {
-	r, err := git.PlainOpen(filepath.Join(c.config.Central.Push.Root))
+	r, err := git.PlainOpen(filepath.Join(c.config.GitRoot))
 	if err != nil {
 		return err
 	}
@@ -244,7 +244,7 @@ func (c *Central) gitPush() error {
 	}
 	push := false
 	for _, p := range c.generatedPaths {
-		rel, err := filepath.Rel(c.config.Central.Push.Root, p)
+		rel, err := filepath.Rel(c.config.GitRoot, p)
 		if err != nil {
 			return err
 		}

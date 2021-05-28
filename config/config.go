@@ -40,6 +40,7 @@ type Config struct {
 	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
 	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
+	GitRoot           string                   `yaml:"-"`
 	// working directory
 	wd string
 	// config file path
@@ -96,8 +97,7 @@ type ConfigCentral struct {
 }
 
 type ConfigCentralPush struct {
-	Enable bool   `yaml:"enable"`
-	Root   string `yaml:"-"`
+	Enable bool `yaml:"enable"`
 }
 
 func New() *Config {
