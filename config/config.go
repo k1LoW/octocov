@@ -98,7 +98,8 @@ type ConfigCentral struct {
 }
 
 type ConfigPush struct {
-	Enable bool `yaml:"enable"`
+	Enable bool   `yaml:"enable"`
+	If     string `yaml:"if,omitempty"`
 }
 
 func New() *Config {
@@ -162,6 +163,8 @@ func (c *Config) Build() {
 	if c.Repository == "" {
 		c.Repository = os.Getenv("GITHUB_REPOSITORY")
 	}
+	gitRoot, _ := traverseGitPath(c.Root())
+	c.GitRoot = gitRoot
 	if c.Datastore != nil && c.Datastore.Github != nil {
 		c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
 		c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
@@ -199,31 +202,13 @@ func (c *Config) DatastoreConfigReady() bool {
 	if c.Datastore == nil {
 		return false
 	}
-	if c.Datastore.If == "" {
-		return true
-	}
-	cond := c.Datastore.If
-	e, _ := runner.DecodeGitHubEvent()
-	now := time.Now()
-	variables := map[string]interface{}{
-		"year":    now.UTC().Year(),
-		"month":   now.UTC().Month(),
-		"day":     now.UTC().Day(),
-		"hour":    now.UTC().Hour(),
-		"weekday": int(now.UTC().Weekday()),
-		"github": map[string]interface{}{
-			"event_name": e.Name,
-			"event":      e.Payload,
-		},
-		"env": env.EnvMap(),
-	}
-	doOrNot, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	ok, err := CheckIf(c.Datastore.If)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: %v\n", err)
 		return false
 	}
-	if !doOrNot.(bool) {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", cond)
+	if !ok {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", c.Datastore.If)
 		return false
 	}
 	return true
@@ -256,19 +241,25 @@ func (c *Config) BuildDatastoreConfig() error {
 }
 
 func (c *Config) PushConfigReady() bool {
-	return (c.Push != nil && c.Push.Enable)
+	if c.Push == nil || !c.Push.Enable || c.GitRoot == "" {
+		fmt.Printf("%#v\n", c)
+		return false
+	}
+	ok, err := CheckIf(c.Push.If)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: %v\n", err)
+		return false
+	}
+	if !ok {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: the condition in the `if` section is not met (%s)\n", c.Push.If)
+		return false
+	}
+	return true
 }
 
 func (c *Config) BuildPushConfig() error {
 	if c.Push == nil {
 		return errors.New("push: not set")
-	}
-	if c.Push.Enable && c.GitRoot == "" {
-		gitRoot, err := traverseGitPath(c.path)
-		if err != nil {
-			return err
-		}
-		c.GitRoot = gitRoot
 	}
 	return nil
 }
@@ -362,4 +353,32 @@ func (c *Config) TestExecutionTimeColor(d time.Duration) string {
 	default:
 		return red
 	}
+}
+
+func CheckIf(cond string) (bool, error) {
+	if cond == "" {
+		return true, nil
+	}
+	e, err := runner.DecodeGitHubEvent()
+	if err != nil {
+		return false, err
+	}
+	now := time.Now()
+	variables := map[string]interface{}{
+		"year":    now.UTC().Year(),
+		"month":   now.UTC().Month(),
+		"day":     now.UTC().Day(),
+		"hour":    now.UTC().Hour(),
+		"weekday": int(now.UTC().Weekday()),
+		"github": map[string]interface{}{
+			"event_name": e.Name,
+			"event":      e.Payload,
+		},
+		"env": env.EnvMap(),
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		return false, err
+	}
+	return ok.(bool), nil
 }
