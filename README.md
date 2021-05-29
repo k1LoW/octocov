@@ -126,6 +126,19 @@ You can display the coverage badge without external communication by setting a l
 
 ![coverage](docs/coverage.svg)
 
+### Push report badges self.
+
+By setting `push.enable:`, git push report badges self.
+
+``` yaml
+# .octocov.yml
+coverage:
+  badge:
+    path: docs/coverage.svg
+push
+  enable: true
+```
+
 ### Store report to central datastore
 
 By setting `datastore:`, store the coverage reports to central datastore.
