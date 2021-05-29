@@ -112,7 +112,10 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				bp := filepath.Clean(c.Coverage.Badge.Path)
+				bp, err := filepath.Abs(filepath.Clean(c.Coverage.Badge.Path))
+				if err != nil {
+					return err
+				}
 				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 				if err != nil {
 					return err
@@ -143,7 +146,10 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				bp := filepath.Clean(c.CodeToTestRatio.Badge.Path)
+				bp, err := filepath.Abs(filepath.Clean(c.CodeToTestRatio.Badge.Path))
+				if err != nil {
+					return err
+				}
 				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 				if err != nil {
 					return err
@@ -176,7 +182,10 @@ var rootCmd = &cobra.Command{
 					if err != nil {
 						return err
 					}
-					bp := filepath.Clean(c.TestExecutionTime.Badge.Path)
+					bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
+					if err != nil {
+						return err
+					}
 					out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 					if err != nil {
 						return err
