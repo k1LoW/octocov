@@ -199,30 +199,12 @@ func (c *Config) DatastoreConfigReady() bool {
 	if c.Datastore == nil {
 		return false
 	}
-	if c.Datastore.If == "" {
-		return true
-	}
-	cond := c.Datastore.If
-	e, _ := runner.DecodeGitHubEvent()
-	now := time.Now()
-	variables := map[string]interface{}{
-		"year":    now.UTC().Year(),
-		"month":   now.UTC().Month(),
-		"day":     now.UTC().Day(),
-		"hour":    now.UTC().Hour(),
-		"weekday": int(now.UTC().Weekday()),
-		"github": map[string]interface{}{
-			"event_name": e.Name,
-			"event":      e.Payload,
-		},
-		"env": env.EnvMap(),
-	}
-	doOrNot, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	ok, err := CheckIf(c.Datastore.If)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
 		return false
 	}
-	if !doOrNot.(bool) {
+	if !ok {
 		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", cond)
 		return false
 	}
@@ -362,4 +344,32 @@ func (c *Config) TestExecutionTimeColor(d time.Duration) string {
 	default:
 		return red
 	}
+}
+
+func CheckIf(cond string) (bool, error) {
+	if cond == "" {
+		return true, nil
+	}
+	e, err := runner.DecodeGitHubEvent()
+	if err != nil {
+		return false, err
+	}
+	now := time.Now()
+	variables := map[string]interface{}{
+		"year":    now.UTC().Year(),
+		"month":   now.UTC().Month(),
+		"day":     now.UTC().Day(),
+		"hour":    now.UTC().Hour(),
+		"weekday": int(now.UTC().Weekday()),
+		"github": map[string]interface{}{
+			"event_name": e.Name,
+			"event":      e.Payload,
+		},
+		"env": env.EnvMap(),
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		return false, err
+	}
+	return ok.(bool), nil
 }
