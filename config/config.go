@@ -163,6 +163,8 @@ func (c *Config) Build() {
 	if c.Repository == "" {
 		c.Repository = os.Getenv("GITHUB_REPOSITORY")
 	}
+	gitRoot, _ := traverseGitPath(c.Root())
+	c.GitRoot = gitRoot
 	if c.Datastore != nil && c.Datastore.Github != nil {
 		c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
 		c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
@@ -240,6 +242,7 @@ func (c *Config) BuildDatastoreConfig() error {
 
 func (c *Config) PushConfigReady() bool {
 	if c.Push == nil || !c.Push.Enable || c.GitRoot == "" {
+		fmt.Printf("%#v\n", c)
 		return false
 	}
 	ok, err := CheckIf(c.Push.If)
@@ -257,13 +260,6 @@ func (c *Config) PushConfigReady() bool {
 func (c *Config) BuildPushConfig() error {
 	if c.Push == nil {
 		return errors.New("push: not set")
-	}
-	if c.Push.Enable && c.GitRoot == "" {
-		gitRoot, err := traverseGitPath(c.path)
-		if err != nil {
-			return err
-		}
-		c.GitRoot = gitRoot
 	}
 	return nil
 }

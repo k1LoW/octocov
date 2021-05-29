@@ -41,13 +41,6 @@ func (c *Config) BuildCentralConfig() error {
 	if !strings.HasPrefix(c.Central.Root, "/") {
 		c.Central.Root = filepath.Clean(filepath.Join(c.Root(), c.Central.Root))
 	}
-	if c.Central.Push.Enable && c.GitRoot == "" {
-		gitRoot, err := traverseGitPath(c.Central.Root)
-		if err != nil {
-			return err
-		}
-		c.GitRoot = gitRoot
-	}
 	if c.Central.Reports == "" {
 		c.Central.Reports = defaultReportsDir
 	}

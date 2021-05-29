@@ -16,3 +16,4 @@ testExecutionTime:
     path: docs/time.svg
 push:
   enable: true
+  if: env.GITHUB_REF == 'refs/heads/main'
