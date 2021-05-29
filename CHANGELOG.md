@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.9.0](https://github.com/k1LoW/octocov/compare/v0.8.0...v0.9.0) (2021-05-30)
+
+* Add push.if: section and central.push.if: section [#27](https://github.com/k1LoW/octocov/pull/27) ([k1LoW](https://github.com/k1LoW))
+* Add push: for support self push badges [#26](https://github.com/k1LoW/octocov/pull/26) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.8.0](https://github.com/k1LoW/octocov/compare/v0.7.3...v0.8.0) (2021-05-26)
 
 * Add testExecutionTime.acceptable: ( and fix typo ) [#25](https://github.com/k1LoW/octocov/pull/25) ([k1LoW](https://github.com/k1LoW))
