@@ -32,9 +32,3 @@ jobs:
 
       - name: Run octocov-action
         uses: k1LoW/octocov-action@v0
-
-      - name: Commit badge and example
-        uses: EndBug/add-and-commit@v7
-        if: github.ref == 'refs/heads/main'
-        with:
-          add: 'docs/coverage.svg docs/ratio.svg docs/time.svg example/**'

@@ -40,6 +40,8 @@ type Config struct {
 	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
 	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
+	Push              *ConfigPush              `yaml:"push,omitempty"`
+	GitRoot           string                   `yaml:"-"`
 	// working directory
 	wd string
 	// config file path
@@ -88,16 +90,15 @@ type ConfigDatastoreGithub struct {
 }
 
 type ConfigCentral struct {
-	Enable  bool              `yaml:"enable"`
-	Root    string            `yaml:"root"`
-	Reports string            `yaml:"reports"`
-	Badges  string            `yaml:"badges"`
-	Push    ConfigCentralPush `yaml:"push"`
+	Enable  bool       `yaml:"enable"`
+	Root    string     `yaml:"root"`
+	Reports string     `yaml:"reports"`
+	Badges  string     `yaml:"badges"`
+	Push    ConfigPush `yaml:"push"`
 }
 
-type ConfigCentralPush struct {
-	Enable bool   `yaml:"enable"`
-	Root   string `yaml:"-"`
+type ConfigPush struct {
+	Enable bool `yaml:"enable"`
 }
 
 func New() *Config {
@@ -250,6 +251,24 @@ func (c *Config) BuildDatastoreConfig() error {
 	}
 	if c.Datastore.Github.Path == "" {
 		return errors.New("datastore.github.path not set")
+	}
+	return nil
+}
+
+func (c *Config) PushConfigReady() bool {
+	return (c.Push != nil && c.Push.Enable)
+}
+
+func (c *Config) BuildPushConfig() error {
+	if c.Push == nil {
+		return errors.New("push: not set")
+	}
+	if c.Push.Enable && c.GitRoot == "" {
+		gitRoot, err := traverseGitPath(c.path)
+		if err != nil {
+			return err
+		}
+		c.GitRoot = gitRoot
 	}
 	return nil
 }

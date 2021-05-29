@@ -56,6 +56,8 @@ var rootCmd = &cobra.Command{
 	Version:      version.Version,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		addPaths := []string{}
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
 		if len(args) > 0 && args[0] == "completion" {
 			return completionCmd(cmd, args[1:])
@@ -72,7 +74,7 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			ctr := central.New(c)
-			return ctr.Generate()
+			return ctr.Generate(ctx)
 		}
 
 		path := c.Coverage.Path
@@ -110,10 +112,15 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				out, err = os.OpenFile(filepath.Clean(c.Coverage.Badge.Path), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				bp, err := filepath.Abs(filepath.Clean(c.Coverage.Badge.Path))
 				if err != nil {
 					return err
 				}
+				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				if err != nil {
+					return err
+				}
+				addPaths = append(addPaths, bp)
 			}
 
 			b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
@@ -139,10 +146,15 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				out, err = os.OpenFile(filepath.Clean(c.CodeToTestRatio.Badge.Path), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				bp, err := filepath.Abs(filepath.Clean(c.CodeToTestRatio.Badge.Path))
 				if err != nil {
 					return err
 				}
+				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				if err != nil {
+					return err
+				}
+				addPaths = append(addPaths, bp)
 			}
 
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
@@ -170,10 +182,15 @@ var rootCmd = &cobra.Command{
 					if err != nil {
 						return err
 					}
-					out, err = os.OpenFile(filepath.Clean(c.TestExecutionTime.Badge.Path), os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+					bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
 					if err != nil {
 						return err
 					}
+					out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+					if err != nil {
+						return err
+					}
+					addPaths = append(addPaths, bp)
 				}
 
 				d := time.Duration(*r.TestExecutionTime)
@@ -205,8 +222,18 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			ctx := context.Background()
 			if err := g.Store(ctx, r); err != nil {
+				return err
+			}
+		}
+
+		// Push generated files
+		if c.PushConfigReady() {
+			if err := c.BuildPushConfig(); err != nil {
+				return err
+			}
+
+			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
 				return err
 			}
 		}
