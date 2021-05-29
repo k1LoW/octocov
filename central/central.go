@@ -63,7 +63,7 @@ func (c *Central) Generate(ctx context.Context) error {
 	c.generatedPaths = append(c.generatedPaths, p)
 
 	// git push
-	if c.config.Central.Push.Enable {
+	if c.config.CentralPushConfigReady() {
 		if err := gh.PushUsingLocalGit(ctx, c.config.GitRoot, c.generatedPaths, "Update by octocov"); err != nil {
 			return err
 		}

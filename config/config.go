@@ -98,7 +98,8 @@ type ConfigCentral struct {
 }
 
 type ConfigPush struct {
-	Enable bool `yaml:"enable"`
+	Enable bool   `yaml:"enable"`
+	If     string `yaml:"if,omitempty"`
 }
 
 func New() *Config {
@@ -201,11 +202,11 @@ func (c *Config) DatastoreConfigReady() bool {
 	}
 	ok, err := CheckIf(c.Datastore.If)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
+		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: %v\n", err)
 		return false
 	}
 	if !ok {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", cond)
+		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", c.Datastore.If)
 		return false
 	}
 	return true
@@ -238,7 +239,19 @@ func (c *Config) BuildDatastoreConfig() error {
 }
 
 func (c *Config) PushConfigReady() bool {
-	return (c.Push != nil && c.Push.Enable)
+	if c.Push == nil || !c.Push.Enable || c.GitRoot == "" {
+		return false
+	}
+	ok, err := CheckIf(c.Push.If)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: %v\n", err)
+		return false
+	}
+	if !ok {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: the condition in the `if` section is not met (%s)\n", c.Push.If)
+		return false
+	}
+	return true
 }
 
 func (c *Config) BuildPushConfig() error {

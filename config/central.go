@@ -12,6 +12,22 @@ func (c *Config) CentralConfigReady() bool {
 	return (c.Central != nil && c.Central.Enable)
 }
 
+func (c *Config) CentralPushConfigReady() bool {
+	if !c.CentralConfigReady() || !c.Central.Push.Enable || c.GitRoot == "" {
+		return false
+	}
+	ok, err := CheckIf(c.Central.Push.If)
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: %v\n", err)
+		return false
+	}
+	if !ok {
+		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: the condition in the `if` section is not met (%s)\n", c.Push.If)
+		return false
+	}
+	return true
+}
+
 func (c *Config) BuildCentralConfig() error {
 	if c.Repository == "" {
 		return errors.New("repository: not set (or env GITHUB_REPOSITORY is not set)")
