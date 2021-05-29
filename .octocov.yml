@@ -14,3 +14,5 @@ testExecutionTime:
   acceptable: 1min
   badge:
     path: docs/time.svg
+push:
+  enable: true
