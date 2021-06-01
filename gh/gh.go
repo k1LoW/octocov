@@ -159,7 +159,7 @@ func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, err
 	return "", fmt.Errorf("not found files. please commit file to root directory and push: %s/%s", owner, repo)
 }
 
-func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string, nameRe *regexp.Regexp) (int64, error) {
+func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64, error) {
 	if os.Getenv("GITHUB_RUN_ID") == "" {
 		return 0, fmt.Errorf("env %s is not set", "GITHUB_RUN_ID")
 	}
@@ -190,11 +190,6 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string, nameRe 
 				return j.GetID(), nil
 			}
 			for _, s := range j.Steps {
-				if nameRe != nil {
-					if nameRe.MatchString(s.GetName()) {
-						return j.GetID(), nil
-					}
-				}
 				if s.StartedAt != nil && s.CompletedAt == nil && octocovNameRe.MatchString(s.GetName()) {
 					return j.GetID(), nil
 				}
@@ -233,6 +228,60 @@ func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string,
 		}
 	}
 	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
+}
+
+type Step struct {
+	Name        string
+	StartedAt   time.Time
+	CompletedAt time.Time
+}
+
+func (g *Gh) GetStepsByName(ctx context.Context, owner, repo string, name string) ([]Step, error) {
+	if os.Getenv("GITHUB_RUN_ID") == "" {
+		return nil, fmt.Errorf("env %s is not set", "GITHUB_RUN_ID")
+	}
+	runID, err := strconv.ParseInt(os.Getenv("GITHUB_RUN_ID"), 10, 64)
+	if err != nil {
+		return nil, err
+	}
+	steps := []Step{}
+	// Although it would be nice if we could get the job_id from an environment variable,
+	// there is no way to get it at this time, so it uses a heuristic.
+	p := backoff.Exponential(
+		backoff.WithMinInterval(time.Second),
+		backoff.WithMaxInterval(30*time.Second),
+		backoff.WithJitterFactor(0.05),
+		backoff.WithMaxRetries(5),
+	)
+	b := p.Start(ctx)
+L:
+	for backoff.Continue(b) {
+		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
+		if err != nil {
+			return nil, err
+		}
+		for _, j := range jobs.Jobs {
+			l := len(j.Steps)
+			for i, s := range j.Steps {
+				if s.GetName() == name {
+					if s.StartedAt == nil || s.CompletedAt == nil {
+						steps = []Step{}
+						continue L
+					}
+					log.Printf("got job step [%d %d/%d]: %s %v-%v", j.GetID(), i+1, l, s.GetName(), s.StartedAt, s.CompletedAt)
+					steps = append(steps, Step{
+						Name:        s.GetName(),
+						StartedAt:   s.GetStartedAt().Time,
+						CompletedAt: s.GetCompletedAt().Time,
+					})
+				}
+			}
+		}
+	}
+	if len(steps) == 0 {
+		return nil, fmt.Errorf("could not get step times: %s", name)
+	}
+	return steps, nil
 }
 
 func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, message string) error {
