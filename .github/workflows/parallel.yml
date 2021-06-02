@@ -1,6 +1,6 @@
 name: parallel
 
-on: push
+on: workflow_dispatch
 
 jobs:
   job-parallel:
