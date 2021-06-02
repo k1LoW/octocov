@@ -244,7 +244,6 @@ func (g *Gh) GetStepsByName(ctx context.Context, owner, repo string, name string
 	if err != nil {
 		return nil, err
 	}
-	steps := []Step{}
 	// Although it would be nice if we could get the job_id from an environment variable,
 	// there is no way to get it at this time, so it uses a heuristic.
 	p := backoff.Exponential(
@@ -254,8 +253,11 @@ func (g *Gh) GetStepsByName(ctx context.Context, owner, repo string, name string
 		backoff.WithMaxRetries(5),
 	)
 	b := p.Start(ctx)
+	steps := []Step{}
+	max := 0
 L:
 	for backoff.Continue(b) {
+		max = 0
 		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
 		if err != nil {
 			return nil, err
@@ -265,8 +267,8 @@ L:
 			l := len(j.Steps)
 			for i, s := range j.Steps {
 				if s.GetName() == name {
+					max += 1
 					if s.StartedAt == nil || s.CompletedAt == nil {
-						log.Printf("failed to got job step [%d %d/%d]: %s %v-%v", j.GetID(), i+1, l, s.GetName(), s.StartedAt, s.CompletedAt)
 						steps = []Step{}
 						continue L
 					}
@@ -279,8 +281,11 @@ L:
 				}
 			}
 		}
+		if max == len(steps) {
+			return steps, nil
+		}
 	}
-	if len(steps) == 0 {
+	if max < len(steps) || len(steps) == 0 {
 		return nil, fmt.Errorf("could not get step times: %s", name)
 	}
 	return steps, nil
