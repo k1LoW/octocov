@@ -261,10 +261,12 @@ L:
 			return nil, err
 		}
 		for _, j := range jobs.Jobs {
+			log.Printf("search job: %d", j.GetID())
 			l := len(j.Steps)
 			for i, s := range j.Steps {
 				if s.GetName() == name {
 					if s.StartedAt == nil || s.CompletedAt == nil {
+						log.Printf("failed to got job step [%d %d/%d]: %s %v-%v", j.GetID(), i+1, l, s.GetName(), s.StartedAt, s.CompletedAt)
 						steps = []Step{}
 						continue L
 					}
