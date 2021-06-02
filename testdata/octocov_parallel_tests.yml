@@ -1,0 +1,7 @@
+coverage:
+  path: coverage.out
+testExecutionTime:
+  steps:
+    - Run tests 0
+    - Run tests 1
+    - Run tests 2
