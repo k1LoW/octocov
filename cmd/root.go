@@ -87,7 +87,11 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 		}
-		if err := r.MeasureTestExecutionTime(); err != nil {
+		stepNames := []string{}
+		if c.TestExecutionTime != nil && len(c.TestExecutionTime.Steps) > 0 {
+			stepNames = c.TestExecutionTime.Steps
+		}
+		if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
 			return err
 		}
 

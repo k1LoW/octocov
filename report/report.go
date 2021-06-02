@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -91,7 +92,7 @@ func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
 	return nil
 }
 
-func (r *Report) MeasureTestExecutionTime() error {
+func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []string) error {
 	if os.Getenv("GITHUB_RUN_ID") == "" {
 		return nil
 	}
@@ -102,17 +103,31 @@ func (r *Report) MeasureTestExecutionTime() error {
 	splitted := strings.Split(r.Repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]
-	gh, err := gh.New()
+	g, err := gh.New()
 	if err != nil {
 		return err
 	}
-	ctx := context.Background()
-	jobID, err := gh.DetectCurrentJobID(ctx, owner, repo, nil)
+	if len(stepNames) > 0 {
+		steps := []gh.Step{}
+		for _, n := range stepNames {
+			s, err := g.GetStepsByName(ctx, owner, repo, n)
+			if err != nil {
+				_, _ = fmt.Fprintf(os.Stderr, "Skip measuring test execution time: %v\n", err)
+				return nil
+			}
+			steps = append(steps, s...)
+		}
+		d := mergeExecutionTimes(steps)
+		t := float64(d)
+		r.TestExecutionTime = &t
+		return nil
+	}
+	jobID, err := g.DetectCurrentJobID(ctx, owner, repo)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Skip measuring test execution time: %v\n", err)
 		return nil
 	}
-	d, err := gh.GetStepExecutionTimeByTime(ctx, owner, repo, jobID, fi.ModTime())
+	d, err := g.GetStepExecutionTimeByTime(ctx, owner, repo, jobID, fi.ModTime())
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Skip measuring test execution time: %v\n", err)
 		return nil
@@ -141,4 +156,31 @@ func (r *Report) CoveragePercent() float64 {
 
 func (r *Report) CodeToTestRatioRatio() float64 {
 	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
+}
+
+type timePoint struct {
+	t time.Time
+	c int
+}
+
+func mergeExecutionTimes(steps []gh.Step) time.Duration {
+	timePoints := []timePoint{}
+	for _, s := range steps {
+		timePoints = append(timePoints, timePoint{s.StartedAt, 1}, timePoint{s.CompletedAt, -1})
+	}
+	sort.Slice(timePoints, func(i, j int) bool { return timePoints[i].t.UnixNano() < timePoints[j].t.UnixNano() })
+	var st, ct time.Time
+	d := time.Duration(0)
+	c := 0
+	for _, tp := range timePoints {
+		if c == 0 {
+			st = tp.t
+		}
+		c += tp.c
+		if c == 0 {
+			ct = tp.t
+			d += ct.Sub(st)
+		}
+	}
+	return d
 }

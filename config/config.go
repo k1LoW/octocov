@@ -72,6 +72,7 @@ type ConfigCodeToTestRatioBadge struct {
 type ConfigTestExecutionTime struct {
 	Badge      ConfigTestExecutionTimeBadge `yaml:"badge,omitempty"`
 	Acceptable string                       `yaml:"acceptable,omitempty"`
+	Steps      []string                     `yaml:"steps,omitempty"`
 }
 
 type ConfigTestExecutionTimeBadge struct {
