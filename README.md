@@ -135,13 +135,23 @@ By setting `push.enable:`, git push report badges self.
 coverage:
   badge:
     path: docs/coverage.svg
-push
+push:
+  enable: true
+```
+
+### Comment report to pull request
+
+By setting `comment:`, [comment the reports to pull request](https://github.com/k1LoW/octocov/pull/30#issuecomment-860188829).
+
+``` yaml
+# .octocov.yml
+comment:
   enable: true
 ```
 
 ### Store report to central datastore
 
-By setting `datastore:`, store the coverage reports to central datastore.
+By setting `datastore:`, store the reports to central datastore.
 
 #### GitHub
 
