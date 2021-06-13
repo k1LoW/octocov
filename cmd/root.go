@@ -211,7 +211,7 @@ var rootCmd = &cobra.Command{
 
 		// Store report
 		if c.DatastoreConfigReady() {
-			cmd.PrintErrln("Store coverage report...")
+			cmd.PrintErrln("Store report...")
 			if err := r.Validate(); err != nil {
 				return err
 			}
@@ -231,8 +231,9 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		// Comment to pull request
+		// Comment report to pull request
 		if c.CommentConfigReady() {
+			cmd.PrintErrln("Comment report...")
 			owner, repo, err := c.OwnerRepo()
 			if err != nil {
 				return err
@@ -243,15 +244,16 @@ var rootCmd = &cobra.Command{
 			}
 			n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
 			if err != nil {
-				return err
-			}
-			comment := strings.Join([]string{
-				r.Table(),
-				"---",
-				"Reported by [octocov](https://github.com/k1LoW/octocov)",
-			}, "\n")
-			if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
-				return err
+				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
+			} else {
+				comment := strings.Join([]string{
+					r.Table(),
+					"---",
+					"Reported by [octocov](https://github.com/k1LoW/octocov)",
+				}, "\n")
+				if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
+					return err
+				}
 			}
 		}
 
