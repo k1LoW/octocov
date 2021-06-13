@@ -238,6 +238,9 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			gh, err := gh.New()
+			if err != nil {
+				return err
+			}
 			n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
 			if err != nil {
 				return err
@@ -247,9 +250,6 @@ var rootCmd = &cobra.Command{
 				"---",
 				"Reported by [octocov](https://github.com/k1LoW/octocov)",
 			}, "\n")
-			if err != nil {
-				return err
-			}
 			if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
 				return err
 			}
