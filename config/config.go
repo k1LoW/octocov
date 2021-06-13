@@ -41,6 +41,7 @@ type Config struct {
 	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`
+	Comment           *ConfigComment           `yaml:"comment,omitempty"`
 	GitRoot           string                   `yaml:"-"`
 	// working directory
 	wd string
@@ -101,6 +102,10 @@ type ConfigCentral struct {
 type ConfigPush struct {
 	Enable bool   `yaml:"enable"`
 	If     string `yaml:"if,omitempty"`
+}
+
+type ConfigComment struct {
+	Enable bool `yaml:"enable"`
 }
 
 func New() *Config {
@@ -243,7 +248,6 @@ func (c *Config) BuildDatastoreConfig() error {
 
 func (c *Config) PushConfigReady() bool {
 	if c.Push == nil || !c.Push.Enable || c.GitRoot == "" {
-		fmt.Printf("%#v\n", c)
 		return false
 	}
 	ok, err := CheckIf(c.Push.If)
@@ -253,6 +257,13 @@ func (c *Config) PushConfigReady() bool {
 	}
 	if !ok {
 		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: the condition in the `if` section is not met (%s)\n", c.Push.If)
+		return false
+	}
+	return true
+}
+
+func (c *Config) CommentConfigReady() bool {
+	if c.Comment == nil || !c.Comment.Enable || !strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/") {
 		return false
 	}
 	return true
@@ -309,6 +320,16 @@ func (c *Config) Acceptable(r *report.Report) error {
 	}
 
 	return nil
+}
+
+func (c *Config) OwnerRepo() (string, string, error) {
+	splitted := strings.Split(c.Repository, "/")
+	if len(splitted) != 2 {
+		return "", "", errors.New("could not get owner and repo")
+	}
+	owner := splitted[0]
+	repo := splitted[1]
+	return owner, repo, nil
 }
 
 func (c *Config) CoverageColor(cover float64) string {

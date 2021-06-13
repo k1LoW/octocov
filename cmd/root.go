@@ -28,6 +28,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -231,12 +232,33 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Comment to pull request
+		if c.CommentConfigReady() {
+			splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head
+			prNumber := splitted[2]
+			owner, repo, err := c.OwnerRepo()
+			if err != nil {
+				return err
+			}
+			n, err := strconv.Atoi(prNumber)
+			if err != nil {
+				return err
+			}
+			comment := r.Table()
+			gh, err := gh.New()
+			if err != nil {
+				return err
+			}
+			if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
+				return err
+			}
+		}
+
 		// Push generated files
 		if c.PushConfigReady() {
 			if err := c.BuildPushConfig(); err != nil {
 				return err
 			}
-
 			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
 				return err
 			}

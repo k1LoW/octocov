@@ -291,6 +291,36 @@ L:
 	return steps, nil
 }
 
+const commentSig = "<!-- octocov -->"
+
+func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment string) error {
+	if err := g.deleteCurrentIssueComment(ctx, owner, repo, n); err != nil {
+		return err
+	}
+	c := strings.Join([]string{comment, commentSig}, "\n")
+	if _, _, err := g.client.Issues.CreateComment(ctx, owner, repo, n, &github.IssueComment{Body: &c}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *Gh) deleteCurrentIssueComment(ctx context.Context, owner, repo string, n int) error {
+	opts := &github.IssueListCommentsOptions{}
+	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
+	if err != nil {
+		return err
+	}
+	for _, c := range comments {
+		if strings.Contains(*c.Body, commentSig) {
+			_, err = g.client.Issues.DeleteComment(ctx, owner, repo, *c.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
 func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, message string) error {
 	r, err := git.PlainOpen(gitRoot)
 	if err != nil {
