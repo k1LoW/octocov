@@ -2,7 +2,6 @@ name: build
 
 on:
   push:
-  pull_request:
 
 jobs:
   job-test:
@@ -15,10 +14,6 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DEBUG: 1
     steps:
-      - run: |
-          env
-          cat ${GITHUB_EVENT_PATH}
-
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v2
         with:

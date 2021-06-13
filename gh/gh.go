@@ -200,6 +200,34 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 	return 0, errors.New("could not detect id of current job")
 }
 
+func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo string) (int, error) {
+	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch-name
+	if strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/") {
+		prNumber := splitted[2]
+		return strconv.Atoi(prNumber)
+	}
+	b := splitted[2]
+	l, _, err := g.client.PullRequests.List(ctx, owner, repo, &github.PullRequestListOptions{
+		State: "open",
+	})
+	if err != nil {
+		return 0, err
+	}
+	var d *github.PullRequest
+	for _, pr := range l {
+		if pr.GetHead().GetRef() == b {
+			if d != nil {
+				return 0, errors.New("could not detect number of pull request")
+			}
+			d = pr
+		}
+	}
+	if d != nil {
+		return d.GetNumber(), nil
+	}
+	return 0, errors.New("could not detect number of pull request")
+}
+
 func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
 	p := backoff.Exponential(
 		backoff.WithMinInterval(time.Second),

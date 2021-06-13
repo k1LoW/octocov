@@ -28,7 +28,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -234,18 +233,20 @@ var rootCmd = &cobra.Command{
 
 		// Comment to pull request
 		if c.CommentConfigReady() {
-			splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head
-			prNumber := splitted[2]
 			owner, repo, err := c.OwnerRepo()
 			if err != nil {
 				return err
 			}
-			n, err := strconv.Atoi(prNumber)
+			gh, err := gh.New()
+			n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
 			if err != nil {
 				return err
 			}
-			comment := r.Table()
-			gh, err := gh.New()
+			comment := strings.Join([]string{
+				r.Table(),
+				"---",
+				"Reported by [octocov](https://github.com/k1LoW/octocov)",
+			}, "\n")
 			if err != nil {
 				return err
 			}

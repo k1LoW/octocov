@@ -263,7 +263,7 @@ func (c *Config) PushConfigReady() bool {
 }
 
 func (c *Config) CommentConfigReady() bool {
-	if c.Comment == nil || !c.Comment.Enable || !strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/") {
+	if c.Comment == nil || !c.Comment.Enable {
 		return false
 	}
 	return true
