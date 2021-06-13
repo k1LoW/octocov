@@ -186,9 +186,10 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	splitted := strings.Split(c.config.Repository, "/")
-	owner := splitted[0]
-	repo := splitted[1]
+	owner, repo, err := c.config.OwnerRepo()
+	if err != nil {
+		return err
+	}
 	rawRootURL, err := gh.GetRawRootURL(ctx, owner, repo)
 	if err != nil {
 		return err

@@ -1,11 +1,44 @@
 package report
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/k1LoW/octocov/gh"
 )
+
+func TestTable(t *testing.T) {
+	tests := []struct {
+		path string
+		want string
+	}{
+		{
+			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
+			`| Coverage |
+|----------|
+| 68.0%    |
+`,
+		},
+		{
+			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
+			`| Coverage | Code to Test Ratio | Test Execution Time |
+|----------|--------------------|---------------------|
+| 68.0%    | 1:0.5              | 4m40s               |
+`,
+		},
+	}
+	for _, tt := range tests {
+		r := New()
+		if err := r.MeasureCoverage(tt.path); err != nil {
+			t.Fatal(err)
+		}
+		if got := r.Table(); got != tt.want {
+			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
+		}
+	}
+}
 
 func TestMergeExecutionTimes(t *testing.T) {
 	tests := []struct {
@@ -85,4 +118,17 @@ func TestMergeExecutionTimes(t *testing.T) {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
+}
+
+func testdataDir(t *testing.T) string {
+	t.Helper()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "testdata"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return dir
 }

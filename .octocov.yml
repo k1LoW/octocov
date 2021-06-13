@@ -17,3 +17,5 @@ testExecutionTime:
 push:
   enable: true
   if: env.GITHUB_REF == 'refs/heads/main'
+comment:
+  enable: true

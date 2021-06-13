@@ -1,6 +1,7 @@
 package report
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -15,6 +16,7 @@ import (
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
+	"github.com/olekukonko/tablewriter"
 )
 
 type Report struct {
@@ -63,6 +65,33 @@ func (r *Report) String() string {
 		panic(err)
 	}
 	return string(b)
+}
+
+func (r *Report) Table() string {
+	h := []string{}
+	m := []string{}
+	if r.Coverage != nil {
+		h = append(h, "Coverage")
+		m = append(m, fmt.Sprintf("%.1f%%", r.CoveragePercent()))
+	}
+	if r.CodeToTestRatio != nil {
+		h = append(h, "Code to Test Ratio")
+		m = append(m, fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio()))
+	}
+	if r.TestExecutionTime != nil {
+		h = append(h, "Test Execution Time")
+		d := time.Duration(*r.TestExecutionTime)
+		m = append(m, d.String())
+	}
+	buf := new(bytes.Buffer)
+	table := tablewriter.NewWriter(buf)
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	table.Append(m)
+	table.Render()
+	return buf.String()
 }
 
 func (r *Report) MeasureCoverage(path string) error {
@@ -151,10 +180,16 @@ func (r *Report) Validate() error {
 }
 
 func (r *Report) CoveragePercent() float64 {
+	if r.Coverage.Total == 0 {
+		return 0.0
+	}
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
 }
 
 func (r *Report) CodeToTestRatioRatio() float64 {
+	if r.CodeToTestRatio.Code == 0 {
+		return 0.0
+	}
 	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
 }
 

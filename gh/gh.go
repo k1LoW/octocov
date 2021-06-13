@@ -200,6 +200,34 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 	return 0, errors.New("could not detect id of current job")
 }
 
+func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo string) (int, error) {
+	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch-name
+	if strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/") {
+		prNumber := splitted[2]
+		return strconv.Atoi(prNumber)
+	}
+	b := splitted[2]
+	l, _, err := g.client.PullRequests.List(ctx, owner, repo, &github.PullRequestListOptions{
+		State: "open",
+	})
+	if err != nil {
+		return 0, err
+	}
+	var d *github.PullRequest
+	for _, pr := range l {
+		if pr.GetHead().GetRef() == b {
+			if d != nil {
+				return 0, errors.New("could not detect number of pull request")
+			}
+			d = pr
+		}
+	}
+	if d != nil {
+		return d.GetNumber(), nil
+	}
+	return 0, errors.New("could not detect number of pull request")
+}
+
 func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
 	p := backoff.Exponential(
 		backoff.WithMinInterval(time.Second),
@@ -289,6 +317,36 @@ L:
 		return nil, fmt.Errorf("could not get step times: %s", name)
 	}
 	return steps, nil
+}
+
+const commentSig = "<!-- octocov -->"
+
+func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment string) error {
+	if err := g.deleteCurrentIssueComment(ctx, owner, repo, n); err != nil {
+		return err
+	}
+	c := strings.Join([]string{comment, commentSig}, "\n")
+	if _, _, err := g.client.Issues.CreateComment(ctx, owner, repo, n, &github.IssueComment{Body: &c}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *Gh) deleteCurrentIssueComment(ctx context.Context, owner, repo string, n int) error {
+	opts := &github.IssueListCommentsOptions{}
+	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
+	if err != nil {
+		return err
+	}
+	for _, c := range comments {
+		if strings.Contains(*c.Body, commentSig) {
+			_, err = g.client.Issues.DeleteComment(ctx, owner, repo, *c.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, message string) error {

@@ -211,7 +211,7 @@ var rootCmd = &cobra.Command{
 
 		// Store report
 		if c.DatastoreConfigReady() {
-			cmd.PrintErrln("Store coverage report...")
+			cmd.PrintErrln("Store report...")
 			if err := r.Validate(); err != nil {
 				return err
 			}
@@ -231,12 +231,37 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Comment report to pull request
+		if c.CommentConfigReady() {
+			cmd.PrintErrln("Comment report...")
+			owner, repo, err := c.OwnerRepo()
+			if err != nil {
+				return err
+			}
+			gh, err := gh.New()
+			if err != nil {
+				return err
+			}
+			n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
+			if err != nil {
+				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
+			} else {
+				comment := strings.Join([]string{
+					r.Table(),
+					"---",
+					"Reported by [octocov](https://github.com/k1LoW/octocov)",
+				}, "\n")
+				if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
+					return err
+				}
+			}
+		}
+
 		// Push generated files
 		if c.PushConfigReady() {
 			if err := c.BuildPushConfig(); err != nil {
 				return err
 			}
-
 			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
 				return err
 			}
