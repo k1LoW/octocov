@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.11.0](https://github.com/k1LoW/octocov/compare/v0.10.0...v0.11.0) (2021-06-13)
+
+* Update central mode report format [#30](https://github.com/k1LoW/octocov/pull/30) ([k1LoW](https://github.com/k1LoW))
+* Add comment: for commenting report to pull request [#29](https://github.com/k1LoW/octocov/pull/29) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.10.0](https://github.com/k1LoW/octocov/compare/v0.9.0...v0.10.0) (2021-06-02)
 
 * Support measure parallel/multi tests execution time [#28](https://github.com/k1LoW/octocov/pull/28) ([k1LoW](https://github.com/k1LoW))
