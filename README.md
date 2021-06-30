@@ -147,6 +147,7 @@ By setting `comment:`, [comment the reports to pull request](https://github.com/
 # .octocov.yml
 comment:
   enable: true
+  hideFooterLink: false # hide octocov link
 ```
 
 ### Store report to central datastore

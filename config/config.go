@@ -105,7 +105,8 @@ type ConfigPush struct {
 }
 
 type ConfigComment struct {
-	Enable bool `yaml:"enable"`
+	Enable         bool `yaml:"enable"`
+	HideFooterLink bool `yaml:"hideFooterLink"`
 }
 
 func New() *Config {

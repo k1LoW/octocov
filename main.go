@@ -21,7 +21,9 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/k1LoW/octocov/cmd"
+import (
+	"github.com/k1LoW/octocov/cmd"
+)
 
 func main() {
 	cmd.Execute()

@@ -246,10 +246,14 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
 			} else {
+				footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
+				if c.Comment.HideFooterLink {
+					footer = "Reported by octocov"
+				}
 				comment := strings.Join([]string{
 					r.Table(),
 					"---",
-					"Reported by [octocov](https://github.com/k1LoW/octocov)",
+					footer,
 				}, "\n")
 				if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
 					return err
