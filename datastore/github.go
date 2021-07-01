@@ -30,6 +30,9 @@ func (g *Github) Store(ctx context.Context, r *report.Report) error {
 	if g.config.Repository != "" {
 		from = g.config.Repository
 	}
+	if from == "" {
+		return fmt.Errorf("report '%s' is not set", "repository")
+	}
 	message := fmt.Sprintf("Store coverage report of %s", from)
 	splitted := strings.Split(g.config.Datastore.Github.Repository, "/")
 	owner := splitted[0]

@@ -14,13 +14,16 @@ BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
 default: test
 
-ci: depsdev test test_central sec
+ci: depsdev test test_central test_no_coverage sec
 
 test:
 	go test ./... -coverprofile=coverage.out -covermode=count
 
 test_central: build
 	./octocov --config testdata/octocov_central.yml
+
+test_no_coverage: build
+	./octocov --config testdata/octocov_no_coverage.yml
 
 sec:
 	gosec ./...

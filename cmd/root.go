@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -77,25 +78,39 @@ var rootCmd = &cobra.Command{
 			return ctr.Generate(ctx)
 		}
 
-		path := c.Coverage.Path
 		r := report.New()
-		if err := r.MeasureCoverage(path); err != nil {
-			return err
-		}
-		if c.CodeToTestRatioReady() {
-			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
-				return err
+
+		if c.CoverageConfigReady() {
+			path := c.Coverage.Path
+			if err := r.MeasureCoverage(path); err != nil {
+				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 			}
 		}
-		stepNames := []string{}
-		if c.TestExecutionTime != nil && len(c.TestExecutionTime.Steps) > 0 {
-			stepNames = c.TestExecutionTime.Steps
+
+		if c.CodeToTestRatioConfigReady() {
+			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
+				cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
+			}
 		}
-		if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
-			return err
+
+		if c.TestExecutionTimeConfigReady() {
+			stepNames := []string{}
+			if len(c.TestExecutionTime.Steps) > 0 {
+				stepNames = c.TestExecutionTime.Steps
+			}
+			if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
+				cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
+			}
+		}
+
+		if r.CountMeasured() == 0 {
+			return errors.New("nothing could be measured")
 		}
 
 		if dump {
+			if err := r.Validate(); err != nil {
+				cmd.PrintErrf("Validation error: %v\n", err)
+			}
 			cmd.Println(r.String())
 			return nil
 		}
@@ -106,6 +121,10 @@ var rootCmd = &cobra.Command{
 
 		// Generate coverage report badge
 		if c.CoverageBadgeConfigReady() || coverageBadge {
+			if !r.IsMeasuredCoverage() {
+				return fmt.Errorf("could not generate badge: %s", "coverage is not measured")
+			}
+
 			var out *os.File
 			cp := r.CoveragePercent()
 			if c.Coverage.Badge.Path == "" {
@@ -140,6 +159,10 @@ var rootCmd = &cobra.Command{
 
 		// Generate code-to-test-ratio report badge
 		if c.CodeToTestRatioBadgeConfigReady() || ratioBadge {
+			if !r.IsMeasuredCodeToTestRatio() {
+				return fmt.Errorf("could not generate badge: %s", "code-to-test-ratio is not measured")
+			}
+
 			var out *os.File
 			tr := r.CodeToTestRatioRatio()
 			if c.CodeToTestRatio.Badge.Path == "" {
@@ -174,35 +197,35 @@ var rootCmd = &cobra.Command{
 
 		// Generate test-execution-time report badge
 		if c.TestExecutionTimeBadgeConfigReady() || timeBadge {
-			var out *os.File
-			if r.TestExecutionTime == nil {
-				cmd.PrintErrln("Skip generating test-execution-time badge: in order to generate the test-execution-time badge, it is necessary to measure the code coverage on GitHub Actions.")
-			} else {
-				if c.TestExecutionTime.Badge.Path == "" {
-					out = os.Stdout
-				} else {
-					cmd.PrintErrln("Generate test-execution-time report badge...")
-					err := os.MkdirAll(filepath.Dir(c.TestExecutionTime.Badge.Path), 0755) // #nosec
-					if err != nil {
-						return err
-					}
-					bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
-					if err != nil {
-						return err
-					}
-					out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-					if err != nil {
-						return err
-					}
-					addPaths = append(addPaths, bp)
-				}
+			if !r.IsMeasuredTestExecutionTime() {
+				return fmt.Errorf("could not generate badge: %s", "test-execution-time is not measured")
+			}
 
-				d := time.Duration(*r.TestExecutionTime)
-				b := badge.New("test execution time", d.String())
-				b.MessageColor = c.TestExecutionTimeColor(d)
-				if err := b.Render(out); err != nil {
+			var out *os.File
+			if c.TestExecutionTime.Badge.Path == "" {
+				out = os.Stdout
+			} else {
+				cmd.PrintErrln("Generate test-execution-time report badge...")
+				err := os.MkdirAll(filepath.Dir(c.TestExecutionTime.Badge.Path), 0755) // #nosec
+				if err != nil {
 					return err
 				}
+				bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
+				if err != nil {
+					return err
+				}
+				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+				if err != nil {
+					return err
+				}
+				addPaths = append(addPaths, bp)
+			}
+
+			d := time.Duration(*r.TestExecutionTime)
+			b := badge.New("test execution time", d.String())
+			b.MessageColor = c.TestExecutionTimeColor(d)
+			if err := b.Render(out); err != nil {
+				return err
 			}
 			if timeBadge {
 				return nil
@@ -212,9 +235,6 @@ var rootCmd = &cobra.Command{
 		// Store report
 		if c.DatastoreConfigReady() {
 			cmd.PrintErrln("Store report...")
-			if err := r.Validate(); err != nil {
-				return err
-			}
 			if err := c.BuildDatastoreConfig(); err != nil {
 				return err
 			}
