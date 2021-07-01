@@ -86,6 +86,7 @@ func TestCoverageAcceptable(t *testing.T) {
 	}
 	for _, tt := range tests {
 		c := New()
+		c.Coverage = &ConfigCoverage{}
 		c.Coverage.Acceptable = tt.in
 		c.Build()
 

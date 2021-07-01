@@ -94,9 +94,39 @@ func (r *Report) Table() string {
 	return buf.String()
 }
 
+func (r *Report) CountMeasured() int {
+	c := 0
+	if r.IsMeasuredCoverage() {
+		c += 1
+	}
+	if r.IsMeasuredCodeToTestRatio() {
+		c += 1
+	}
+	if r.IsMeasuredTestExecutionTime() {
+		c += 1
+	}
+	return c
+}
+
+func (r *Report) IsMeasuredCoverage() bool {
+	return r.Coverage != nil
+}
+
+func (r *Report) IsMeasuredCodeToTestRatio() bool {
+	return r.CodeToTestRatio != nil
+}
+
+func (r *Report) IsMeasuredTestExecutionTime() bool {
+	return r.TestExecutionTime != nil
+}
+
 func (r *Report) MeasureCoverage(path string) error {
 	cov, rp, cerr := coverage.Measure(path)
 	if cerr != nil {
+		f, err := os.Stat(path)
+		if err != nil || f.IsDir() {
+			return cerr
+		}
 		b, err := ioutil.ReadFile(filepath.Clean(path))
 		if err != nil {
 			return err
@@ -122,12 +152,8 @@ func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
 }
 
 func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []string) error {
-	if os.Getenv("GITHUB_RUN_ID") == "" {
-		return nil
-	}
-	fi, err := os.Stat(r.rp)
-	if err != nil {
-		return err
+	if r.Repository == "" {
+		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	splitted := strings.Split(r.Repository, "/")
 	owner := splitted[0]
@@ -141,8 +167,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		for _, n := range stepNames {
 			s, err := g.GetStepsByName(ctx, owner, repo, n)
 			if err != nil {
-				_, _ = fmt.Fprintf(os.Stderr, "Skip measuring test execution time: %v\n", err)
-				return nil
+				return err
 			}
 			steps = append(steps, s...)
 		}
@@ -151,31 +176,20 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		r.TestExecutionTime = &t
 		return nil
 	}
+	fi, err := os.Stat(r.rp)
+	if err != nil {
+		return err
+	}
 	jobID, err := g.DetectCurrentJobID(ctx, owner, repo)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip measuring test execution time: %v\n", err)
-		return nil
+		return err
 	}
 	d, err := g.GetStepExecutionTimeByTime(ctx, owner, repo, jobID, fi.ModTime())
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip measuring test execution time: %v\n", err)
-		return nil
+		return err
 	}
 	t := float64(d)
 	r.TestExecutionTime = &t
-	return nil
-}
-
-func (r *Report) Validate() error {
-	if r.Repository == "" {
-		return fmt.Errorf("coverage report '%s' is not set", "repository")
-	}
-	if r.Ref == "" {
-		return fmt.Errorf("coverage report '%s' is not set", "ref")
-	}
-	if r.Commit == "" {
-		return fmt.Errorf("coverage report '%s' is not set", "commit")
-	}
 	return nil
 }
 
@@ -191,6 +205,19 @@ func (r *Report) CodeToTestRatioRatio() float64 {
 		return 0.0
 	}
 	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
+}
+
+func (r *Report) Validate() error {
+	if r.Repository == "" {
+		return fmt.Errorf("coverage report '%s' is not set", "repository")
+	}
+	if r.Ref == "" {
+		return fmt.Errorf("coverage report '%s' is not set", "ref")
+	}
+	if r.Commit == "" {
+		return fmt.Errorf("coverage report '%s' is not set", "commit")
+	}
+	return nil
 }
 
 type timePoint struct {
