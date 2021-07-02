@@ -2,6 +2,7 @@ package coverage
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,9 +26,11 @@ type CoberturaReport struct {
 	Sources         struct {
 		Source []string `xml:"source"`
 	} `xml:"sources"`
-	Packages struct {
-		Package []CoberturaReportPackage `xml:"package"`
-	} `xml:"packages"`
+	Packages *CoberturaReportPackages `xml:"packages"`
+}
+
+type CoberturaReportPackages struct {
+	Package []CoberturaReportPackage `xml:"package"`
 }
 
 type CoberturaReportPackage struct {
@@ -82,6 +85,10 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	if err := xml.Unmarshal(b, &r); err != nil {
 		return nil, "", err
 	}
+	if r.Packages == nil {
+		return nil, "", fmt.Errorf("%s is not Cobertura format", filepath.Clean(rp))
+	}
+
 	cov := New()
 	cov.Type = TypeLOC
 	cov.Format = "Cobertura"

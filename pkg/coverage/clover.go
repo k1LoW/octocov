@@ -2,6 +2,7 @@ package coverage
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,26 +13,28 @@ const CloverDefaultPath = "coverage.xml"
 type Clover struct{}
 
 type CloverReport struct {
-	XMLName   xml.Name `xml:"coverage"`
-	Generated string   `xml:"generated,attr"`
-	Project   struct {
-		Timestamp string             `xml:"timestamp,attr"`
-		File      []CloverReportFile `xml:"file"`
-		Metrics   struct {
-			Files               int `xml:"files,attr"`
-			Loc                 int `xml:"loc,attr"`
-			Ncloc               int `xml:"ncloc,attr"`
-			Classes             int `xml:"classes,attr"`
-			Methods             int `xml:"methods,attr"`
-			Coveredmethods      int `xml:"coveredmethods,attr"`
-			Conditionals        int `xml:"conditionals,attr"`
-			Coveredconditionals int `xml:"coveredconditionals,attr"`
-			Statements          int `xml:"statements,attr"`
-			Coveredstatements   int `xml:"coveredstatements,attr"`
-			Elements            int `xml:"elements,attr"`
-			Coveredelements     int `xml:"coveredelements,attr"`
-		} `xml:"metrics"`
-	} `xml:"project"`
+	XMLName   xml.Name             `xml:"coverage"`
+	Generated string               `xml:"generated,attr"`
+	Project   *CloverReportProject `xml:"project"`
+}
+
+type CloverReportProject struct {
+	Timestamp string             `xml:"timestamp,attr"`
+	File      []CloverReportFile `xml:"file"`
+	Metrics   struct {
+		Files               int `xml:"files,attr"`
+		Loc                 int `xml:"loc,attr"`
+		Ncloc               int `xml:"ncloc,attr"`
+		Classes             int `xml:"classes,attr"`
+		Methods             int `xml:"methods,attr"`
+		Coveredmethods      int `xml:"coveredmethods,attr"`
+		Conditionals        int `xml:"conditionals,attr"`
+		Coveredconditionals int `xml:"coveredconditionals,attr"`
+		Statements          int `xml:"statements,attr"`
+		Coveredstatements   int `xml:"coveredstatements,attr"`
+		Elements            int `xml:"elements,attr"`
+		Coveredelements     int `xml:"coveredelements,attr"`
+	} `xml:"metrics"`
 }
 
 type CloverReportFile struct {
@@ -93,6 +96,10 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	if err := xml.Unmarshal(b, &r); err != nil {
 		return nil, "", err
 	}
+	if r.Project == nil {
+		return nil, "", fmt.Errorf("%s is not Clover format", filepath.Clean(rp))
+	}
+
 	cov := New()
 	cov.Type = TypeStatement
 	cov.Format = "Clover"
