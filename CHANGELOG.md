@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.12.0](https://github.com/k1LoW/octocov/compare/v0.11.0...v0.12.0) (2021-07-02)
+
+* Support Cobertura XML format [#33](https://github.com/k1LoW/octocov/pull/33) ([k1LoW](https://github.com/k1LoW))
+* Allow no code coverage report [#32](https://github.com/k1LoW/octocov/pull/32) ([k1LoW](https://github.com/k1LoW))
+* Add comment.hideFooterLink section [#31](https://github.com/k1LoW/octocov/pull/31) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.11.0](https://github.com/k1LoW/octocov/compare/v0.10.0...v0.11.0) (2021-06-13)
 
 * Update central mode report format [#30](https://github.com/k1LoW/octocov/pull/30) ([k1LoW](https://github.com/k1LoW))
