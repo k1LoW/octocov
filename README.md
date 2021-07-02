@@ -229,6 +229,10 @@ Support `SF` `DA` only
 
 **Default path:** `coverage.xml`
 
+### Cobertura
+
+**Default path:** `coverage.xml`
+
 ## Supported code metrics
 
 - **Code Coverage**
