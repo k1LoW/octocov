@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.12.1](https://github.com/k1LoW/octocov/compare/v0.12.0...v0.12.1) (2021-07-02)
+
+* Avoid incorrectly parsing other report formats. [#34](https://github.com/k1LoW/octocov/pull/34) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.12.0](https://github.com/k1LoW/octocov/compare/v0.11.0...v0.12.0) (2021-07-02)
 
 * Support Cobertura XML format [#33](https://github.com/k1LoW/octocov/pull/33) ([k1LoW](https://github.com/k1LoW))
