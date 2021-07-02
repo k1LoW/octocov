@@ -25,3 +25,22 @@ func TestLcov(t *testing.T) {
 		t.Errorf("got %v\nwant %v", got.Files[0].FileName, want)
 	}
 }
+
+func TestLcovParseAllFormat(t *testing.T) {
+	tests := []struct {
+		path    string
+		wantErr bool
+	}{
+		{filepath.Join(testdataDir(t), "gocover", "coverage.out"), true},
+		{filepath.Join(testdataDir(t), "lcov", "lcov.info"), false},
+		{filepath.Join(testdataDir(t), "simplecov", ".resultset.json"), true},
+		{filepath.Join(testdataDir(t), "clover", "coverage.xml"), true},
+		{filepath.Join(testdataDir(t), "cobertura", "coverage.xml"), true},
+	}
+	for _, tt := range tests {
+		_, _, err := NewLcov().ParseReport(tt.path)
+		if tt.wantErr != (err != nil) {
+			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+		}
+	}
+}

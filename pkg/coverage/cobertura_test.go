@@ -22,3 +22,22 @@ func TestCobertura(t *testing.T) {
 		t.Error("got 0 want > 0")
 	}
 }
+
+func TestCoberturaParseAllFormat(t *testing.T) {
+	tests := []struct {
+		path    string
+		wantErr bool
+	}{
+		{filepath.Join(testdataDir(t), "gocover", "coverage.out"), true},
+		{filepath.Join(testdataDir(t), "lcov", "lcov.info"), true},
+		{filepath.Join(testdataDir(t), "simplecov", ".resultset.json"), true},
+		{filepath.Join(testdataDir(t), "clover", "coverage.xml"), true},
+		{filepath.Join(testdataDir(t), "cobertura", "coverage.xml"), false},
+	}
+	for _, tt := range tests {
+		_, _, err := NewCobertura().ParseReport(tt.path)
+		if tt.wantErr != (err != nil) {
+			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+		}
+	}
+}

@@ -24,6 +24,25 @@ func TestGocover(t *testing.T) {
 	}
 }
 
+func TestGocoverParseAllFormat(t *testing.T) {
+	tests := []struct {
+		path    string
+		wantErr bool
+	}{
+		{filepath.Join(testdataDir(t), "gocover", "coverage.out"), false},
+		{filepath.Join(testdataDir(t), "lcov", "lcov.info"), true},
+		{filepath.Join(testdataDir(t), "simplecov", ".resultset.json"), true},
+		{filepath.Join(testdataDir(t), "clover", "coverage.xml"), true},
+		{filepath.Join(testdataDir(t), "cobertura", "coverage.xml"), true},
+	}
+	for _, tt := range tests {
+		_, _, err := NewGocover().ParseReport(tt.path)
+		if tt.wantErr != (err != nil) {
+			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+		}
+	}
+}
+
 func testdataDir(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
