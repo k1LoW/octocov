@@ -1,0 +1,1539 @@
+{
+  "repository": "tiangolo/fastapi",
+  "ref": "refs/heads/master",
+  "commit": "26a36f79fa3e1a4534e29066fa4fa20fe762206c",
+  "coverage": {
+    "type": "loc",
+    "format": "Cobertura",
+    "total": 7712,
+    "covered": 7706,
+    "files": [
+      {
+        "file": "test_dependency_security_overrides.py",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "test_modules_same_name_body.app/test_modules_same_name_body/app/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_modules_same_name_body.app/test_modules_same_name_body/app/b.py",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "test_tutorial.test_behind_a_proxy/test_tutorial/test_behind_a_proxy/test_tutorial002.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_advanced_middleware/test_tutorial/test_advanced_middleware/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_conditional_openapi/test_tutorial/test_conditional_openapi/test_tutorial001.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "test_dependency_overrides.py",
+        "total": 47,
+        "covered": 47
+      },
+      {
+        "file": "test_multipart_installation.py",
+        "total": 63,
+        "covered": 63
+      },
+      {
+        "file": "test_operations_signatures.py",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "test_params_repr.py",
+        "total": 25,
+        "covered": 25
+      },
+      {
+        "file": "test_security_api_key_query.py",
+        "total": 28,
+        "covered": 28
+      },
+      {
+        "file": "test_security_http_basic_optional.py",
+        "total": 40,
+        "covered": 40
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_events/test_tutorial/test_events/test_tutorial001.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_tutorial.test_response_change_status_code/test_tutorial/test_response_change_status_code/test_tutorial001.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_tutorial.test_sub_applications/test_tutorial/test_sub_applications/test_tutorial001.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_starlette_exception.py",
+        "total": 39,
+        "covered": 39
+      },
+      {
+        "file": "test_tutorial.test_body/test_tutorial/test_body/test_tutorial001.py",
+        "total": 49,
+        "covered": 49
+      },
+      {
+        "file": "requests.py",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "security/security/open_id_connect_url.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_tutorial.test_additional_status_codes/test_tutorial/test_additional_status_codes/test_tutorial001.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_tutorial.test_query_params/test_tutorial/test_query_params/test_tutorial005.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_tutorial.test_response_change_status_code/test_tutorial/test_response_change_status_code/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_http_connection_injection.py",
+        "total": 24,
+        "covered": 24
+      },
+      {
+        "file": "test_put_no_body.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_tutorial.test_additional_status_codes/test_tutorial/test_additional_status_codes/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_sql_databases/test_tutorial/test_sql_databases/test_sql_databases.py",
+        "total": 69,
+        "covered": 69
+      },
+      {
+        "file": "test_custom_route_class.py",
+        "total": 42,
+        "covered": 42
+      },
+      {
+        "file": "test_tutorial.test_background_tasks/test_tutorial/test_background_tasks/test_tutorial002.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "test_tutorial.test_custom_request_and_route/test_tutorial/test_custom_request_and_route/test_tutorial001.py",
+        "total": 25,
+        "covered": 25
+      },
+      {
+        "file": "test_tutorial.test_extra_data_types/test_tutorial/test_extra_data_types/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_response_headers/test_tutorial/test_response_headers/test_tutorial001.py",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "test_tutorial.test_websockets/test_tutorial/test_websockets/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_exception_handlers.py",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "test_tutorial.test_dependencies/test_tutorial/test_dependencies/test_tutorial001.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_tutorial.test_response_cookies/test_tutorial/test_response_cookies/test_tutorial002.py",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "templating.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_security_http_base.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "test_security_oauth2_optional.py",
+        "total": 49,
+        "covered": 49
+      },
+      {
+        "file": "test_tutorial.test_request_forms_and_files/test_tutorial/test_request_forms_and_files/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_additional_responses_custom_model_in_callback.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_dependency_class.py",
+        "total": 61,
+        "covered": 61
+      },
+      {
+        "file": "test_response_model_invalid.py",
+        "total": 26,
+        "covered": 26
+      },
+      {
+        "file": "security/security/utils.py",
+        "total": 6,
+        "covered": 6
+      },
+      {
+        "file": "test_modules_same_name_body/test_modules_same_name_body/test_main.py",
+        "total": 26,
+        "covered": 26
+      },
+      {
+        "file": "test_tutorial.test_schema_extra_example/test_tutorial/test_schema_extra_example/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_query_params/test_tutorial/test_query_params/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "logger.py",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "param_functions.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_extra_routes.py",
+        "total": 64,
+        "covered": 64
+      },
+      {
+        "file": "test_modules_same_name_body.app/test_modules_same_name_body/app/a.py",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "test_tutorial.test_extra_data_types/test_tutorial/test_extra_data_types/test_tutorial001.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_path_operation_advanced_configurations/test_tutorial/test_path_operation_advanced_configurations/test_tutorial001.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_sql_databases_peewee/test_tutorial/test_sql_databases_peewee/test_sql_databases_peewee.py",
+        "total": 86,
+        "covered": 86
+      },
+      {
+        "file": "test_tutorial.test_sub_applications/test_tutorial/test_sub_applications/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "background.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_validate_response_recursive.py",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "test_tutorial.test_extending_openapi/test_tutorial/test_extending_openapi/test_tutorial001.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_tutorial.test_request_files/test_tutorial/test_request_files/test_tutorial002.py",
+        "total": 45,
+        "covered": 45
+      },
+      {
+        "file": "test_tutorial.test_response_cookies/test_tutorial/test_response_cookies/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_sql_databases/test_tutorial/test_sql_databases/test_testing_databases.py",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "test_tutorial.test_websockets/test_tutorial/test_websockets/test_tutorial001.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_tutorial.test_wsgi/test_tutorial/test_wsgi/test_tutorial001.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_additional_responses_bad.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_security_http_bearer.py",
+        "total": 26,
+        "covered": 26
+      },
+      {
+        "file": "test_security_http_digest.py",
+        "total": 26,
+        "covered": 26
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial008.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_query_params_str_validations/test_tutorial/test_query_params_str_validations/test_tutorial013.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "dependencies/dependencies/utils.py",
+        "total": 403,
+        "covered": 403
+      },
+      {
+        "file": "test_tutorial.test_behind_a_proxy/test_tutorial/test_behind_a_proxy/test_tutorial004.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_path_params/test_tutorial/test_path_params/test_tutorial004.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_tutorial.test_testing_dependencies/test_tutorial/test_testing_dependencies/test_tutorial001.py",
+        "total": 24,
+        "covered": 24
+      },
+      {
+        "file": "test_param_class.py",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "dependencies/dependencies/models.py",
+        "total": 28,
+        "covered": 28
+      },
+      {
+        "file": "test_tutorial.test_body_updates/test_tutorial/test_body_updates/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_custom_request_and_route/test_tutorial/test_custom_request_and_route/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_datastructures.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial001b.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_websockets/test_tutorial/test_websockets/test_tutorial002.py",
+        "total": 64,
+        "covered": 64
+      },
+      {
+        "file": "test_infer_param_optionality.py",
+        "total": 72,
+        "covered": 72
+      },
+      {
+        "file": "test_invalid_sequence_param.py",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "test_tutorial.test_additional_responses/test_tutorial/test_additional_responses/test_tutorial001.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_body_multiple_params/test_tutorial/test_body_multiple_params/test_tutorial003.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_tutorial.test_dependencies/test_tutorial/test_dependencies/test_tutorial012.py",
+        "total": 40,
+        "covered": 40
+      },
+      {
+        "file": "test_tutorial.test_header_params/test_tutorial/test_header_params/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_response_headers/test_tutorial/test_response_headers/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_additional_responses_router.py",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "test_request_body_parameters_media_type.py",
+        "total": 24,
+        "covered": 24
+      },
+      {
+        "file": "testclient.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "security/security/base.py",
+        "total": 4,
+        "covered": 4
+      },
+      {
+        "file": "test_tutorial.test_cookie_params/test_tutorial/test_cookie_params/test_tutorial001.py",
+        "total": 10,
+        "covered": 10
+      },
+      {
+        "file": "test_tutorial.test_path_operation_advanced_configurations/test_tutorial/test_path_operation_advanced_configurations/test_tutorial003.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "openapi/openapi/utils.py",
+        "total": 210,
+        "covered": 210
+      },
+      {
+        "file": "test_tutorial.test_behind_a_proxy/test_tutorial/test_behind_a_proxy/test_tutorial003.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_behind_a_proxy/test_tutorial/test_behind_a_proxy/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_query_params/test_tutorial/test_query_params/test_tutorial006.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_tutorial.test_settings/test_tutorial/test_settings/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "concurrency.py",
+        "total": 28,
+        "covered": 22
+      },
+      {
+        "file": "test_serialize_response_dataclass.py",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "openapi/openapi/constants.py",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "test_tutorial.test_async_tests/test_tutorial/test_async_tests/test_main.py",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "test_tutorial.test_request_forms/test_tutorial/test_request_forms/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_response_cookies/test_tutorial/test_response_cookies/test_tutorial001.py",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "test_tutorial.test_response_headers/test_tutorial/test_response_headers/test_tutorial002.py",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "test_tutorial.test_sql_databases/test_tutorial/test_sql_databases/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "encoders.py",
+        "total": 69,
+        "covered": 69
+      },
+      {
+        "file": "test_additional_properties.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_dependency_contextmanager.py",
+        "total": 230,
+        "covered": 230
+      },
+      {
+        "file": "test_router_prefix_with_template.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "test_tutorial.test_background_tasks/test_tutorial/test_background_tasks/test_tutorial001.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "test_tutorial.test_metadata/test_tutorial/test_metadata/test_tutorial004.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "test_tutorial.test_sql_databases_peewee/test_tutorial/test_sql_databases_peewee/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_templates/test_tutorial/test_templates/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "exception_handlers.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "responses.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "dependencies/dependencies/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_cors/test_tutorial/test_cors/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_starlette_urlconvertors.py",
+        "total": 29,
+        "covered": 29
+      },
+      {
+        "file": "test_tutorial.test_path_operation_configurations/test_tutorial/test_path_operation_configurations/test_tutorial005.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_path_operation_configurations/test_tutorial/test_path_operation_configurations/test_tutorial006.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_tutorial.test_response_model/test_tutorial/test_response_model/test_tutorial006.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_testing/test_tutorial/test_testing/test_tutorial003.py",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "test_include_router_defaults_overrides.py",
+        "total": 177,
+        "covered": 177
+      },
+      {
+        "file": "test_security_http_basic_realm.py",
+        "total": 38,
+        "covered": 38
+      },
+      {
+        "file": "test_serialize_response_model.py",
+        "total": 66,
+        "covered": 66
+      },
+      {
+        "file": "test_sub_callbacks.py",
+        "total": 39,
+        "covered": 39
+      },
+      {
+        "file": "types.py",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "test_tutorial.test_custom_request_and_route/test_tutorial/test_custom_request_and_route/test_tutorial002.py",
+        "total": 9,
+        "covered": 9
+      },
+      {
+        "file": "test_tutorial.test_path_params/test_tutorial/test_path_params/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_sql_databases/test_tutorial/test_sql_databases/test_sql_databases_middleware.py",
+        "total": 69,
+        "covered": 69
+      },
+      {
+        "file": "test_default_response_class.py",
+        "total": 141,
+        "covered": 141
+      },
+      {
+        "file": "test_default_response_class_router.py",
+        "total": 135,
+        "covered": 135
+      },
+      {
+        "file": "test_security_api_key_cookie.py",
+        "total": 28,
+        "covered": 28
+      },
+      {
+        "file": "test_tutorial.test_async_sql_databases/test_tutorial/test_async_sql_databases/test_tutorial001.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/test_tutorial006.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_tutorial.test_openapi_callbacks/test_tutorial/test_openapi_callbacks/test_tutorial001.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_tutorial.test_path_operation_configurations/test_tutorial/test_path_operation_configurations/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_query_params_str_validations/test_tutorial/test_query_params_str_validations/test_tutorial001.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "staticfiles.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_additional_responses_response_class.py",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "test_path.py",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "test_repeated_dependency_schema.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "openapi/openapi/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_modules_same_name_body/test_modules_same_name_body/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_body_fields/test_tutorial/test_body_fields/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/test_tutorial002.py",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "middleware/middleware/gzip.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "security/security/http.py",
+        "total": 87,
+        "covered": 87
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial005.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_dependencies/test_tutorial/test_dependencies/test_tutorial004.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_response_by_alias.py",
+        "total": 80,
+        "covered": 80
+      },
+      {
+        "file": "test_security_api_key_query_optional.py",
+        "total": 33,
+        "covered": 33
+      },
+      {
+        "file": "test_security_http_base_optional.py",
+        "total": 25,
+        "covered": 25
+      },
+      {
+        "file": "test_additional_response_extra.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_datetime_custom_encoder.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_tutorial.test_additional_responses/test_tutorial/test_additional_responses/test_tutorial003.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_body_multiple_params/test_tutorial/test_body_multiple_params/test_tutorial001.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_tutorial.test_extending_openapi/test_tutorial/test_extending_openapi/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/test_tutorial004.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "main.py",
+        "total": 118,
+        "covered": 118
+      },
+      {
+        "file": "test_tutorial.test_query_params_str_validations/test_tutorial/test_query_params_str_validations/test_tutorial012.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "routing.py",
+        "total": 287,
+        "covered": 287
+      },
+      {
+        "file": "test_tutorial.test_body_fields/test_tutorial/test_body_fields/test_tutorial001.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_tutorial.test_advanced_middleware/test_tutorial/test_advanced_middleware/test_tutorial001.py",
+        "total": 10,
+        "covered": 10
+      },
+      {
+        "file": "test_tutorial.test_async_sql_databases/test_tutorial/test_async_sql_databases/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_behind_a_proxy/test_tutorial/test_behind_a_proxy/test_tutorial001.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_metadata/test_tutorial/test_metadata/test_tutorial001.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_templates/test_tutorial/test_templates/test_tutorial001.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_path_operation_advanced_configurations/test_tutorial/test_path_operation_advanced_configurations/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "params.py",
+        "total": 62,
+        "covered": 62
+      },
+      {
+        "file": "test_get_request_body.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_openapi_servers.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "middleware/middleware/wsgi.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/test_tutorial001.py",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "test_tutorial.test_metadata/test_tutorial/test_metadata/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_empty_router.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_tutorial.test_body_nested_models/test_tutorial/test_body_nested_models/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_query_params_str_validations/test_tutorial/test_query_params_str_validations/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_testing/test_tutorial/test_testing/test_tutorial001.py",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "test_deprecated_openapi_prefix.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_include_route.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_validate_response_dataclass.py",
+        "total": 31,
+        "covered": 31
+      },
+      {
+        "file": "test_tutorial.test_additional_responses/test_tutorial/test_additional_responses/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_request_files/test_tutorial/test_request_files/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_local_docs.py",
+        "total": 41,
+        "covered": 41
+      },
+      {
+        "file": "test_multi_body_errors.py",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "test_security_http_digest_optional.py",
+        "total": 29,
+        "covered": 29
+      },
+      {
+        "file": "test_tutorial.test_advanced_middleware/test_tutorial/test_advanced_middleware/test_tutorial003.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_tutorial.test_body_updates/test_tutorial/test_body_updates/test_tutorial001.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_tutorial.test_extra_models/test_tutorial/test_extra_models/test_tutorial003.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_additional_responses_default_validationerror.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_callable_endpoint.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_security_oauth2_password_bearer_optional.py",
+        "total": 29,
+        "covered": 29
+      },
+      {
+        "file": "utils.py",
+        "total": 3,
+        "covered": 3
+      },
+      {
+        "file": "middleware/middleware/httpsredirect.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_dependency_cache.py",
+        "total": 43,
+        "covered": 43
+      },
+      {
+        "file": "test_tutorial.test_websockets/test_tutorial/test_websockets/test_tutorial003.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_security_openid_connect_optional.py",
+        "total": 37,
+        "covered": 37
+      },
+      {
+        "file": "websockets.py",
+        "total": 2,
+        "covered": 2
+      },
+      {
+        "file": "test_tutorial.test_background_tasks/test_tutorial/test_background_tasks/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_body/test_tutorial/test_body/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial001.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_events/test_tutorial/test_events/test_tutorial002.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "test_ws_router.py",
+        "total": 63,
+        "covered": 63
+      },
+      {
+        "file": "test_tutorial.test_dependencies/test_tutorial/test_dependencies/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_header_params/test_tutorial/test_header_params/test_tutorial001.py",
+        "total": 10,
+        "covered": 10
+      },
+      {
+        "file": "test_application.py",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "test_fakeasync.py",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "test_invalid_path_param.py",
+        "total": 45,
+        "covered": 45
+      },
+      {
+        "file": "openapi/openapi/models.py",
+        "total": 242,
+        "covered": 242
+      },
+      {
+        "file": "security/security/oauth2.py",
+        "total": 63,
+        "covered": 63
+      },
+      {
+        "file": "test_tutorial.test_body_nested_models/test_tutorial/test_body_nested_models/test_tutorial009.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "middleware/middleware/trustedhost.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_tutorial.test_first_steps/test_tutorial/test_first_steps/test_tutorial001.py",
+        "total": 10,
+        "covered": 10
+      },
+      {
+        "file": "test_tutorial.test_response_model/test_tutorial/test_response_model/test_tutorial003.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_response_code_no_body.py",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial004.py",
+        "total": 13,
+        "covered": 13
+      },
+      {
+        "file": "test_tutorial.test_testing/test_tutorial/test_testing/test_main.py",
+        "total": 8,
+        "covered": 8
+      },
+      {
+        "file": "test_forms_from_non_typing_sequences.py",
+        "total": 25,
+        "covered": 25
+      },
+      {
+        "file": "test_tutorial.test_extending_openapi/test_tutorial/test_extending_openapi/test_tutorial002.py",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "test_tutorial.test_extra_models/test_tutorial/test_extra_models/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_path_params/test_tutorial/test_path_params/test_tutorial005.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial/test_tutorial/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial007.py",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/test_tutorial005.py",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "test_query.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_response_class_no_mediatype.py",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "test_union_body.py",
+        "total": 26,
+        "covered": 26
+      },
+      {
+        "file": "test_tutorial.test_advanced_middleware/test_tutorial/test_advanced_middleware/test_tutorial002.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_cookie_params/test_tutorial/test_cookie_params/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_security/test_tutorial/test_security/test_tutorial001.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "test_tutorial.test_settings/test_tutorial/test_settings/test_app02.py",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "test_tutorial.test_wsgi/test_tutorial/test_wsgi/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_additional_responses_custom_validationerror.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_tutorial.test_async_tests/test_tutorial/test_async_tests/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_bigger_applications/test_tutorial/test_bigger_applications/test_main.py",
+        "total": 35,
+        "covered": 35
+      },
+      {
+        "file": "test_tutorial.test_path_operation_advanced_configurations/test_tutorial/test_path_operation_advanced_configurations/test_tutorial004.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_query_params_str_validations/test_tutorial/test_query_params_str_validations/test_tutorial011.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_tutorial.test_schema_extra_example/test_tutorial/test_schema_extra_example/test_tutorial004.py",
+        "total": 11,
+        "covered": 11
+      },
+      {
+        "file": "test_duplicate_models_openapi.py",
+        "total": 24,
+        "covered": 24
+      },
+      {
+        "file": "openapi/openapi/docs.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "test_tutorial.test_conditional_openapi/test_tutorial/test_conditional_openapi/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_extra_models/test_tutorial/test_extra_models/test_tutorial004.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_custom_request_and_route/test_tutorial/test_custom_request_and_route/test_tutorial003.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_request_forms/test_tutorial/test_request_forms/test_tutorial001.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_inherited_custom_class.py",
+        "total": 40,
+        "covered": 40
+      },
+      {
+        "file": "test_security_api_key_header.py",
+        "total": 28,
+        "covered": 28
+      },
+      {
+        "file": "test_security_oauth2.py",
+        "total": 44,
+        "covered": 44
+      },
+      {
+        "file": "test_security_oauth2_authorization_code_bearer.py",
+        "total": 27,
+        "covered": 27
+      },
+      {
+        "file": "middleware/middleware/cors.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_tutorial.test_body_multiple_params/test_tutorial/test_body_multiple_params/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_repeated_cookie_headers.py",
+        "total": 19,
+        "covered": 19
+      },
+      {
+        "file": "test_schema_extra_examples.py",
+        "total": 95,
+        "covered": 95
+      },
+      {
+        "file": "middleware/middleware/__init__.py",
+        "total": 1,
+        "covered": 1
+      },
+      {
+        "file": "test_tutorial.test_additional_responses/test_tutorial/test_additional_responses/test_tutorial004.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_tutorial.test_custom_response/test_tutorial/test_custom_response/test_tutorial006.py",
+        "total": 7,
+        "covered": 7
+      },
+      {
+        "file": "test_tutorial.test_request_forms_and_files/test_tutorial/test_request_forms_and_files/test_tutorial001.py",
+        "total": 42,
+        "covered": 42
+      },
+      {
+        "file": "test_tutorial.test_cors/test_tutorial/test_cors/test_tutorial001.py",
+        "total": 19,
+        "covered": 19
+      },
+      {
+        "file": "test_tutorial.test_response_model/test_tutorial/test_response_model/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_response_model/test_tutorial/test_response_model/test_tutorial004.py",
+        "total": 14,
+        "covered": 14
+      },
+      {
+        "file": "test_tutorial.test_security/test_tutorial/test_security/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_security/test_tutorial/test_security/test_tutorial003.py",
+        "total": 43,
+        "covered": 43
+      },
+      {
+        "file": "test_tutorial.test_testing/test_tutorial/test_testing/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_filter_pydantic_sub_model.py",
+        "total": 38,
+        "covered": 38
+      },
+      {
+        "file": "test_response_change_status_code.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_router_events.py",
+        "total": 60,
+        "covered": 60
+      },
+      {
+        "file": "test_security_api_key_header_optional.py",
+        "total": 33,
+        "covered": 33
+      },
+      {
+        "file": "test_tutorial.test_testing/test_tutorial/test_testing/test_tutorial002.py",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "test_response_model_sub_types.py",
+        "total": 34,
+        "covered": 34
+      },
+      {
+        "file": "test_modules_same_name_body.app/test_modules_same_name_body/app/main.py",
+        "total": 5,
+        "covered": 5
+      },
+      {
+        "file": "test_tutorial.test_security/test_tutorial/test_security/test_tutorial006.py",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "test_no_swagger_ui_redirect.py",
+        "total": 20,
+        "covered": 20
+      },
+      {
+        "file": "test_security_api_key_cookie_optional.py",
+        "total": 33,
+        "covered": 33
+      },
+      {
+        "file": "test_tutorial.test_bigger_applications/test_tutorial/test_bigger_applications/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_security/test_tutorial/test_security/test_tutorial005.py",
+        "total": 98,
+        "covered": 98
+      },
+      {
+        "file": "test_tutorial.test_testing_dependencies/test_tutorial/test_testing_dependencies/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "datastructures.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "security/security/__init__.py",
+        "total": 15,
+        "covered": 15
+      },
+      {
+        "file": "test_swagger_ui_init_oauth.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_tutorial.test_first_steps/test_tutorial/test_first_steps/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_tutorial.test_request_files/test_tutorial/test_request_files/test_tutorial001.py",
+        "total": 43,
+        "covered": 43
+      },
+      {
+        "file": "test_security_http_bearer_optional.py",
+        "total": 29,
+        "covered": 29
+      },
+      {
+        "file": "test_skip_defaults.py",
+        "total": 50,
+        "covered": 50
+      },
+      {
+        "file": "test_tutorial.test_path_operation_advanced_configurations/test_tutorial/test_path_operation_advanced_configurations/test_tutorial002.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "applications.py",
+        "total": 126,
+        "covered": 126
+      },
+      {
+        "file": "test_jsonable_encoder.py",
+        "total": 103,
+        "covered": 103
+      },
+      {
+        "file": "test_union_inherited_body.py",
+        "total": 30,
+        "covered": 30
+      },
+      {
+        "file": "test_tutorial.test_additional_responses/test_tutorial/test_additional_responses/test_tutorial002.py",
+        "total": 21,
+        "covered": 21
+      },
+      {
+        "file": "test_tutorial.test_extra_models/test_tutorial/test_extra_models/test_tutorial005.py",
+        "total": 12,
+        "covered": 12
+      },
+      {
+        "file": "test_tutorial.test_response_model/test_tutorial/test_response_model/test_tutorial005.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "exceptions.py",
+        "total": 18,
+        "covered": 18
+      },
+      {
+        "file": "test_custom_swagger_ui_redirect.py",
+        "total": 23,
+        "covered": 23
+      },
+      {
+        "file": "test_param_in_path_and_dependency.py",
+        "total": 17,
+        "covered": 17
+      },
+      {
+        "file": "test_validate_response.py",
+        "total": 29,
+        "covered": 29
+      },
+      {
+        "file": "test_tutorial.test_dependencies/test_tutorial/test_dependencies/test_tutorial006.py",
+        "total": 24,
+        "covered": 24
+      },
+      {
+        "file": "test_tutorial.test_events/test_tutorial/test_events/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_security_openid_connect.py",
+        "total": 32,
+        "covered": 32
+      },
+      {
+        "file": "test_serialize_response.py",
+        "total": 31,
+        "covered": 31
+      },
+      {
+        "file": "test_tutorial.test_handling_errors/test_tutorial/test_handling_errors/test_tutorial003.py",
+        "total": 16,
+        "covered": 16
+      },
+      {
+        "file": "test_tutorial.test_openapi_callbacks/test_tutorial/test_openapi_callbacks/__init__.py",
+        "total": 0,
+        "covered": 0
+      },
+      {
+        "file": "test_dependency_duplicates.py",
+        "total": 44,
+        "covered": 44
+      },
+      {
+        "file": "test_multi_query_errors.py",
+        "total": 22,
+        "covered": 22
+      },
+      {
+        "file": "security/security/api_key.py",
+        "total": 44,
+        "covered": 44
+      }
+    ]
+  },
+  "timestamp": "2021-07-02T02:06:04.888845Z"
+}
