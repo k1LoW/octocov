@@ -2,8 +2,10 @@ package gh
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -410,6 +412,61 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 	}
 
 	return nil
+}
+
+type GitHubEvent struct {
+	Name    string
+	Number  int
+	State   string
+	Payload interface{}
+}
+
+func DecodeGitHubEvent() (*GitHubEvent, error) {
+	i := &GitHubEvent{}
+	n := os.Getenv("GITHUB_EVENT_NAME")
+	if n == "" {
+		return i, fmt.Errorf("env %s is not set.", "GITHUB_EVENT_NAME")
+	}
+	i.Name = n
+	p := os.Getenv("GITHUB_EVENT_PATH")
+	if p == "" {
+		return i, fmt.Errorf("env %s is not set.", "GITHUB_EVENT_PATH")
+	}
+	b, err := ioutil.ReadFile(filepath.Clean(p))
+	if err != nil {
+		return i, err
+	}
+	s := struct {
+		PullRequest struct {
+			Number int    `json:"number,omitempty"`
+			State  string `json:"state,omitempty"`
+		} `json:"pull_request,omitempty"`
+		Issue struct {
+			Number int    `json:"number,omitempty"`
+			State  string `json:"state,omitempty"`
+		} `json:"issue,omitempty"`
+	}{}
+	if err := json.Unmarshal(b, &s); err != nil {
+		return i, err
+	}
+	switch {
+	case s.PullRequest.Number > 0:
+		i.Number = s.PullRequest.Number
+		i.State = s.PullRequest.State
+	case s.Issue.Number > 0:
+		i.Number = s.Issue.Number
+		i.State = s.Issue.State
+	}
+
+	var payload interface{}
+
+	if err := json.Unmarshal(b, &payload); err != nil {
+		return i, err
+	}
+
+	i.Payload = payload
+
+	return i, nil
 }
 
 type roundTripper struct {
