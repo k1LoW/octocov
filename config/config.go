@@ -13,8 +13,7 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
-	"github.com/k1LoW/ghdag/env"
-	"github.com/k1LoW/ghdag/runner"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -403,7 +402,7 @@ func CheckIf(cond string) (bool, error) {
 	if cond == "" {
 		return true, nil
 	}
-	e, err := runner.DecodeGitHubEvent()
+	e, err := gh.DecodeGitHubEvent()
 	if err != nil {
 		return false, err
 	}
@@ -418,7 +417,7 @@ func CheckIf(cond string) (bool, error) {
 			"event_name": e.Name,
 			"event":      e.Payload,
 		},
-		"env": env.EnvMap(),
+		"env": envMap(),
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -451,4 +450,21 @@ func traverseGitPath(base string) (string, error) {
 		p = filepath.Dir(p)
 	}
 	return "", fmt.Errorf("failed to traverse the Git root path: %s", base)
+}
+
+func envMap() map[string]string {
+	m := map[string]string{}
+	for _, kv := range os.Environ() {
+		if !strings.Contains(kv, "=") {
+			continue
+		}
+		parts := strings.SplitN(kv, "=", 2)
+		k := parts[0]
+		if len(parts) < 2 {
+			m[k] = ""
+			continue
+		}
+		m[k] = parts[1]
+	}
+	return m
 }
