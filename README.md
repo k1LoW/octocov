@@ -165,6 +165,20 @@ datastore:
     path:                       # default: reports/${GITHUB_REPOSITORY}/report.json
 ```
 
+#### S3
+
+``` yaml
+# .octocov.yml
+datastore:
+  s3:
+    bucket: my-coverage # central datastore bucket
+    path:               # default: reports/${GITHUB_REPOSITORY}/report.json
+```
+
+**Required permission:**
+
+- `s3:PutObject`
+
 #### If section
 
 ``` yaml

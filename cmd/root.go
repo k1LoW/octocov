@@ -32,6 +32,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
@@ -238,16 +240,34 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildDatastoreConfig(); err != nil {
 				return err
 			}
-			gh, err := gh.New()
-			if err != nil {
-				return err
+			if c.Datastore.Github != nil {
+				// GitHub
+				gh, err := gh.New()
+				if err != nil {
+					return err
+				}
+				g, err := datastore.NewGithub(c, gh)
+				if err != nil {
+					return err
+				}
+				if err := g.Store(ctx, r); err != nil {
+					return err
+				}
 			}
-			g, err := datastore.NewGithub(c, gh)
-			if err != nil {
-				return err
-			}
-			if err := g.Store(ctx, r); err != nil {
-				return err
+			if c.Datastore.S3 != nil {
+				// S3
+				sess, err := session.NewSession()
+				if err != nil {
+					return err
+				}
+				sc := s3.New(sess)
+				s, err := datastore.NewS3(c, sc)
+				if err != nil {
+					return err
+				}
+				if err := s.Store(ctx, r); err != nil {
+					return err
+				}
 			}
 		}
 
