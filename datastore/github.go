@@ -5,36 +5,33 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
 
 type Github struct {
-	config *config.Config
-	gh     *gh.Gh
+	gh         *gh.Gh
+	repository string
+	branch     string
 }
 
-func NewGithub(c *config.Config, gh *gh.Gh) (*Github, error) {
+func NewGithub(gh *gh.Gh, r, b string) (*Github, error) {
 	return &Github{
-		config: c,
-		gh:     gh,
+		gh:         gh,
+		repository: r,
+		branch:     b,
 	}, nil
 }
 
-func (g *Github) Store(ctx context.Context, r *report.Report) error {
-	branch := g.config.Datastore.Github.Branch
+func (g *Github) Store(ctx context.Context, path string, r *report.Report) error {
+	branch := g.branch
 	content := r.String()
-	path := g.config.Datastore.Github.Path
 	from := r.Repository
-	if g.config.Repository != "" {
-		from = g.config.Repository
-	}
 	if from == "" {
-		return fmt.Errorf("report '%s' is not set", "repository")
+		from = "?"
 	}
 	message := fmt.Sprintf("Store coverage report of %s", from)
-	splitted := strings.Split(g.config.Datastore.Github.Repository, "/")
+	splitted := strings.Split(g.repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]
 

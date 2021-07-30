@@ -246,11 +246,11 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				g, err := datastore.NewGithub(c, gh)
+				g, err := datastore.NewGithub(gh, c.Datastore.Github.Repository, c.Datastore.Github.Branch)
 				if err != nil {
 					return err
 				}
-				if err := g.Store(ctx, r); err != nil {
+				if err := g.Store(ctx, c.Datastore.Github.Path, r); err != nil {
 					return err
 				}
 			}
@@ -261,11 +261,11 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				sc := s3.New(sess)
-				s, err := datastore.NewS3(c, sc)
+				s, err := datastore.NewS3(sc, c.Datastore.S3.Bucket)
 				if err != nil {
 					return err
 				}
-				if err := s.Store(ctx, r); err != nil {
+				if err := s.Store(ctx, c.Datastore.S3.Path, r); err != nil {
 					return err
 				}
 			}
