@@ -82,12 +82,18 @@ type ConfigTestExecutionTimeBadge struct {
 type ConfigDatastore struct {
 	If     string                 `yaml:"if,omitempty"`
 	Github *ConfigDatastoreGithub `yaml:"github,omitempty"`
+	S3     *ConfigDatastoreS3     `yaml:"s3,omitempty"`
 }
 
 type ConfigDatastoreGithub struct {
 	Repository string `yaml:"repository"`
 	Branch     string `yaml:"branch"`
 	Path       string `yaml:"path"`
+}
+
+type ConfigDatastoreS3 struct {
+	Bucket string `yaml:"bucket"`
+	Path   string `yaml:"path"`
 }
 
 type ConfigCentral struct {
@@ -166,10 +172,16 @@ func (c *Config) Build() {
 	}
 	gitRoot, _ := traverseGitPath(c.Root())
 	c.GitRoot = gitRoot
-	if c.Datastore != nil && c.Datastore.Github != nil {
-		c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
-		c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
-		c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
+	if c.Datastore != nil {
+		if c.Datastore.Github != nil {
+			c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
+			c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
+			c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
+		}
+		if c.Datastore.S3 != nil {
+			c.Datastore.S3.Bucket = os.ExpandEnv(c.Datastore.S3.Bucket)
+			c.Datastore.S3.Path = os.ExpandEnv(c.Datastore.S3.Path)
+		}
 	}
 
 	if c.Coverage == nil {
@@ -242,10 +254,28 @@ func (c *Config) DatastoreConfigReady() bool {
 }
 
 func (c *Config) BuildDatastoreConfig() error {
+	if c.Datastore.Github == nil && c.Datastore.S3 == nil {
+		return errors.New("datastore not set")
+	}
+	if c.Datastore.Github != nil {
+		// GitHub
+		if err := c.buildDatastoreGithubConfig(); err != nil {
+			return err
+		}
+	}
+	if c.Datastore.S3 != nil {
+		// S3
+		if err := c.buildDatastoreS3Config(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *Config) buildDatastoreGithubConfig() error {
 	if c.Datastore.Github == nil {
 		return errors.New("datastore.github not set")
 	}
-	// GitHub
 	if c.Datastore.Github.Branch == "" {
 		c.Datastore.Github.Branch = defaultBranch
 	}
@@ -263,6 +293,22 @@ func (c *Config) BuildDatastoreConfig() error {
 	}
 	if c.Datastore.Github.Path == "" {
 		return errors.New("datastore.github.path not set")
+	}
+	return nil
+}
+
+func (c *Config) buildDatastoreS3Config() error {
+	if c.Datastore.S3 == nil {
+		return errors.New("datastore.s3 not set")
+	}
+	if c.Datastore.S3.Bucket == "" {
+		return errors.New("datastore.s3.bucket not set")
+	}
+	if c.Datastore.S3.Path == "" && c.Repository != "" {
+		c.Datastore.S3.Path = fmt.Sprintf("%s/%s/report.json", defaultReportsDir, c.Repository)
+	}
+	if c.Datastore.S3.Path == "" {
+		return errors.New("datastore.s3.path not set")
 	}
 	return nil
 }

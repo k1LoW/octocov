@@ -194,7 +194,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 }
 
 func (r *Report) CoveragePercent() float64 {
-	if r.Coverage.Total == 0 {
+	if r.Coverage == nil || r.Coverage.Total == 0 {
 		return 0.0
 	}
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
