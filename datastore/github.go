@@ -2,7 +2,9 @@ package datastore
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
@@ -35,4 +37,8 @@ func (g *Github) Store(ctx context.Context, path string, r *report.Report) error
 		return err
 	}
 	return g.gh.PushContent(ctx, owner, repo, branch, content, path, message)
+}
+
+func (g *Github) ReadDirDS(path string) (fs.ReadDirFS, error) {
+	return nil, errors.New("not implemented")
 }
