@@ -3,7 +3,6 @@ package datastore
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
@@ -31,9 +30,9 @@ func (g *Github) Store(ctx context.Context, path string, r *report.Report) error
 		from = "?"
 	}
 	message := fmt.Sprintf("Store coverage report of %s", from)
-	splitted := strings.Split(g.repository, "/")
-	owner := splitted[0]
-	repo := splitted[1]
-
+	owner, repo, err := gh.SplitRepository(g.repository)
+	if err != nil {
+		return err
+	}
 	return g.gh.PushContent(ctx, owner, repo, branch, content, path, message)
 }
