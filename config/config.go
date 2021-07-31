@@ -390,13 +390,7 @@ func (c *Config) Acceptable(r *report.Report) error {
 }
 
 func (c *Config) OwnerRepo() (string, string, error) {
-	splitted := strings.Split(c.Repository, "/")
-	if len(splitted) != 2 {
-		return "", "", errors.New("could not get owner and repo")
-	}
-	owner := splitted[0]
-	repo := splitted[1]
-	return owner, repo, nil
+	return gh.SplitRepository(c.Repository)
 }
 
 func (c *Config) CoverageColor(cover float64) string {

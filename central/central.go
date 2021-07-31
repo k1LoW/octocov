@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -14,7 +14,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
@@ -24,68 +23,76 @@ import (
 var indexTmpl []byte
 
 type Central struct {
-	config         *config.Config
-	reports        []*report.Report
-	generatedPaths []string
+	config  *CentralConfig
+	reports []*report.Report
 }
 
-func New(c *config.Config) *Central {
+type CentralConfig struct {
+	Repository             string
+	Wd                     string
+	Index                  string
+	Badges                 string
+	Reports                fs.ReadDirFS
+	CoverageColor          func(cover float64) string
+	CodeToTestRatioColor   func(ratio float64) string
+	TestExecutionTimeColor func(d time.Duration) string
+}
+
+func New(c *CentralConfig) *Central {
 	return &Central{
-		config:  c,
-		reports: []*report.Report{},
+		config: c,
 	}
 }
 
-func (c *Central) Generate(ctx context.Context) error {
+func (c *Central) Generate(ctx context.Context) ([]string, error) {
 	// collect reports
 	if err := c.collectReports(); err != nil {
-		return err
+		return nil, err
 	}
 
 	// generate badges
-	if err := c.generateBadges(); err != nil {
-		return err
+	paths, err := c.generateBadges()
+	if err != nil {
+		return nil, err
 	}
 
 	// render index
-	p := c.config.Central.Root
-	fi, err := os.Stat(c.config.Central.Root)
+	p := c.config.Index
+	fi, err := os.Stat(c.config.Index)
 	if err == nil && fi.IsDir() {
-		p = filepath.Join(c.config.Central.Root, "README.md")
+		p = filepath.Join(c.config.Index, "README.md")
 	}
 	i, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := c.renderIndex(i); err != nil {
-		return err
+		return nil, err
 	}
-	c.generatedPaths = append(c.generatedPaths, p)
+	paths = append(paths, p)
 
-	// git push
-	if c.config.CentralPushConfigReady() {
-		_, _ = fmt.Fprintln(os.Stderr, "Commit and push central report")
-		if err := gh.PushUsingLocalGit(ctx, c.config.GitRoot, c.generatedPaths, "Update by octocov"); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return paths, nil
 }
 
 func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
+	fsys := c.config.Reports
 
 	// collect reports
-	if err := filepath.Walk(c.config.Central.Reports, func(path string, fi os.FileInfo, err error) error {
+	if err := fs.WalkDir(fsys, "/", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if fi.IsDir() || !strings.HasSuffix(fi.Name(), ".json") {
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
 			return nil
 		}
 		r := report.New()
-		b, err := ioutil.ReadFile(filepath.Clean(path))
+		f, err := fsys.Open(path)
+		if err != nil {
+			return nil
+		}
+		defer f.Close()
+		b, err := io.ReadAll(f)
 		if err != nil {
 			return nil
 		}
@@ -113,66 +120,68 @@ func (c *Central) collectReports() error {
 	return nil
 }
 
-func (c *Central) generateBadges() error {
+func (c *Central) generateBadges() ([]string, error) {
+	generatedPaths := []string{}
+
 	for _, r := range c.reports {
 		cp := r.CoveragePercent()
-		err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+		err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
 		if err != nil {
-			return err
+			return nil, err
 		}
-		bp := filepath.Join(c.config.Central.Badges, r.Repository, "coverage.svg")
+		bp := filepath.Join(c.config.Badges, r.Repository, "coverage.svg")
 		out, err := os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 		if err != nil {
-			return err
+			return nil, err
 		}
 		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
 		b.MessageColor = c.config.CoverageColor(cp)
 		if err := b.Render(out); err != nil {
-			return err
+			return nil, err
 		}
-		c.generatedPaths = append(c.generatedPaths, bp)
+		generatedPaths = append(generatedPaths, bp)
 
 		// Code to Test Ratio
 		if r.CodeToTestRatio != nil {
 			tr := r.CodeToTestRatioRatio()
-			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
 			if err != nil {
-				return err
+				return nil, err
 			}
-			bp := filepath.Join(c.config.Central.Badges, r.Repository, "ratio.svg")
+			bp := filepath.Join(c.config.Badges, r.Repository, "ratio.svg")
 			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 			if err != nil {
-				return err
+				return nil, err
 			}
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
 			b.MessageColor = c.config.CodeToTestRatioColor(tr)
 			if err := b.Render(out); err != nil {
-				return err
+				return nil, err
 			}
-			c.generatedPaths = append(c.generatedPaths, bp)
+			generatedPaths = append(generatedPaths, bp)
 		}
 
 		// Test Execution Time
 		if r.TestExecutionTime != nil {
 			d := time.Duration(*r.TestExecutionTime)
-			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
 			if err != nil {
-				return err
+				return nil, err
 			}
-			bp := filepath.Join(c.config.Central.Badges, r.Repository, "time.svg")
+			bp := filepath.Join(c.config.Badges, r.Repository, "time.svg")
 			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 			if err != nil {
-				return err
+				return nil, err
 			}
 			b := badge.New("test execution time", d.String())
 			b.MessageColor = c.config.TestExecutionTimeColor(d)
 			if err := b.Render(out); err != nil {
-				return err
+				return nil, err
 			}
-			c.generatedPaths = append(c.generatedPaths, bp)
+			generatedPaths = append(generatedPaths, bp)
 		}
 	}
-	return nil
+	return generatedPaths, nil
 }
 
 func (c *Central) renderIndex(wr io.Writer) error {
@@ -183,33 +192,33 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	}
 
 	ctx := context.Background()
-	gh, err := gh.New()
+	g, err := gh.New()
 	if err != nil {
 		return err
 	}
-	owner, repo, err := c.config.OwnerRepo()
+	owner, repo, err := gh.SplitRepository(c.config.Repository)
 	if err != nil {
 		return err
 	}
-	rawRootURL, err := gh.GetRawRootURL(ctx, owner, repo)
+	rawRootURL, err := g.GetRawRootURL(ctx, owner, repo)
 	if err != nil {
 		return err
 	}
 
 	// Get project root dir
-	proot := c.config.Getwd()
+	proot := c.config.Wd
 
-	croot := c.config.Central.Root
+	croot := c.config.Index
 	if strings.HasSuffix(croot, ".md") {
-		croot = filepath.Dir(c.config.Central.Root)
+		croot = filepath.Dir(c.config.Index)
 	}
 
-	badgesLinkRel, err := filepath.Rel(croot, c.config.Central.Badges)
+	badgesLinkRel, err := filepath.Rel(croot, c.config.Badges)
 	if err != nil {
 		return err
 	}
 
-	badgesURLRel, err := filepath.Rel(proot, c.config.Central.Badges)
+	badgesURLRel, err := filepath.Rel(proot, c.config.Badges)
 	if err != nil {
 		return err
 	}

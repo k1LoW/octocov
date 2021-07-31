@@ -8,16 +8,34 @@ import (
 	"testing"
 
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/datastore"
 )
 
 func TestCollectReports(t *testing.T) {
 	c := config.New()
 	c.Central = &config.ConfigCentral{
 		Enable:  true,
-		Reports: filepath.Join(testdataDir(t), "reports"),
+		Reports: "reports",
 	}
+	l, err := datastore.NewLocal(testdataDir(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fsys, err := l.ReadDirDS(c.Central.Reports)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctr := New(&CentralConfig{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Getwd(),
+		Badges:                 c.Central.Badges,
+		Reports:                fsys,
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
 
-	ctr := New(c)
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
 	}
@@ -33,17 +51,38 @@ func TestGenerateBadges(t *testing.T) {
 	c := config.New()
 	c.Central = &config.ConfigCentral{
 		Enable:  true,
-		Reports: filepath.Join(testdataDir(t), "reports"),
+		Reports: "reports",
 		Badges:  bd,
 	}
+	l, err := datastore.NewLocal(testdataDir(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fsys, err := l.ReadDirDS(c.Central.Reports)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	ctr := New(c)
+	ctr := New(&CentralConfig{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Getwd(),
+		Badges:                 c.Central.Badges,
+		Reports:                fsys,
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := ctr.generateBadges(); err != nil {
+	paths, err := ctr.generateBadges()
+	if err != nil {
 		t.Fatal(err)
+	}
+	if want := 10; len(paths) != want {
+		t.Errorf("got %v\nwant %v", len(paths), want)
 	}
 
 	got := []string{}
@@ -75,14 +114,31 @@ func TestRenderIndex(t *testing.T) {
 	c.Repository = "k1LoW/octocov"
 	c.Central = &config.ConfigCentral{
 		Enable:  true,
-		Reports: filepath.Join(testdataDir(t), "reports"),
+		Reports: "reports",
 		Badges:  "badges",
 	}
 	if err := c.BuildCentralConfig(); err != nil {
 		t.Fatal(err)
 	}
+	l, err := datastore.NewLocal(testdataDir(t))
+	if err != nil {
+		t.Fatal(err)
+	}
+	fsys, err := l.ReadDirDS(c.Central.Reports)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	ctr := New(c)
+	ctr := New(&CentralConfig{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Getwd(),
+		Badges:                 c.Central.Badges,
+		Reports:                fsys,
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
 	}

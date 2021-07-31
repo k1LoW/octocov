@@ -76,8 +76,36 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildCentralConfig(); err != nil {
 				return err
 			}
-			ctr := central.New(c)
-			return ctr.Generate(ctx)
+			l, err := datastore.NewLocal(c.Root())
+			if err != nil {
+				return err
+			}
+			fsys, err := l.ReadDirDS(c.Central.Reports)
+			if err != nil {
+				return err
+			}
+			ctr := central.New(&central.CentralConfig{
+				Repository:             c.Repository,
+				Index:                  c.Central.Root,
+				Wd:                     c.Getwd(),
+				Badges:                 c.Central.Badges,
+				Reports:                fsys,
+				CoverageColor:          c.CoverageColor,
+				CodeToTestRatioColor:   c.CodeToTestRatioColor,
+				TestExecutionTimeColor: c.TestExecutionTimeColor,
+			})
+			paths, err := ctr.Generate(ctx)
+			if err != nil {
+				return err
+			}
+			// git push
+			if c.CentralPushConfigReady() {
+				_, _ = fmt.Fprintln(os.Stderr, "Commit and push central report")
+				if err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, "Update by octocov"); err != nil {
+					return err
+				}
+			}
+			return nil
 		}
 
 		r := report.New()
