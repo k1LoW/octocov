@@ -76,12 +76,20 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildCentralConfig(); err != nil {
 				return err
 			}
+			l, err := datastore.NewLocal(c.Root())
+			if err != nil {
+				return err
+			}
+			fsys, err := l.ReadDirDS(c.Central.Reports)
+			if err != nil {
+				return err
+			}
 			ctr := central.New(&central.CentralConfig{
 				Repository:             c.Repository,
 				Index:                  c.Central.Root,
 				Wd:                     c.Getwd(),
 				Badges:                 c.Central.Badges,
-				Reports:                c.Central.Reports,
+				Reports:                fsys,
 				CoverageColor:          c.CoverageColor,
 				CodeToTestRatioColor:   c.CodeToTestRatioColor,
 				TestExecutionTimeColor: c.TestExecutionTimeColor,

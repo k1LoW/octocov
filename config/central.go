@@ -44,9 +44,6 @@ func (c *Config) BuildCentralConfig() error {
 	if c.Central.Reports == "" {
 		c.Central.Reports = defaultReportsDir
 	}
-	if !strings.HasPrefix(c.Central.Reports, "/") {
-		c.Central.Reports = filepath.Clean(filepath.Join(c.Root(), c.Central.Reports))
-	}
 	if c.Central.Badges == "" {
 		c.Central.Badges = defaultBadgesDir
 	}

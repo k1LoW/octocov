@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
@@ -32,7 +32,7 @@ type CentralConfig struct {
 	Wd                     string
 	Index                  string
 	Badges                 string
-	Reports                string // fs.ReadDirFS
+	Reports                fs.ReadDirFS
 	CoverageColor          func(cover float64) string
 	CodeToTestRatioColor   func(ratio float64) string
 	TestExecutionTimeColor func(d time.Duration) string
@@ -76,17 +76,23 @@ func (c *Central) Generate(ctx context.Context) ([]string, error) {
 
 func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
+	fsys := c.config.Reports
 
 	// collect reports
-	if err := filepath.Walk(c.config.Reports, func(path string, fi os.FileInfo, err error) error {
+	if err := fs.WalkDir(fsys, "/", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if fi.IsDir() || !strings.HasSuffix(fi.Name(), ".json") {
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
 			return nil
 		}
 		r := report.New()
-		b, err := ioutil.ReadFile(filepath.Clean(path))
+		f, err := fsys.Open(path)
+		if err != nil {
+			return nil
+		}
+		defer f.Close()
+		b, err := io.ReadAll(f)
 		if err != nil {
 			return nil
 		}

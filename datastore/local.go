@@ -2,11 +2,11 @@ package datastore
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/k1LoW/octocov/report"
 )
@@ -33,5 +33,26 @@ func (l *Local) Store(ctx context.Context, path string, r *report.Report) error 
 }
 
 func (l *Local) ReadDirDS(path string) (fs.ReadDirFS, error) {
-	return nil, errors.New("not implemented")
+	if !strings.HasPrefix(path, "/") {
+		path = filepath.Join(l.root, path)
+	}
+	return &LocalFS{
+		root: path,
+	}, nil
+}
+
+type LocalFS struct {
+	root string
+}
+
+func (fsys *LocalFS) Open(name string) (fs.File, error) {
+	f, err := os.Open(filepath.Join(fsys.root, name))
+	if f == nil {
+		return nil, err
+	}
+	return f, err
+}
+
+func (fsys *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
+	return os.ReadDir(filepath.Join(fsys.root, name))
 }
