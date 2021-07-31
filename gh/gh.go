@@ -469,6 +469,16 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	return i, nil
 }
 
+func SplitRepository(r string) (string, string, error) {
+	splitted := strings.Split(r, "/")
+	if len(splitted) != 2 {
+		return "", "", errors.New("could not get owner and repo")
+	}
+	owner := splitted[0]
+	repo := splitted[1]
+	return owner, repo, nil
+}
+
 type roundTripper struct {
 	transport   *http.Transport
 	accessToken string

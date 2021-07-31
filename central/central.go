@@ -14,7 +14,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
@@ -24,14 +23,24 @@ import (
 var indexTmpl []byte
 
 type Central struct {
-	config  *config.Config
+	config  *CentralConfig
 	reports []*report.Report
 }
 
-func New(c *config.Config) *Central {
+type CentralConfig struct {
+	Repository             string
+	Wd                     string
+	Index                  string
+	Badges                 string
+	Reports                string // fs.ReadDirFS
+	CoverageColor          func(cover float64) string
+	CodeToTestRatioColor   func(ratio float64) string
+	TestExecutionTimeColor func(d time.Duration) string
+}
+
+func New(c *CentralConfig) *Central {
 	return &Central{
-		config:  c,
-		reports: []*report.Report{},
+		config: c,
 	}
 }
 
@@ -48,10 +57,10 @@ func (c *Central) Generate(ctx context.Context) ([]string, error) {
 	}
 
 	// render index
-	p := c.config.Central.Root
-	fi, err := os.Stat(c.config.Central.Root)
+	p := c.config.Index
+	fi, err := os.Stat(c.config.Index)
 	if err == nil && fi.IsDir() {
-		p = filepath.Join(c.config.Central.Root, "README.md")
+		p = filepath.Join(c.config.Index, "README.md")
 	}
 	i, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 	if err != nil {
@@ -69,7 +78,7 @@ func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
 
 	// collect reports
-	if err := filepath.Walk(c.config.Central.Reports, func(path string, fi os.FileInfo, err error) error {
+	if err := filepath.Walk(c.config.Reports, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -110,11 +119,11 @@ func (c *Central) generateBadges() ([]string, error) {
 
 	for _, r := range c.reports {
 		cp := r.CoveragePercent()
-		err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+		err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
 		if err != nil {
 			return nil, err
 		}
-		bp := filepath.Join(c.config.Central.Badges, r.Repository, "coverage.svg")
+		bp := filepath.Join(c.config.Badges, r.Repository, "coverage.svg")
 		out, err := os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 		if err != nil {
 			return nil, err
@@ -129,11 +138,11 @@ func (c *Central) generateBadges() ([]string, error) {
 		// Code to Test Ratio
 		if r.CodeToTestRatio != nil {
 			tr := r.CodeToTestRatioRatio()
-			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
 			if err != nil {
 				return nil, err
 			}
-			bp := filepath.Join(c.config.Central.Badges, r.Repository, "ratio.svg")
+			bp := filepath.Join(c.config.Badges, r.Repository, "ratio.svg")
 			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 			if err != nil {
 				return nil, err
@@ -149,11 +158,11 @@ func (c *Central) generateBadges() ([]string, error) {
 		// Test Execution Time
 		if r.TestExecutionTime != nil {
 			d := time.Duration(*r.TestExecutionTime)
-			err := os.MkdirAll(filepath.Join(c.config.Central.Badges, r.Repository), 0755) // #nosec
+			err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
 			if err != nil {
 				return nil, err
 			}
-			bp := filepath.Join(c.config.Central.Badges, r.Repository, "time.svg")
+			bp := filepath.Join(c.config.Badges, r.Repository, "time.svg")
 			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
 			if err != nil {
 				return nil, err
@@ -177,33 +186,33 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	}
 
 	ctx := context.Background()
-	gh, err := gh.New()
+	g, err := gh.New()
 	if err != nil {
 		return err
 	}
-	owner, repo, err := c.config.OwnerRepo()
+	owner, repo, err := gh.SplitRepository(c.config.Repository)
 	if err != nil {
 		return err
 	}
-	rawRootURL, err := gh.GetRawRootURL(ctx, owner, repo)
+	rawRootURL, err := g.GetRawRootURL(ctx, owner, repo)
 	if err != nil {
 		return err
 	}
 
 	// Get project root dir
-	proot := c.config.Getwd()
+	proot := c.config.Wd
 
-	croot := c.config.Central.Root
+	croot := c.config.Index
 	if strings.HasSuffix(croot, ".md") {
-		croot = filepath.Dir(c.config.Central.Root)
+		croot = filepath.Dir(c.config.Index)
 	}
 
-	badgesLinkRel, err := filepath.Rel(croot, c.config.Central.Badges)
+	badgesLinkRel, err := filepath.Rel(croot, c.config.Badges)
 	if err != nil {
 		return err
 	}
 
-	badgesURLRel, err := filepath.Rel(proot, c.config.Central.Badges)
+	badgesURLRel, err := filepath.Rel(proot, c.config.Badges)
 	if err != nil {
 		return err
 	}

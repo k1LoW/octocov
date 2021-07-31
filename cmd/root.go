@@ -76,7 +76,16 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildCentralConfig(); err != nil {
 				return err
 			}
-			ctr := central.New(c)
+			ctr := central.New(&central.CentralConfig{
+				Repository:             c.Repository,
+				Index:                  c.Central.Root,
+				Wd:                     c.Getwd(),
+				Badges:                 c.Central.Badges,
+				Reports:                c.Central.Reports,
+				CoverageColor:          c.CoverageColor,
+				CodeToTestRatioColor:   c.CodeToTestRatioColor,
+				TestExecutionTimeColor: c.TestExecutionTimeColor,
+			})
 			paths, err := ctr.Generate(ctx)
 			if err != nil {
 				return err

@@ -17,7 +17,17 @@ func TestCollectReports(t *testing.T) {
 		Reports: filepath.Join(testdataDir(t), "reports"),
 	}
 
-	ctr := New(c)
+	ctr := New(&CentralConfig{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Getwd(),
+		Badges:                 c.Central.Badges,
+		Reports:                c.Central.Reports,
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
+
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +47,16 @@ func TestGenerateBadges(t *testing.T) {
 		Badges:  bd,
 	}
 
-	ctr := New(c)
+	ctr := New(&CentralConfig{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Getwd(),
+		Badges:                 c.Central.Badges,
+		Reports:                c.Central.Reports,
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
 	}
@@ -86,7 +105,16 @@ func TestRenderIndex(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctr := New(c)
+	ctr := New(&CentralConfig{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Getwd(),
+		Badges:                 c.Central.Badges,
+		Reports:                c.Central.Reports,
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
 	}
