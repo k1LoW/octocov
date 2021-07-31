@@ -46,7 +46,7 @@ type LocalFS struct {
 }
 
 func (fsys *LocalFS) Open(name string) (fs.File, error) {
-	f, err := os.Open(filepath.Join(fsys.root, name))
+	f, err := os.Open(filepath.Clean(filepath.Join(fsys.root, name)))
 	if f == nil {
 		return nil, err
 	}
