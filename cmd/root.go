@@ -77,7 +77,18 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			ctr := central.New(c)
-			return ctr.Generate(ctx)
+			paths, err := ctr.Generate(ctx)
+			if err != nil {
+				return err
+			}
+			// git push
+			if c.CentralPushConfigReady() {
+				_, _ = fmt.Fprintln(os.Stderr, "Commit and push central report")
+				if err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, "Update by octocov"); err != nil {
+					return err
+				}
+			}
+			return nil
 		}
 
 		r := report.New()

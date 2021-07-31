@@ -42,8 +42,12 @@ func TestGenerateBadges(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := ctr.generateBadges(); err != nil {
+	paths, err := ctr.generateBadges()
+	if err != nil {
 		t.Fatal(err)
+	}
+	if want := 10; len(paths) != want {
+		t.Errorf("got %v\nwant %v", len(paths), want)
 	}
 
 	got := []string{}
