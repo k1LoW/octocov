@@ -88,5 +88,4 @@ func (c *Config) CentralReportsFS() (fs.ReadDirFS, error) {
 		}
 		return fsys, err
 	}
-	return nil, errors.New("invalid fs")
 }
