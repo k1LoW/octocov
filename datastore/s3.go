@@ -3,10 +3,14 @@ package datastore
 import (
 	"bytes"
 	"context"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3iface"
+	"github.com/jszwec/s3fs"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -35,4 +39,24 @@ func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
 		return err
 	}
 	return nil
+}
+
+func (s *S3) ReadDirFS(path string) (fs.ReadDirFS, error) {
+	return &S3FSWithPrefix{
+		prefix: strings.Trim(path, "/"),
+		s3fs:   s3fs.New(s.client, s.bucket),
+	}, nil
+}
+
+type S3FSWithPrefix struct {
+	prefix string
+	s3fs   *s3fs.S3FS
+}
+
+func (fsys *S3FSWithPrefix) Open(name string) (fs.File, error) {
+	return fsys.s3fs.Open(filepath.Join(fsys.prefix, name))
+}
+
+func (fsys *S3FSWithPrefix) ReadDir(name string) ([]fs.DirEntry, error) {
+	return fsys.s3fs.ReadDir(filepath.Join(fsys.prefix, name))
 }

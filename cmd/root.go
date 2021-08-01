@@ -76,14 +76,12 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildCentralConfig(); err != nil {
 				return err
 			}
-			l, err := datastore.NewLocal(c.Root())
+
+			fsys, err := c.CentralReportsFS()
 			if err != nil {
 				return err
 			}
-			fsys, err := l.ReadDirDS(c.Central.Reports)
-			if err != nil {
-				return err
-			}
+
 			ctr := central.New(&central.CentralConfig{
 				Repository:             c.Repository,
 				Index:                  c.Central.Root,

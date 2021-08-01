@@ -14,6 +14,7 @@ require (
 	github.com/google/go-cmp v0.5.5 // indirect
 	github.com/google/go-github/v35 v35.1.0
 	github.com/hhatto/gocloc v0.4.1
+	github.com/jszwec/s3fs v0.3.1
 	github.com/k1LoW/duration v1.1.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/olekukonko/tablewriter v0.0.5
