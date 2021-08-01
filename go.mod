@@ -3,6 +3,7 @@ module github.com/k1LoW/octocov
 go 1.16
 
 require (
+	cloud.google.com/go/storage v1.0.0
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go v1.40.11
 	github.com/bmatcuk/doublestar/v4 v4.0.1

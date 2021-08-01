@@ -165,19 +165,50 @@ datastore:
     path:                       # default: reports/${GITHUB_REPOSITORY}/report.json
 ```
 
+**Required environment variables:**
+
+- `GITHUB_TOKEN`
+- `GITHUB_REPOSITORY`
+- `GITHUB_API_URL` (optional)
+
 #### S3
 
 ``` yaml
 # .octocov.yml
 datastore:
   s3:
-    bucket: my-coverage # central datastore bucket
+    bucket: my-coverage # datastore bucket
     path:               # default: reports/${GITHUB_REPOSITORY}/report.json
 ```
 
 **Required permission:**
 
 - `s3:PutObject`
+
+**Required environment variables:**
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN` (optional)
+
+#### GCS
+
+``` yaml
+# .octocov.yml
+datastore:
+  gcs:
+    bucket: my-coverage # datastore bucket
+    path:               # default: reports/${GITHUB_REPOSITORY}/report.json
+```
+
+**Required permission:**
+
+- `storage.objects.create`
+- `storage.objects.delete`
+
+**Required environment variables:**
+
+- `GOOGLE_APPLICATION_CREDENTIALS`
 
 #### If section
 
