@@ -3,9 +3,14 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/k1LoW/octocov/datastore"
 )
 
 func (c *Config) CentralConfigReady() bool {
@@ -52,4 +57,36 @@ func (c *Config) BuildCentralConfig() error {
 	}
 
 	return nil
+}
+
+func (c *Config) CentralReportsFS() (fs.ReadDirFS, error) {
+	switch {
+	case strings.HasPrefix(c.Central.Reports, "s3://"):
+		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "s3://"), "/")
+		if len(splitted) == 0 {
+			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
+		}
+		bucket := splitted[0]
+		sess, err := session.NewSession()
+		if err != nil {
+			return nil, err
+		}
+		sc := s3.New(sess)
+		s, err := datastore.NewS3(sc, bucket)
+		if err != nil {
+			return nil, err
+		}
+		return s.ReadDirFS(strings.Join(splitted[1:], "/"))
+	default:
+		l, err := datastore.NewLocal(c.Root())
+		if err != nil {
+			return nil, err
+		}
+		fsys, err := l.ReadDirDS(c.Central.Reports)
+		if err != nil {
+			return nil, err
+		}
+		return fsys, err
+	}
+	return nil, errors.New("invalid fs")
 }
