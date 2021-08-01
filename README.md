@@ -202,10 +202,6 @@ The variables available in the `if` section are as follows
 | `github.event` | `object` | Detailed data for each event of GitHub Actions (ex. `github.event.action`, `github.event.label.name` ) |
 | `env.<env_name>` | `string` | The value of a specific environment variable |
 
-#### S3
-
-:construction:
-
 ### Central mode
 
 By enabling `central:`, `octocov` acts as a central repository for collecting reports ( [example](example/central/README.md) ).
