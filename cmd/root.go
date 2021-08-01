@@ -32,6 +32,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/k1LoW/octocov/central"
@@ -292,6 +293,21 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				if err := s.Store(ctx, c.Datastore.S3.Path, r); err != nil {
+					return err
+				}
+			}
+			if c.Datastore.GCS != nil {
+				// GCS
+				client, err := storage.NewClient(ctx)
+				if err != nil {
+					return err
+				}
+				defer client.Close()
+				g, err := datastore.NewGCS(client, c.Datastore.GCS.Bucket)
+				if err != nil {
+					return err
+				}
+				if err := g.Store(ctx, c.Datastore.GCS.Path, r); err != nil {
 					return err
 				}
 			}

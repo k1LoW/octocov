@@ -28,9 +28,8 @@ func NewS3(client s3iface.S3API, b string) (*S3, error) {
 
 func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
 	content := r.String()
-	bucket := s.bucket
 	_, err := s.client.PutObject(&s3.PutObjectInput{
-		Bucket:        &bucket,
+		Bucket:        &s.bucket,
 		Key:           &path,
 		Body:          bytes.NewReader([]byte(content)),
 		ContentLength: aws.Int64(int64(len(content))),

@@ -83,6 +83,7 @@ type ConfigDatastore struct {
 	If     string                 `yaml:"if,omitempty"`
 	Github *ConfigDatastoreGithub `yaml:"github,omitempty"`
 	S3     *ConfigDatastoreS3     `yaml:"s3,omitempty"`
+	GCS    *ConfigDatastoreGCS    `yaml:"gcs,omitempty"`
 }
 
 type ConfigDatastoreGithub struct {
@@ -92,6 +93,11 @@ type ConfigDatastoreGithub struct {
 }
 
 type ConfigDatastoreS3 struct {
+	Bucket string `yaml:"bucket"`
+	Path   string `yaml:"path"`
+}
+
+type ConfigDatastoreGCS struct {
 	Bucket string `yaml:"bucket"`
 	Path   string `yaml:"path"`
 }
@@ -254,7 +260,7 @@ func (c *Config) DatastoreConfigReady() bool {
 }
 
 func (c *Config) BuildDatastoreConfig() error {
-	if c.Datastore.Github == nil && c.Datastore.S3 == nil {
+	if c.Datastore.Github == nil && c.Datastore.S3 == nil && c.Datastore.GCS == nil {
 		return errors.New("datastore not set")
 	}
 	if c.Datastore.Github != nil {
@@ -266,6 +272,12 @@ func (c *Config) BuildDatastoreConfig() error {
 	if c.Datastore.S3 != nil {
 		// S3
 		if err := c.buildDatastoreS3Config(); err != nil {
+			return err
+		}
+	}
+	if c.Datastore.GCS != nil {
+		// GCS
+		if err := c.buildDatastoreGCSConfig(); err != nil {
 			return err
 		}
 	}
@@ -309,6 +321,22 @@ func (c *Config) buildDatastoreS3Config() error {
 	}
 	if c.Datastore.S3.Path == "" {
 		return errors.New("datastore.s3.path not set")
+	}
+	return nil
+}
+
+func (c *Config) buildDatastoreGCSConfig() error {
+	if c.Datastore.GCS == nil {
+		return errors.New("datastore.gcs not set")
+	}
+	if c.Datastore.GCS.Bucket == "" {
+		return errors.New("datastore.gcs.bucket not set")
+	}
+	if c.Datastore.GCS.Path == "" && c.Repository != "" {
+		c.Datastore.GCS.Path = fmt.Sprintf("%s/%s/report.json", defaultReportsDir, c.Repository)
+	}
+	if c.Datastore.GCS.Path == "" {
+		return errors.New("datastore.gcs.path not set")
 	}
 	return nil
 }
