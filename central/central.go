@@ -32,7 +32,7 @@ type CentralConfig struct {
 	Wd                     string
 	Index                  string
 	Badges                 string
-	Reports                fs.ReadDirFS
+	Reports                fs.FS
 	CoverageColor          func(cover float64) string
 	CodeToTestRatioColor   func(ratio float64) string
 	TestExecutionTimeColor func(d time.Duration) string

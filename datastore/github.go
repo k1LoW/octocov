@@ -39,6 +39,6 @@ func (g *Github) Store(ctx context.Context, path string, r *report.Report) error
 	return g.gh.PushContent(ctx, owner, repo, branch, content, path, message)
 }
 
-func (g *Github) ReadDirDS(path string) (fs.ReadDirFS, error) {
+func (g *Github) FS(path string) (fs.FS, error) {
 	return nil, errors.New("not implemented")
 }

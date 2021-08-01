@@ -21,7 +21,7 @@ func TestCollectReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.ReadDirDS(c.Central.Reports)
+	fsys, err := l.FS(c.Central.Reports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +58,7 @@ func TestGenerateBadges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.ReadDirDS(c.Central.Reports)
+	fsys, err := l.FS(c.Central.Reports)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func TestRenderIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.ReadDirDS(c.Central.Reports)
+	fsys, err := l.FS(c.Central.Reports)
 	if err != nil {
 		t.Fatal(err)
 	}

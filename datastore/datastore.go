@@ -9,5 +9,5 @@ import (
 
 type Datastore interface {
 	Store(ctx context.Context, path string, r *report.Report) error
-	ReadDirFS(path string) (fs.ReadDirFS, error)
+	FS(path string) (fs.FS, error)
 }

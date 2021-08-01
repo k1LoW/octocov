@@ -40,7 +40,7 @@ func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
 	return nil
 }
 
-func (s *S3) ReadDirFS(path string) (fs.ReadDirFS, error) {
+func (s *S3) FS(path string) (fs.FS, error) {
 	return &S3FSWithPrefix{
 		prefix: strings.Trim(path, "/"),
 		s3fs:   s3fs.New(s.client, s.bucket),
@@ -54,8 +54,4 @@ type S3FSWithPrefix struct {
 
 func (fsys *S3FSWithPrefix) Open(name string) (fs.File, error) {
 	return fsys.s3fs.Open(filepath.Join(fsys.prefix, name))
-}
-
-func (fsys *S3FSWithPrefix) ReadDir(name string) ([]fs.DirEntry, error) {
-	return fsys.s3fs.ReadDir(filepath.Join(fsys.prefix, name))
 }
