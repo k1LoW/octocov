@@ -32,7 +32,7 @@ func (l *Local) Store(ctx context.Context, path string, r *report.Report) error 
 	return os.WriteFile(filepath.Join(l.root, path), []byte(r.String()), os.ModePerm)
 }
 
-func (l *Local) ReadDirDS(path string) (fs.ReadDirFS, error) {
+func (l *Local) FS(path string) (fs.FS, error) {
 	if !strings.HasPrefix(path, "/") {
 		path = filepath.Join(l.root, path)
 	}
@@ -51,8 +51,4 @@ func (fsys *LocalFS) Open(name string) (fs.File, error) {
 		return nil, err
 	}
 	return f, err
-}
-
-func (fsys *LocalFS) ReadDir(name string) ([]fs.DirEntry, error) {
-	return os.ReadDir(filepath.Join(fsys.root, name))
 }

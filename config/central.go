@@ -59,7 +59,7 @@ func (c *Config) BuildCentralConfig() error {
 	return nil
 }
 
-func (c *Config) CentralReportsFS() (fs.ReadDirFS, error) {
+func (c *Config) CentralReportsFS() (fs.FS, error) {
 	switch {
 	case strings.HasPrefix(c.Central.Reports, "s3://"):
 		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "s3://"), "/")
@@ -76,13 +76,13 @@ func (c *Config) CentralReportsFS() (fs.ReadDirFS, error) {
 		if err != nil {
 			return nil, err
 		}
-		return s.ReadDirFS(strings.Join(splitted[1:], "/"))
+		return s.FS(strings.Join(splitted[1:], "/"))
 	default:
 		l, err := datastore.NewLocal(c.Root())
 		if err != nil {
 			return nil, err
 		}
-		fsys, err := l.ReadDirDS(c.Central.Reports)
+		fsys, err := l.FS(c.Central.Reports)
 		if err != nil {
 			return nil, err
 		}
