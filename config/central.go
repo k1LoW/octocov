@@ -64,6 +64,7 @@ func (c *Config) BuildCentralConfig() error {
 func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 	switch {
 	case strings.HasPrefix(c.Central.Reports, "s3://"):
+		// s3://
 		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "s3://"), "/")
 		if len(splitted) == 0 {
 			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
@@ -80,6 +81,7 @@ func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 		}
 		return s.FS(strings.Join(splitted[1:], "/"))
 	case strings.HasPrefix(c.Central.Reports, "gs://"):
+		// gs://
 		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "gs://"), "/")
 		if len(splitted) == 0 {
 			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
@@ -95,11 +97,12 @@ func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 		}
 		return g.FS(strings.Join(splitted[1:], "/"))
 	default:
+		// file://
 		l, err := datastore.NewLocal(c.Root())
 		if err != nil {
 			return nil, err
 		}
-		fsys, err := l.FS(c.Central.Reports)
+		fsys, err := l.FS(strings.TrimPrefix(c.Central.Reports, "file://"))
 		if err != nil {
 			return nil, err
 		}
