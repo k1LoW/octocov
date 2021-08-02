@@ -292,6 +292,17 @@ central:
     enable: true
 ```
 
+**Required permission (Central Repo):**
+
+- `s3:GetObject`
+- `s3:ListObject`
+
+**Required environment variables (Central Repo):**
+
+- `AWS_ACCESS_KEY_ID`
+- `AWS_SECRET_ACCESS_KEY`
+- `AWS_SESSION_TOKEN` (optional)
+
 ### Use GCS bucket as datastore
 
 ![gcs](docs/gcs.svg)
@@ -314,8 +325,18 @@ central:
     enable: true
 ```
 
+**Required permission (Central Repo):**
 
-When central mode is enabled, other functions are automatically turned off.
+- `storage.objects.get`
+- `storage.objects.list`
+- `storage.buckets.get`
+
+**Required environment variables (Central Repo):**
+
+- `GOOGLE_APPLICATION_CREDENTIALS`
+
+
+:NOTICE: When central mode is enabled, other functions are automatically turned off.
 
 ## Supported coverage report formats
 
