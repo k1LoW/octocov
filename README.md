@@ -40,9 +40,9 @@ comment:
   hideFooterLink: false # hide octocov link
 ```
 
-octocov checks for code coverage by default. If it is running on GitHub Actions, it will also measure the test execution time.
+octocov checks for **"Code Coverage"** by default. If it is running on GitHub Actions, it will also measure **"Test Execution Time"**.
 
-If you want to measure the code to test ratio, set `codeToTestRatio:`.
+If you want to measure **"Code to Test Ratio"**, set `codeToTestRatio:`.
 
 ``` yaml
 comment:
