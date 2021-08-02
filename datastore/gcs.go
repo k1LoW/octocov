@@ -2,9 +2,13 @@ package datastore
 
 import (
 	"context"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/k1LoW/octocov/report"
+	"github.com/mauri870/gcsfs"
 )
 
 type GCS struct {
@@ -29,4 +33,21 @@ func (g *GCS) Store(ctx context.Context, path string, r *report.Report) error {
 		return err
 	}
 	return nil
+}
+
+type GCSFS struct {
+	prefix string
+	gscfs  *gcsfs.FS
+}
+
+func (fsys *GCSFS) Open(name string) (fs.File, error) {
+	return fsys.gscfs.Open(filepath.Join(fsys.prefix, name))
+}
+
+func (g *GCS) FS(path string) (fs.FS, error) {
+	prefix := strings.Trim(path, "/")
+	return &GCSFS{
+		prefix: prefix,
+		gscfs:  gcsfs.NewWithClient(g.client, g.bucket),
+	}, nil
 }
