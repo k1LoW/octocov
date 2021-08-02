@@ -29,6 +29,32 @@ Add `.octocov.yml` ( or `octocov.yml` ) file to your repository, and run `octoco
 $ octocov
 ```
 
+### Comment report to pull request
+
+By setting `comment:`, [comment the reports to pull request](https://github.com/k1LoW/octocov/pull/30#issuecomment-860188829).
+
+``` yaml
+# .octocov.yml
+comment:
+  enable: true
+  hideFooterLink: false # hide octocov link
+```
+
+octocov checks for code coverage by default. If it is running on GitHub Actions, it will also measure the test execution time.
+
+If you want to measure the code to test ratio, set `codeToTestRatio:`.
+
+``` yaml
+comment:
+  enable: true
+codeToTestRatio:
+  code:
+    - '**/*.go'
+    - '!**/*_test.go'
+  test:
+    - '**/*_test.go'
+```
+
 ### Check for acceptable coverage
 
 By setting `coverage.acceptable:`, the minimum acceptable coverage is specified.
@@ -137,17 +163,6 @@ coverage:
     path: docs/coverage.svg
 push:
   enable: true
-```
-
-### Comment report to pull request
-
-By setting `comment:`, [comment the reports to pull request](https://github.com/k1LoW/octocov/pull/30#issuecomment-860188829).
-
-``` yaml
-# .octocov.yml
-comment:
-  enable: true
-  hideFooterLink: false # hide octocov link
 ```
 
 ### Store report to central datastore
@@ -339,6 +354,17 @@ central:
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
 
 ## Supported coverage report formats
+
+octocov supports multiple coverage report formats.
+
+And octocov searches for the default path for each format.
+
+If you want to specify the path of the report file, set `coverage.path`
+
+``` yaml
+coverage:
+  path: /path/to/coverage.txt
+```
 
 ### Go coverage
 
