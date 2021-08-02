@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"io/fs"
-	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -41,17 +40,6 @@ func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
 }
 
 func (s *S3) FS(path string) (fs.FS, error) {
-	return &S3FSWithPrefix{
-		prefix: strings.Trim(path, "/"),
-		s3fs:   s3fs.New(s.client, s.bucket),
-	}, nil
-}
-
-type S3FSWithPrefix struct {
-	prefix string
-	s3fs   *s3fs.S3FS
-}
-
-func (fsys *S3FSWithPrefix) Open(name string) (fs.File, error) {
-	return fsys.s3fs.Open(filepath.Join(fsys.prefix, name))
+	prefix := strings.Trim(path, "/")
+	return fs.Sub(s3fs.New(s.client, s.bucket), prefix)
 }

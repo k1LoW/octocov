@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -8,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/k1LoW/octocov/datastore"
@@ -59,7 +61,7 @@ func (c *Config) BuildCentralConfig() error {
 	return nil
 }
 
-func (c *Config) CentralReportsFS() (fs.FS, error) {
+func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 	switch {
 	case strings.HasPrefix(c.Central.Reports, "s3://"):
 		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "s3://"), "/")
@@ -77,6 +79,21 @@ func (c *Config) CentralReportsFS() (fs.FS, error) {
 			return nil, err
 		}
 		return s.FS(strings.Join(splitted[1:], "/"))
+	case strings.HasPrefix(c.Central.Reports, "gs://"):
+		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "gs://"), "/")
+		if len(splitted) == 0 {
+			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
+		}
+		bucket := splitted[0]
+		client, err := storage.NewClient(ctx)
+		if err != nil {
+			return nil, err
+		}
+		g, err := datastore.NewGCS(client, bucket)
+		if err != nil {
+			return nil, err
+		}
+		return g.FS(strings.Join(splitted[1:], "/"))
 	default:
 		l, err := datastore.NewLocal(c.Root())
 		if err != nil {

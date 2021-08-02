@@ -78,7 +78,7 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 
-			fsys, err := c.CentralReportsFS()
+			fsys, err := c.CentralReportsFS(ctx)
 			if err != nil {
 				return err
 			}

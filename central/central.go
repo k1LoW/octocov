@@ -79,7 +79,7 @@ func (c *Central) collectReports() error {
 	fsys := c.config.Reports
 
 	// collect reports
-	if err := fs.WalkDir(fsys, "/", func(path string, d fs.DirEntry, err error) error {
+	if err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
