@@ -238,15 +238,82 @@ The variables available in the `if` section are as follows
 By enabling `central:`, `octocov` acts as a central repository for collecting reports ( [example](example/central/README.md) ).
 
 ``` yaml
-# .octocov.yml
+# .octocov.yml for central mode
 central:
   enable: true
   root: .          # root directory or index file path of collected coverage reports pages. default: .
-  reports: reports # directory where reports are stored. default: reports
+  reports: reports # datastore path (url) where reports are stored. default: reports
   badges: badges   # directory where badges are generated. default: badges
   push:
     enable: true   # enable self git push
 ```
+
+#### Use GitHub repository as datastore
+
+When using the central repository as a datastore, perform badge generation via on.push.
+
+![github](docs/github.svg)
+
+``` yaml
+# .octocov.yml
+datastore:
+  github:
+    repository: owner/central-repo
+```
+
+``` yaml
+# .octocov.yml for central repo
+central:
+  enable: true
+  reports: reports
+  push:
+    enable: true
+```
+
+#### Use S3 bucket as datastore
+
+When using the S3 bucket as a datastore, perform badge generation via on.schedule.
+
+![s3](docs/s3.svg)
+
+``` yaml
+# .octocov.yml
+datastore:
+  s3:
+    bucket: my-s3-bucket
+```
+
+``` yaml
+# .octocov.yml for central repo
+central:
+  enable: true
+  reports: s3://my-s3-bucket/reports
+  push:
+    enable: true
+```
+
+### Use GCS bucket as datastore
+
+![gcs](docs/gcs.svg)
+
+When using the GCS bucket as a datastore, perform badge generation via on.schedule.
+
+``` yaml
+# .octocov.yml
+datastore:
+  gcs:
+    bucket: my-gcs-bucket
+```
+
+``` yaml
+# .octocov.yml for central repo
+central:
+  enable: true
+  reports: gs://my-gcs-bucket/reports
+  push:
+    enable: true
+```
+
 
 When central mode is enabled, other functions are automatically turned off.
 
