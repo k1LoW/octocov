@@ -316,7 +316,7 @@ var rootCmd = &cobra.Command{
 		// Comment report to pull request
 		if c.CommentConfigReady() {
 			cmd.PrintErrln("Comment report...")
-			owner, repo, err := c.OwnerRepo()
+			owner, repo, err := gh.SplitRepository(c.Repository)
 			if err != nil {
 				return err
 			}

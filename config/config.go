@@ -417,10 +417,6 @@ func (c *Config) Acceptable(r *report.Report) error {
 	return nil
 }
 
-func (c *Config) OwnerRepo() (string, string, error) {
-	return gh.SplitRepository(c.Repository)
-}
-
 func (c *Config) CoverageColor(cover float64) string {
 	switch {
 	case cover >= 80.0:
