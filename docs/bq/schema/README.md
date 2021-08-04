@@ -1,4 +1,4 @@
-# octocov-test:octocov_test_dataset
+# BigQuery schema for octocov datasource
 
 ## Tables
 

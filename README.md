@@ -245,9 +245,9 @@ datastore:
 
 - `GOOGLE_APPLICATION_CREDENTIALS`
 
-**Datastore table schema:**
+**Datastore schema:**
 
-[Datastore table schema](docs/bq/schema/README.md)
+[Datastore schema](docs/bq/schema/README.md)
 
 If you want to create a table, execute the following command ( require `bigquery.datasets.create` ).
 
