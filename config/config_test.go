@@ -48,32 +48,6 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func TestDatasourceGithubPath(t *testing.T) {
-	if err := clearEnv(); err != nil {
-		t.Fatal(err)
-	}
-	os.Setenv("GITHUB_REPOSITORY", "foo/bar")
-
-	c := New()
-	c.Datastore = &ConfigDatastore{
-		Github: &ConfigDatastoreGithub{
-			Repository: "report/dest",
-		},
-	}
-
-	c.Build()
-	if got := c.DatastoreConfigReady(); got != true {
-		t.Errorf("got %v\nwant %v", got, true)
-	}
-	if err := c.BuildDatastoreConfig(); err != nil {
-		t.Fatal(err)
-	}
-	want := "reports/foo/bar/report.json"
-	if got := c.Datastore.Github.Path; got != want {
-		t.Errorf("got %v\nwant %v", got, want)
-	}
-}
-
 func TestCoverageAcceptable(t *testing.T) {
 	tests := []struct {
 		in      string
