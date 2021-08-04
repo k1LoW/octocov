@@ -325,6 +325,9 @@ var rootCmd = &cobra.Command{
 				}
 				defer client.Close()
 				b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset)
+				if err != nil {
+					return err
+				}
 				if err := b.Store(ctx, c.Datastore.BQ.Table, r); err != nil {
 					return err
 				}
