@@ -52,6 +52,7 @@ var (
 	coverageBadge bool
 	ratioBadge    bool
 	timeBadge     bool
+	createTable   bool
 )
 
 var rootCmd = &cobra.Command{
@@ -72,6 +73,10 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 		c.Build()
+
+		if createTable {
+			return createBQTable(ctx, c)
+		}
 
 		if c.CentralConfigReady() {
 			cmd.PrintErrln("Central mode enabled")
@@ -381,6 +386,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&coverageBadge, "coverage-badge", "", false, "generate coverage report badge")
 	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
 	rootCmd.Flags().BoolVarP(&timeBadge, "test-execution-time-badge", "", false, "generate test-execution-time report badge")
+	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
 }
 
 func Execute() {
