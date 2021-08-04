@@ -32,6 +32,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -51,6 +52,7 @@ var (
 	coverageBadge bool
 	ratioBadge    bool
 	timeBadge     bool
+	createTable   bool
 )
 
 var rootCmd = &cobra.Command{
@@ -71,6 +73,10 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 		c.Build()
+
+		if createTable {
+			return createBQTable(ctx, c)
+		}
 
 		if c.CentralConfigReady() {
 			cmd.PrintErrln("Central mode enabled")
@@ -311,12 +317,27 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 			}
+			if c.Datastore.BQ != nil {
+				// BigQuery
+				client, err := bigquery.NewClient(ctx, c.Datastore.BQ.Project)
+				if err != nil {
+					return err
+				}
+				defer client.Close()
+				b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset)
+				if err != nil {
+					return err
+				}
+				if err := b.Store(ctx, c.Datastore.BQ.Table, r); err != nil {
+					return err
+				}
+			}
 		}
 
 		// Comment report to pull request
 		if c.CommentConfigReady() {
 			cmd.PrintErrln("Comment report...")
-			owner, repo, err := c.OwnerRepo()
+			owner, repo, err := gh.SplitRepository(c.Repository)
 			if err != nil {
 				return err
 			}
@@ -368,6 +389,7 @@ func init() {
 	rootCmd.Flags().BoolVarP(&coverageBadge, "coverage-badge", "", false, "generate coverage report badge")
 	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
 	rootCmd.Flags().BoolVarP(&timeBadge, "test-execution-time-badge", "", false, "generate test-execution-time report badge")
+	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
 }
 
 func Execute() {

@@ -225,6 +225,35 @@ datastore:
 
 - `GOOGLE_APPLICATION_CREDENTIALS`
 
+#### BigQuery
+
+``` yaml
+# .octocov.yml
+datastore:
+  bq:
+    project: my-octocov-project # project ID
+    dataset: octocov            # dataset ID
+    table:                      # table. default: reports
+```
+
+**Required permission:**
+
+- `bigquery.datasets.get`
+- `bigquery.tables.updateData`
+
+**Required environment variables:**
+
+- `GOOGLE_APPLICATION_CREDENTIALS`
+
+**Datastore table schema:**
+
+[Datastore table schema](docs/bq/schema/README.md)
+
+If you want to create a table, execute the following command ( require `bigquery.datasets.create` ).
+
+``` console
+$ octocov --create-bq-table
+```
 #### If section
 
 ``` yaml
