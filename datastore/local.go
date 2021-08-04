@@ -29,7 +29,7 @@ func NewLocal(root string) (*Local, error) {
 }
 
 func (l *Local) Store(ctx context.Context, path string, r *report.Report) error {
-	return os.WriteFile(filepath.Join(l.root, path), []byte(r.String()), os.ModePerm)
+	return os.WriteFile(filepath.Join(l.root, path), r.Bytes(), os.ModePerm)
 }
 
 func (l *Local) FS(path string) (fs.FS, error) {
