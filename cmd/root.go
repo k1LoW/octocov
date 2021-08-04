@@ -32,6 +32,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -308,6 +309,18 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				if err := g.Store(ctx, c.Datastore.GCS.Path, r); err != nil {
+					return err
+				}
+			}
+			if c.Datastore.BQ != nil {
+				// BigQuery
+				client, err := bigquery.NewClient(ctx, c.Datastore.BQ.Project)
+				if err != nil {
+					return err
+				}
+				defer client.Close()
+				b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset)
+				if err := b.Store(ctx, c.Datastore.BQ.Table, r); err != nil {
 					return err
 				}
 			}

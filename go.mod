@@ -3,6 +3,7 @@ module github.com/k1LoW/octocov
 go 1.16
 
 require (
+	cloud.google.com/go/bigquery v1.8.0
 	cloud.google.com/go/storage v1.16.0
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go v1.40.11
@@ -18,6 +19,7 @@ require (
 	github.com/k1LoW/duration v1.1.0
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/mauri870/gcsfs v0.0.0-20210217184550-8b539458430a
+	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.1.3
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
