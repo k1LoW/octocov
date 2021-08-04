@@ -120,13 +120,18 @@ func (b *BQ) CreateTable(ctx context.Context, table string) error {
 func (b *BQ) FS(table string) (fs.FS, error) {
 	ctx := context.Background()
 	fsys := fstest.MapFS{}
-	t := fmt.Sprintf("`%s.%s`", b.dataset, table)
-	q := fmt.Sprintf(`SELECT r.owner, r.repo, r.timestamp, r.raw FROM %s AS r
+	q := b.client.Query(`SELECT r.owner, r.repo, r.timestamp, r.raw FROM @table AS r
 INNER JOIN (
-    SELECT owner, repo, MAX(timestamp) AS timestamp FROM %s GROUP BY owner, repo
+    SELECT owner, repo, MAX(timestamp) AS timestamp FROM @table GROUP BY owner, repo
 ) AS l ON r.owner = l.owner AND r.repo = l.repo AND l.timestamp = r.timestamp
-ORDER BY r.owner, r.repo`, t, t)
-	it, err := b.client.Query(q).Read(ctx)
+ORDER BY r.owner, r.repo`)
+	q.Parameters = []bigquery.QueryParameter{
+		{
+			Name:  "table",
+			Value: fmt.Sprintf("`%s.%s`", b.dataset, table),
+		},
+	}
+	it, err := q.Read(ctx)
 	if err != nil {
 		return nil, err
 	}
