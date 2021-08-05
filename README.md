@@ -379,6 +379,38 @@ central:
 
 - `GOOGLE_APPLICATION_CREDENTIALS`
 
+### Use BigQuery table as datastore
+
+![gcs](docs/bq.svg)
+
+When using the BigQuery table as a datastore, perform badge generation via on.schedule.
+
+``` yaml
+# .octocov.yml
+datastore:
+  bq:
+    project: my-project
+    dataset: my-dataset
+```
+
+``` yaml
+# .octocov.yml for central repo
+central:
+  enable: true
+  reports: bq://my-project/my-dataset/reports
+  push:
+    enable: true
+```
+
+**Required permission (Central Repo):**
+
+- `bigquery.jobs.create`
+- `bigquery.tables.getData`
+
+**Required environment variables (Central Repo):**
+
+- `GOOGLE_APPLICATION_CREDENTIALS`
+
 
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
 
