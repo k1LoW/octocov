@@ -67,6 +67,14 @@ func (r *Report) String() string {
 	return string(b)
 }
 
+func (r *Report) Bytes() []byte {
+	b, err := json.MarshalIndent(r, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+	return b
+}
+
 func (r *Report) Table() string {
 	h := []string{}
 	m := []string{}

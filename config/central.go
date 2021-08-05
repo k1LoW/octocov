@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -96,6 +97,23 @@ func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 			return nil, err
 		}
 		return g.FS(strings.Join(splitted[1:], "/"))
+	case strings.HasPrefix(c.Central.Reports, "bq://"):
+		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "bq://"), "/")
+		if len(splitted) != 3 {
+			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
+		}
+		project := splitted[0]
+		dataset := splitted[1]
+		table := splitted[2]
+		client, err := bigquery.NewClient(ctx, project)
+		if err != nil {
+			return nil, err
+		}
+		b, err := datastore.NewBQ(client, dataset)
+		if err != nil {
+			return nil, err
+		}
+		return b.FS(table)
 	default:
 		// file://
 		l, err := datastore.NewLocal(c.Root())

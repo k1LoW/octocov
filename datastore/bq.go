@@ -3,12 +3,16 @@ package datastore
 import (
 	"context"
 	"crypto/rand"
+	"fmt"
+	"io/fs"
+	"testing/fstest"
 	"time"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 	"github.com/oklog/ulid/v2"
+	"google.golang.org/api/iterator"
 )
 
 type BQ struct {
@@ -111,4 +115,41 @@ func (b *BQ) CreateTable(ctx context.Context, table string) error {
 		return err
 	}
 	return nil
+}
+
+func (b *BQ) FS(table string) (fs.FS, error) {
+	ctx := context.Background()
+	fsys := fstest.MapFS{}
+	q := b.client.Query(`SELECT r.owner, r.repo, r.timestamp, r.raw FROM @table AS r
+INNER JOIN (
+    SELECT owner, repo, MAX(timestamp) AS timestamp FROM @table GROUP BY owner, repo
+) AS l ON r.owner = l.owner AND r.repo = l.repo AND l.timestamp = r.timestamp
+ORDER BY r.owner, r.repo`)
+	q.Parameters = []bigquery.QueryParameter{
+		{
+			Name:  "table",
+			Value: fmt.Sprintf("`%s.%s`", b.dataset, table),
+		},
+	}
+	it, err := q.Read(ctx)
+	if err != nil {
+		return nil, err
+	}
+	for {
+		var rr ReportRecord
+		err := it.Next(&rr)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		path := fmt.Sprintf("%s/%s/report.json", rr.Owner, rr.Repo)
+		fsys[path] = &fstest.MapFile{
+			Data:    []byte(rr.Raw),
+			Mode:    fs.ModePerm,
+			ModTime: rr.Timestamp,
+		}
+	}
+	return &fsys, nil
 }
