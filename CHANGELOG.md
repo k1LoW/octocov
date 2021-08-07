@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.13.0](https://github.com/k1LoW/octocov/compare/v0.12.1...v0.13.0) (2021-08-05)
+
+* Support BigQuery for central.reports [#44](https://github.com/k1LoW/octocov/pull/44) ([k1LoW](https://github.com/k1LoW))
+* Support datastore.bq [#43](https://github.com/k1LoW/octocov/pull/43) ([k1LoW](https://github.com/k1LoW))
+* Support GCS for central.reports [#42](https://github.com/k1LoW/octocov/pull/42) ([k1LoW](https://github.com/k1LoW))
+* Change datasource.Datastore interface [#41](https://github.com/k1LoW/octocov/pull/41) ([k1LoW](https://github.com/k1LoW))
+* Support datastore.gcs [#40](https://github.com/k1LoW/octocov/pull/40) ([k1LoW](https://github.com/k1LoW))
+* Support S3 for central.reports [#39](https://github.com/k1LoW/octocov/pull/39) ([k1LoW](https://github.com/k1LoW))
+* Refactor central [#38](https://github.com/k1LoW/octocov/pull/38) ([k1LoW](https://github.com/k1LoW))
+* Change datastore interface [#37](https://github.com/k1LoW/octocov/pull/37) ([k1LoW](https://github.com/k1LoW))
+* Support datastore.s3 [#36](https://github.com/k1LoW/octocov/pull/36) ([k1LoW](https://github.com/k1LoW))
+* Remove ghdag pkg [#35](https://github.com/k1LoW/octocov/pull/35) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.12.1](https://github.com/k1LoW/octocov/compare/v0.12.0...v0.12.1) (2021-07-02)
 
 * Avoid incorrectly parsing other report formats. [#34](https://github.com/k1LoW/octocov/pull/34) ([k1LoW](https://github.com/k1LoW))

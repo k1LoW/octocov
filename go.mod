@@ -25,5 +25,5 @@ require (
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 	golang.org/x/tools v0.1.5
-	google.golang.org/api v0.52.0 // indirect
+	google.golang.org/api v0.52.0
 )
