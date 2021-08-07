@@ -25,7 +25,7 @@ func TestDatasourceGithubPath(t *testing.T) {
 	if err := c.BuildDatastoreConfig(); err != nil {
 		t.Fatal(err)
 	}
-	want := "reports/foo/bar/report.json"
+	want := "foo/bar/report.json"
 	if got := c.Datastore.Github.Path; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
@@ -52,7 +52,7 @@ func TestDatasourceS3Path(t *testing.T) {
 	if err := c.BuildDatastoreConfig(); err != nil {
 		t.Fatal(err)
 	}
-	want := "reports/foo/bar/report.json"
+	want := "foo/bar/report.json"
 	if got := c.Datastore.S3.Path; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
@@ -79,7 +79,7 @@ func TestDatasourceGCSPath(t *testing.T) {
 	if err := c.BuildDatastoreConfig(); err != nil {
 		t.Fatal(err)
 	}
-	want := "reports/foo/bar/report.json"
+	want := "foo/bar/report.json"
 	if got := c.Datastore.GCS.Path; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}

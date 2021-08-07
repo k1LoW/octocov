@@ -17,11 +17,11 @@ func TestCollectReports(t *testing.T) {
 		Enable:  true,
 		Reports: "reports",
 	}
-	l, err := datastore.NewLocal(testdataDir(t))
+	l, err := datastore.NewLocal(filepath.Join(testdataDir(t), c.Central.Reports))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.FS(c.Central.Reports)
+	fsys, err := l.FS()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,11 +54,11 @@ func TestGenerateBadges(t *testing.T) {
 		Reports: "reports",
 		Badges:  bd,
 	}
-	l, err := datastore.NewLocal(testdataDir(t))
+	l, err := datastore.NewLocal(filepath.Join(testdataDir(t), c.Central.Reports))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.FS(c.Central.Reports)
+	fsys, err := l.FS()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,11 +120,11 @@ func TestRenderIndex(t *testing.T) {
 	if err := c.BuildCentralConfig(); err != nil {
 		t.Fatal(err)
 	}
-	l, err := datastore.NewLocal(testdataDir(t))
+	l, err := datastore.NewLocal(filepath.Join(testdataDir(t), c.Central.Reports))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.FS(c.Central.Reports)
+	fsys, err := l.FS()
 	if err != nil {
 		t.Fatal(err)
 	}

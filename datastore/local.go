@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/k1LoW/octocov/report"
 )
@@ -32,12 +31,9 @@ func (l *Local) Store(ctx context.Context, path string, r *report.Report) error 
 	return os.WriteFile(filepath.Join(l.root, path), r.Bytes(), os.ModePerm)
 }
 
-func (l *Local) FS(path string) (fs.FS, error) {
-	if !strings.HasPrefix(path, "/") {
-		path = filepath.Join(l.root, path)
-	}
+func (l *Local) FS() (fs.FS, error) {
 	return &LocalFS{
-		root: path,
+		root: filepath.Join(l.root),
 	}, nil
 }
 

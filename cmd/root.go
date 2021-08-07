@@ -279,7 +279,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				g, err := datastore.NewGithub(gh, c.Datastore.Github.Repository, c.Datastore.Github.Branch)
+				g, err := datastore.NewGithub(gh, c.Datastore.Github.Repository, c.Datastore.Github.Branch, config.DefaultReportPrefix)
 				if err != nil {
 					return err
 				}
@@ -294,7 +294,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				sc := s3.New(sess)
-				s, err := datastore.NewS3(sc, c.Datastore.S3.Bucket)
+				s, err := datastore.NewS3(sc, c.Datastore.S3.Bucket, config.DefaultReportPrefix)
 				if err != nil {
 					return err
 				}
@@ -309,7 +309,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				defer client.Close()
-				g, err := datastore.NewGCS(client, c.Datastore.GCS.Bucket)
+				g, err := datastore.NewGCS(client, c.Datastore.GCS.Bucket, config.DefaultReportPrefix)
 				if err != nil {
 					return err
 				}
@@ -324,7 +324,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				defer client.Close()
-				b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset)
+				b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset, config.DefaultReportPrefix)
 				if err != nil {
 					return err
 				}

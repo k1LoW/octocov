@@ -50,7 +50,7 @@ func (c *Config) BuildCentralConfig() error {
 		c.Central.Root = filepath.Clean(filepath.Join(c.Root(), c.Central.Root))
 	}
 	if c.Central.Reports == "" {
-		c.Central.Reports = defaultReportsDir
+		c.Central.Reports = DefaultReportPrefix
 	}
 	if c.Central.Badges == "" {
 		c.Central.Badges = defaultBadgesDir
@@ -76,11 +76,11 @@ func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 			return nil, err
 		}
 		sc := s3.New(sess)
-		s, err := datastore.NewS3(sc, bucket)
+		s, err := datastore.NewS3(sc, bucket, strings.Join(splitted[1:], "/"))
 		if err != nil {
 			return nil, err
 		}
-		return s.FS(strings.Join(splitted[1:], "/"))
+		return s.FS()
 	case strings.HasPrefix(c.Central.Reports, "gs://"):
 		// gs://
 		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "gs://"), "/")
@@ -92,11 +92,11 @@ func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 		if err != nil {
 			return nil, err
 		}
-		g, err := datastore.NewGCS(client, bucket)
+		g, err := datastore.NewGCS(client, bucket, strings.Join(splitted[1:], "/"))
 		if err != nil {
 			return nil, err
 		}
-		return g.FS(strings.Join(splitted[1:], "/"))
+		return g.FS()
 	case strings.HasPrefix(c.Central.Reports, "bq://"):
 		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "bq://"), "/")
 		if len(splitted) != 3 {
@@ -109,18 +109,25 @@ func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
 		if err != nil {
 			return nil, err
 		}
-		b, err := datastore.NewBQ(client, dataset)
+		b, err := datastore.NewBQ(client, dataset, table)
 		if err != nil {
 			return nil, err
 		}
-		return b.FS(table)
+		return b.FS()
 	default:
 		// file://
-		l, err := datastore.NewLocal(c.Root())
+		root := c.Root()
+		p := strings.TrimPrefix(c.Central.Reports, "file://")
+		if strings.HasPrefix(p, "/") {
+			root = p
+		} else {
+			root = filepath.Join(root, p)
+		}
+		l, err := datastore.NewLocal(root)
 		if err != nil {
 			return nil, err
 		}
-		fsys, err := l.FS(strings.TrimPrefix(c.Central.Reports, "file://"))
+		fsys, err := l.FS()
 		if err != nil {
 			return nil, err
 		}

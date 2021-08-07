@@ -28,9 +28,9 @@ func createBQTable(ctx context.Context, c *config.Config) error {
 		return err
 	}
 	defer client.Close()
-	b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset)
+	b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset, c.Datastore.BQ.Table)
 	if err != nil {
 		return err
 	}
-	return b.CreateTable(ctx, c.Datastore.BQ.Table)
+	return b.CreateTable(ctx)
 }

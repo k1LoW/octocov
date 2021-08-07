@@ -16,5 +16,5 @@ var (
 
 type Datastore interface {
 	Store(ctx context.Context, path string, r *report.Report) error
-	FS(path string) (fs.FS, error)
+	FS() (fs.FS, error)
 }

@@ -92,7 +92,7 @@ func (c *Config) buildDatastoreGithubConfig() error {
 		c.Datastore.Github.Branch = defaultBranch
 	}
 	if c.Datastore.Github.Path == "" && c.Repository != "" {
-		c.Datastore.Github.Path = fmt.Sprintf("%s/%s/report.json", defaultReportsDir, c.Repository)
+		c.Datastore.Github.Path = fmt.Sprintf("%s/report.json", c.Repository)
 	}
 	if c.Datastore.Github.Repository == "" {
 		return errors.New("datastore.github.repository not set")
@@ -117,7 +117,7 @@ func (c *Config) buildDatastoreS3Config() error {
 		return errors.New("datastore.s3.bucket not set")
 	}
 	if c.Datastore.S3.Path == "" && c.Repository != "" {
-		c.Datastore.S3.Path = fmt.Sprintf("%s/%s/report.json", defaultReportsDir, c.Repository)
+		c.Datastore.S3.Path = fmt.Sprintf("%s/report.json", c.Repository)
 	}
 	if c.Datastore.S3.Path == "" {
 		return errors.New("datastore.s3.path not set")
@@ -133,7 +133,7 @@ func (c *Config) buildDatastoreGCSConfig() error {
 		return errors.New("datastore.gcs.bucket not set")
 	}
 	if c.Datastore.GCS.Path == "" && c.Repository != "" {
-		c.Datastore.GCS.Path = fmt.Sprintf("%s/%s/report.json", defaultReportsDir, c.Repository)
+		c.Datastore.GCS.Path = fmt.Sprintf("%s/report.json", c.Repository)
 	}
 	if c.Datastore.GCS.Path == "" {
 		return errors.New("datastore.gcs.path not set")
@@ -152,7 +152,7 @@ func (c *Config) buildDatastoreBQConfig() error {
 		return errors.New("datastore.bq.dataset not set")
 	}
 	if c.Datastore.BQ.Table == "" {
-		c.Datastore.BQ.Table = defaultReportsDir
+		c.Datastore.BQ.Table = DefaultReportPrefix
 	}
 	return nil
 }

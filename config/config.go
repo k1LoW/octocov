@@ -18,8 +18,8 @@ import (
 )
 
 const defaultBranch = "main"
-const defaultReportsDir = "reports"
 const defaultBadgesDir = "badges"
+const DefaultReportPrefix = "reports"
 
 const (
 	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
@@ -37,6 +37,7 @@ type Config struct {
 	Coverage          *ConfigCoverage          `yaml:"coverage"`
 	CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
 	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
+	Report            *ConfigReport            `yaml:"report,omitempty"`
 	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`

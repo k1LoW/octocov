@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"path/filepath"
 
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
@@ -14,13 +15,15 @@ type Github struct {
 	gh         *gh.Gh
 	repository string
 	branch     string
+	prefix     string
 }
 
-func NewGithub(gh *gh.Gh, r, b string) (*Github, error) {
+func NewGithub(gh *gh.Gh, r, b, prefix string) (*Github, error) {
 	return &Github{
 		gh:         gh,
 		repository: r,
 		branch:     b,
+		prefix:     prefix,
 	}, nil
 }
 
@@ -36,9 +39,10 @@ func (g *Github) Store(ctx context.Context, path string, r *report.Report) error
 	if err != nil {
 		return err
 	}
-	return g.gh.PushContent(ctx, owner, repo, branch, content, path, message)
+	cp := filepath.Join(g.prefix, path)
+	return g.gh.PushContent(ctx, owner, repo, branch, content, cp, message)
 }
 
-func (g *Github) FS(path string) (fs.FS, error) {
+func (g *Github) FS() (fs.FS, error) {
 	return nil, errors.New("not implemented")
 }
