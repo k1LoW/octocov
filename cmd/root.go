@@ -113,6 +113,7 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
 		if c.CoverageConfigReady() {
 			path := c.Coverage.Path
 			if err := r.MeasureCoverage(path); err != nil {

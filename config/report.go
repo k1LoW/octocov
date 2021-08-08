@@ -21,7 +21,7 @@ func (c *Config) ReportConfigReady() bool {
 		return false
 	}
 	if !ok {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", c.Datastore.If)
+		_, _ = fmt.Fprintf(os.Stderr, "Skip storing the report: the condition in the `if` section is not met (%s)\n", c.Report.If)
 		return false
 	}
 	return true

@@ -38,7 +38,7 @@ type Config struct {
 	CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
 	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
 	Report            *ConfigReport            `yaml:"report,omitempty"`
-	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
+	Datastore         interface{}              `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`
 	Comment           *ConfigComment           `yaml:"comment,omitempty"`
@@ -156,17 +156,6 @@ func (c *Config) Build() {
 	}
 	gitRoot, _ := traverseGitPath(c.Root())
 	c.GitRoot = gitRoot
-	if c.Datastore != nil {
-		if c.Datastore.Github != nil {
-			c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
-			c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
-			c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
-		}
-		if c.Datastore.S3 != nil {
-			c.Datastore.S3.Bucket = os.ExpandEnv(c.Datastore.S3.Bucket)
-			c.Datastore.S3.Path = os.ExpandEnv(c.Datastore.S3.Path)
-		}
-	}
 
 	if c.Coverage == nil {
 		c.Coverage = &ConfigCoverage{}
