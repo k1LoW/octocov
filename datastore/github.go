@@ -27,14 +27,11 @@ func NewGithub(gh *gh.Gh, r, b, prefix string) (*Github, error) {
 	}, nil
 }
 
-func (g *Github) Store(ctx context.Context, path string, r *report.Report) error {
+func (g *Github) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	branch := g.branch
 	content := r.String()
-	from := r.Repository
-	if from == "" {
-		from = "?"
-	}
-	message := fmt.Sprintf("Store coverage report of %s", from)
+	message := fmt.Sprintf("Store coverage report of %s", r.Repository)
 	owner, repo, err := gh.SplitRepository(g.repository)
 	if err != nil {
 		return err

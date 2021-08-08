@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 
@@ -24,9 +25,10 @@ func NewGCS(client *storage.Client, bucket, prefix string) (*GCS, error) {
 	}, nil
 }
 
-func (g *GCS) Store(ctx context.Context, path string, r *report.Report) error {
+func (g *GCS) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	content := r.String()
-	o := filepath.Join(g.bucket, path)
+	o := filepath.Join(g.prefix, path)
 	w := g.client.Bucket(g.bucket).Object(o).NewWriter(ctx)
 	if _, err := w.Write([]byte(content)); err != nil {
 		return err

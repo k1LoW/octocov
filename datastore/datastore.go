@@ -25,7 +25,7 @@ var (
 )
 
 type Datastore interface {
-	Store(ctx context.Context, path string, r *report.Report) error
+	Store(ctx context.Context, r *report.Report) error
 	FS() (fs.FS, error)
 }
 
@@ -80,12 +80,19 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 func parse(u, configRoot string) (datastore string, args []string, err error) {
 	switch {
 	case strings.HasPrefix(u, "github://"):
+		branch := ""
+		{
+			splitted := strings.Split(u, "@")
+			u = splitted[0]
+			if len(splitted) == 2 {
+				branch = splitted[1]
+			}
+		}
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "github://"), "/"), "/")
 		if len(splitted) < 2 {
 			return "", nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		repo := fmt.Sprintf("%s/%s", splitted[0], splitted[1])
-		branch := "" // TODO
 		prefix := strings.Join(splitted[2:], "/")
 		return "github", []string{repo, branch, prefix}, nil
 	case strings.HasPrefix(u, "s3://"):

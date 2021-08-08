@@ -3,6 +3,7 @@ package datastore
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 
@@ -27,7 +28,8 @@ func NewS3(client s3iface.S3API, bucket, prefix string) (*S3, error) {
 	}, nil
 }
 
-func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
+func (s *S3) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	content := r.String()
 	key := filepath.Join(s.prefix, path)
 	_, err := s.client.PutObject(&s3.PutObjectInput{

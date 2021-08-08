@@ -27,7 +27,8 @@ func NewLocal(root string) (*Local, error) {
 	}, nil
 }
 
-func (l *Local) Store(ctx context.Context, path string, r *report.Report) error {
+func (l *Local) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	return os.WriteFile(filepath.Join(l.root, path), r.Bytes(), os.ModePerm)
 }
 
