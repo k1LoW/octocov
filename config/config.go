@@ -17,7 +17,6 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-const defaultBranch = "main"
 const defaultBadgesDir = "badges"
 const DefaultReportPrefix = "reports"
 

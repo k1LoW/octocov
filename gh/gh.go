@@ -126,12 +126,19 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 	return nil
 }
 
-func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, error) {
+func (g *Gh) GetDefaultBranch(ctx context.Context, owner, repo string) (string, error) {
 	r, _, err := g.client.Repositories.Get(ctx, owner, repo)
 	if err != nil {
 		return "", err
 	}
-	b := r.GetDefaultBranch()
+	return r.GetDefaultBranch(), nil
+}
+
+func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, error) {
+	b, err := g.GetDefaultBranch(ctx, owner, repo)
+	if err != nil {
+		return "", err
+	}
 
 	if os.Getenv("GITHUB_SERVER_URL") != "" && os.Getenv("GITHUB_SERVER_URL") != DefaultGithubServerURL {
 		// GitHub Enterprise Server

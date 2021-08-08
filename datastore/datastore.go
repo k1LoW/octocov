@@ -43,6 +43,16 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 		if err != nil {
 			return nil, err
 		}
+		if branch == "" {
+			owner, repo, err := gh.SplitRepository(repo)
+			if err != nil {
+				return nil, err
+			}
+			branch, err = g.GetDefaultBranch(ctx, owner, repo)
+			if err != nil {
+				return nil, err
+			}
+		}
 		return NewGithub(g, repo, branch, prefix)
 	case "s3":
 		bucket := args[0]
