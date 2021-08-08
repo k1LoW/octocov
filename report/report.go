@@ -34,7 +34,7 @@ type Report struct {
 
 func New() (*Report, error) {
 	repo := os.Getenv("GITHUB_REPOSITORY")
-	if repo != "" {
+	if repo == "" {
 		return nil, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	ref := os.Getenv("GITHUB_REF")
