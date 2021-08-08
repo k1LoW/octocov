@@ -167,17 +167,21 @@ push:
 
 ### Store report to central datastore
 
-By setting `datastore:`, store the reports to central datastore.
+By setting `report:`, store the reports to central datastores.
+
+``` yaml
+report:
+  datastores:
+    - github://owner/coverages/reports
+    - s3://bucket/reports
+```
 
 #### GitHub
 
-``` yaml
-# .octocov.yml
-datastore:
-  github:
-    repository: owner/coverages # central datastore repository
-    branch: main                # default: main
-    path:                       # default: reports/${GITHUB_REPOSITORY}/report.json
+Use `github://` scheme.
+
+```
+github://[owner]/[repo]/[prefix]
 ```
 
 **Required environment variables:**
@@ -188,12 +192,10 @@ datastore:
 
 #### S3
 
-``` yaml
-# .octocov.yml
-datastore:
-  s3:
-    bucket: my-coverage # datastore bucket
-    path:               # default: reports/${GITHUB_REPOSITORY}/report.json
+Use `s3://` scheme.
+
+```
+s3://[bucket]/[prefix]
 ```
 
 **Required permission:**
@@ -208,12 +210,10 @@ datastore:
 
 #### GCS
 
-``` yaml
-# .octocov.yml
-datastore:
-  gcs:
-    bucket: my-coverage # datastore bucket
-    path:               # default: reports/${GITHUB_REPOSITORY}/report.json
+Use `gs://` scheme.
+
+```
+gs://[bucket]/[prefix]
 ```
 
 **Required permission:**
@@ -227,13 +227,10 @@ datastore:
 
 #### BigQuery
 
-``` yaml
-# .octocov.yml
-datastore:
-  bq:
-    project: my-octocov-project # project ID
-    dataset: octocov            # dataset ID
-    table:                      # table. default: reports
+Use `bq://` scheme.
+
+```
+bq://[project ID]/[dataset ID]/[table]
 ```
 
 **Required permission:**
@@ -254,14 +251,23 @@ If you want to create a table, execute the following command ( require `bigquery
 ``` console
 $ octocov --create-bq-table
 ```
+
+#### Local
+
+Use `file://` scheme.
+
+```
+file://[path]
+```
+
 #### If section
 
 ``` yaml
 # .octocov.yml
-datastore:
+report:
   if: env.GITHUB_REF == 'refs/heads/main'
-  github:
-    repository: owner/coverages
+  datastores:
+    - github://owner/coverages/reports
 ```
 
 The variables available in the `if` section are as follows
