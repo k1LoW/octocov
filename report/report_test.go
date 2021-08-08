@@ -30,7 +30,7 @@ func TestTable(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		r := New()
+		r := &Report{}
 		if err := r.MeasureCoverage(tt.path); err != nil {
 			t.Fatal(err)
 		}
