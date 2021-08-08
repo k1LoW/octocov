@@ -32,10 +32,6 @@ import (
 	"strings"
 	"time"
 
-	"cloud.google.com/go/bigquery"
-	"cloud.google.com/go/storage"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
@@ -270,70 +266,28 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Store report
-		if c.DatastoreConfigReady() {
+		if c.ReportConfigReady() {
 			cmd.PrintErrln("Store report...")
-			if err := c.BuildDatastoreConfig(); err != nil {
+			if err := c.BuildReportConfig(); err != nil {
 				return err
 			}
-			if c.Datastore.Github != nil {
-				// GitHub
-				gh, err := gh.New()
+			datastores := []datastore.Datastore{}
+			for _, s := range c.Report.Datastores {
+				d, err := datastore.New(ctx, s, c.Root())
 				if err != nil {
 					return err
 				}
-				g, err := datastore.NewGithub(gh, c.Datastore.Github.Repository, c.Datastore.Github.Branch, config.DefaultReportPrefix)
-				if err != nil {
-					return err
-				}
-				if err := g.Store(ctx, c.Datastore.Github.Path, r); err != nil {
+				datastores = append(datastores, d)
+			}
+			for _, d := range datastores {
+				if err := d.Store(ctx, r); err != nil {
 					return err
 				}
 			}
-			if c.Datastore.S3 != nil {
-				// S3
-				sess, err := session.NewSession()
-				if err != nil {
-					return err
-				}
-				sc := s3.New(sess)
-				s, err := datastore.NewS3(sc, c.Datastore.S3.Bucket, config.DefaultReportPrefix)
-				if err != nil {
-					return err
-				}
-				if err := s.Store(ctx, c.Datastore.S3.Path, r); err != nil {
-					return err
-				}
-			}
-			if c.Datastore.GCS != nil {
-				// GCS
-				client, err := storage.NewClient(ctx)
-				if err != nil {
-					return err
-				}
-				defer client.Close()
-				g, err := datastore.NewGCS(client, c.Datastore.GCS.Bucket, config.DefaultReportPrefix)
-				if err != nil {
-					return err
-				}
-				if err := g.Store(ctx, c.Datastore.GCS.Path, r); err != nil {
-					return err
-				}
-			}
-			if c.Datastore.BQ != nil {
-				// BigQuery
-				client, err := bigquery.NewClient(ctx, c.Datastore.BQ.Project)
-				if err != nil {
-					return err
-				}
-				defer client.Close()
-				b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset, config.DefaultReportPrefix)
-				if err != nil {
-					return err
-				}
-				if err := b.Store(ctx, c.Datastore.BQ.Table, r); err != nil {
-					return err
-				}
-			}
+		}
+
+		if c.DatastoreConfigReady() {
+			cmd.PrintErrln("Skip storing report: config datastore: is deprecated. the report will never be sent")
 		}
 
 		// Comment report to pull request
