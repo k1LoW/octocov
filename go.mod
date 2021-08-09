@@ -23,10 +23,11 @@ require (
 	github.com/mauri870/gcsfs v0.0.0-20210217184550-8b539458430a
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/spf13/cobra v1.1.3
-	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/spf13/cobra v1.2.1
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
 	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
 	golang.org/x/tools v0.1.5
 	google.golang.org/api v0.52.0
 )
+
+replace github.com/miekg/dns => github.com/miekg/dns v1.1.43
