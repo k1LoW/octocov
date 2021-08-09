@@ -80,11 +80,15 @@ type ConfigTestExecutionTimeBadge struct {
 }
 
 type ConfigCentral struct {
-	Enable  bool       `yaml:"enable"`
-	Root    string     `yaml:"root"`
-	Reports string     `yaml:"reports"`
-	Badges  string     `yaml:"badges"`
-	Push    ConfigPush `yaml:"push"`
+	Enable  bool                 `yaml:"enable"`
+	Root    string               `yaml:"root"`
+	Reports ConfigCentralReports `yaml:"reports"`
+	Badges  string               `yaml:"badges"`
+	Push    ConfigPush           `yaml:"push"`
+}
+
+type ConfigCentralReports struct {
+	Datastores []string `yaml:"datastores"`
 }
 
 type ConfigPush struct {
@@ -177,7 +181,11 @@ func (c *Config) Build() {
 	}
 	if c.Central != nil {
 		c.Central.Root = os.ExpandEnv(c.Central.Root)
-		c.Central.Reports = os.ExpandEnv(c.Central.Reports)
+		ds := []string{}
+		for _, s := range c.Central.Reports.Datastores {
+			ds = append(ds, os.ExpandEnv(s))
+		}
+		c.Central.Reports.Datastores = ds
 		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
 	}
 }

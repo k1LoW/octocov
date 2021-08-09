@@ -29,7 +29,7 @@ func (c *Config) ReportConfigReady() bool {
 
 func (c *Config) BuildReportConfig() error {
 	if len(c.Report.Datastores) == 0 {
-		return errors.New("datastore not set")
+		return errors.New("report.datastores is not set")
 	}
 	return nil
 }
