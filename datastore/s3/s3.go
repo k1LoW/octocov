@@ -1,10 +1,11 @@
-package datastore
+package s3
 
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io/fs"
-	"strings"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -16,20 +17,24 @@ import (
 type S3 struct {
 	client s3iface.S3API
 	bucket string
+	prefix string
 }
 
-func NewS3(client s3iface.S3API, b string) (*S3, error) {
+func New(client s3iface.S3API, bucket, prefix string) (*S3, error) {
 	return &S3{
 		client: client,
-		bucket: b,
+		bucket: bucket,
+		prefix: prefix,
 	}, nil
 }
 
-func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
+func (s *S3) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	content := r.String()
+	key := filepath.Join(s.prefix, path)
 	_, err := s.client.PutObject(&s3.PutObjectInput{
 		Bucket:        &s.bucket,
-		Key:           &path,
+		Key:           &key,
 		Body:          bytes.NewReader([]byte(content)),
 		ContentLength: aws.Int64(int64(len(content))),
 	})
@@ -39,7 +44,6 @@ func (s *S3) Store(ctx context.Context, path string, r *report.Report) error {
 	return nil
 }
 
-func (s *S3) FS(path string) (fs.FS, error) {
-	prefix := strings.Trim(path, "/")
-	return fs.Sub(s3fs.New(s.client, s.bucket), prefix)
+func (s *S3) FS() (fs.FS, error) {
+	return fs.Sub(s3fs.New(s.client, s.bucket), s.prefix)
 }

@@ -1,4 +1,4 @@
-package datastore
+package local
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/k1LoW/octocov/report"
 )
@@ -15,7 +14,7 @@ type Local struct {
 	root string
 }
 
-func NewLocal(root string) (*Local, error) {
+func New(root string) (*Local, error) {
 	fi, err := os.Stat(root)
 	if err != nil {
 		return nil, err
@@ -28,16 +27,14 @@ func NewLocal(root string) (*Local, error) {
 	}, nil
 }
 
-func (l *Local) Store(ctx context.Context, path string, r *report.Report) error {
+func (l *Local) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	return os.WriteFile(filepath.Join(l.root, path), r.Bytes(), os.ModePerm)
 }
 
-func (l *Local) FS(path string) (fs.FS, error) {
-	if !strings.HasPrefix(path, "/") {
-		path = filepath.Join(l.root, path)
-	}
+func (l *Local) FS() (fs.FS, error) {
 	return &LocalFS{
-		root: path,
+		root: filepath.Join(l.root),
 	}, nil
 }
 

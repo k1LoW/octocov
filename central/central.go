@@ -86,7 +86,7 @@ func (c *Central) collectReports() error {
 		if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
 			return nil
 		}
-		r := report.New()
+		r := &report.Report{}
 		f, err := fsys.Open(path)
 		if err != nil {
 			return nil

@@ -1,10 +1,10 @@
-package datastore
+package gcs
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"path/filepath"
-	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/k1LoW/octocov/report"
@@ -14,18 +14,22 @@ import (
 type GCS struct {
 	client *storage.Client
 	bucket string
+	prefix string
 }
 
-func NewGCS(client *storage.Client, b string) (*GCS, error) {
+func New(client *storage.Client, bucket, prefix string) (*GCS, error) {
 	return &GCS{
 		client: client,
-		bucket: b,
+		bucket: bucket,
+		prefix: prefix,
 	}, nil
 }
 
-func (g *GCS) Store(ctx context.Context, path string, r *report.Report) error {
+func (g *GCS) Store(ctx context.Context, r *report.Report) error {
+	path := fmt.Sprintf("%s/report.json", r.Repository)
 	content := r.String()
-	w := g.client.Bucket(g.bucket).Object(path).NewWriter(ctx)
+	o := filepath.Join(g.prefix, path)
+	w := g.client.Bucket(g.bucket).Object(o).NewWriter(ctx)
 	if _, err := w.Write([]byte(content)); err != nil {
 		return err
 	}
@@ -44,10 +48,9 @@ func (fsys *GCSFS) Open(name string) (fs.File, error) {
 	return fsys.gscfs.Open(filepath.Join(fsys.prefix, name))
 }
 
-func (g *GCS) FS(path string) (fs.FS, error) {
-	prefix := strings.Trim(path, "/")
+func (g *GCS) FS() (fs.FS, error) {
 	return &GCSFS{
-		prefix: prefix,
+		prefix: g.prefix,
 		gscfs:  gcsfs.NewWithClient(g.client, g.bucket),
 	}, nil
 }

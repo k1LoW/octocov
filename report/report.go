@@ -32,8 +32,11 @@ type Report struct {
 	rp string
 }
 
-func New() *Report {
+func New() (*Report, error) {
 	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		return nil, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+	}
 	ref := os.Getenv("GITHUB_REF")
 	if ref == "" {
 		b, err := ioutil.ReadFile(".git/HEAD")
@@ -56,7 +59,7 @@ func New() *Report {
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
-	}
+	}, nil
 }
 
 func (r *Report) String() string {
@@ -160,9 +163,6 @@ func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
 }
 
 func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []string) error {
-	if r.Repository == "" {
-		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
-	}
 	splitted := strings.Split(r.Repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]

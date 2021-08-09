@@ -1,4 +1,4 @@
-package datastore
+package bq
 
 import (
 	"context"
@@ -18,12 +18,14 @@ import (
 type BQ struct {
 	client  *bigquery.Client
 	dataset string
+	table   string
 }
 
-func NewBQ(client *bigquery.Client, dataset string) (*BQ, error) {
+func New(client *bigquery.Client, dataset, table string) (*BQ, error) {
 	return &BQ{
 		client:  client,
 		dataset: dataset,
+		table:   table,
 	}, nil
 }
 
@@ -57,8 +59,8 @@ var reportsSchema = bigquery.Schema{
 	&bigquery.FieldSchema{Name: "raw", Type: bigquery.StringFieldType, Required: true},
 }
 
-func (b *BQ) Store(ctx context.Context, table string, r *report.Report) error {
-	u := b.client.Dataset(b.dataset).Table(table).Uploader()
+func (b *BQ) Store(ctx context.Context, r *report.Report) error {
+	u := b.client.Dataset(b.dataset).Table(b.table).Uploader()
 	owner, repo, err := gh.SplitRepository(r.Repository)
 	if err != nil {
 		return nil
@@ -106,18 +108,18 @@ func (b *BQ) Store(ctx context.Context, table string, r *report.Report) error {
 	return u.Put(ctx, []*ReportRecord{rr})
 }
 
-func (b *BQ) CreateTable(ctx context.Context, table string) error {
+func (b *BQ) CreateTable(ctx context.Context) error {
 	metaData := &bigquery.TableMetadata{
 		Schema: reportsSchema,
 	}
-	tableRef := b.client.Dataset(b.dataset).Table(table)
+	tableRef := b.client.Dataset(b.dataset).Table(b.table)
 	if err := tableRef.Create(ctx, metaData); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (b *BQ) FS(table string) (fs.FS, error) {
+func (b *BQ) FS() (fs.FS, error) {
 	ctx := context.Background()
 	fsys := fstest.MapFS{}
 	q := b.client.Query(`SELECT r.owner, r.repo, r.timestamp, r.raw FROM @table AS r
@@ -128,7 +130,7 @@ ORDER BY r.owner, r.repo`)
 	q.Parameters = []bigquery.QueryParameter{
 		{
 			Name:  "table",
-			Value: fmt.Sprintf("`%s.%s`", b.dataset, table),
+			Value: fmt.Sprintf("`%s.%s`", b.dataset, b.table),
 		},
 	}
 	it, err := q.Read(ctx)

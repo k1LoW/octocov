@@ -3,34 +3,41 @@ package cmd
 import (
 	"context"
 	"errors"
-	"fmt"
-	"os"
+	"strings"
 
-	"cloud.google.com/go/bigquery"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/datastore/bq"
 )
 
 func createBQTable(ctx context.Context, c *config.Config) error {
 	if !c.DatastoreConfigReady() {
 		return errors.New("datastore config not ready")
 	}
-	if err := c.BuildDatastoreConfig(); err != nil {
+	if err := c.BuildReportConfig(); err != nil {
 		return err
 	}
-	if c.Datastore.BQ == nil {
-		return errors.New("datastore.bq not ready")
+	datastores := []datastore.Datastore{}
+	for _, s := range c.Report.Datastores {
+		if !strings.HasPrefix("bq://", s) {
+			continue
+		}
+		d, err := datastore.New(ctx, s, c.Root())
+		if err != nil {
+			return err
+		}
+		datastores = append(datastores, d)
 	}
-	_, _ = fmt.Fprintf(os.Stderr, "Creating BigQuery table: %s:%s.%s ...\n", c.Datastore.BQ.Project, c.Datastore.BQ.Dataset, c.Datastore.BQ.Table)
 
-	client, err := bigquery.NewClient(ctx, c.Datastore.BQ.Project)
-	if err != nil {
-		return err
+	if len(datastores) == 0 {
+		return errors.New("bq:// are not exists")
 	}
-	defer client.Close()
-	b, err := datastore.NewBQ(client, c.Datastore.BQ.Dataset)
-	if err != nil {
-		return err
+
+	for _, d := range datastores {
+		b := d.(*bq.BQ)
+		if err := b.CreateTable(ctx); err != nil {
+			return err
+		}
 	}
-	return b.CreateTable(ctx, c.Datastore.BQ.Table)
+	return nil
 }

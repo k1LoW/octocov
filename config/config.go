@@ -17,9 +17,8 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-const defaultBranch = "main"
-const defaultReportsDir = "reports"
 const defaultBadgesDir = "badges"
+const DefaultReportPrefix = "reports"
 
 const (
 	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
@@ -37,7 +36,8 @@ type Config struct {
 	Coverage          *ConfigCoverage          `yaml:"coverage"`
 	CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
 	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
-	Datastore         *ConfigDatastore         `yaml:"datastore,omitempty"`
+	Report            *ConfigReport            `yaml:"report,omitempty"`
+	Datastore         interface{}              `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`
 	Comment           *ConfigComment           `yaml:"comment,omitempty"`
@@ -155,17 +155,6 @@ func (c *Config) Build() {
 	}
 	gitRoot, _ := traverseGitPath(c.Root())
 	c.GitRoot = gitRoot
-	if c.Datastore != nil {
-		if c.Datastore.Github != nil {
-			c.Datastore.Github.Repository = os.ExpandEnv(c.Datastore.Github.Repository)
-			c.Datastore.Github.Branch = os.ExpandEnv(c.Datastore.Github.Branch)
-			c.Datastore.Github.Path = os.ExpandEnv(c.Datastore.Github.Path)
-		}
-		if c.Datastore.S3 != nil {
-			c.Datastore.S3.Bucket = os.ExpandEnv(c.Datastore.S3.Bucket)
-			c.Datastore.S3.Path = os.ExpandEnv(c.Datastore.S3.Path)
-		}
-	}
 
 	if c.Coverage == nil {
 		c.Coverage = &ConfigCoverage{}

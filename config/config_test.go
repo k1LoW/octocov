@@ -64,7 +64,7 @@ func TestCoverageAcceptable(t *testing.T) {
 		c.Coverage.Acceptable = tt.in
 		c.Build()
 
-		r := report.New()
+		r := &report.Report{}
 		r.Coverage = &coverage.Coverage{
 			Covered: 50,
 			Total:   100,
@@ -98,7 +98,7 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 			Test:       []string{"*_test.go"},
 		}
 		c.Build()
-		r := report.New()
+		r := &report.Report{}
 		r.CodeToTestRatio = &ratio.Ratio{
 			Code: 100,
 			Test: 100,
@@ -130,7 +130,7 @@ func TestTestExecutionTimeAcceptable(t *testing.T) {
 			Acceptable: tt.in,
 		}
 		c.Build()
-		r := report.New()
+		r := &report.Report{}
 		e := float64(time.Minute)
 		r.TestExecutionTime = &e
 		if err := c.Acceptable(r); err != nil {

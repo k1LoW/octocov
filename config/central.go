@@ -9,10 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"cloud.google.com/go/bigquery"
-	"cloud.google.com/go/storage"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/k1LoW/octocov/datastore"
 )
 
@@ -50,7 +46,7 @@ func (c *Config) BuildCentralConfig() error {
 		c.Central.Root = filepath.Clean(filepath.Join(c.Root(), c.Central.Root))
 	}
 	if c.Central.Reports == "" {
-		c.Central.Reports = defaultReportsDir
+		c.Central.Reports = DefaultReportPrefix
 	}
 	if c.Central.Badges == "" {
 		c.Central.Badges = defaultBadgesDir
@@ -63,67 +59,9 @@ func (c *Config) BuildCentralConfig() error {
 }
 
 func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
-	switch {
-	case strings.HasPrefix(c.Central.Reports, "s3://"):
-		// s3://
-		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "s3://"), "/")
-		if len(splitted) == 0 {
-			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
-		}
-		bucket := splitted[0]
-		sess, err := session.NewSession()
-		if err != nil {
-			return nil, err
-		}
-		sc := s3.New(sess)
-		s, err := datastore.NewS3(sc, bucket)
-		if err != nil {
-			return nil, err
-		}
-		return s.FS(strings.Join(splitted[1:], "/"))
-	case strings.HasPrefix(c.Central.Reports, "gs://"):
-		// gs://
-		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "gs://"), "/")
-		if len(splitted) == 0 {
-			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
-		}
-		bucket := splitted[0]
-		client, err := storage.NewClient(ctx)
-		if err != nil {
-			return nil, err
-		}
-		g, err := datastore.NewGCS(client, bucket)
-		if err != nil {
-			return nil, err
-		}
-		return g.FS(strings.Join(splitted[1:], "/"))
-	case strings.HasPrefix(c.Central.Reports, "bq://"):
-		splitted := strings.Split(strings.TrimPrefix(c.Central.Reports, "bq://"), "/")
-		if len(splitted) != 3 {
-			return nil, fmt.Errorf("invalid central.reports: %s", c.Central.Reports)
-		}
-		project := splitted[0]
-		dataset := splitted[1]
-		table := splitted[2]
-		client, err := bigquery.NewClient(ctx, project)
-		if err != nil {
-			return nil, err
-		}
-		b, err := datastore.NewBQ(client, dataset)
-		if err != nil {
-			return nil, err
-		}
-		return b.FS(table)
-	default:
-		// file://
-		l, err := datastore.NewLocal(c.Root())
-		if err != nil {
-			return nil, err
-		}
-		fsys, err := l.FS(strings.TrimPrefix(c.Central.Reports, "file://"))
-		if err != nil {
-			return nil, err
-		}
-		return fsys, err
+	d, err := datastore.New(ctx, c.Central.Reports, c.Root())
+	if err != nil {
+		return nil, err
 	}
+	return d.FS()
 }
