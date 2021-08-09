@@ -254,11 +254,20 @@ $ octocov --create-bq-table
 
 #### Local
 
-Use `file://` scheme.
+Use `local://` or `file://` scheme.
 
 ```
-file://[path]
+local://[path]
 ```
+
+**Example:**
+
+If the absolute path of `.octocov.yml` is `/path/to/.octocov.yml`
+
+- `local://reports` ... `/path/to/reports` directory
+- `local://.reports` ... `/path/to/reports` directory
+- `local://../reports` ... `/path/reports` directory
+- `local:///reports` ... `/reports` directory.
 
 #### If section
 

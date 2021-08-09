@@ -86,7 +86,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 			return nil, err
 		}
 		return bq.New(client, dataset, table)
-	case "file":
+	case "local":
 		root := args[0]
 		return local.New(root)
 	}
@@ -141,12 +141,12 @@ func parse(u, configRoot string) (datastore string, args []string, err error) {
 		return "bq", []string{project, dataset, table}, nil
 	default:
 		root := configRoot
-		p := strings.TrimSuffix(strings.TrimPrefix(u, "file://"), "/")
+		p := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(u, "file://"), "local://"), "/")
 		if strings.HasPrefix(p, "/") {
 			root = p
 		} else {
 			root = filepath.Join(root, p)
 		}
-		return "file", []string{root}, nil
+		return "local", []string{root}, nil
 	}
 }

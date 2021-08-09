@@ -32,10 +32,12 @@ func TestParse(t *testing.T) {
 		{"bq://project/dataset/table", "bq", []string{"project", "dataset", "table"}, false},
 		{"bq://project/dataset", "", []string{}, true},
 		{"bq://project/dataset/table/more", "", []string{}, true},
-		{"file://reports", "file", []string{filepath.Join(testdataDir(t), "reports")}, false},
-		{"reports", "file", []string{filepath.Join(testdataDir(t), "reports")}, false},
-		{"file:///reports", "file", []string{"/reports"}, false},
-		{"/reports", "file", []string{"/reports"}, false},
+		{"file://reports", "local", []string{filepath.Join(testdataDir(t), "reports")}, false},
+		{"reports", "local", []string{filepath.Join(testdataDir(t), "reports")}, false},
+		{"file:///reports", "local", []string{"/reports"}, false},
+		{"/reports", "local", []string{"/reports"}, false},
+		{"local://reports", "local", []string{filepath.Join(testdataDir(t), "reports")}, false},
+		{"local:///reports", "local", []string{"/reports"}, false},
 	}
 	for _, tt := range tests {
 		gotType, gotArgs, err := parse(tt.in, testdataDir(t))
