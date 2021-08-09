@@ -1,4 +1,4 @@
-package datastore
+package gcs
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type GCS struct {
 	prefix string
 }
 
-func NewGCS(client *storage.Client, bucket, prefix string) (*GCS, error) {
+func New(client *storage.Client, bucket, prefix string) (*GCS, error) {
 	return &GCS{
 		client: client,
 		bucket: bucket,

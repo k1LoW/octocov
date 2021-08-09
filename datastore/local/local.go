@@ -1,4 +1,4 @@
-package datastore
+package local
 
 import (
 	"context"
@@ -14,7 +14,7 @@ type Local struct {
 	root string
 }
 
-func NewLocal(root string) (*Local, error) {
+func New(root string) (*Local, error) {
 	fi, err := os.Stat(root)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package datastore
+package s3
 
 import (
 	"bytes"
@@ -20,7 +20,7 @@ type S3 struct {
 	prefix string
 }
 
-func NewS3(client s3iface.S3API, bucket, prefix string) (*S3, error) {
+func New(client s3iface.S3API, bucket, prefix string) (*S3, error) {
 	return &S3{
 		client: client,
 		bucket: bucket,

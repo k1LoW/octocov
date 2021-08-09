@@ -1,4 +1,4 @@
-package datastore
+package github
 
 import (
 	"context"
@@ -18,7 +18,7 @@ type Github struct {
 	prefix     string
 }
 
-func NewGithub(gh *gh.Gh, r, b, prefix string) (*Github, error) {
+func New(gh *gh.Gh, r, b, prefix string) (*Github, error) {
 	return &Github{
 		gh:         gh,
 		repository: r,

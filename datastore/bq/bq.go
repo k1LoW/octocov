@@ -1,4 +1,4 @@
-package datastore
+package bq
 
 import (
 	"context"
@@ -21,7 +21,7 @@ type BQ struct {
 	table   string
 }
 
-func NewBQ(client *bigquery.Client, dataset, table string) (*BQ, error) {
+func New(client *bigquery.Client, dataset, table string) (*BQ, error) {
 	return &BQ{
 		client:  client,
 		dataset: dataset,

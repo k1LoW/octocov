@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/datastore/local"
 )
 
 func TestCollectReports(t *testing.T) {
@@ -17,7 +17,7 @@ func TestCollectReports(t *testing.T) {
 		Enable:  true,
 		Reports: "reports",
 	}
-	l, err := datastore.NewLocal(filepath.Join(testdataDir(t), c.Central.Reports))
+	l, err := local.New(filepath.Join(testdataDir(t), c.Central.Reports))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestGenerateBadges(t *testing.T) {
 		Reports: "reports",
 		Badges:  bd,
 	}
-	l, err := datastore.NewLocal(filepath.Join(testdataDir(t), c.Central.Reports))
+	l, err := local.New(filepath.Join(testdataDir(t), c.Central.Reports))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,7 +120,7 @@ func TestRenderIndex(t *testing.T) {
 	if err := c.BuildCentralConfig(); err != nil {
 		t.Fatal(err)
 	}
-	l, err := datastore.NewLocal(filepath.Join(testdataDir(t), c.Central.Reports))
+	l, err := local.New(filepath.Join(testdataDir(t), c.Central.Reports))
 	if err != nil {
 		t.Fatal(err)
 	}

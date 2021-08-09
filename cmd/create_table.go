@@ -7,6 +7,7 @@ import (
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/datastore/bq"
 )
 
 func createBQTable(ctx context.Context, c *config.Config) error {
@@ -33,7 +34,7 @@ func createBQTable(ctx context.Context, c *config.Config) error {
 	}
 
 	for _, d := range datastores {
-		b := d.(*datastore.BQ)
+		b := d.(*bq.BQ)
 		if err := b.CreateTable(ctx); err != nil {
 			return err
 		}

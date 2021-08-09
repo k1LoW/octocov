@@ -11,6 +11,11 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/k1LoW/octocov/datastore/bq"
+	"github.com/k1LoW/octocov/datastore/gcs"
+	"github.com/k1LoW/octocov/datastore/github"
+	"github.com/k1LoW/octocov/datastore/local"
+	s3d "github.com/k1LoW/octocov/datastore/s3"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
@@ -18,10 +23,11 @@ import (
 type DatastoreType int
 
 var (
-	_ Datastore = (*Github)(nil)
-	_ Datastore = (*S3)(nil)
-	_ Datastore = (*GCS)(nil)
-	_ Datastore = (*BQ)(nil)
+	_ Datastore = (*github.Github)(nil)
+	_ Datastore = (*s3d.S3)(nil)
+	_ Datastore = (*gcs.GCS)(nil)
+	_ Datastore = (*bq.BQ)(nil)
+	_ Datastore = (*local.Local)(nil)
 )
 
 type Datastore interface {
@@ -53,7 +59,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 				return nil, err
 			}
 		}
-		return NewGithub(g, repo, branch, prefix)
+		return github.New(g, repo, branch, prefix)
 	case "s3":
 		bucket := args[0]
 		prefix := args[1]
@@ -62,7 +68,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 			return nil, err
 		}
 		sc := s3.New(sess)
-		return NewS3(sc, bucket, prefix)
+		return s3d.New(sc, bucket, prefix)
 	case "gs":
 		bucket := args[0]
 		prefix := args[1]
@@ -70,7 +76,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewGCS(client, bucket, prefix)
+		return gcs.New(client, bucket, prefix)
 	case "bq":
 		project := args[0]
 		dataset := args[1]
@@ -79,10 +85,10 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewBQ(client, dataset, table)
+		return bq.New(client, dataset, table)
 	case "file":
 		root := args[0]
-		return NewLocal(root)
+		return local.New(root)
 	}
 	return nil, fmt.Errorf("invalid datastore: %s", u)
 }

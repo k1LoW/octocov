@@ -9,7 +9,7 @@ import (
 )
 
 func TestParse(t *testing.T) {
-	tests := []struct {
+	var tests = []struct {
 		in        string
 		wantType  string
 		wantArgs  []string
