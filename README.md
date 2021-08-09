@@ -236,6 +236,7 @@ bq://[project ID]/[dataset ID]/[table]
 **Required permission:**
 
 - `bigquery.datasets.get`
+- `bigquery.tables.get`
 - `bigquery.tables.updateData`
 
 **Required environment variables:**
