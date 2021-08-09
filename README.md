@@ -181,7 +181,7 @@ report:
 Use `github://` scheme.
 
 ```
-github://[owner]/[repo]/[prefix]
+github://[owner]/[repo]@[branch]/[prefix]
 ```
 
 **Required environment variables:**
