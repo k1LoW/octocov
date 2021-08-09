@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.14.0](https://github.com/k1LoW/octocov/compare/v0.13.0...v0.14.0) (2021-08-09)
+
+* Fix BigQuery query error [#47](https://github.com/k1LoW/octocov/pull/47) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Support multi datastores on central mode and change config format [#46](https://github.com/k1LoW/octocov/pull/46) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Support multi datastores and change config format. [#45](https://github.com/k1LoW/octocov/pull/45) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.13.0](https://github.com/k1LoW/octocov/compare/v0.12.1...v0.13.0) (2021-08-05)
 
 * Support BigQuery for central.reports [#44](https://github.com/k1LoW/octocov/pull/44) ([k1LoW](https://github.com/k1LoW))
