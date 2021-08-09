@@ -306,9 +306,9 @@ When using the central repository as a datastore, perform badge generation via o
 
 ``` yaml
 # .octocov.yml
-datastore:
-  github:
-    repository: owner/central-repo
+report:
+  datastores:
+    - github://owner/central-repo/reports
 ```
 
 ``` yaml
@@ -328,9 +328,9 @@ When using the S3 bucket as a datastore, perform badge generation via on.schedul
 
 ``` yaml
 # .octocov.yml
-datastore:
-  s3:
-    bucket: my-s3-bucket
+report:
+  datastores:
+    - s3://my-s3-bucket/reports
 ```
 
 ``` yaml
@@ -361,9 +361,9 @@ When using the GCS bucket as a datastore, perform badge generation via on.schedu
 
 ``` yaml
 # .octocov.yml
-datastore:
-  gcs:
-    bucket: my-gcs-bucket
+report:
+  datastores:
+    - gs://my-gcs-bucket/reports
 ```
 
 ``` yaml
@@ -393,10 +393,9 @@ When using the BigQuery table as a datastore, perform badge generation via on.sc
 
 ``` yaml
 # .octocov.yml
-datastore:
-  bq:
-    project: my-project
-    dataset: my-dataset
+report:
+  datastores:
+    - bq://my-project/my-dataset/reports
 ```
 
 ``` yaml
