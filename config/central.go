@@ -1,15 +1,11 @@
 package config
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/k1LoW/octocov/datastore"
 )
 
 func (c *Config) CentralConfigReady() bool {
@@ -45,8 +41,8 @@ func (c *Config) BuildCentralConfig() error {
 	if !strings.HasPrefix(c.Central.Root, "/") {
 		c.Central.Root = filepath.Clean(filepath.Join(c.Root(), c.Central.Root))
 	}
-	if c.Central.Reports == "" {
-		c.Central.Reports = DefaultReportPrefix
+	if len(c.Central.Reports.Datastores) == 0 {
+		return errors.New("central.reports.datastores is not set")
 	}
 	if c.Central.Badges == "" {
 		c.Central.Badges = defaultBadgesDir
@@ -56,12 +52,4 @@ func (c *Config) BuildCentralConfig() error {
 	}
 
 	return nil
-}
-
-func (c *Config) CentralReportsFS(ctx context.Context) (fs.FS, error) {
-	d, err := datastore.New(ctx, c.Central.Reports, c.Root())
-	if err != nil {
-		return nil, err
-	}
-	return d.FS()
 }

@@ -32,7 +32,7 @@ type CentralConfig struct {
 	Wd                     string
 	Index                  string
 	Badges                 string
-	Reports                fs.FS
+	Reports                []fs.FS
 	CoverageColor          func(cover float64) string
 	CodeToTestRatioColor   func(ratio float64) string
 	TestExecutionTimeColor func(d time.Duration) string
@@ -76,41 +76,42 @@ func (c *Central) Generate(ctx context.Context) ([]string, error) {
 
 func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
-	fsys := c.config.Reports
 
 	// collect reports
-	if err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
+	for _, fsys := range c.config.Reports {
+		if err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
+				return nil
+			}
+			r := &report.Report{}
+			f, err := fsys.Open(path)
+			if err != nil {
+				return nil
+			}
+			defer f.Close()
+			b, err := io.ReadAll(f)
+			if err != nil {
+				return nil
+			}
+			if err := json.Unmarshal(b, r); err != nil {
+				return nil
+			}
+			current, ok := rsMap[r.Repository]
+			if !ok {
+				_, _ = fmt.Fprintf(os.Stderr, "Collect report of %s\n", r.Repository)
+				rsMap[r.Repository] = r
+				return nil
+			}
+			if current.Timestamp.UnixNano() < r.Timestamp.UnixNano() {
+				rsMap[r.Repository] = r
+			}
+			return nil
+		}); err != nil {
 			return err
 		}
-		if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
-			return nil
-		}
-		r := &report.Report{}
-		f, err := fsys.Open(path)
-		if err != nil {
-			return nil
-		}
-		defer f.Close()
-		b, err := io.ReadAll(f)
-		if err != nil {
-			return nil
-		}
-		if err := json.Unmarshal(b, r); err != nil {
-			return nil
-		}
-		current, ok := rsMap[r.Repository]
-		if !ok {
-			_, _ = fmt.Fprintf(os.Stderr, "Collect report of %s\n", r.Repository)
-			rsMap[r.Repository] = r
-			return nil
-		}
-		if current.Timestamp.UnixNano() < r.Timestamp.UnixNano() {
-			rsMap[r.Repository] = r
-		}
-		return nil
-	}); err != nil {
-		return err
 	}
 
 	for _, r := range rsMap {

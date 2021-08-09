@@ -324,7 +324,9 @@ report:
 # .octocov.yml for central repo
 central:
   enable: true
-  reports: reports
+  reports:
+    datastores:
+      - local://reports
   push:
     enable: true
 ```
@@ -346,7 +348,9 @@ report:
 # .octocov.yml for central repo
 central:
   enable: true
-  reports: s3://my-s3-bucket/reports
+  reports:
+    datastores:
+      - s3://my-s3-bucket/reports
   push:
     enable: true
 ```
@@ -379,7 +383,9 @@ report:
 # .octocov.yml for central repo
 central:
   enable: true
-  reports: gs://my-gcs-bucket/reports
+  reports:
+    datastores:
+      - gs://my-gcs-bucket/reports
   push:
     enable: true
 ```
@@ -411,7 +417,9 @@ report:
 # .octocov.yml for central repo
 central:
   enable: true
-  reports: bq://my-project/my-dataset/reports
+  reports:
+    datastores:
+      - bq://my-project/my-dataset/reports
   push:
     enable: true
 ```

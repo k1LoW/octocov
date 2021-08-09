@@ -2,6 +2,7 @@ package central
 
 import (
 	"bytes"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,11 +14,7 @@ import (
 
 func TestCollectReports(t *testing.T) {
 	c := config.New()
-	c.Central = &config.ConfigCentral{
-		Enable:  true,
-		Reports: "reports",
-	}
-	l, err := local.New(filepath.Join(testdataDir(t), c.Central.Reports))
+	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,11 +23,11 @@ func TestCollectReports(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctr := New(&CentralConfig{
-		Repository:             c.Repository,
-		Index:                  c.Central.Root,
+		Repository:             "owner/repo",
+		Index:                  ".",
 		Wd:                     c.Getwd(),
-		Badges:                 c.Central.Badges,
-		Reports:                fsys,
+		Badges:                 "badges",
+		Reports:                []fs.FS{fsys},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -49,12 +46,7 @@ func TestCollectReports(t *testing.T) {
 func TestGenerateBadges(t *testing.T) {
 	bd := t.TempDir()
 	c := config.New()
-	c.Central = &config.ConfigCentral{
-		Enable:  true,
-		Reports: "reports",
-		Badges:  bd,
-	}
-	l, err := local.New(filepath.Join(testdataDir(t), c.Central.Reports))
+	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -62,13 +54,12 @@ func TestGenerateBadges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	ctr := New(&CentralConfig{
-		Repository:             c.Repository,
-		Index:                  c.Central.Root,
+		Repository:             "owner/repo",
+		Index:                  ".",
 		Wd:                     c.Getwd(),
-		Badges:                 c.Central.Badges,
-		Reports:                fsys,
+		Badges:                 bd,
+		Reports:                []fs.FS{fsys},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -113,14 +104,16 @@ func TestRenderIndex(t *testing.T) {
 	c.Setwd(filepath.Dir(wd))
 	c.Repository = "k1LoW/octocov"
 	c.Central = &config.ConfigCentral{
-		Enable:  true,
-		Reports: "reports",
-		Badges:  "badges",
+		Enable: true,
+		Reports: config.ConfigCentralReports{
+			Datastores: []string{"reports"},
+		},
+		Badges: "badges",
 	}
 	if err := c.BuildCentralConfig(); err != nil {
 		t.Fatal(err)
 	}
-	l, err := local.New(filepath.Join(testdataDir(t), c.Central.Reports))
+	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -134,7 +127,7 @@ func TestRenderIndex(t *testing.T) {
 		Index:                  c.Central.Root,
 		Wd:                     c.Getwd(),
 		Badges:                 c.Central.Badges,
-		Reports:                fsys,
+		Reports:                []fs.FS{fsys},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
