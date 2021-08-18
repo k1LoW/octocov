@@ -223,7 +223,7 @@ gs://[bucket]/[prefix]
 
 **Required environment variables:**
 
-- `GOOGLE_APPLICATION_CREDENTIALS`
+- `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
 #### BigQuery
 
@@ -241,7 +241,7 @@ bq://[project ID]/[dataset ID]/[table]
 
 **Required environment variables:**
 
-- `GOOGLE_APPLICATION_CREDENTIALS`
+- `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
 **Datastore schema:**
 
@@ -399,7 +399,7 @@ central:
 
 **Required environment variables (Central Repo):**
 
-- `GOOGLE_APPLICATION_CREDENTIALS`
+- `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
 ### Use BigQuery table as datastore
 
@@ -432,7 +432,7 @@ central:
 
 **Required environment variables (Central Repo):**
 
-- `GOOGLE_APPLICATION_CREDENTIALS`
+- `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
 
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
