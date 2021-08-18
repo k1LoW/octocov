@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -18,6 +19,7 @@ import (
 	s3d "github.com/k1LoW/octocov/datastore/s3"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
+	"google.golang.org/api/option"
 )
 
 type DatastoreType int
@@ -72,7 +74,12 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 	case "gs":
 		bucket := args[0]
 		prefix := args[1]
-		client, err := storage.NewClient(ctx)
+		var client *storage.Client
+		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
+			client, err = storage.NewClient(ctx, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"))))
+		} else {
+			client, err = storage.NewClient(ctx, nil)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -81,7 +88,12 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 		project := args[0]
 		dataset := args[1]
 		table := args[2]
-		client, err := bigquery.NewClient(ctx, project)
+		var client *bigquery.Client
+		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
+			client, err = bigquery.NewClient(ctx, project, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"))))
+		} else {
+			client, err = bigquery.NewClient(ctx, project)
+		}
 		if err != nil {
 			return nil, err
 		}
