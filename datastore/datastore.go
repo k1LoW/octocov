@@ -125,7 +125,7 @@ func parse(u, configRoot string) (datastore string, args []string, err error) {
 		return "github", []string{ownerrepo, branch, prefix}, nil
 	case strings.HasPrefix(u, "s3://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "s3://"), "/"), "/")
-		if len(splitted) == 0 {
+		if splitted[0] == "" {
 			return "", nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		bucket := splitted[0]
@@ -133,7 +133,7 @@ func parse(u, configRoot string) (datastore string, args []string, err error) {
 		return "s3", []string{bucket, prefix}, nil
 	case strings.HasPrefix(u, "gs://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "gs://"), "/"), "/")
-		if len(splitted) == 0 {
+		if splitted[0] == "" {
 			return "", nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		bucket := splitted[0]
