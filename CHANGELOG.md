@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.15.0](https://github.com/k1LoW/octocov/compare/v0.14.0...v0.15.0) (2021-08-18)
+
+* Support GOOGLE_APPLICATION_CREDENTIALS_JSON [#49](https://github.com/k1LoW/octocov/pull/49) ([k1LoW](https://github.com/k1LoW))
+* Add trivy-action [#48](https://github.com/k1LoW/octocov/pull/48) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.14.0](https://github.com/k1LoW/octocov/compare/v0.13.0...v0.14.0) (2021-08-09)
 
 * Fix BigQuery query error [#47](https://github.com/k1LoW/octocov/pull/47) ([k1LoW](https://github.com/k1LoW))
