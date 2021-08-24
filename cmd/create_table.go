@@ -19,7 +19,7 @@ func createBQTable(ctx context.Context, c *config.Config) error {
 	}
 	datastores := []datastore.Datastore{}
 	for _, s := range c.Report.Datastores {
-		if !strings.HasPrefix("bq://", s) {
+		if !strings.HasPrefix(s, "bq://") {
 			continue
 		}
 		d, err := datastore.New(ctx, s, c.Root())
