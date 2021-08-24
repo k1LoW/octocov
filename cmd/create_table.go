@@ -11,8 +11,8 @@ import (
 )
 
 func createBQTable(ctx context.Context, c *config.Config) error {
-	if !c.DatastoreConfigReady() {
-		return errors.New("datastore config not ready")
+	if !c.ReportConfigDatastoresReady() {
+		return errors.New("report.datastores is not set")
 	}
 	if err := c.BuildReportConfig(); err != nil {
 		return err
