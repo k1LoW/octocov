@@ -22,9 +22,28 @@ THE SOFTWARE.
 package main
 
 import (
+	"os"
+	"strings"
+
 	"github.com/k1LoW/octocov/cmd"
 )
 
+const envPrefix = "OCTOCOV_"
+
 func main() {
+	for _, env := range os.Environ() {
+		kv := strings.SplitN(env, "=", 2)
+		k := kv[0]
+		v := kv[1]
+		if !strings.HasPrefix(k, envPrefix) {
+			continue
+		}
+		k2 := strings.TrimPrefix(k, envPrefix)
+		if os.Getenv(k2) == "" {
+			if err := os.Setenv(k2, v); err != nil {
+				panic(err)
+			}
+		}
+	}
 	cmd.Execute()
 }
