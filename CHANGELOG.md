@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.15.1](https://github.com/k1LoW/octocov/compare/v0.15.0...v0.15.1) (2021-08-24)
+
+* Fix --create-bq-table [#50](https://github.com/k1LoW/octocov/pull/50) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.0](https://github.com/k1LoW/octocov/compare/v0.14.0...v0.15.0) (2021-08-18)
 
 * Support GOOGLE_APPLICATION_CREDENTIALS_JSON [#49](https://github.com/k1LoW/octocov/pull/49) ([k1LoW](https://github.com/k1LoW))
