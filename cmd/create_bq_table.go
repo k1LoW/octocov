@@ -3,6 +3,8 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"strings"
 
 	"github.com/k1LoW/octocov/config"
@@ -17,7 +19,7 @@ func createBQTable(ctx context.Context, c *config.Config) error {
 	if err := c.BuildReportConfig(); err != nil {
 		return err
 	}
-	datastores := []datastore.Datastore{}
+	datastores := map[string]datastore.Datastore{}
 	for _, s := range c.Report.Datastores {
 		if !strings.HasPrefix(s, "bq://") {
 			continue
@@ -26,18 +28,19 @@ func createBQTable(ctx context.Context, c *config.Config) error {
 		if err != nil {
 			return err
 		}
-		datastores = append(datastores, d)
+		datastores[s] = d
 	}
 
 	if len(datastores) == 0 {
 		return errors.New("bq:// are not exists")
 	}
 
-	for _, d := range datastores {
+	for u, d := range datastores {
 		b := d.(*bq.BQ)
 		if err := b.CreateTable(ctx); err != nil {
 			return err
 		}
+		_, _ = fmt.Fprintf(os.Stderr, "%s has been created\n", u)
 	}
 	return nil
 }
