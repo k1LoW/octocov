@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.16.0](https://github.com/k1LoW/octocov/compare/v0.15.2...v0.16.0) (2021-08-24)
+
+* Support `OCTOCOV_` prefix environment variables [#52](https://github.com/k1LoW/octocov/pull/52) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.15.2](https://github.com/k1LoW/octocov/compare/v0.15.1...v0.15.2) (2021-08-24)
 
 * Fix --create-bq-table [#51](https://github.com/k1LoW/octocov/pull/51) ([k1LoW](https://github.com/k1LoW))
