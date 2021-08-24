@@ -332,6 +332,7 @@ var rootCmd = &cobra.Command{
 
 		// Push generated files
 		if c.PushConfigReady() {
+			cmd.PrintErrln("Pushing generated files...")
 			if err := c.BuildPushConfig(); err != nil {
 				return err
 			}
