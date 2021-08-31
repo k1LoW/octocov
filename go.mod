@@ -19,6 +19,7 @@ require (
 	github.com/hhatto/gocloc v0.4.1
 	github.com/jszwec/s3fs v0.3.1
 	github.com/k1LoW/duration v1.1.0
+	github.com/k1LoW/osfs v0.1.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/mauri870/gcsfs v0.0.0-20210217184550-8b539458430a
 	github.com/oklog/ulid/v2 v2.0.2

@@ -266,6 +266,8 @@ github.com/jszwec/s3fs v0.3.1/go.mod h1:+FmWmocDLzba/O3eTTc2MXb1a3O8vkoul2C/Cm2l
 github.com/jtolds/gls v4.20.0+incompatible/go.mod h1:QJZ7F/aHp+rZTRtaJ1ow/lLfFfVYBRgL+9YlvaHOwJU=
 github.com/k1LoW/duration v1.1.0 h1:KEIL/aAGL//DnGMCiMrxSgRcVw4nM0ur6KSC9kEBsDo=
 github.com/k1LoW/duration v1.1.0/go.mod h1:MEWYmZ4Agei4RDvERiInjZAhcZStYLp6y7+ZrpaAMJQ=
+github.com/k1LoW/osfs v0.1.1 h1:L6x7eqO21JVDmRdNar/VQttPqRCOZBdZTn/ZRwb5I1A=
+github.com/k1LoW/osfs v0.1.1/go.mod h1:aMpw4iUko/C4OTDT5zLPQvZdcZgLF82xpKWluk330Yc=
 github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 h1:DowS9hvgyYSX4TO5NpyC606/Z4SxnNYbT+WX27or6Ck=
 github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/kisielk/errcheck v1.5.0/go.mod h1:pFxgyoBC7bSaBwPgfKdkLd5X25qrDl4LWUI2bnpBCr8=

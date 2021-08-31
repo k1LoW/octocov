@@ -6,8 +6,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/k1LoW/octocov/report"
+	"github.com/k1LoW/osfs"
 )
 
 type Local struct {
@@ -33,19 +35,5 @@ func (l *Local) Store(ctx context.Context, r *report.Report) error {
 }
 
 func (l *Local) FS() (fs.FS, error) {
-	return &LocalFS{
-		root: filepath.Join(l.root),
-	}, nil
-}
-
-type LocalFS struct {
-	root string
-}
-
-func (fsys *LocalFS) Open(name string) (fs.File, error) {
-	f, err := os.Open(filepath.Clean(filepath.Join(fsys.root, name)))
-	if f == nil {
-		return nil, err
-	}
-	return f, err
+	return osfs.New().Sub(strings.TrimPrefix(l.root, "/"))
 }
