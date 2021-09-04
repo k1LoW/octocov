@@ -49,7 +49,7 @@ func testdataDir(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dir, err := filepath.Abs(filepath.Join(filepath.Dir(filepath.Dir(wd)), "testdata"))
+	dir, err := filepath.Abs(filepath.Join(wd, "testdata"))
 	if err != nil {
 		t.Fatal(err)
 	}
