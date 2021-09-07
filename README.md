@@ -401,7 +401,7 @@ central:
 
 - `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON` or `OCTOCOV_GOOGLE_APPLICATION_CREDENTIALS` or `OCTOCOV_GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
-### Use BigQuery table as datastore
+#### Use BigQuery table as datastore
 
 ![gcs](docs/bq.svg)
 
