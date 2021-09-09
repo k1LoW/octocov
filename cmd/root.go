@@ -62,9 +62,6 @@ var rootCmd = &cobra.Command{
 		ctx := context.Background()
 		addPaths := []string{}
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
-		if len(args) > 0 && args[0] == "completion" {
-			return completionCmd(cmd, args[1:])
-		}
 		c := config.New()
 		if err := c.Load(configPath); err != nil {
 			return err
