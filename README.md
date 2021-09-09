@@ -55,7 +55,7 @@ codeToTestRatio:
     - '**/*_test.go'
 ```
 
-### Check for acceptable coverage
+### Check for acceptable score
 
 By setting `coverage.acceptable:`, the minimum acceptable coverage is specified.
 
@@ -72,8 +72,6 @@ $ octocov
 Error: code coverage is 54.9%, which is below the accepted 60.0%
 ```
 
-### Check for acceptable code to test ratio
-
 By setting `codeToTestRatio.acceptable:`, the minimum acceptable "Code to Test Ratio" is specified.
 
 If it is less than that value, the command will exit with exit status `1`.
@@ -81,12 +79,12 @@ If it is less than that value, the command will exit with exit status `1`.
 ``` yaml
 # .octocov.yml
 codeToTestRatio:
+  acceptable: 1:1.2
   code:
     - '**/*.go'
     - '!**/*_test.go'
   test:
     - '**/*_test.go'
-  acceptable: 1:1.2
 ```
 
 ``` console
@@ -94,11 +92,7 @@ $ octocov
 Error: code to test ratio is 1:1.1, which is below the accepted 1:1.2
 ```
 
-### Check for acceptable test execution time
-
-**(on GitHub Actions only)**
-
-By setting `testExecutionTime.acceptable:`, the maximum acceptable "Test Execution Time" is specified.
+By setting `testExecutionTime.acceptable:`, the maximum acceptable "Test Execution Time" is specified **(on GitHub Actions only)** .
 
 If it is greater than that value, the command will exit with exit status `1`.
 
@@ -115,7 +109,7 @@ Error: test execution time is 1m15s, which is below the accepted 1m
 
 ### Generate report badges self.
 
-By setting `coverage.badge.path:`, generate the coverage report badge self.
+By setting `*.badge.path:`, generate badges self.
 
 ``` yaml
 # .octocov.yml
@@ -124,16 +118,12 @@ coverage:
     path: docs/coverage.svg
 ```
 
-By setting `codeToTestRatio.badge.path:`, generate the code-to-test-ratio report badge self.
-
 ``` yaml
 # .octocov.yml
 codeToTestRatio:
   badge:
     path: docs/ratio.svg
 ```
-
-By setting `testExecutionTime.badge.path:`, generate the test-execution-time report badge self (on GitHub Actions only).
 
 ``` yaml
 # .octocov.yml
@@ -165,9 +155,199 @@ push:
   enable: true
 ```
 
-### Store report to central datastore
+### Store report to central datastores
 
 By setting `report:`, store the reports to central datastores.
+
+``` yaml
+# .octocov.yml
+report:
+  datastores:
+    - github://owner/coverages/reports
+    - s3://bucket/reports
+```
+
+#### Supported datastores
+
+- GitHub repository
+- S3
+- GCS
+- BigQuery
+- Local
+
+### Central mode
+
+By enabling `central:`, `octocov` acts as a central repository for collecting reports ( [example](example/central/README.md) ).
+
+``` yaml
+# .octocov.yml for central mode
+central:
+  enable: true
+  root:                    .             # root directory or index file path of collected coverage reports pages. default: .
+  reports:
+    - bq://my-project/my-dataset/reports # datastore paths (URLs) where reports are stored. default: local://reports
+  badges: badges                         # directory where badges are generated. default: badges
+  push:
+    enable: true                         # enable self git push
+```
+
+#### Supported datastores
+
+- GitHub repository
+- S3
+- GCS
+- BigQuery
+- Local
+
+## Configuration
+
+### `coverage:`
+
+Configuration for code coverage.
+
+### `coverage.path:`
+
+The path to the coverage report file.
+
+If no path is specified, the default path for each coverage format will be scanned.
+
+``` yaml
+coverage:
+  path: tests/coverage.xml
+```
+
+### `coverage.acceptable:`
+
+The minimum acceptable coverage.
+
+``` yaml
+coverage:
+  acceptable: 60%
+```
+
+### `coverage.badge:`
+
+Set this if want to generate the badge self.
+
+### `coverage.badge.path:`
+
+The path to the badge.
+
+``` yaml
+coverage:
+  badge:
+    path: docs/coverage.svg
+```
+
+### `codeToTestRatio:`
+
+Configuration for code to test ratio.
+
+### `codeToTestRatio.code:` `codeToTestRatio.test:`
+
+Files to count.
+
+``` yaml
+codeToTestRatio:
+  code:                  # files to count as "Code"
+    - '**/*.go'
+    - '!**/*_test.go'
+  test:                  # files to count as "Test"
+    - '**/*_test.go'
+```
+
+### `codeToTestRatio.acceptable:`
+
+The minimum acceptable ratio.
+
+``` yaml
+codeToTestRatio:
+  acceptable: 1:1.2
+```
+
+### `codeToTestRatio.badge:`
+
+Set this if want to generate the badge self.
+
+### `codeToTestRatio.badge.path:`
+
+The path to the badge.
+
+``` yaml
+codeToTestRatio:
+  badge:
+    path: docs/ratio.svg
+```
+
+### `testExecutionTime:`
+
+Configuration for test execution time.
+
+### `testExecutionTime.acceptable`
+
+The minimum acceptable time.
+
+``` yaml
+testExecutionTime:
+  acceptable: 1min
+```
+
+### `testExecutionTime.badge`
+
+Set this if want to generate the badge self.
+
+### `testExecutionTime.badge.path`
+
+The path to the badge.
+
+``` yaml
+testExecutionTime:
+  badge:
+    path: docs/time.svg
+```
+
+### `push:`
+
+Configuration for `git push` badges self.
+
+### `push.enable:`
+
+Enable `git push`
+
+``` yaml
+push:
+  enable: true
+```
+
+### `comment:`
+
+Set this if want to comment report to pull request
+
+### `comment.enable:`
+
+Enable comment.
+
+``` yaml
+comment:
+  enable: true
+```
+
+### `comment.hideFooterLink:`
+
+Hide footer [octocov](https://github.com/k1LoW/octocov) link.
+
+``` yaml
+comment:
+  hideFooterLink: true
+```
+
+### `report:`
+
+Configuration for reporting to central datastores.
+
+### `report.datastores:`
+
+The datastores where the reports are saved.
 
 ``` yaml
 report:
@@ -176,7 +356,7 @@ report:
     - s3://bucket/reports
 ```
 
-#### GitHub
+#### GitHub repository
 
 Use `github://` scheme.
 
@@ -270,7 +450,9 @@ If the absolute path of `.octocov.yml` is `/path/to/.octocov.yml`
 - `local://../reports` ... `/path/reports` directory
 - `local:///reports` ... `/reports` directory.
 
-#### If section
+### `report.if:`
+
+Conditions for saving a report.
 
 ``` yaml
 # .octocov.yml
@@ -293,19 +475,38 @@ The variables available in the `if` section are as follows
 | `github.event` | `object` | Detailed data for each event of GitHub Actions (ex. `github.event.action`, `github.event.label.name` ) |
 | `env.<env_name>` | `string` | The value of a specific environment variable |
 
-### Central mode
+### `central:`
 
-By enabling `central:`, `octocov` acts as a central repository for collecting reports ( [example](example/central/README.md) ).
+### `central.enable:`
+
+Enable central mode.
 
 ``` yaml
-# .octocov.yml for central mode
 central:
   enable: true
-  root: .          # root directory or index file path of collected coverage reports pages. default: .
-  reports: reports # datastore path (url) where reports are stored. default: reports
-  badges: badges   # directory where badges are generated. default: badges
-  push:
-    enable: true   # enable self git push
+```
+
+:NOTICE: When central mode is enabled, other functions are automatically turned off.
+
+
+### `central.root:`
+
+The root directory or index file ( [index file example](example/central/README.md) ) path of collected coverage reports pages. default: `.`
+
+``` yaml
+central:
+  root: path/to
+```
+
+### `central.reports:`
+
+Datastore paths (URLs) where reports are stored. default: `local://reports`
+
+``` yaml
+central:
+  reports:
+    - local://reports
+    - gs://my-gcs-bucket/reports
 ```
 
 #### Use GitHub repository as datastore
@@ -367,7 +568,7 @@ central:
 - `AWS_SECRET_ACCESS_KEY` or `OCTOCOV_AWS_SECRET_ACCESS_KEY`
 - `AWS_SESSION_TOKEN` or `OCTOCOV_AWS_SESSION_TOKEN` (optional)
 
-### Use GCS bucket as datastore
+#### Use GCS bucket as datastore
 
 ![gcs](docs/gcs.svg)
 
@@ -434,8 +635,29 @@ central:
 
 - `GOOGLE_APPLICATION_CREDENTIALS` or `GOOGLE_APPLICATION_CREDENTIALS_JSON` or `OCTOCOV_GOOGLE_APPLICATION_CREDENTIALS` or `OCTOCOV_GOOGLE_APPLICATION_CREDENTIALS_JSON`
 
+### `central.badges:`
 
-:NOTICE: When central mode is enabled, other functions are automatically turned off.
+Directory where badges are generated. default: `badges`
+
+``` yaml
+central:
+  badges: badges
+```
+
+Support local only.
+
+### `central.push:`
+
+Configuration for `git push` index file and badges self.
+
+### `central.push.enable:`
+
+Enable `git push`
+
+``` yaml
+push:
+  enable: true
+```
 
 ## Supported coverage report formats
 
