@@ -8,6 +8,8 @@ import (
 	"github.com/goccy/go-json"
 )
 
+var _ Processor = (*Simplecov)(nil)
+
 var SimplecovDefaultPath = []string{"coverage", ".resultset.json"}
 
 type Simplecov struct{}
@@ -26,6 +28,10 @@ func NewSimplecov() *Simplecov {
 	return &Simplecov{}
 }
 
+func (s *Simplecov) Name() string {
+	return "SimpleCov"
+}
+
 func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := s.detectReportPath(path)
 	if err != nil {
@@ -41,7 +47,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	}
 	cov := New()
 	cov.Type = TypeLOC
-	cov.Format = "SimpleCov"
+	cov.Format = s.Name()
 	for _, c := range r {
 		for fn, fc := range c.Coverage {
 			fcov := NewFileCoverage(fn)

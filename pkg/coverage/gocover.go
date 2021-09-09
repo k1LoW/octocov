@@ -7,12 +7,18 @@ import (
 	"golang.org/x/tools/cover"
 )
 
+var _ Processor = (*Gocover)(nil)
+
 const GocoverDefaultPath = "coverage.out"
 
 type Gocover struct{}
 
 func NewGocover() *Gocover {
 	return &Gocover{}
+}
+
+func (g *Gocover) Name() string {
+	return "Go coverage"
 }
 
 func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
@@ -26,7 +32,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 	}
 	cov := New()
 	cov.Type = TypeStatement
-	cov.Format = "Go coverage"
+	cov.Format = g.Name()
 	for _, p := range profiles {
 		total, covered := g.countProfile(p)
 		fcov := NewFileCoverage(p.FileName)

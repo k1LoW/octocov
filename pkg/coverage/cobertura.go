@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+var _ Processor = (*Cobertura)(nil)
+
 const CoberturaDefaultPath = "coverage.xml"
 
 type Cobertura struct{}
@@ -72,6 +74,10 @@ func NewCobertura() *Cobertura {
 	return &Cobertura{}
 }
 
+func (c *Cobertura) Name() string {
+	return "Cobertura"
+}
+
 func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := c.detectReportPath(path)
 	if err != nil {
@@ -91,7 +97,7 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 
 	cov := New()
 	cov.Type = TypeLOC
-	cov.Format = "Cobertura"
+	cov.Format = c.Name()
 
 	flm := map[string]map[int]int{}
 	for _, p := range r.Packages.Package {

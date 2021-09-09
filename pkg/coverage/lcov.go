@@ -8,12 +8,18 @@ import (
 	"strings"
 )
 
+var _ Processor = (*Lcov)(nil)
+
 var LcovDefaultPath = []string{"coverage", "lcov.info"}
 
 type Lcov struct{}
 
 func NewLcov() *Lcov {
 	return &Lcov{}
+}
+
+func (l *Lcov) Name() string {
+	return "LCOV"
 }
 
 func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
@@ -35,7 +41,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	)
 	cov := New()
 	cov.Type = TypeLOC
-	cov.Format = "LCOV"
+	cov.Format = l.Name()
 	parsed := false
 	for scanner.Scan() {
 		l := scanner.Text()

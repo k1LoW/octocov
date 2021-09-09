@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 )
 
+var _ Processor = (*Clover)(nil)
+
 const CloverDefaultPath = "coverage.xml"
 
 type Clover struct{}
@@ -83,6 +85,10 @@ func NewClover() *Clover {
 	return &Clover{}
 }
 
+func (c *Clover) Name() string {
+	return "Clover"
+}
+
 func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := c.detectReportPath(path)
 	if err != nil {
@@ -102,7 +108,7 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 
 	cov := New()
 	cov.Type = TypeStatement
-	cov.Format = "Clover"
+	cov.Format = c.Name()
 	for _, f := range r.Project.File {
 		fcov := NewFileCoverage(f.Name)
 		fcov.Covered = f.Metrics.Coveredstatements
