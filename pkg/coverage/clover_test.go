@@ -21,6 +21,22 @@ func TestClover(t *testing.T) {
 	if len(got.Files) == 0 {
 		t.Error("got 0 want > 0")
 	}
+	for _, f := range got.Files {
+		total := 0
+		covered := 0
+		for _, b := range f.Blocks {
+			total = total + *b.NumStmt
+			if *b.Count > 0 {
+				covered += *b.NumStmt
+			}
+		}
+		if got := f.Total; got != total {
+			t.Errorf("got %v\nwant %v", got, total)
+		}
+		if got := f.Covered; got != covered {
+			t.Errorf("got %v\nwant %v", got, covered)
+		}
+	}
 }
 
 func TestCloverParseAllFormat(t *testing.T) {

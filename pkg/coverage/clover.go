@@ -113,6 +113,22 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 		fcov := NewFileCoverage(f.Name)
 		fcov.Covered = f.Metrics.Coveredstatements
 		fcov.Total = f.Metrics.Statements
+		for _, l := range f.Line {
+			if l.Type != "stmt" {
+				continue
+			}
+			sl := l.Num
+			el := l.Num
+			ns := 1
+			c := l.Count
+			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
+				Type:      TypeStatement,
+				StartLine: &sl,
+				EndLine:   &el,
+				NumStmt:   &ns,
+				Count:     &c,
+			})
+		}
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 		cov.Files = append(cov.Files, fcov)

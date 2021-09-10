@@ -99,29 +99,38 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	cov.Type = TypeLOC
 	cov.Format = c.Name()
 
-	flm := map[string]map[int]int{}
+	flm := map[string]BlockCoverages{}
 	for _, p := range r.Packages.Package {
 		for _, c := range p.Classes.Class {
 			n := filepath.Join(p.Name, c.Filename)
 			f, ok := flm[n]
 			if !ok {
-				f = map[int]int{}
+				f = BlockCoverages{}
 			}
 			for _, l := range c.Lines.Line {
-				f[l.Number] = l.Hits
+				sl := l.Number
+				el := l.Number
+				c := l.Hits
+				f = append(f, &BlockCoverage{
+					Type:      TypeLOC,
+					StartLine: &sl,
+					EndLine:   &el,
+					Count:     &c,
+				})
 			}
 			flm[n] = f
 		}
 	}
 
-	for f, lines := range flm {
+	for f, blocks := range flm {
 		fcov := NewFileCoverage(f)
-		for _, h := range lines {
+		for _, b := range blocks {
 			fcov.Total += 1
-			if h > 0 {
+			if *b.Count > 0 {
 				fcov.Covered += 1
 			}
 		}
+		fcov.Blocks = blocks
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 		cov.Files = append(cov.Files, fcov)

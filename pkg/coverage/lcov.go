@@ -3,8 +3,10 @@ package coverage
 import (
 	"bufio"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -43,6 +45,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	cov.Type = TypeLOC
 	cov.Format = l.Name()
 	parsed := false
+	blocks := BlockCoverages{}
 	for scanner.Scan() {
 		l := scanner.Text()
 		if l == "end_of_record" {
@@ -52,12 +55,14 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			}
 			fcov.Total += total
 			fcov.Covered += covered
+			fcov.Blocks = blocks
 			cov.Total += total
 			cov.Covered += covered
 			cov.Files = append(cov.Files, fcov)
 			total = 0
 			covered = 0
 			parsed = true
+			blocks = BlockCoverages{}
 			continue
 		}
 		splitted := strings.Split(l, ":")
@@ -69,9 +74,27 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			fileName = splitted[1]
 		case "DA":
 			total += 1
-			if !strings.HasSuffix(splitted[1], ",0") {
+			nums := strings.Split(splitted[1], ",")
+			if len(nums) != 2 {
+				return nil, "", fmt.Errorf("can not parse: %s", l)
+			}
+			line, err := strconv.Atoi(nums[0])
+			if err != nil {
+				return nil, "", err
+			}
+			count, err := strconv.Atoi(nums[1])
+			if err != nil {
+				return nil, "", err
+			}
+			if count > 0 {
 				covered += 1
 			}
+			blocks = append(blocks, &BlockCoverage{
+				Type:      TypeLOC,
+				StartLine: &line,
+				EndLine:   &line,
+				Count:     &count,
+			})
 		default:
 			// not implemented
 		}

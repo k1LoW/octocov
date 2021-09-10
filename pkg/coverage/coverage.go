@@ -18,12 +18,25 @@ type Coverage struct {
 }
 
 type FileCoverage struct {
-	FileName string `json:"file"`
-	Total    int    `json:"total"`
-	Covered  int    `json:"covered"`
+	FileName string         `json:"file"`
+	Total    int            `json:"total"`
+	Covered  int            `json:"covered"`
+	Blocks   BlockCoverages `json:"blocks"`
 }
 
 type FileCoverages []*FileCoverage
+
+type BlockCoverage struct {
+	StartLine *int `json:"start_line,omitempty"`
+	StartCol  *int `json:"start_col,omitempty"`
+	EndLine   *int `json:"end_line,omitempty"`
+	EndCol    *int `json:"end_col,omitempty"`
+	NumStmt   *int `json:"num_stmt,omitempty"`
+	Count     *int `json:"count,omitempty"`
+	Type      Type `json:"type"`
+}
+
+type BlockCoverages []*BlockCoverage
 
 type Processor interface {
 	Name() string
@@ -41,6 +54,7 @@ func NewFileCoverage(fileName string) *FileCoverage {
 		FileName: fileName,
 		Total:    0,
 		Covered:  0,
+		Blocks:   BlockCoverages{},
 	}
 }
 
