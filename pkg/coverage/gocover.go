@@ -31,7 +31,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 		return nil, "", err
 	}
 	cov := New()
-	cov.Type = TypeStatement
+	cov.Type = TypeStmt
 	cov.Format = g.Name()
 	for _, p := range profiles {
 		total, covered := g.countProfile(p)
@@ -46,7 +46,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 			ns := b.NumStmt
 			c := b.Count
 			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
-				Type:      TypeStatement,
+				Type:      TypeStmt,
 				StartLine: &sl,
 				StartCol:  &sc,
 				EndLine:   &el,

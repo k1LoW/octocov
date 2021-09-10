@@ -6,7 +6,7 @@ type Type string
 
 const (
 	TypeLOC       Type = "loc"
-	TypeStatement Type = "statement"
+	TypeStmt Type = "statement"
 )
 
 type Coverage struct {

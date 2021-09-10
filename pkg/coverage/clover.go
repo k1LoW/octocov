@@ -107,7 +107,7 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	}
 
 	cov := New()
-	cov.Type = TypeStatement
+	cov.Type = TypeStmt
 	cov.Format = c.Name()
 	for _, f := range r.Project.File {
 		fcov := NewFileCoverage(f.Name)
@@ -122,7 +122,7 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 			ns := 1
 			c := l.Count
 			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
-				Type:      TypeStatement,
+				Type:      TypeStmt,
 				StartLine: &sl,
 				EndLine:   &el,
 				NumStmt:   &ns,
