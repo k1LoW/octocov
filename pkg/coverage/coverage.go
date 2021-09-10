@@ -5,7 +5,7 @@ import "fmt"
 type Type string
 
 const (
-	TypeLOC       Type = "loc"
+	TypeLOC  Type = "loc"
 	TypeStmt Type = "statement"
 )
 
@@ -65,28 +65,4 @@ func (coverages FileCoverages) FindByFileName(fileName string) (*FileCoverage, e
 		}
 	}
 	return nil, fmt.Errorf("file name not found: %s", fileName)
-}
-
-func Measure(path string) (*Coverage, string, error) {
-	// gocover
-	if cov, rp, err := NewGocover().ParseReport(path); err == nil {
-		return cov, rp, nil
-	}
-	// lcov
-	if cov, rp, err := NewLcov().ParseReport(path); err == nil {
-		return cov, rp, nil
-	}
-	// simplecov
-	if cov, rp, err := NewSimplecov().ParseReport(path); err == nil {
-		return cov, rp, nil
-	}
-	// clover
-	if cov, rp, err := NewClover().ParseReport(path); err == nil {
-		return cov, rp, nil
-	}
-	// cobertura
-	if cov, rp, err := NewCobertura().ParseReport(path); err == nil {
-		return cov, rp, nil
-	}
-	return nil, "", fmt.Errorf("coverage report not found: %s", path)
 }

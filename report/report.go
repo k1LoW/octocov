@@ -132,7 +132,7 @@ func (r *Report) IsMeasuredTestExecutionTime() bool {
 }
 
 func (r *Report) MeasureCoverage(path string) error {
-	cov, rp, cerr := coverage.Measure(path)
+	cov, rp, cerr := challengeParseReport(path)
 	if cerr != nil {
 		f, err := os.Stat(path)
 		if err != nil || f.IsDir() {
@@ -253,4 +253,28 @@ func mergeExecutionTimes(steps []gh.Step) time.Duration {
 		}
 	}
 	return d
+}
+
+func challengeParseReport(path string) (*coverage.Coverage, string, error) {
+	// gocover
+	if cov, rp, err := coverage.NewGocover().ParseReport(path); err == nil {
+		return cov, rp, nil
+	}
+	// lcov
+	if cov, rp, err := coverage.NewLcov().ParseReport(path); err == nil {
+		return cov, rp, nil
+	}
+	// simplecov
+	if cov, rp, err := coverage.NewSimplecov().ParseReport(path); err == nil {
+		return cov, rp, nil
+	}
+	// clover
+	if cov, rp, err := coverage.NewClover().ParseReport(path); err == nil {
+		return cov, rp, nil
+	}
+	// cobertura
+	if cov, rp, err := coverage.NewCobertura().ParseReport(path); err == nil {
+		return cov, rp, nil
+	}
+	return nil, "", fmt.Errorf("coverage report not found: %s", path)
 }
