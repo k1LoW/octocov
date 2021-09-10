@@ -18,10 +18,10 @@ type Coverage struct {
 }
 
 type FileCoverage struct {
-	FileName string         `json:"file"`
-	Total    int            `json:"total"`
-	Covered  int            `json:"covered"`
-	Blocks   BlockCoverages `json:"blocks"`
+	File    string         `json:"file"`
+	Total   int            `json:"total"`
+	Covered int            `json:"covered"`
+	Blocks  BlockCoverages `json:"blocks"`
 }
 
 type FileCoverages []*FileCoverage
@@ -49,20 +49,20 @@ func New() *Coverage {
 	}
 }
 
-func NewFileCoverage(fileName string) *FileCoverage {
+func NewFileCoverage(file string) *FileCoverage {
 	return &FileCoverage{
-		FileName: fileName,
-		Total:    0,
-		Covered:  0,
-		Blocks:   BlockCoverages{},
+		File:    file,
+		Total:   0,
+		Covered: 0,
+		Blocks:  BlockCoverages{},
 	}
 }
 
-func (coverages FileCoverages) FindByFileName(fileName string) (*FileCoverage, error) {
+func (coverages FileCoverages) FindByFile(file string) (*FileCoverage, error) {
 	for _, c := range coverages {
-		if c.FileName == fileName {
+		if c.File == file {
 			return c, nil
 		}
 	}
-	return nil, fmt.Errorf("file name not found: %s", fileName)
+	return nil, fmt.Errorf("file name not found: %s", file)
 }
