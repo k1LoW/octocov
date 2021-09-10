@@ -38,6 +38,23 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 		fcov := NewFileCoverage(p.FileName)
 		fcov.Total = total
 		fcov.Covered = covered
+		for _, b := range p.Blocks {
+			sl := b.StartLine
+			sc := b.StartCol
+			el := b.EndLine
+			ec := b.EndCol
+			ns := b.NumStmt
+			c := b.Count
+			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
+				Type:      TypeStatement,
+				StartLine: &sl,
+				StartCol:  &sc,
+				EndLine:   &el,
+				EndCol:    &ec,
+				NumStmt:   &ns,
+				Count:     &c,
+			})
+		}
 		cov.Total += total
 		cov.Covered += covered
 		cov.Files = append(cov.Files, fcov)
