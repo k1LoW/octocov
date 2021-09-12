@@ -34,7 +34,7 @@ import (
 
 // catCmd represents the cat command
 var catCmd = &cobra.Command{
-	Use:   "cat",
+	Use:   "cat [FILE ...]",
 	Short: "cat with coverage",
 	Long:  `cat with coverage.`,
 	Args:  cobra.MinimumNArgs(1),

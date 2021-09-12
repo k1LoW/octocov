@@ -46,7 +46,7 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	cl.EnableColor()
 	for scanner.Scan() {
 		c, out := paintLine(n, w2, scanner.Text(), p.fc.FindBlocksByLine(n))
-		_, _ = fmt.Fprintf(dest, "%s| %s| %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out)
+		_, _ = fmt.Fprintf(dest, "%s %s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out)
 		n += 1
 	}
 	if err := scanner.Err(); err != nil {
