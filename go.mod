@@ -9,6 +9,7 @@ require (
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go v1.40.11
 	github.com/bmatcuk/doublestar/v4 v4.0.1
+	github.com/fatih/color v1.10.0
 	github.com/go-enry/go-enry/v2 v2.7.0
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/goccy/go-json v0.4.13

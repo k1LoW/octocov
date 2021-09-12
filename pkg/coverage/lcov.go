@@ -49,7 +49,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	for scanner.Scan() {
 		l := scanner.Text()
 		if l == "end_of_record" {
-			fcov, err := cov.Files.FindByFileName(fileName)
+			fcov, err := cov.Files.FindByFile(fileName)
 			if err != nil {
 				fcov = NewFileCoverage(fileName)
 			}

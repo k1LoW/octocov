@@ -21,8 +21,8 @@ func TestLcov(t *testing.T) {
 	if len(got.Files) == 0 {
 		t.Error("got 0 want > 0")
 	}
-	if want := "./lib/ridgepole.rb"; got.Files[0].FileName != want {
-		t.Errorf("got %v\nwant %v", got.Files[0].FileName, want)
+	if want := "./lib/ridgepole.rb"; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
 	}
 
 	for _, f := range got.Files {
