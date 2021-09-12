@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 
 	"github.com/fatih/color"
 )
@@ -29,12 +30,23 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 		return err
 	}
 	w := len(strconv.Itoa(c))
+	c2 := 0
+	if p.fc != nil {
+		for _, b := range p.fc.Blocks {
+			if *b.Count > c2 {
+				c2 = *b.Count
+			}
+		}
+	}
+	w2 := len(strconv.Itoa(c2))
+
 	scanner := bufio.NewScanner(r2)
 	n := 1
 	cl := color.New(color.FgYellow)
 	cl.EnableColor()
 	for scanner.Scan() {
-		_, _ = fmt.Fprintf(dest, "%s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), paintLine(n, scanner.Text(), p.fc.FindBlocksByLine(n)))
+		c, out := paintLine(n, w2, scanner.Text(), p.fc.FindBlocksByLine(n))
+		_, _ = fmt.Fprintf(dest, "%s| %s| %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out)
 		n += 1
 	}
 	if err := scanner.Err(); err != nil {
@@ -61,7 +73,7 @@ func countLines(r io.Reader) (int, error) {
 	}
 }
 
-func paintLine(n int, in string, blocks BlockCoverages) string {
+func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
 	g := color.New(color.FgGreen)
 	g.EnableColor()
 	r := color.New(color.FgRed)
@@ -70,17 +82,18 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 	lc := len(in)
 	l := make([]string, lc)
 
+	c := 0
 	for _, b := range blocks {
-		var c string
+		var cl string
 		if *b.Count > 0 {
-			c = "g"
+			cl = "g"
 		} else {
-			c = "r"
+			cl = "r"
 		}
 		switch b.Type {
 		case TypeLOC:
 			for i := 0; i < lc; i++ {
-				l[i] = c
+				l[i] = cl
 			}
 		case TypeStmt:
 			s := 0
@@ -92,16 +105,20 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 				e = *b.EndCol - 1
 			}
 			for i := s; i < e; i++ {
-				l[i] = c
+				l[i] = cl
 			}
+		}
+
+		if *b.Count > c {
+			c = *b.Count
 		}
 	}
 
 	out := ""
 	pos := 0
 	current := ""
-	for i, c := range l {
-		if current == c {
+	for i, cl := range l {
+		if current == cl {
 			continue
 		}
 		switch current {
@@ -112,7 +129,7 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 		case "r":
 			out += r.Sprint(in[pos:i])
 		}
-		current = c
+		current = cl
 		pos = i
 	}
 	switch current {
@@ -124,5 +141,12 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 		out += r.Sprint(in[pos:lc])
 	}
 
-	return out
+	s := strings.Repeat(" ", w)
+	if c > 0 {
+		g := color.New(color.FgHiGreen)
+		g.EnableColor()
+		s = g.Sprintf(fmt.Sprintf("%%%dd", w), c)
+	}
+
+	return s, out
 }

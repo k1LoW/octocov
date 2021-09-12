@@ -82,6 +82,9 @@ func (coverages FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, erro
 }
 
 func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
+	if fc == nil {
+		return BlockCoverages{}
+	}
 	if len(fc.cache) == 0 {
 		for _, b := range fc.Blocks {
 			for i := *b.StartLine; i <= *b.EndLine; i++ {

@@ -32,18 +32,18 @@ func IsOK(in string) error {
 				newBlockCoverage(TypeLOC, 8, -1, 8, -1, -1, 0),
 				newBlockCoverage(TypeLOC, 9, -1, 9, -1, -1, 1),
 			},
-			"\x1b[33m 3\x1b[0m import \"fmt\"",
-			"\x1b[33m 7\x1b[0m \x1b[31m\t\treturn fmt.Errorf(\"error: %s\", in)\x1b[0m",
-			"\x1b[33m 9\x1b[0m \x1b[32m\treturn nil\x1b[0m",
+			"\x1b[33m 3\x1b[0m|  | import \"fmt\"",
+			"\x1b[33m 7\x1b[0m|  | \x1b[31m\t\treturn fmt.Errorf(\"error: %s\", in)\x1b[0m",
+			"\x1b[33m 9\x1b[0m| \x1b[92m1\x1b[0m| \x1b[32m\treturn nil\x1b[0m",
 		},
 		{
 			BlockCoverages{
 				newBlockCoverage(TypeStmt, 6, 16, 8, 3, 1, 0),
 				newBlockCoverage(TypeStmt, 9, 2, 9, 12, 1, 1),
 			},
-			"\x1b[33m 3\x1b[0m import \"fmt\"",
-			"\x1b[33m 7\x1b[0m \x1b[31m\t\treturn fmt.Errorf(\"error: %s\", in)\x1b[0m",
-			"\x1b[33m 9\x1b[0m \t\x1b[32mreturn nil\x1b[0m",
+			"\x1b[33m 3\x1b[0m|  | import \"fmt\"",
+			"\x1b[33m 7\x1b[0m|  | \x1b[31m\t\treturn fmt.Errorf(\"error: %s\", in)\x1b[0m",
+			"\x1b[33m 9\x1b[0m| \x1b[92m1\x1b[0m| \t\x1b[32mreturn nil\x1b[0m",
 		},
 	}
 
