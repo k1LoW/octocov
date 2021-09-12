@@ -24,6 +24,7 @@ package cmd
 import (
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/pkg/coverage"
@@ -63,11 +64,13 @@ var catCmd = &cobra.Command{
 					return err
 				}
 				fc, _ := r.Coverage.Files.FuzzyFindByFile(f)
-				fp, err := os.Open(f)
+				fp, err := os.Open(filepath.Clean(f))
 				if err != nil {
 					return err
 				}
-				defer fp.Close()
+				defer func() {
+					_ = fp.Close()
+				}()
 				if err := coverage.NewPrinter(fc).Print(fp, os.Stdout); err != nil {
 					return err
 				}
