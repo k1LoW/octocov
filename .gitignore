@@ -7,3 +7,4 @@ octocov
 .go-version
 .DS_Store
 /.tmp/
+/*.cast
