@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.17.0](https://github.com/k1LoW/octocov/compare/v0.16.0...v0.17.0) (2021-09-13)
+
+* Added `octocov cat` to check line-by-line coverage of source code. [#58](https://github.com/k1LoW/octocov/pull/58) ([k1LoW](https://github.com/k1LoW))
+* Change TypeStatement to TypeStmt [#57](https://github.com/k1LoW/octocov/pull/57) ([k1LoW](https://github.com/k1LoW))
+* Include coverage per block in the report [#56](https://github.com/k1LoW/octocov/pull/56) ([k1LoW](https://github.com/k1LoW))
+* Use cobra default completion [#55](https://github.com/k1LoW/octocov/pull/55) ([k1LoW](https://github.com/k1LoW))
+* Fix testdata dir [#54](https://github.com/k1LoW/octocov/pull/54) ([k1LoW](https://github.com/k1LoW))
+* Use github.com/k1LoW/osfs [#53](https://github.com/k1LoW/octocov/pull/53) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.16.0](https://github.com/k1LoW/octocov/compare/v0.15.2...v0.16.0) (2021-08-24)
 
 * Support `OCTOCOV_` prefix environment variables [#52](https://github.com/k1LoW/octocov/pull/52) ([k1LoW](https://github.com/k1LoW))
