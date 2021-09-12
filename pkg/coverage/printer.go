@@ -24,7 +24,7 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	r2 := new(bytes.Buffer)
 	r1 := io.TeeReader(src, r2)
 
-	c, err := linesCount(r1)
+	c, err := countLines(r1)
 	if err != nil {
 		return err
 	}
@@ -43,7 +43,7 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	return nil
 }
 
-func linesCount(r io.Reader) (int, error) {
+func countLines(r io.Reader) (int, error) {
 	buf := make([]byte, 1024)
 	count := 0
 	sep := []byte{'\n'}
@@ -67,8 +67,8 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 	r := color.New(color.FgRed)
 	r.EnableColor()
 
-	wc := len(in)
-	l := make([]string, wc)
+	lc := len(in)
+	l := make([]string, lc)
 
 	for _, b := range blocks {
 		var c string
@@ -79,7 +79,7 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 		}
 		switch b.Type {
 		case TypeLOC:
-			for i := 0; i < wc; i++ {
+			for i := 0; i < lc; i++ {
 				l[i] = c
 			}
 		case TypeStmt:
@@ -87,7 +87,7 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 			if *b.StartLine == n {
 				s = *b.StartCol - 1
 			}
-			e := wc
+			e := lc
 			if *b.EndLine == n {
 				e = *b.EndCol - 1
 			}
@@ -117,11 +117,11 @@ func paintLine(n int, in string, blocks BlockCoverages) string {
 	}
 	switch current {
 	case "":
-		out += in[pos:wc]
+		out += in[pos:lc]
 	case "g":
-		out += g.Sprint(in[pos:wc])
+		out += g.Sprint(in[pos:lc])
 	case "r":
-		out += r.Sprint(in[pos:wc])
+		out += r.Sprint(in[pos:lc])
 	}
 
 	return out
