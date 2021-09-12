@@ -199,6 +199,12 @@ central:
 - BigQuery
 - Local
 
+### View code coverage report of file
+
+`octocov view` command can be used to view the file coverage report.
+
+![view](docs/view.svg)
+
 ## Configuration
 
 ### `coverage:`

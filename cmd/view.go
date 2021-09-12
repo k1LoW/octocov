@@ -32,12 +32,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// catCmd represents the cat command
-var catCmd = &cobra.Command{
-	Use:   "cat [FILE ...]",
-	Short: "cat with coverage",
-	Long:  `cat with coverage.`,
-	Args:  cobra.MinimumNArgs(1),
+// viewCmd represents the view command
+var viewCmd = &cobra.Command{
+	Use:     "view [FILE ...]",
+	Short:   "view code coverage report of file",
+	Long:    `view code coverage report of file.`,
+	Aliases: []string{"cat"},
+	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c := config.New()
 		if err := c.Load(configPath); err != nil {
@@ -85,5 +86,5 @@ var catCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(catCmd)
+	rootCmd.AddCommand(viewCmd)
 }
