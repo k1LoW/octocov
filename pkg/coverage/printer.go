@@ -59,8 +59,6 @@ func linesCount(r io.Reader) (int, error) {
 
 		count += bytes.Count(buf[:n], sep)
 	}
-
-	return count, nil
 }
 
 func paintLine(n int, in string, blocks BlockCoverages) string {
