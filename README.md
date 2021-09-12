@@ -201,7 +201,7 @@ central:
 
 ### View code coverage report of file
 
-`octocov view` command can be used to view the file coverage report.
+`octocov view` (alias: `octocov cat`) command can be used to view the file coverage report.
 
 ![view](docs/view.svg)
 
