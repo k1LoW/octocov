@@ -45,7 +45,6 @@ import (
 
 var (
 	configPath    string
-	dump          bool
 	coverageBadge bool
 	ratioBadge    bool
 	timeBadge     bool
@@ -62,6 +61,7 @@ var rootCmd = &cobra.Command{
 		ctx := context.Background()
 		addPaths := []string{}
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
+
 		c := config.New()
 		if err := c.Load(configPath); err != nil {
 			return err
@@ -145,14 +145,6 @@ var rootCmd = &cobra.Command{
 
 		if r.CountMeasured() == 0 {
 			return errors.New("nothing could be measured")
-		}
-
-		if dump {
-			if err := r.Validate(); err != nil {
-				cmd.PrintErrf("Validation error: %v\n", err)
-			}
-			cmd.Println(r.String())
-			return nil
 		}
 
 		if !c.Loaded() {
@@ -349,7 +341,6 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
-	rootCmd.Flags().BoolVarP(&dump, "dump", "", false, "dump coverage report")
 	rootCmd.Flags().BoolVarP(&coverageBadge, "coverage-badge", "", false, "generate coverage report badge")
 	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
 	rootCmd.Flags().BoolVarP(&timeBadge, "test-execution-time-badge", "", false, "generate test-execution-time report badge")

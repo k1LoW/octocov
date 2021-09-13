@@ -22,72 +22,74 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"context"
 	"errors"
-	"os"
-	"path/filepath"
+	"fmt"
 
 	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/report"
+	"github.com/k1LoW/octocov/version"
 	"github.com/spf13/cobra"
 )
 
-var reportPath string
-
-// viewCmd represents the view command
-var viewCmd = &cobra.Command{
-	Use:     "view [FILE ...]",
-	Short:   "view code coverage report of file",
-	Long:    `view code coverage report of file.`,
-	Aliases: []string{"cat"},
-	Args:    cobra.MinimumNArgs(1),
+// dumpCmd represents the dump command
+var dumpCmd = &cobra.Command{
+	Use:   "dump",
+	Short: "dump report",
+	Long:  `dump report.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
 		c := config.New()
 		if err := c.Load(configPath); err != nil {
 			return err
 		}
 		c.Build()
-		if !c.CoverageConfigReady() {
-			return errors.New("invalid .octocov.yml")
-		}
+
 		r, err := report.New()
 		if err != nil {
 			return err
 		}
-		path := c.Coverage.Path
-		if reportPath != "" {
-			path = reportPath
-		}
-		if err := r.MeasureCoverage(path); err != nil {
-			return err
-		}
-		for _, f := range args {
-			err := func() error {
-				if _, err := os.Stat(f); err != nil {
-					return err
-				}
-				fc, _ := r.Coverage.Files.FuzzyFindByFile(f)
-				fp, err := os.Open(filepath.Clean(f))
-				if err != nil {
-					return err
-				}
-				defer func() {
-					_ = fp.Close()
-				}()
-				if err := coverage.NewPrinter(fc).Print(fp, os.Stdout); err != nil {
-					return err
-				}
-				return nil
-			}()
-			if err != nil {
-				return err
+
+		if c.CoverageConfigReady() {
+			path := c.Coverage.Path
+			if reportPath != "" {
+				path = reportPath
+			}
+			if err := r.MeasureCoverage(path); err != nil {
+				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 			}
 		}
+
+		if c.CodeToTestRatioConfigReady() {
+			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
+				cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
+			}
+		}
+
+		if c.TestExecutionTimeConfigReady() {
+			stepNames := []string{}
+			if len(c.TestExecutionTime.Steps) > 0 {
+				stepNames = c.TestExecutionTime.Steps
+			}
+			if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
+				cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
+			}
+		}
+
+		if r.CountMeasured() == 0 {
+			return errors.New("nothing could be measured")
+		}
+
+		if err := r.Validate(); err != nil {
+			return fmt.Errorf("validation error: %w\n", err)
+		}
+		cmd.Println(r.String())
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
+	rootCmd.AddCommand(dumpCmd)
+	dumpCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 }
