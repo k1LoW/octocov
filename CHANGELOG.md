@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.17.2](https://github.com/k1LoW/octocov/compare/v0.17.1...v0.17.2) (2021-09-13)
+
+* Fix paintLine when TypeStmt [#61](https://github.com/k1LoW/octocov/pull/61) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.17.1](https://github.com/k1LoW/octocov/compare/v0.17.0...v0.17.1) (2021-09-13)
 
 * Add `--report` option [#60](https://github.com/k1LoW/octocov/pull/60) ([k1LoW](https://github.com/k1LoW))
