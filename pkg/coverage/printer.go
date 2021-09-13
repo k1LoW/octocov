@@ -97,11 +97,11 @@ func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
 			}
 		case TypeStmt:
 			s := 0
-			if *b.StartLine == n {
+			if *b.StartLine == n && b.StartCol != nil {
 				s = *b.StartCol - 1
 			}
 			e := lc
-			if *b.EndLine == n {
+			if *b.EndLine == n && b.EndCol != nil {
 				e = *b.EndCol - 1
 			}
 			for i := s; i < e; i++ {
