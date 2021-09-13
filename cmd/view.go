@@ -50,9 +50,6 @@ var viewCmd = &cobra.Command{
 		if !c.CoverageConfigReady() {
 			return errors.New("invalid .octocov.yml")
 		}
-		if err := os.Setenv("GITHUB_REPOSITORY", "dummy"); err != nil {
-			return err
-		}
 		r, err := report.New()
 		if err != nil {
 			return err

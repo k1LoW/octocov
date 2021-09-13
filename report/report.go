@@ -34,9 +34,6 @@ type Report struct {
 
 func New() (*Report, error) {
 	repo := os.Getenv("GITHUB_REPOSITORY")
-	if repo == "" {
-		return nil, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
-	}
 	ref := os.Getenv("GITHUB_REF")
 	if ref == "" {
 		b, err := ioutil.ReadFile(".git/HEAD")
@@ -163,6 +160,9 @@ func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
 }
 
 func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []string) error {
+	if r.Repository == "" {
+		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+	}
 	splitted := strings.Split(r.Repository, "/")
 	owner := splitted[0]
 	repo := splitted[1]
@@ -217,13 +217,13 @@ func (r *Report) CodeToTestRatioRatio() float64 {
 
 func (r *Report) Validate() error {
 	if r.Repository == "" {
-		return fmt.Errorf("coverage report '%s' is not set", "repository")
+		return fmt.Errorf("coverage report '%s' (env %s) is not set", "repository", "GITHUB_REPOSITORY")
 	}
 	if r.Ref == "" {
-		return fmt.Errorf("coverage report '%s' is not set", "ref")
+		return fmt.Errorf("coverage report '%s' (env %s) is not set", "ref", "GITHUB_REF")
 	}
 	if r.Commit == "" {
-		return fmt.Errorf("coverage report '%s' is not set", "commit")
+		return fmt.Errorf("coverage report '%s' (env %s) is not set", "commit", "GITHUB_SHA")
 	}
 	return nil
 }
