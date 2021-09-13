@@ -32,6 +32,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var reportPath string
+
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:     "view [FILE ...]",
@@ -56,6 +58,9 @@ var viewCmd = &cobra.Command{
 			return err
 		}
 		path := c.Coverage.Path
+		if reportPath != "" {
+			path = reportPath
+		}
 		if err := r.MeasureCoverage(path); err != nil {
 			return err
 		}
@@ -87,4 +92,5 @@ var viewCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
+	viewCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 }
