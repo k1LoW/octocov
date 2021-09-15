@@ -37,6 +37,9 @@ func TestTable(t *testing.T) {
 		if got := r.Table(); got != tt.want {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
+		_ = r.String()
+		r.Coverage.FlushBlockCoverages()
+		_ = r.String()
 	}
 }
 
