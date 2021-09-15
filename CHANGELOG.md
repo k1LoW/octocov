@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.18.0](https://github.com/k1LoW/octocov/compare/v0.17.2...v0.18.0) (2021-09-15)
+
+* Flush the block coverages from the report to handle `Error 413 (Request Entity Too Large)!!1` error. [#64](https://github.com/k1LoW/octocov/pull/64) ([k1LoW](https://github.com/k1LoW))
+* Add `octocov ls-files` [#63](https://github.com/k1LoW/octocov/pull/63) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Add `octocov dump` instead of `--dump` [#62](https://github.com/k1LoW/octocov/pull/62) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.17.2](https://github.com/k1LoW/octocov/compare/v0.17.1...v0.17.2) (2021-09-13)
 
 * Fix paintLine when TypeStmt [#61](https://github.com/k1LoW/octocov/pull/61) ([k1LoW](https://github.com/k1LoW))
