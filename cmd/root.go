@@ -270,6 +270,7 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildReportConfig(); err != nil {
 				return err
 			}
+			r.Coverage.FlushBlockCoverages()
 			datastores := []datastore.Datastore{}
 			for _, s := range c.Report.Datastores {
 				d, err := datastore.New(ctx, s, c.Root())

@@ -24,7 +24,7 @@ type FileCoverage struct {
 	File    string         `json:"file"`
 	Total   int            `json:"total"`
 	Covered int            `json:"covered"`
-	Blocks  BlockCoverages `json:"blocks"`
+	Blocks  BlockCoverages `json:"blocks,omitempty"`
 	cache   map[int]BlockCoverages
 }
 
@@ -60,6 +60,12 @@ func NewFileCoverage(file string) *FileCoverage {
 		Covered: 0,
 		Blocks:  BlockCoverages{},
 		cache:   map[int]BlockCoverages{},
+	}
+}
+
+func (c *Coverage) FlushBlockCoverages() {
+	for _, f := range c.Files {
+		f.Blocks = BlockCoverages{}
 	}
 }
 
