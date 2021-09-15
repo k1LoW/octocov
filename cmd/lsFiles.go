@@ -80,6 +80,9 @@ var lsFilesCmd = &cobra.Command{
 		prefix := generatePrefix(wd, r.Coverage.Files[0].File)
 		for _, f := range r.Coverage.Files {
 			cover := float64(f.Covered) / float64(f.Total) * 100
+			if f.Total == 0 {
+				cover = 0.0
+			}
 			cl := c.CoverageColor(cover)
 			c, err := detectTermColor(cl)
 			if err != nil {
