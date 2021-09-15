@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.18.1](https://github.com/k1LoW/octocov/compare/v0.18.0...v0.18.1) (2021-09-15)
+
+* Fix `NaN%` coverage [#65](https://github.com/k1LoW/octocov/pull/65) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.18.0](https://github.com/k1LoW/octocov/compare/v0.17.2...v0.18.0) (2021-09-15)
 
 * Flush the block coverages from the report to handle `Error 413 (Request Entity Too Large)!!1` error. [#64](https://github.com/k1LoW/octocov/pull/64) ([k1LoW](https://github.com/k1LoW))
