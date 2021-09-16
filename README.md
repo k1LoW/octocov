@@ -33,6 +33,8 @@ $ octocov
 
 By setting `comment:`, [comment the reports to pull request](https://github.com/k1LoW/octocov/pull/30#issuecomment-860188829).
 
+![comment](docs/comment.png)
+
 ``` yaml
 # .octocov.yml
 comment:
