@@ -54,7 +54,9 @@ func TestFileCoveagesTable(t *testing.T) {
 		{[]*gh.PullRequestFile{}, ""},
 		{
 			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go"}},
-			`|                                  Files                                  | Coverage |
+			`### Coverage in pull request scope (41.7%)
+
+|                                  Files                                  | Coverage |
 |-------------------------------------------------------------------------|---------:|
 | [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.7%    |
 `,

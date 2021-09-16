@@ -19,6 +19,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
+const filesHideMin = 30
+const filesSkipMax = 100
+
 type Report struct {
 	Repository        string             `json:"repository"`
 	Ref               string             `json:"ref"`
@@ -109,30 +112,56 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	if len(files) == 0 {
 		return ""
 	}
-	h := []string{"Files", "Coverage"}
-	buf := new(bytes.Buffer)
-	table := tablewriter.NewWriter(buf)
-	table.SetHeader(h)
-	table.SetAutoFormatHeaders(false)
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
+	var t, c int
 	exist := false
+	d := [][]string{}
 	for _, f := range files {
 		fc, err := r.Coverage.Files.FuzzyFindByFile(f.Filename)
 		if err != nil {
 			continue
 		}
 		exist = true
+		c += fc.Covered
+		t += fc.Total
 		cover := float64(fc.Covered) / float64(fc.Total) * 100
 		if fc.Total == 0 {
 			cover = 0.0
 		}
-		table.Append([]string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", cover)})
+		d = append(d, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", cover)})
 	}
 	if !exist {
 		return ""
 	}
+	coverAll := float64(c) / float64(t) * 100
+	title := fmt.Sprintf("### Coverage in pull request scope (%.1f%%)", coverAll)
+
+	buf := new(bytes.Buffer)
+	buf.WriteString(fmt.Sprintf("%s\n\n", title))
+
+	if len(d) > filesSkipMax {
+		buf.WriteString(fmt.Sprintf("Skip file coverages because there are too many files (%d)\n", len(d)))
+		return buf.String()
+	}
+
+	if len(d) > filesHideMin {
+		buf.WriteString("<details>\n\n")
+	}
+
+	table := tablewriter.NewWriter(buf)
+	h := []string{"Files", "Coverage"}
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	for _, v := range d {
+		table.Append(v)
+	}
 	table.Render()
+
+	if len(d) > filesHideMin {
+		buf.WriteString("\n</details>\n")
+	}
+
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
 

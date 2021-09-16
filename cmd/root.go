@@ -319,7 +319,6 @@ var rootCmd = &cobra.Command{
 					"## Code Metrics Report",
 					r.Table(),
 					"",
-					"### Pull Request Coverage",
 					r.FileCoveagesTable(files),
 					"---",
 					footer,
