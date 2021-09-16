@@ -316,9 +316,10 @@ var rootCmd = &cobra.Command{
 					footer = "Reported by octocov"
 				}
 				comment := strings.Join([]string{
+					"## Code Metrics Report",
 					r.Table(),
 					"",
-					"### Files",
+					"### Pull Request Coverage",
 					r.FileCoveagesTable(files),
 					"---",
 					footer,
