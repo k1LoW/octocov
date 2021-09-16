@@ -99,7 +99,7 @@ func (r *Report) Table() string {
 	table.SetCenterSeparator("|")
 	table.Append(m)
 	table.Render()
-	return buf.String()
+	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
 
 func (r *Report) FileCoveagesTable(files []string) string {
@@ -133,7 +133,7 @@ func (r *Report) FileCoveagesTable(files []string) string {
 		return ""
 	}
 	table.Render()
-	return buf.String()
+	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
 
 func (r *Report) CountMeasured() int {

@@ -17,14 +17,14 @@ func TestTable(t *testing.T) {
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
 			`| Coverage |
-|----------|
+|---------:|
 | 68.5%    |
 `,
 		},
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
 			`| Coverage | Code to Test Ratio | Test Execution Time |
-|----------|--------------------|---------------------|
+|---------:|-------------------:|--------------------:|
 | 68.5%    | 1:0.5              | 4m40s               |
 `,
 		},
@@ -55,7 +55,7 @@ func TestFileCoveagesTable(t *testing.T) {
 		{
 			[]string{"config/yaml.go"},
 			`|     Files      | Coverage |
-|----------------|----------|
+|----------------|---------:|
 | config/yaml.go | 41.7%    |
 `,
 		},
