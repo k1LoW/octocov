@@ -237,6 +237,28 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 	return 0, errors.New("could not detect number of pull request")
 }
 
+func (g *Gh) GetPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]string, error) {
+	files := []string{}
+	page := 1
+	for {
+		commitFiles, _, err := g.client.PullRequests.ListFiles(ctx, owner, repo, number, &github.ListOptions{
+			Page:    page,
+			PerPage: 100,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if len(commitFiles) == 0 {
+			break
+		}
+		for _, f := range commitFiles {
+			files = append(files, *f.Filename)
+		}
+		page += 1
+	}
+	return files, nil
+}
+
 func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
 	p := backoff.Exponential(
 		backoff.WithMinInterval(time.Second),

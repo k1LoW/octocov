@@ -102,6 +102,40 @@ func (r *Report) Table() string {
 	return buf.String()
 }
 
+func (r *Report) FileCoveagesTable(files []string) string {
+	if r.Coverage == nil {
+		return ""
+	}
+	if len(files) == 0 {
+		return ""
+	}
+	h := []string{"Files", "Coverage"}
+	buf := new(bytes.Buffer)
+	table := tablewriter.NewWriter(buf)
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	exist := false
+	for _, f := range files {
+		fc, err := r.Coverage.Files.FuzzyFindByFile(f)
+		if err != nil {
+			continue
+		}
+		exist = true
+		cover := float64(fc.Covered) / float64(fc.Total) * 100
+		if fc.Total == 0 {
+			cover = 0.0
+		}
+		table.Append([]string{f, fmt.Sprintf("%.1f%%", cover)})
+	}
+	if !exist {
+		return ""
+	}
+	table.Render()
+	return buf.String()
+}
+
 func (r *Report) CountMeasured() int {
 	c := 0
 	if r.IsMeasuredCoverage() {

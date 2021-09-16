@@ -46,6 +46,32 @@ func TestTable(t *testing.T) {
 	}
 }
 
+func TestFileCoveagesTable(t *testing.T) {
+	tests := []struct {
+		files []string
+		want  string
+	}{
+		{[]string{}, ""},
+		{
+			[]string{"config/yaml.go"},
+			`|     Files      | Coverage |
+|----------------|----------|
+| config/yaml.go | 41.7%    |
+`,
+		},
+	}
+	path := filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")
+	r := &Report{}
+	if err := r.MeasureCoverage(path); err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range tests {
+		if got := r.FileCoveagesTable(tt.files); got != tt.want {
+			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
+		}
+	}
+}
+
 func TestMergeExecutionTimes(t *testing.T) {
 	tests := []struct {
 		steps []gh.Step
