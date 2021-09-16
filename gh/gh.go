@@ -224,6 +224,7 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 	}
 	var d *github.PullRequest
 	for _, pr := range l {
+		fmt.Printf("%s <-> %s\n", pr.GetHead().GetRef(), b)
 		if pr.GetHead().GetRef() == b {
 			if d != nil {
 				return 0, errors.New("could not detect number of pull request")
