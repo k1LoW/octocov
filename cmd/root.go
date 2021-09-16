@@ -292,31 +292,43 @@ var rootCmd = &cobra.Command{
 
 		// Comment report to pull request
 		if c.CommentConfigReady() {
-			cmd.PrintErrln("Comment report...")
-			owner, repo, err := gh.SplitRepository(c.Repository)
-			if err != nil {
-				return err
-			}
-			gh, err := gh.New()
-			if err != nil {
-				return err
-			}
-			n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
-			if err != nil {
-				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
-			} else {
+			if err := func() error {
+				cmd.PrintErrln("Comment report...")
+				owner, repo, err := gh.SplitRepository(c.Repository)
+				if err != nil {
+					return err
+				}
+				gh, err := gh.New()
+				if err != nil {
+					return err
+				}
+				n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
+				if err != nil {
+					cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
+					return nil
+				}
+				files, err := gh.GetPullRequestFiles(ctx, owner, repo, n)
+				if err != nil {
+					return err
+				}
 				footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
 				if c.Comment.HideFooterLink {
 					footer = "Reported by octocov"
 				}
 				comment := strings.Join([]string{
+					"## Code Metrics Report",
 					r.Table(),
+					"",
+					r.FileCoveagesTable(files),
 					"---",
 					footer,
 				}, "\n")
 				if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
 					return err
 				}
+				return nil
+			}(); err != nil {
+				return err
 			}
 		}
 

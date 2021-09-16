@@ -35,6 +35,3 @@ jobs:
 
       - name: Run build octocov
         run: make coverage
-
-      - name: Run octocov-action
-        uses: k1LoW/octocov-action@v0

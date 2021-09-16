@@ -17,14 +17,14 @@ func TestTable(t *testing.T) {
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
 			`| Coverage |
-|----------|
+|---------:|
 | 68.5%    |
 `,
 		},
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
 			`| Coverage | Code to Test Ratio | Test Execution Time |
-|----------|--------------------|---------------------|
+|---------:|-------------------:|--------------------:|
 | 68.5%    | 1:0.5              | 4m40s               |
 `,
 		},
@@ -42,6 +42,34 @@ func TestTable(t *testing.T) {
 		flushed := r.String()
 		if len(orig) <= len(flushed) {
 			t.Error("FlushBlockCoverages error")
+		}
+	}
+}
+
+func TestFileCoveagesTable(t *testing.T) {
+	tests := []struct {
+		files []*gh.PullRequestFile
+		want  string
+	}{
+		{[]*gh.PullRequestFile{}, ""},
+		{
+			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go"}},
+			`### Coverage in pull request scope (41.7%)
+
+|                                  Files                                  | Coverage |
+|-------------------------------------------------------------------------|---------:|
+| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.7%    |
+`,
+		},
+	}
+	path := filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")
+	r := &Report{}
+	if err := r.MeasureCoverage(path); err != nil {
+		t.Fatal(err)
+	}
+	for _, tt := range tests {
+		if got := r.FileCoveagesTable(tt.files); got != tt.want {
+			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 	}
 }
