@@ -133,6 +133,9 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 		return ""
 	}
 	coverAll := float64(c) / float64(t) * 100
+	if t == 0 {
+		coverAll = 0.0
+	}
 	title := fmt.Sprintf("### Coverage in pull request scope (%.1f%%)", coverAll)
 
 	buf := new(bytes.Buffer)
