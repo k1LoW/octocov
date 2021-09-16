@@ -48,15 +48,15 @@ func TestTable(t *testing.T) {
 
 func TestFileCoveagesTable(t *testing.T) {
 	tests := []struct {
-		files []string
+		files []*gh.PullRequestFile
 		want  string
 	}{
-		{[]string{}, ""},
+		{[]*gh.PullRequestFile{}, ""},
 		{
-			[]string{"config/yaml.go"},
-			`|     Files      | Coverage |
-|----------------|---------:|
-| config/yaml.go | 41.7%    |
+			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go"}},
+			`|                                  Files                                  | Coverage |
+|-------------------------------------------------------------------------|---------:|
+| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.7%    |
 `,
 		},
 	}

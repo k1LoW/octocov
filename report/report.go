@@ -102,7 +102,7 @@ func (r *Report) Table() string {
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
 
-func (r *Report) FileCoveagesTable(files []string) string {
+func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	if r.Coverage == nil {
 		return ""
 	}
@@ -118,7 +118,7 @@ func (r *Report) FileCoveagesTable(files []string) string {
 	table.SetCenterSeparator("|")
 	exist := false
 	for _, f := range files {
-		fc, err := r.Coverage.Files.FuzzyFindByFile(f)
+		fc, err := r.Coverage.Files.FuzzyFindByFile(f.Filename)
 		if err != nil {
 			continue
 		}
@@ -127,7 +127,7 @@ func (r *Report) FileCoveagesTable(files []string) string {
 		if fc.Total == 0 {
 			cover = 0.0
 		}
-		table.Append([]string{f, fmt.Sprintf("%.1f%%", cover)})
+		table.Append([]string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", cover)})
 	}
 	if !exist {
 		return ""
