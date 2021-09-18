@@ -26,7 +26,7 @@ type Report struct {
 	Repository        string             `json:"repository"`
 	Ref               string             `json:"ref"`
 	Commit            string             `json:"commit"`
-	Coverage          *coverage.Coverage `json:"coverage"`
+	Coverage          *coverage.Coverage `json:"coverage,omitempty"`
 	CodeToTestRatio   *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
 	TestExecutionTime *float64           `json:"test_execution_time,omitempty"`
 
