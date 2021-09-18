@@ -154,6 +154,39 @@ func TestMergeExecutionTimes(t *testing.T) {
 	}
 }
 
+func TestCompare(t *testing.T) {
+	a := &Report{}
+	if err := a.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	b := &Report{}
+	if err := b.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	got := a.Compare(b)
+	if want := 0.0; got.Coverage.Diff != want {
+		t.Errorf("got %v\nwant %v", got.Coverage.Diff, want)
+	}
+	if got.CodeToTestRatio != nil {
+		t.Errorf("got %v\nwant %v", got.CodeToTestRatio, nil)
+	}
+	if got.TestExecutionTime != nil {
+		t.Errorf("got %v\nwant %v", got.TestExecutionTime, nil)
+	}
+	{
+		got := b.Compare(a)
+		if want := 0.0; got.Coverage.Diff != want {
+			t.Errorf("got %v\nwant %v", got.Coverage.Diff, want)
+		}
+		if want := 0.5143015828936407; got.CodeToTestRatio.Diff != want {
+			t.Errorf("got %v\nwant %v", got.CodeToTestRatio.Diff, want)
+		}
+		if want := 280000000000.000000; got.TestExecutionTime.Diff != want {
+			t.Errorf("got %v\nwant %v", got.TestExecutionTime.Diff, want)
+		}
+	}
+}
+
 func testdataDir(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
