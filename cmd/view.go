@@ -37,8 +37,8 @@ var reportPath string
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:     "view [FILE ...]",
-	Short:   "view code coverage report of file",
-	Long:    `view code coverage report of file.`,
+	Short:   "view code coverage of file",
+	Long:    `view code coverage of file.`,
 	Aliases: []string{"cat"},
 	Args:    cobra.MinimumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
