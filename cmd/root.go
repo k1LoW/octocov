@@ -66,6 +66,10 @@ var rootCmd = &cobra.Command{
 		if err := c.Load(configPath); err != nil {
 			return err
 		}
+		if !c.Loaded() {
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
+		}
+
 		c.Build()
 
 		if createTable {
@@ -145,10 +149,6 @@ var rootCmd = &cobra.Command{
 
 		if r.CountMeasured() == 0 {
 			return errors.New("nothing could be measured")
-		}
-
-		if !c.Loaded() {
-			return fmt.Errorf("%s are not found", strings.Join(config.DefaultConfigFilePaths, " and "))
 		}
 
 		// Generate coverage report badge
