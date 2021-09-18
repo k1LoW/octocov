@@ -18,7 +18,7 @@ import (
 )
 
 const defaultBadgesDir = "badges"
-const DefaultReportPrefix = "reports"
+const defaultReportsDatastore = "local://reports"
 
 const (
 	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
@@ -185,7 +185,11 @@ func (c *Config) Build() {
 		for _, s := range c.Central.Reports.Datastores {
 			ds = append(ds, os.ExpandEnv(s))
 		}
+		if len(ds) == 0 {
+			ds = append(ds, defaultReportsDatastore)
+		}
 		c.Central.Reports.Datastores = ds
+
 		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
 	}
 }

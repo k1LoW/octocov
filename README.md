@@ -508,13 +508,16 @@ central:
 
 ### `central.reports:`
 
+### `central.reports.datastores:`
+
 Datastore paths (URLs) where reports are stored. default: `local://reports`
 
 ``` yaml
 central:
   reports:
-    - local://reports
-    - gs://my-gcs-bucket/reports
+    datastores:
+      - local://reports
+      - gs://my-gcs-bucket/reports
 ```
 
 #### Use GitHub repository as datastore
