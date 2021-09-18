@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -350,6 +351,138 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 		d.TestExecutionTime = dt
 	}
 	return d
+}
+
+func (d *DiffReport) Out(w io.Writer) {
+	table := tablewriter.NewWriter(w)
+
+	table.SetHeader([]string{"", makeHeadTitle(d.RefA, d.CommitA, d.ReportA.rp), makeHeadTitle(d.RefB, d.CommitB, d.ReportB.rp), "+/-"})
+	table.SetAutoFormatHeaders(false)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("-")
+	table.SetHeaderLine(true)
+	table.SetBorder(false)
+	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
+
+	g := tablewriter.Colors{tablewriter.Bold, tablewriter.FgGreenColor}
+	r := tablewriter.Colors{tablewriter.Bold, tablewriter.FgRedColor}
+
+	if d.Coverage != nil {
+		{
+			dd := d.Coverage.Diff
+			ds := fmt.Sprintf("%.1f%%", dd)
+			cc := tablewriter.Colors{}
+			if dd > 0 {
+				ds = fmt.Sprintf("+%.1f%%", dd)
+				cc = g
+			} else if dd < 0 {
+				ds = fmt.Sprintf("%.1f%%", dd)
+				cc = r
+			}
+			table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", d.Coverage.A), fmt.Sprintf("%.1f%%", d.Coverage.B), ds}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		}
+		if d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
+			{
+				dd := len(d.Coverage.CoverageA.Files) - len(d.Coverage.CoverageB.Files)
+				ds := fmt.Sprintf("%d", dd)
+				if dd > 0 {
+					ds = fmt.Sprintf("+%d", dd)
+				}
+				table.Append([]string{"  Files", fmt.Sprintf("%d", len(d.Coverage.CoverageA.Files)), fmt.Sprintf("%d", len(d.Coverage.CoverageB.Files)), ds})
+			}
+
+			{
+				dd := d.Coverage.CoverageA.Total - d.Coverage.CoverageB.Total
+				ds := fmt.Sprintf("%d", dd)
+				if dd > 0 {
+					ds = fmt.Sprintf("+%d", dd)
+				}
+				table.Append([]string{"  Lines", fmt.Sprintf("%d", d.Coverage.CoverageA.Total), fmt.Sprintf("%d", d.Coverage.CoverageB.Total), ds})
+			}
+
+			{
+				dd := d.Coverage.CoverageA.Covered - d.Coverage.CoverageB.Covered
+				ds := fmt.Sprintf("%d", dd)
+				if dd > 0 {
+					ds = fmt.Sprintf("+%d", dd)
+				}
+				table.Append([]string{"  Covered", fmt.Sprintf("%d", d.Coverage.CoverageA.Covered), fmt.Sprintf("%d", d.Coverage.CoverageB.Covered), ds})
+			}
+		}
+
+	}
+	if d.CodeToTestRatio != nil {
+		dd := d.CodeToTestRatio.Diff
+		ds := fmt.Sprintf("%.1f", dd)
+		cc := tablewriter.Colors{}
+		if dd > 0 {
+			ds = fmt.Sprintf("+%.1f", dd)
+			cc = g
+		} else if dd < 0 {
+			ds = fmt.Sprintf("%.1f", dd)
+			cc = r
+		}
+		table.Rich([]string{"Code to Test Ratio", fmt.Sprintf("1:%.1f", d.CodeToTestRatio.A), fmt.Sprintf("1:%.1f", d.CodeToTestRatio.B), ds}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+
+		if d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
+			{
+				dd := d.CodeToTestRatio.RatioA.Code - d.CodeToTestRatio.RatioB.Code
+				ds := fmt.Sprintf("%d", dd)
+				if dd > 0 {
+					ds = fmt.Sprintf("+%d", dd)
+				}
+				table.Append([]string{"  Code", fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Code), fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Code), ds})
+			}
+			{
+				dd := d.CodeToTestRatio.RatioA.Test - d.CodeToTestRatio.RatioB.Test
+				ds := fmt.Sprintf("%d", dd)
+				if dd > 0 {
+					ds = fmt.Sprintf("+%d", dd)
+				}
+				table.Append([]string{"  Test", fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Test), fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Test), ds})
+			}
+		}
+	}
+	if d.TestExecutionTime != nil {
+		a := "-"
+		b := "-"
+		if d.TestExecutionTime.A != nil {
+			a = time.Duration(*d.TestExecutionTime.A).String()
+		}
+		if d.TestExecutionTime.B != nil {
+			b = time.Duration(*d.TestExecutionTime.B).String()
+		}
+		dd := d.TestExecutionTime.Diff
+		ds := time.Duration(dd).String()
+		cc := tablewriter.Colors{}
+		if dd > 0 {
+			ds = fmt.Sprintf("+%s", time.Duration(dd).String())
+			cc = r
+		} else if dd < 0 {
+			ds = time.Duration(dd).String()
+			cc = g
+		}
+		table.Rich([]string{"Test Execution Time", a, b, ds}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+	}
+
+	table.Render()
+}
+
+func makeHeadTitle(ref, commit, rp string) string {
+	ref = strings.TrimPrefix(ref, "refs/heads/")
+	if strings.HasPrefix(ref, "refs/pull/") {
+		ref = strings.Replace(strings.TrimSuffix(ref, "/head"), "refs/pull/", "#", 1)
+	}
+	if len(commit) > 7 {
+		commit = commit[:7]
+	} else {
+		commit = "-"
+	}
+	if ref == "" {
+		return rp
+	}
+	return fmt.Sprintf("%s (%s)", ref, commit)
 }
 
 type timePoint struct {
