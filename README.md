@@ -157,9 +157,9 @@ push:
   enable: true
 ```
 
-### Store report to central datastores
+### Store report to datastores
 
-By setting `report:`, store the reports to central datastores.
+By setting `report:`, store the reports to datastores.
 
 ``` yaml
 # .octocov.yml
@@ -351,7 +351,7 @@ comment:
 
 ### `report:`
 
-Configuration for reporting to central datastores.
+Configuration for reporting to datastores.
 
 ### `report.datastores:`
 
