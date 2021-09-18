@@ -18,8 +18,34 @@ type Ratio struct {
 	TestFiles []string `json:"-"`
 }
 
+type DiffRatio struct {
+	A      float64 `json:"a"`
+	B      float64 `json:"b"`
+	Diff   float64 `json:"diff"`
+	RatioA *Ratio  `json:"-"`
+	RatioB *Ratio  `json:"-"`
+}
+
 func New() *Ratio {
 	return &Ratio{}
+}
+
+func (r *Ratio) Compare(r2 *Ratio) *DiffRatio {
+	d := &DiffRatio{
+		RatioA: r,
+		RatioB: r2,
+	}
+	var ratioA, ratioB float64
+	if r != nil && r.Code != 0 {
+		ratioA = float64(r.Test) / float64(r.Code)
+	}
+	if r2 != nil && r2.Code != 0 {
+		ratioB = float64(r2.Test) / float64(r2.Code)
+	}
+	d.A = ratioA
+	d.B = ratioB
+	d.Diff = ratioA - ratioB
+	return d
 }
 
 func Measure(root string, code, test []string) (*Ratio, error) {

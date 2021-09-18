@@ -4,7 +4,64 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 )
+
+func TestCompare(t *testing.T) {
+	a := &Ratio{
+		Code: 100,
+		Test: 250,
+	}
+	tests := []struct {
+		b    *Ratio
+		want *DiffRatio
+	}{
+		{
+			&Ratio{
+				Code: 100,
+				Test: 250,
+			},
+			&DiffRatio{
+				A:    2.5,
+				B:    2.5,
+				Diff: 0.0,
+			},
+		},
+		{
+			nil,
+			&DiffRatio{
+				A:    2.5,
+				B:    0.0,
+				Diff: 2.5,
+			},
+		},
+		{
+			&Ratio{
+				Code: 100,
+				Test: 300,
+			},
+			&DiffRatio{
+				A:    2.5,
+				B:    3.0,
+				Diff: -0.5,
+			},
+		},
+	}
+	for _, tt := range tests {
+		got := a.Compare(tt.b)
+
+		opts := []cmp.Option{
+			cmpopts.IgnoreUnexported(DiffRatio{}),
+			cmpopts.IgnoreFields(DiffRatio{}, "RatioA", "RatioB"),
+		}
+
+		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
+			t.Errorf("%s", diff)
+		}
+	}
+}
 
 func TestMeasure(t *testing.T) {
 	tests := []struct {

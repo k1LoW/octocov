@@ -22,72 +22,49 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"errors"
 	"os"
-	"path/filepath"
 
-	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
 
-var reportPath string
-
-// viewCmd represents the view command
-var viewCmd = &cobra.Command{
-	Use:     "view [FILE ...]",
-	Short:   "view code coverage of file",
-	Long:    `view code coverage of file.`,
-	Aliases: []string{"cat"},
-	Args:    cobra.MinimumNArgs(1),
+// diffCmd represents the diff command
+var diffCmd = &cobra.Command{
+	Use:     "diff [REPORT_A] [REPORT_B]",
+	Short:   "compare reports (code coverage report or octocov report.json)",
+	Long:    `compare reports (code coverage report or octocov report.json).`,
+	Aliases: []string{"compare"},
+	Args:    cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		c := config.New()
-		if err := c.Load(configPath); err != nil {
+		a := &report.Report{}
+		if err := a.MeasureCoverage(args[0]); err != nil {
 			return err
 		}
-		c.Build()
-		if !c.CoverageConfigReady() {
-			return errors.New("invalid .octocov.yml")
-		}
-		r, err := report.New()
-		if err != nil {
-			return err
-		}
-		path := c.Coverage.Path
-		if reportPath != "" {
-			path = reportPath
-		}
-		if err := r.MeasureCoverage(path); err != nil {
-			return err
-		}
-		for _, f := range args {
-			err := func() error {
-				if _, err := os.Stat(f); err != nil {
-					return err
-				}
-				fc, _ := r.Coverage.Files.FuzzyFindByFile(f)
-				fp, err := os.Open(filepath.Clean(f))
-				if err != nil {
-					return err
-				}
-				defer func() {
-					_ = fp.Close()
-				}()
-				if err := coverage.NewPrinter(fc).Print(fp, os.Stdout); err != nil {
-					return err
-				}
-				return nil
-			}()
+		if a.Timestamp.IsZero() {
+			fi, err := os.Stat(args[0])
 			if err != nil {
 				return err
 			}
+			a.Timestamp = fi.ModTime()
 		}
+
+		b := &report.Report{}
+		if err := b.MeasureCoverage(args[1]); err != nil {
+			return err
+		}
+		if b.Timestamp.IsZero() {
+			fi, err := os.Stat(args[1])
+			if err != nil {
+				return err
+			}
+			b.Timestamp = fi.ModTime()
+		}
+
+		a.Compare(b).Out(os.Stdout)
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(viewCmd)
-	viewCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
+	rootCmd.AddCommand(diffCmd)
 }
