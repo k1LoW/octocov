@@ -66,6 +66,10 @@ var rootCmd = &cobra.Command{
 		if err := c.Load(configPath); err != nil {
 			return err
 		}
+		if !c.Loaded() {
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
+		}
+
 		c.Build()
 
 		if createTable {
@@ -147,43 +151,49 @@ var rootCmd = &cobra.Command{
 			return errors.New("nothing could be measured")
 		}
 
-		if !c.Loaded() {
-			return fmt.Errorf("%s are not found", strings.Join(config.DefaultConfigFilePaths, " and "))
+		cmd.Println("")
+		if err := r.Out(os.Stdout); err != nil {
+			return err
 		}
+		cmd.Println("")
 
 		// Generate coverage report badge
 		if c.CoverageBadgeConfigReady() || coverageBadge {
-			if !r.IsMeasuredCoverage() {
-				return fmt.Errorf("could not generate badge: %s", "coverage is not measured")
-			}
+			if err := func() error {
+				if !r.IsMeasuredCoverage() {
+					cmd.PrintErrf("Skip generating badge: %s\n", "coverage is not measured")
+					return nil
+				}
+				var out *os.File
+				cp := r.CoveragePercent()
+				if c.Coverage.Badge.Path == "" {
+					out = os.Stdout
+				} else {
+					cmd.PrintErrln("Generate coverage report badge...")
+					err := os.MkdirAll(filepath.Dir(c.Coverage.Badge.Path), 0755) // #nosec
+					if err != nil {
+						return err
+					}
+					bp, err := filepath.Abs(filepath.Clean(c.Coverage.Badge.Path))
+					if err != nil {
+						return err
+					}
+					out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+					if err != nil {
+						return err
+					}
+					addPaths = append(addPaths, bp)
+				}
 
-			var out *os.File
-			cp := r.CoveragePercent()
-			if c.Coverage.Badge.Path == "" {
-				out = os.Stdout
-			} else {
-				cmd.PrintErrln("Generate coverage report badge...")
-				err := os.MkdirAll(filepath.Dir(c.Coverage.Badge.Path), 0755) // #nosec
-				if err != nil {
+				b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
+				b.MessageColor = c.CoverageColor(cp)
+				if err := b.Render(out); err != nil {
 					return err
 				}
-				bp, err := filepath.Abs(filepath.Clean(c.Coverage.Badge.Path))
-				if err != nil {
-					return err
-				}
-				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-				if err != nil {
-					return err
-				}
-				addPaths = append(addPaths, bp)
-			}
-
-			b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
-			b.MessageColor = c.CoverageColor(cp)
-			if err := b.Render(out); err != nil {
+				return nil
+			}(); err != nil {
 				return err
 			}
-
 			if coverageBadge {
 				return nil
 			}
@@ -191,34 +201,40 @@ var rootCmd = &cobra.Command{
 
 		// Generate code-to-test-ratio report badge
 		if c.CodeToTestRatioBadgeConfigReady() || ratioBadge {
-			if !r.IsMeasuredCodeToTestRatio() {
-				return fmt.Errorf("could not generate badge: %s", "code-to-test-ratio is not measured")
-			}
+			if err := func() error {
+				if !r.IsMeasuredCodeToTestRatio() {
+					cmd.PrintErrf("Skip generating badge: %s\n", "coverage is not measured")
+					return nil
+				}
 
-			var out *os.File
-			tr := r.CodeToTestRatioRatio()
-			if c.CodeToTestRatio.Badge.Path == "" {
-				out = os.Stdout
-			} else {
-				cmd.PrintErrln("Generate code-to-test-ratio report badge...")
-				err := os.MkdirAll(filepath.Dir(c.CodeToTestRatio.Badge.Path), 0755) // #nosec
-				if err != nil {
-					return err
+				var out *os.File
+				tr := r.CodeToTestRatioRatio()
+				if c.CodeToTestRatio.Badge.Path == "" {
+					out = os.Stdout
+				} else {
+					cmd.PrintErrln("Generate code-to-test-ratio report badge...")
+					err := os.MkdirAll(filepath.Dir(c.CodeToTestRatio.Badge.Path), 0755) // #nosec
+					if err != nil {
+						return err
+					}
+					bp, err := filepath.Abs(filepath.Clean(c.CodeToTestRatio.Badge.Path))
+					if err != nil {
+						return err
+					}
+					out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+					if err != nil {
+						return err
+					}
+					addPaths = append(addPaths, bp)
 				}
-				bp, err := filepath.Abs(filepath.Clean(c.CodeToTestRatio.Badge.Path))
-				if err != nil {
-					return err
-				}
-				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-				if err != nil {
-					return err
-				}
-				addPaths = append(addPaths, bp)
-			}
 
-			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
-			b.MessageColor = c.CodeToTestRatioColor(tr)
-			if err := b.Render(out); err != nil {
+				b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
+				b.MessageColor = c.CodeToTestRatioColor(tr)
+				if err := b.Render(out); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
 
@@ -229,36 +245,43 @@ var rootCmd = &cobra.Command{
 
 		// Generate test-execution-time report badge
 		if c.TestExecutionTimeBadgeConfigReady() || timeBadge {
-			if !r.IsMeasuredTestExecutionTime() {
-				return fmt.Errorf("could not generate badge: %s", "test-execution-time is not measured")
-			}
+			if err := func() error {
+				if !r.IsMeasuredTestExecutionTime() {
+					cmd.PrintErrf("Skip generating badge: %s\n", "test-execution-time is not measured")
+					return nil
+				}
 
-			var out *os.File
-			if c.TestExecutionTime.Badge.Path == "" {
-				out = os.Stdout
-			} else {
-				cmd.PrintErrln("Generate test-execution-time report badge...")
-				err := os.MkdirAll(filepath.Dir(c.TestExecutionTime.Badge.Path), 0755) // #nosec
-				if err != nil {
-					return err
+				var out *os.File
+				if c.TestExecutionTime.Badge.Path == "" {
+					out = os.Stdout
+				} else {
+					cmd.PrintErrln("Generate test-execution-time report badge...")
+					err := os.MkdirAll(filepath.Dir(c.TestExecutionTime.Badge.Path), 0755) // #nosec
+					if err != nil {
+						return err
+					}
+					bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
+					if err != nil {
+						return err
+					}
+					out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+					if err != nil {
+						return err
+					}
+					addPaths = append(addPaths, bp)
 				}
-				bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
-				if err != nil {
-					return err
-				}
-				out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-				if err != nil {
-					return err
-				}
-				addPaths = append(addPaths, bp)
-			}
 
-			d := time.Duration(*r.TestExecutionTime)
-			b := badge.New("test execution time", d.String())
-			b.MessageColor = c.TestExecutionTimeColor(d)
-			if err := b.Render(out); err != nil {
+				d := time.Duration(*r.TestExecutionTime)
+				b := badge.New("test execution time", d.String())
+				b.MessageColor = c.TestExecutionTimeColor(d)
+				if err := b.Render(out); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
 				return err
 			}
+
 			if timeBadge {
 				return nil
 			}
@@ -266,7 +289,7 @@ var rootCmd = &cobra.Command{
 
 		// Store report
 		if c.ReportConfigReady() {
-			cmd.PrintErrln("Store report...")
+			cmd.PrintErrln("Storing report...")
 			if err := c.BuildReportConfig(); err != nil {
 				return err
 			}
@@ -292,7 +315,7 @@ var rootCmd = &cobra.Command{
 
 		// Comment report to pull request
 		if c.CommentConfigReady() {
-			cmd.PrintErrln("Comment report...")
+			cmd.PrintErrln("Commenting report...")
 			if err := commentReport(ctx, c, r); err != nil {
 				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
 			}

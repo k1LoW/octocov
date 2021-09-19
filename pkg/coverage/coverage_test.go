@@ -78,7 +78,7 @@ func TestCompare(t *testing.T) {
 		opts := []cmp.Option{
 			cmpopts.IgnoreUnexported(DiffCoverage{}),
 			cmpopts.IgnoreFields(DiffCoverage{}, "CoverageA", "CoverageB"),
-			cmpopts.SortSlices(func(i, j DiffFileCoverage) bool {
+			cmpopts.SortSlices(func(i, j *DiffFileCoverage) bool {
 				return i.File < j.File
 			}),
 			cmpopts.IgnoreFields(DiffFileCoverage{}, "FileCoverageA", "FileCoverageB"),
