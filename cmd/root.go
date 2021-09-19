@@ -151,6 +151,12 @@ var rootCmd = &cobra.Command{
 			return errors.New("nothing could be measured")
 		}
 
+		cmd.Println("")
+		if err := r.Out(os.Stdout); err != nil {
+			return err
+		}
+		cmd.Println("")
+
 		// Generate coverage report badge
 		if c.CoverageBadgeConfigReady() || coverageBadge {
 			if err := func() error {

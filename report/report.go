@@ -129,6 +129,33 @@ func (r *Report) Table() string {
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
 
+func (r *Report) Out(w io.Writer) error {
+	table := tablewriter.NewWriter(w)
+	table.SetHeader([]string{"", makeHeadTitle(r.Ref, r.Commit, r.rp)})
+	table.SetAutoFormatHeaders(false)
+	table.SetCenterSeparator("")
+	table.SetColumnSeparator("")
+	table.SetRowSeparator("-")
+	table.SetHeaderLine(true)
+	table.SetBorder(false)
+	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
+
+	if r.Coverage != nil {
+		table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", r.CoveragePercent())}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+	}
+
+	if r.CodeToTestRatio != nil {
+		table.Rich([]string{"Code to Test Ratio", fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+	}
+
+	if r.TestExecutionTime != nil {
+		table.Rich([]string{"Test Execution Time", time.Duration(*r.TestExecutionTime).String()}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+	}
+
+	table.Render()
+	return nil
+}
+
 func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	if r.Coverage == nil {
 		return ""
