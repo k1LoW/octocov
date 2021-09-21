@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -63,7 +62,7 @@ func New() (*Report, error) {
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	ref := os.Getenv("GITHUB_REF")
 	if ref == "" {
-		b, err := ioutil.ReadFile(".git/HEAD")
+		b, err := os.ReadFile(".git/HEAD")
 		if err == nil {
 			splitted := strings.Split(strings.TrimSuffix(string(b), "\n"), " ")
 			ref = splitted[1]
@@ -252,7 +251,7 @@ func (r *Report) MeasureCoverage(path string) error {
 		if err != nil || f.IsDir() {
 			return cerr
 		}
-		b, err := ioutil.ReadFile(filepath.Clean(path))
+		b, err := os.ReadFile(filepath.Clean(path))
 		if err != nil {
 			return err
 		}
