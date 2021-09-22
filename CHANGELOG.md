@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.20.0](https://github.com/k1LoW/octocov/compare/v0.19.0...v0.20.0) (2021-09-22)
+
+* Comment report using diff [#71](https://github.com/k1LoW/octocov/pull/71) ([k1LoW](https://github.com/k1LoW))
+* Output code metrics report to STDOUT when octocov command is executed. [#70](https://github.com/k1LoW/octocov/pull/70) ([k1LoW](https://github.com/k1LoW))
+* Add `octocov diff` [#69](https://github.com/k1LoW/octocov/pull/69) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.19.0](https://github.com/k1LoW/octocov/compare/v0.18.1...v0.19.0) (2021-09-17)
 
 * Fix title [#68](https://github.com/k1LoW/octocov/pull/68) ([k1LoW](https://github.com/k1LoW))
