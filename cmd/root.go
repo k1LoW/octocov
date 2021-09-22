@@ -347,7 +347,7 @@ var rootCmd = &cobra.Command{
 						if err := json.Unmarshal(b, rt); err != nil {
 							continue
 						}
-						if r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+						if r2 == nil || r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 							r2 = rt
 						}
 					}
