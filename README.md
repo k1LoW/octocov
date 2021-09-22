@@ -57,6 +57,18 @@ codeToTestRatio:
     - '**/*_test.go'
 ```
 
+By setting `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
+
+``` yaml
+comment:
+  enable: true
+diff:
+  datastores:
+    - s3://bucket/reports
+```
+
+![img](docs/coverage_with_diff.png)
+
 ### Check for acceptable score
 
 By setting `coverage.acceptable:`, the minimum acceptable coverage is specified.
@@ -349,13 +361,42 @@ comment:
   hideFooterLink: true
 ```
 
+### `diff:`
+
+Configuration for comparing reports.
+
+### `diff.path:`
+
+Path of the report to compare.
+
+``` yaml
+diff:
+  path: path/to/coverage.yml
+```
+
+``` yaml
+diff:
+  path: .octocov/owner/repo/report.json
+```
+
+### `diff.datastores:`
+
+Datastores where the report to be compared is stored.
+
+``` yaml
+diff:
+  datastores:
+    - local://.octocov       # Use .octocov/owner/repo/report.json
+    - s3://my-bucket/reports # Use s3://my-bucket/reports/owner/repo/report.json
+```
+
 ### `report:`
 
 Configuration for reporting to datastores.
 
 ### `report.datastores:`
 
-The datastores where the reports are saved.
+Datastores where the reports are saved.
 
 ``` yaml
 report:
