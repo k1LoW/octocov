@@ -41,6 +41,7 @@ type Config struct {
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`
 	Comment           *ConfigComment           `yaml:"comment,omitempty"`
+	Diff              *ConfigDiff              `yaml:"diff,omitempty"`
 	GitRoot           string                   `yaml:"-"`
 	// working directory
 	wd string
@@ -99,6 +100,11 @@ type ConfigPush struct {
 type ConfigComment struct {
 	Enable         bool `yaml:"enable"`
 	HideFooterLink bool `yaml:"hideFooterLink"`
+}
+
+type ConfigDiff struct {
+	Path       string   `yaml:"path,omitempty"`
+	Datastores []string `yaml:"datastores,omitempty"`
 }
 
 func New() *Config {
@@ -191,6 +197,14 @@ func (c *Config) Build() {
 		c.Central.Reports.Datastores = ds
 
 		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
+	}
+	if c.Diff != nil {
+		c.Diff.Path = os.ExpandEnv(c.Diff.Path)
+		ds := []string{}
+		for _, s := range c.Diff.Datastores {
+			ds = append(ds, os.ExpandEnv(s))
+		}
+		c.Diff.Datastores = ds
 	}
 }
 

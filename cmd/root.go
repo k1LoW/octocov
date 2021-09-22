@@ -23,6 +23,7 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -315,8 +316,58 @@ var rootCmd = &cobra.Command{
 
 		// Comment report to pull request
 		if c.CommentConfigReady() {
-			cmd.PrintErrln("Commenting report...")
-			if err := commentReport(ctx, c, r); err != nil {
+			if err := func() error {
+				cmd.PrintErrln("Commenting report...")
+				var r2 *report.Report
+				if c.DiffConfigReady() {
+					owner, repo, err := gh.SplitRepository(c.Repository)
+					if err != nil {
+						return err
+					}
+					path := fmt.Sprintf("%s/%s/report.json", owner, repo)
+					for _, s := range c.Diff.Datastores {
+						d, err := datastore.New(ctx, s, c.Root())
+						if err != nil {
+							return err
+						}
+						fsys, err := d.FS()
+						if err != nil {
+							return err
+						}
+						f, err := fsys.Open(path)
+						if err != nil {
+							continue
+						}
+						defer f.Close()
+						b, err := io.ReadAll(f)
+						if err != nil {
+							continue
+						}
+						rt := &report.Report{}
+						if err := json.Unmarshal(b, rt); err != nil {
+							continue
+						}
+						if r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+							r2 = rt
+						}
+					}
+					if c.Diff.Path != "" {
+						rt, err := report.New()
+						if err != nil {
+							return err
+						}
+						if err := rt.MeasureCoverage(c.Diff.Path); err == nil {
+							if r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+								r2 = rt
+							}
+						}
+					}
+				}
+				if err := commentReport(ctx, c, r, r2); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
 				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
 			}
 		}

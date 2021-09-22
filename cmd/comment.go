@@ -9,7 +9,7 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-func commentReport(ctx context.Context, c *config.Config, r *report.Report) error {
+func commentReport(ctx context.Context, c *config.Config, r, r2 *report.Report) error {
 	owner, repo, err := gh.SplitRepository(c.Repository)
 	if err != nil {
 		return err
