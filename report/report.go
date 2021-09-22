@@ -140,7 +140,7 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	}
 	var t, c int
 	exist := false
-	d := [][]string{}
+	rows := [][]string{}
 	for _, f := range files {
 		fc, err := r.Coverage.Files.FuzzyFindByFile(f.Filename)
 		if err != nil {
@@ -153,7 +153,7 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 		if fc.Total == 0 {
 			cover = 0.0
 		}
-		d = append(d, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", cover)})
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", cover)})
 	}
 	if !exist {
 		return ""
@@ -167,12 +167,12 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	buf := new(bytes.Buffer)
 	buf.WriteString(fmt.Sprintf("%s\n\n", title))
 
-	if len(d) > filesSkipMax {
-		buf.WriteString(fmt.Sprintf("Skip file coverages because there are too many files (%d)\n", len(d)))
+	if len(rows) > filesSkipMax {
+		buf.WriteString(fmt.Sprintf("Skip file coverages because there are too many files (%d)\n", len(rows)))
 		return buf.String()
 	}
 
-	if len(d) > filesHideMin {
+	if len(rows) > filesHideMin {
 		buf.WriteString("<details>\n\n")
 	}
 
@@ -182,12 +182,12 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	table.SetAutoFormatHeaders(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	for _, v := range d {
+	for _, v := range rows {
 		table.Append(v)
 	}
 	table.Render()
 
-	if len(d) > filesHideMin {
+	if len(rows) > filesHideMin {
 		buf.WriteString("\n</details>\n")
 	}
 

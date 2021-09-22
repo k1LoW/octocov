@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
 	"github.com/olekukonko/tablewriter"
@@ -221,4 +222,68 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		}
 		table.Rich([]string{"Test Execution Time", ta, tb, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 	}
+}
+
+func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
+	if d.Coverage == nil {
+		return ""
+	}
+	if len(files) == 0 {
+		return ""
+	}
+	var t, c int
+	exist := false
+	rows := [][]string{}
+	for _, f := range files {
+		fc, err := d.Coverage.Files.FuzzyFindByFile(f.Filename)
+		if err != nil {
+			continue
+		}
+		exist = true
+		diff := fmt.Sprintf("%.1f%%", fc.Diff)
+		if fc.Diff > 0 {
+			diff = fmt.Sprintf("+%.1f%%", fc.Diff)
+		}
+		if fc.FileCoverageB != nil {
+			c += fc.FileCoverageB.Covered
+			t += fc.FileCoverageB.Total
+		}
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", fc.B), diff})
+	}
+	if !exist {
+		return ""
+	}
+	coverAll := float64(c) / float64(t) * 100
+	if t == 0 {
+		coverAll = 0.0
+	}
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%)", coverAll)
+	buf := new(bytes.Buffer)
+	buf.WriteString(fmt.Sprintf("%s\n\n", title))
+
+	if len(rows) > filesSkipMax {
+		buf.WriteString(fmt.Sprintf("Skip file coverages because there are too many files (%d)\n", len(rows)))
+		return buf.String()
+	}
+
+	if len(rows) > filesHideMin {
+		buf.WriteString("<details>\n\n")
+	}
+
+	table := tablewriter.NewWriter(buf)
+	h := []string{"Files", "Coverage", "+/-"}
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	for _, v := range rows {
+		table.Append(v)
+	}
+	table.Render()
+
+	if len(rows) > filesHideMin {
+		buf.WriteString("\n</details>\n")
+	}
+
+	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }

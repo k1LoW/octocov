@@ -183,3 +183,12 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 		return BlockCoverages{}
 	}
 }
+
+func (dfcs DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, error) {
+	for _, dfc := range dfcs {
+		if strings.Contains(strings.TrimLeft(dfc.File, "./"), strings.TrimLeft(file, "./")) {
+			return dfc, nil
+		}
+	}
+	return nil, fmt.Errorf("file name not found: %s", file)
+}

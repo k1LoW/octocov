@@ -30,18 +30,21 @@ func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Repor
 	if c.Comment.HideFooterLink {
 		footer = "Reported by octocov"
 	}
-	var table string
+	var table, fileTable string
 	if rOrig != nil {
-		table = rOrig.Compare(r).Table()
+		d := rOrig.Compare(r)
+		table = d.Table()
+		fileTable = d.FileCoveagesTable(files)
 	} else {
 		table = r.Table()
+		fileTable = r.FileCoveagesTable(files)
 	}
 
 	comment := strings.Join([]string{
 		"## Code Metrics Report",
 		table,
 		"",
-		r.FileCoveagesTable(files),
+		fileTable,
 		"---",
 		footer,
 	}, "\n")
