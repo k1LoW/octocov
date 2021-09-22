@@ -137,7 +137,11 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 				ds = fmt.Sprintf("%.1f%%", dd)
 				cc = r
 			}
-			table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", d.Coverage.A), fmt.Sprintf("%.1f%%", d.Coverage.B), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+			t := "Coverage"
+			if !detail {
+				t = "**Coverage**"
+			}
+			table.Rich([]string{t, fmt.Sprintf("%.1f%%", d.Coverage.A), fmt.Sprintf("%.1f%%", d.Coverage.B), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
@@ -188,7 +192,11 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		if d.CodeToTestRatio.RatioB != nil && (d.CodeToTestRatio.RatioB.Code != 0 || d.CodeToTestRatio.RatioB.Test != 0) {
 			ratioB = fmt.Sprintf("1:%.1f", d.CodeToTestRatio.B)
 		}
-		table.Rich([]string{"Code to Test Ratio", ratioA, ratioB, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		t := "Code to Test Ratio"
+		if !detail {
+			t = "**Code to Test Ratio**"
+		}
+		table.Rich([]string{t, ratioA, ratioB, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 
 		if detail && d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
 			{
@@ -228,7 +236,11 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			ds = time.Duration(dd).String()
 			cc = g
 		}
-		table.Rich([]string{"Test Execution Time", ta, tb, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		t := "Test Execution Time"
+		if !detail {
+			t = "**Test Execution Time**"
+		}
+		table.Rich([]string{t, ta, tb, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 	}
 }
 

@@ -38,11 +38,11 @@ func TestDiffTable(t *testing.T) {
 	}
 
 	got := a.Compare(b).Table()
-	want := `|                     | master (896d3c5) | master (5d1e926) |  +/-   |
-|---------------------|-----------------:|-----------------:|-------:|
-| Coverage            |            68.5% |            38.8% | -29.7% |
-| Code to Test Ratio  |            1:0.5 |            1:0.0 |   -0.5 |
-| Test Execution Time |            4m40s |                - | -4m40s |
+	want := `|                         | master (896d3c5) | master (5d1e926) |  +/-   |
+|-------------------------|-----------------:|-----------------:|-------:|
+| **Coverage**            |            68.5% |            38.8% | -29.7% |
+| **Code to Test Ratio**  |            1:0.5 |            1:0.0 |   -0.5 |
+| **Test Execution Time** |            4m40s |                - | -4m40s |
 ` + "\n<details>\n\n<summary>Details</summary>\n\n``` diff\n" + `  |                     | master (896d3c5) | master (5d1e926) |   +/-   |
   |---------------------|------------------|------------------|---------|
 - | Coverage            |            68.5% |            38.8% |  -29.7% |
