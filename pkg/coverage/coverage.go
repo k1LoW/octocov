@@ -106,7 +106,7 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 	}
 	d.A = coverA
 	d.B = coverB
-	d.Diff = coverA - coverB
+	d.Diff = coverB - coverA
 
 	m := map[string]*DiffFileCoverage{}
 	if c != nil {
@@ -140,7 +140,7 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 		}
 		dfc.A = coverA
 		dfc.B = coverB
-		dfc.Diff = coverA - coverB
+		dfc.Diff = coverB - coverA
 		d.Files = append(d.Files, dfc)
 	}
 
@@ -182,4 +182,13 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 	} else {
 		return BlockCoverages{}
 	}
+}
+
+func (dfcs DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, error) {
+	for _, dfc := range dfcs {
+		if strings.Contains(strings.TrimLeft(dfc.File, "./"), strings.TrimLeft(file, "./")) {
+			return dfc, nil
+		}
+	}
+	return nil, fmt.Errorf("file name not found: %s", file)
 }

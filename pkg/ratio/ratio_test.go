@@ -34,7 +34,7 @@ func TestCompare(t *testing.T) {
 			&DiffRatio{
 				A:    2.5,
 				B:    0.0,
-				Diff: 2.5,
+				Diff: -2.5,
 			},
 		},
 		{
@@ -45,7 +45,7 @@ func TestCompare(t *testing.T) {
 			&DiffRatio{
 				A:    2.5,
 				B:    3.0,
-				Diff: -0.5,
+				Diff: 0.5,
 			},
 		},
 	}

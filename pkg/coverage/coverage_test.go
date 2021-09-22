@@ -45,10 +45,10 @@ func TestCompare(t *testing.T) {
 			&DiffCoverage{
 				A:    54.0,
 				B:    0.0,
-				Diff: 54.0,
+				Diff: -54.0,
 				Files: DiffFileCoverages{
-					&DiffFileCoverage{File: "file_a.go", A: 65.0, B: 0.0, Diff: 65.0},
-					&DiffFileCoverage{File: "file_b.go", A: 37.5, B: 0.0, Diff: 37.5},
+					&DiffFileCoverage{File: "file_a.go", A: 65.0, B: 0.0, Diff: -65.0},
+					&DiffFileCoverage{File: "file_b.go", A: 37.5, B: 0.0, Diff: -37.5},
 				},
 			},
 		},
@@ -64,10 +64,10 @@ func TestCompare(t *testing.T) {
 			&DiffCoverage{
 				A:    54.0,
 				B:    95.0,
-				Diff: -41.0,
+				Diff: 41.0,
 				Files: DiffFileCoverages{
-					&DiffFileCoverage{File: "file_a.go", A: 65.0, B: 98.33333333333333, Diff: -33.33333333333333},
-					&DiffFileCoverage{File: "file_b.go", A: 37.5, B: 87.5, Diff: -50.0},
+					&DiffFileCoverage{File: "file_a.go", A: 65.0, B: 98.33333333333333, Diff: 33.33333333333333},
+					&DiffFileCoverage{File: "file_b.go", A: 37.5, B: 87.5, Diff: 50.0},
 				},
 			},
 		},

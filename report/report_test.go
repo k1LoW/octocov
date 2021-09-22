@@ -1,10 +1,8 @@
 package report
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
@@ -180,32 +178,12 @@ func TestCompare(t *testing.T) {
 		if want := 0.0; got.Coverage.Diff != want {
 			t.Errorf("got %v\nwant %v", got.Coverage.Diff, want)
 		}
-		if want := 0.5143015828936407; got.CodeToTestRatio.Diff != want {
+		if want := -0.5143015828936407; got.CodeToTestRatio.Diff != want {
 			t.Errorf("got %v\nwant %v", got.CodeToTestRatio.Diff, want)
 		}
-		if want := 280000000000.000000; got.TestExecutionTime.Diff != want {
+		if want := -280000000000.000000; got.TestExecutionTime.Diff != want {
 			t.Errorf("got %v\nwant %v", got.TestExecutionTime.Diff, want)
 		}
-	}
-}
-
-func TestDiff(t *testing.T) {
-	a := &Report{}
-	if err := a.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
-		t.Fatal(err)
-	}
-	b := &Report{}
-	if err := b.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
-		t.Fatal(err)
-	}
-	buf := new(bytes.Buffer)
-	a.Compare(b).Out(buf)
-	got := buf.String()
-	if want := "master (896d3c5)  master (5d1e926)    +/-"; !strings.Contains(got, want) {
-		t.Errorf("got %v\nwant %v", got, want)
-	}
-	if want := "  \x1b[1mCoverage\x1b[0m                        68.5%             38.8%   \x1b[1;32m+29.7%\x1b[0m"; !strings.Contains(got, want) {
-		t.Errorf("got %#v\nwant %v", got, want)
 	}
 }
 
