@@ -16,7 +16,7 @@ testExecutionTime:
     path: docs/time.svg
 diff:
   datastores:
-    - github://k1LoW/octocov/.octocov
+    - local://.octocov
 push:
   enable: true
   if: env.GITHUB_REF == 'refs/heads/main'
