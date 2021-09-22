@@ -118,7 +118,7 @@ func (d *DiffReport) Table() string {
 		}
 	}
 
-	out = append(out, fmt.Sprintf("<details>\n\n``` diff\n%s```\n\n</details>\n", t2))
+	out = append(out, fmt.Sprintf("<details>\n\n<summary>Details</summary>\n\n``` diff\n%s```\n\n</details>\n", t2))
 
 	return strings.Join(out, "\n")
 }
@@ -180,7 +180,15 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			ds = fmt.Sprintf("%.1f", dd)
 			cc = r
 		}
-		table.Rich([]string{"Code to Test Ratio", fmt.Sprintf("1:%.1f", d.CodeToTestRatio.A), fmt.Sprintf("1:%.1f", d.CodeToTestRatio.B), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		ratioA := "-"
+		ratioB := "-"
+		if d.CodeToTestRatio.RatioA != nil && (d.CodeToTestRatio.RatioA.Code != 0 || d.CodeToTestRatio.RatioA.Test != 0) {
+			ratioA = fmt.Sprintf("1:%.1f", d.CodeToTestRatio.A)
+		}
+		if d.CodeToTestRatio.RatioB != nil && (d.CodeToTestRatio.RatioB.Code != 0 || d.CodeToTestRatio.RatioB.Test != 0) {
+			ratioB = fmt.Sprintf("1:%.1f", d.CodeToTestRatio.B)
+		}
+		table.Rich([]string{"Code to Test Ratio", ratioA, ratioB, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 
 		if detail && d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
 			{
