@@ -288,32 +288,6 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		// Store report
-		if c.ReportConfigReady() {
-			cmd.PrintErrln("Storing report...")
-			if err := c.BuildReportConfig(); err != nil {
-				return err
-			}
-			r.Coverage.FlushBlockCoverages()
-			datastores := []datastore.Datastore{}
-			for _, s := range c.Report.Datastores {
-				d, err := datastore.New(ctx, s, c.Root())
-				if err != nil {
-					return err
-				}
-				datastores = append(datastores, d)
-			}
-			for _, d := range datastores {
-				if err := d.Store(ctx, r); err != nil {
-					return err
-				}
-			}
-		}
-
-		if c.DatastoreConfigReady() {
-			cmd.PrintErrln("Skip storing report: config datastore: is deprecated. the report will never be sent")
-		}
-
 		// Comment report to pull request
 		if c.CommentConfigReady() {
 			if err := func() error {
@@ -381,6 +355,32 @@ var rootCmd = &cobra.Command{
 			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
 				return err
 			}
+		}
+
+		// Store report
+		if c.ReportConfigReady() {
+			cmd.PrintErrln("Storing report...")
+			if err := c.BuildReportConfig(); err != nil {
+				return err
+			}
+			r.Coverage.FlushBlockCoverages()
+			datastores := []datastore.Datastore{}
+			for _, s := range c.Report.Datastores {
+				d, err := datastore.New(ctx, s, c.Root())
+				if err != nil {
+					return err
+				}
+				datastores = append(datastores, d)
+			}
+			for _, d := range datastores {
+				if err := d.Store(ctx, r); err != nil {
+					return err
+				}
+			}
+		}
+
+		if c.DatastoreConfigReady() {
+			cmd.PrintErrln("Skip storing report: config datastore: is deprecated. the report will never be sent")
 		}
 
 		// Check for acceptable coverage
