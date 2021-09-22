@@ -67,7 +67,7 @@ diff:
     - s3://bucket/reports
 ```
 
-![img](docs/coverage_with_diff.png)
+![img](docs/comment_with_diff.png)
 
 ### Check for acceptable score
 
