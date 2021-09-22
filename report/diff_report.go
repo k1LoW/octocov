@@ -89,9 +89,9 @@ func (d *DiffReport) Table() string {
 		}
 		if d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			if d.Coverage.CoverageA.Covered > d.Coverage.CoverageB.Covered {
-				t2 = strings.Replace(t2, "  |   Covered", "+ |   Covered", 1)
-			} else if d.Coverage.CoverageA.Covered < d.Coverage.CoverageB.Covered {
 				t2 = strings.Replace(t2, "  |   Covered", "- |   Covered", 1)
+			} else if d.Coverage.CoverageA.Covered < d.Coverage.CoverageB.Covered {
+				t2 = strings.Replace(t2, "  |   Covered", "+ |   Covered", 1)
 			}
 		}
 	}
@@ -103,9 +103,9 @@ func (d *DiffReport) Table() string {
 		}
 		if d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
 			if d.CodeToTestRatio.RatioA.Test > d.CodeToTestRatio.RatioB.Test {
-				t2 = strings.Replace(t2, "  |   Test", "+ |   Test", 1)
-			} else if d.CodeToTestRatio.RatioA.Test < d.CodeToTestRatio.RatioB.Test {
 				t2 = strings.Replace(t2, "  |   Test", "- |   Test", 1)
+			} else if d.CodeToTestRatio.RatioA.Test < d.CodeToTestRatio.RatioB.Test {
+				t2 = strings.Replace(t2, "  |   Test", "+ |   Test", 1)
 			}
 		}
 	}
@@ -140,7 +140,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
-				dd := len(d.Coverage.CoverageA.Files) - len(d.Coverage.CoverageB.Files)
+				dd := len(d.Coverage.CoverageB.Files) - len(d.Coverage.CoverageA.Files)
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
@@ -149,7 +149,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			}
 
 			{
-				dd := d.Coverage.CoverageA.Total - d.Coverage.CoverageB.Total
+				dd := d.Coverage.CoverageB.Total - d.Coverage.CoverageA.Total
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
@@ -158,7 +158,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			}
 
 			{
-				dd := d.Coverage.CoverageA.Covered - d.Coverage.CoverageB.Covered
+				dd := d.Coverage.CoverageB.Covered - d.Coverage.CoverageA.Covered
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
@@ -183,7 +183,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 
 		if detail && d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
 			{
-				dd := d.CodeToTestRatio.RatioA.Code - d.CodeToTestRatio.RatioB.Code
+				dd := d.CodeToTestRatio.RatioB.Code - d.CodeToTestRatio.RatioA.Code
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
@@ -191,7 +191,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 				table.Append([]string{"  Code", fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Code), fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Code), ds})
 			}
 			{
-				dd := d.CodeToTestRatio.RatioA.Test - d.CodeToTestRatio.RatioB.Test
+				dd := d.CodeToTestRatio.RatioB.Test - d.CodeToTestRatio.RatioA.Test
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)

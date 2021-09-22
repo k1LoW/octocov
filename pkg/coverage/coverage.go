@@ -106,7 +106,7 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 	}
 	d.A = coverA
 	d.B = coverB
-	d.Diff = coverA - coverB
+	d.Diff = coverB - coverA
 
 	m := map[string]*DiffFileCoverage{}
 	if c != nil {
@@ -140,7 +140,7 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 		}
 		dfc.A = coverA
 		dfc.B = coverB
-		dfc.Diff = coverA - coverB
+		dfc.Diff = coverB - coverA
 		d.Files = append(d.Files, dfc)
 	}
 

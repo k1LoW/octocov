@@ -349,7 +349,7 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 		if r2.TestExecutionTime != nil {
 			t2 = *r2.TestExecutionTime
 		}
-		dt.Diff = t1 - t2
+		dt.Diff = t2 - t1
 		d.TestExecutionTime = dt
 	}
 	return d

@@ -9,7 +9,7 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-func commentReport(ctx context.Context, c *config.Config, r, r2 *report.Report) error {
+func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Report) error {
 	owner, repo, err := gh.SplitRepository(c.Repository)
 	if err != nil {
 		return err
@@ -31,8 +31,8 @@ func commentReport(ctx context.Context, c *config.Config, r, r2 *report.Report) 
 		footer = "Reported by octocov"
 	}
 	var table string
-	if r2 != nil {
-		table = r.Compare(r2).Table()
+	if rOrig != nil {
+		table = rOrig.Compare(r).Table()
 	} else {
 		table = r.Table()
 	}

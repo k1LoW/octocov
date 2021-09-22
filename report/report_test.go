@@ -178,10 +178,10 @@ func TestCompare(t *testing.T) {
 		if want := 0.0; got.Coverage.Diff != want {
 			t.Errorf("got %v\nwant %v", got.Coverage.Diff, want)
 		}
-		if want := 0.5143015828936407; got.CodeToTestRatio.Diff != want {
+		if want := -0.5143015828936407; got.CodeToTestRatio.Diff != want {
 			t.Errorf("got %v\nwant %v", got.CodeToTestRatio.Diff, want)
 		}
-		if want := 280000000000.000000; got.TestExecutionTime.Diff != want {
+		if want := -280000000000.000000; got.TestExecutionTime.Diff != want {
 			t.Errorf("got %v\nwant %v", got.TestExecutionTime.Diff, want)
 		}
 	}
