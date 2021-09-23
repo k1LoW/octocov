@@ -331,7 +331,7 @@ var rootCmd = &cobra.Command{
 							return err
 						}
 						if err := rt.MeasureCoverage(c.Diff.Path); err == nil {
-							if r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+							if r2 == nil || r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 								r2 = rt
 							}
 						}
