@@ -198,6 +198,14 @@ func (c *Config) Build() {
 
 		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
 	}
+	if c.Report != nil {
+		c.Report.Path = os.ExpandEnv(c.Report.Path)
+		ds := []string{}
+		for _, s := range c.Report.Datastores {
+			ds = append(ds, os.ExpandEnv(s))
+		}
+		c.Report.Datastores = ds
+	}
 	if c.Diff != nil {
 		c.Diff.Path = os.ExpandEnv(c.Diff.Path)
 		ds := []string{}
