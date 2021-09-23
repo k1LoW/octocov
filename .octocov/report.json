@@ -1,11 +1,11 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "cda918cb5a529f722d2bbb433bc7d0728acb26ef",
+  "commit": "0c61329c763ff83950633b3a43d597f1bed94bb4",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
-    "total": 1352,
+    "total": 1356,
     "covered": 897,
     "files": [
       {
@@ -20,8 +20,8 @@
       },
       {
         "file": "github.com/k1LoW/octocov/config/config.go",
-        "total": 163,
-        "covered": 75
+        "total": 169,
+        "covered": 76
       },
       {
         "file": "github.com/k1LoW/octocov/config/datastore.go",
@@ -35,8 +35,8 @@
       },
       {
         "file": "github.com/k1LoW/octocov/config/report.go",
-        "total": 19,
-        "covered": 9
+        "total": 17,
+        "covered": 8
       },
       {
         "file": "github.com/k1LoW/octocov/datastore/datastore.go",
@@ -101,9 +101,9 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 4276,
+    "code": 4292,
     "test": 1283
   },
-  "test_execution_time": 37000000000,
-  "timestamp": "2021-09-22T05:55:10.870989429Z"
+  "test_execution_time": 36000000000,
+  "timestamp": "2021-09-23T22:02:23.67377733Z"
 }
