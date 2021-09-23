@@ -171,7 +171,7 @@ push:
 
 ### Store report to datastores
 
-By setting `report:`, store the reports to datastores and local.
+By setting `report:`, store the reports to datastores and local path.
 
 ``` yaml
 # .octocov.yml

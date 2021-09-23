@@ -346,17 +346,6 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		// Push generated files
-		if c.PushConfigReady() {
-			cmd.PrintErrln("Pushing generated files...")
-			if err := c.BuildPushConfig(); err != nil {
-				return err
-			}
-			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
-				return err
-			}
-		}
-
 		// Store report
 		if c.ReportConfigReady() {
 			cmd.PrintErrln("Storing report...")
@@ -378,9 +367,25 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if c.Report.Path != "" {
-				if err := os.WriteFile(filepath.Join(c.Root(), c.Report.Path), r.Bytes(), os.ModePerm); err != nil {
+				rp, err := filepath.Abs(filepath.Clean(c.Report.Path))
+				if err != nil {
 					return err
 				}
+				if err := os.WriteFile(rp, r.Bytes(), os.ModePerm); err != nil {
+					return err
+				}
+				addPaths = append(addPaths, rp)
+			}
+		}
+
+		// Push generated files
+		if c.PushConfigReady() {
+			cmd.PrintErrln("Pushing generated files...")
+			if err := c.BuildPushConfig(); err != nil {
+				return err
+			}
+			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
+				return err
 			}
 		}
 
