@@ -13,7 +13,7 @@ import (
 )
 
 func createBQTable(ctx context.Context, c *config.Config) error {
-	if !c.ReportConfigDatastoresReady() {
+	if !c.ReportConfigTargetReady() {
 		return errors.New("report.datastores is not set")
 	}
 	if err := c.BuildReportConfig(); err != nil {

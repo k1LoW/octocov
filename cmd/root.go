@@ -331,7 +331,7 @@ var rootCmd = &cobra.Command{
 							return err
 						}
 						if err := rt.MeasureCoverage(c.Diff.Path); err == nil {
-							if r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+							if r2 == nil || r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 								r2 = rt
 							}
 						}
@@ -343,17 +343,6 @@ var rootCmd = &cobra.Command{
 				return nil
 			}(); err != nil {
 				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
-			}
-		}
-
-		// Push generated files
-		if c.PushConfigReady() {
-			cmd.PrintErrln("Pushing generated files...")
-			if err := c.BuildPushConfig(); err != nil {
-				return err
-			}
-			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
-				return err
 			}
 		}
 
@@ -377,13 +366,34 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 			}
+			if c.Report.Path != "" {
+				rp, err := filepath.Abs(filepath.Clean(c.Report.Path))
+				if err != nil {
+					return err
+				}
+				if err := os.WriteFile(rp, r.Bytes(), os.ModePerm); err != nil {
+					return err
+				}
+				addPaths = append(addPaths, rp)
+			}
+		}
+
+		// Push generated files
+		if c.PushConfigReady() {
+			cmd.PrintErrln("Pushing generated files...")
+			if err := c.BuildPushConfig(); err != nil {
+				return err
+			}
+			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
+				return err
+			}
 		}
 
 		if c.DatastoreConfigReady() {
 			cmd.PrintErrln("Skip storing report: config datastore: is deprecated. the report will never be sent")
 		}
 
-		// Check for acceptable coverage
+		// Check for acceptable code metrics
 		if err := c.Acceptable(r); err != nil {
 			return err
 		}

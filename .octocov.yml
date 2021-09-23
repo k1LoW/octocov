@@ -15,8 +15,7 @@ testExecutionTime:
   badge:
     path: docs/time.svg
 diff:
-  datastores:
-    - local://.octocov
+  path: .octocov/report.json
 push:
   enable: true
   if: env.GITHUB_REF == 'refs/heads/main'
@@ -24,5 +23,4 @@ comment:
   enable: true
 report:
   if: env.GITHUB_REF == 'refs/heads/main'
-  datastores:
-    - github://k1LoW/octocov/.octocov
+  path: .octocov/report.json

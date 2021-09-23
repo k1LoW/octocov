@@ -171,7 +171,7 @@ push:
 
 ### Store report to datastores
 
-By setting `report:`, store the reports to datastores.
+By setting `report:`, store the reports to datastores and local path.
 
 ``` yaml
 # .octocov.yml
@@ -179,6 +179,12 @@ report:
   datastores:
     - github://owner/coverages/reports
     - s3://bucket/reports
+```
+
+``` yaml
+# .octocov.yml
+report:
+  path: path/to/report.json
 ```
 
 #### Supported datastores
@@ -393,6 +399,15 @@ diff:
 ### `report:`
 
 Configuration for reporting to datastores.
+
+### `report.path:`
+
+Path to save the report.
+
+``` yaml
+report:
+  path: path/to/report.json
+```
 
 ### `report.datastores:`
 
