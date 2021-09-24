@@ -352,6 +352,16 @@ var rootCmd = &cobra.Command{
 			if err := c.BuildReportConfig(); err != nil {
 				return err
 			}
+			if c.Report.Path != "" {
+				rp, err := filepath.Abs(filepath.Clean(c.Report.Path))
+				if err != nil {
+					return err
+				}
+				if err := os.WriteFile(rp, r.Bytes(), os.ModePerm); err != nil {
+					return err
+				}
+				addPaths = append(addPaths, rp)
+			}
 			r.Coverage.FlushBlockCoverages()
 			datastores := []datastore.Datastore{}
 			for _, s := range c.Report.Datastores {
@@ -365,16 +375,6 @@ var rootCmd = &cobra.Command{
 				if err := d.Store(ctx, r); err != nil {
 					return err
 				}
-			}
-			if c.Report.Path != "" {
-				rp, err := filepath.Abs(filepath.Clean(c.Report.Path))
-				if err != nil {
-					return err
-				}
-				if err := os.WriteFile(rp, r.Bytes(), os.ModePerm); err != nil {
-					return err
-				}
-				addPaths = append(addPaths, rp)
 			}
 		}
 
