@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.20.1](https://github.com/k1LoW/octocov/compare/v0.20.0...v0.20.1) (2021-09-27)
+
+* Fix: panic: assignment to entry in nil map [#74](https://github.com/k1LoW/octocov/pull/74) ([k1LoW](https://github.com/k1LoW))
+* If `report.path:`, save the full report data [#73](https://github.com/k1LoW/octocov/pull/73) ([k1LoW](https://github.com/k1LoW))
+* Add `report.path:` to save the report local path. [#72](https://github.com/k1LoW/octocov/pull/72) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.20.0](https://github.com/k1LoW/octocov/compare/v0.19.0...v0.20.0) (2021-09-22)
 
 * Comment report using diff [#71](https://github.com/k1LoW/octocov/pull/71) ([k1LoW](https://github.com/k1LoW))
