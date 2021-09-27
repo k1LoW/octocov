@@ -170,8 +170,13 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 		return BlockCoverages{}
 	}
 	if len(fc.cache) == 0 {
+		fc.cache = map[int]BlockCoverages{}
 		for _, b := range fc.Blocks {
 			for i := *b.StartLine; i <= *b.EndLine; i++ {
+				_, ok := fc.cache[i]
+				if !ok {
+					fc.cache[i] = BlockCoverages{}
+				}
 				fc.cache[i] = append(fc.cache[i], b)
 			}
 		}
