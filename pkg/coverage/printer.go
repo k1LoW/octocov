@@ -104,6 +104,10 @@ func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
 			if *b.EndLine == n && b.EndCol != nil {
 				e = *b.EndCol - 1
 			}
+			if e > lc {
+				// coverage report and source code are out of sync.
+				e = lc
+			}
 			for i := s; i < e; i++ {
 				l[i] = cl
 			}
