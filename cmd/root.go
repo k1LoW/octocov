@@ -389,10 +389,6 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		if c.DatastoreConfigReady() {
-			cmd.PrintErrln("Skip storing report: config datastore: is deprecated. the report will never be sent")
-		}
-
 		// Check for acceptable code metrics
 		if err := c.Acceptable(r); err != nil {
 			return err
