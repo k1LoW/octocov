@@ -4,24 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 )
-
-func GeneratePrefix(wd, p string) string {
-	prefix := p
-	for {
-		if strings.HasSuffix(wd, prefix) {
-			prefix += "/"
-			break
-		}
-		if prefix == "." || prefix == "/" {
-			prefix = ""
-			break
-		}
-		prefix = filepath.Dir(prefix)
-	}
-	return prefix
-}
 
 func TraverseGitPath(base string) (string, error) {
 	p, err := filepath.Abs(base)
