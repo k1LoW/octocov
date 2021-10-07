@@ -25,6 +25,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -77,14 +78,22 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		gitRoot, err := internal.TraverseGitPath(wd)
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(gitRoot, wd)
+		if err != nil {
+			return err
+		}
 		p, err := r.Coverage.Files.PathPrefix()
 		if err != nil {
 			return err
 		}
-		prefix := internal.GeneratePrefix(wd, p)
+		prefix := fmt.Sprintf("%s/", filepath.Join(p, rel))
 		for _, f := range r.Coverage.Files {
 			if !strings.HasPrefix(f.File, prefix) {
-				break
+				continue
 			}
 			cover := float64(f.Covered) / float64(f.Total) * 100
 			if f.Total == 0 {
