@@ -25,13 +25,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/lucasb-eyer/go-colorful"
 	"github.com/spf13/cobra"
@@ -77,8 +77,15 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		prefix := generatePrefix(wd, r.Coverage.Files[0].File)
+		p, err := r.Coverage.Files.PathPrefix()
+		if err != nil {
+			return err
+		}
+		prefix := internal.GeneratePrefix(wd, p)
 		for _, f := range r.Coverage.Files {
+			if !strings.HasPrefix(f.File, prefix) {
+				break
+			}
 			cover := float64(f.Covered) / float64(f.Total) * 100
 			if f.Total == 0 {
 				cover = 0.0
@@ -94,22 +101,6 @@ var lsFilesCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-func generatePrefix(wd, p string) string {
-	prefix := p
-	for {
-		if strings.HasSuffix(wd, prefix) {
-			prefix += "/"
-			break
-		}
-		if prefix == "." || prefix == "/" {
-			prefix = "/"
-			break
-		}
-		prefix = filepath.Dir(prefix)
-	}
-	return prefix
 }
 
 func detectTermColor(cl string) (*color.Color, error) {
