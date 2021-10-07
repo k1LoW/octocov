@@ -244,7 +244,10 @@ func (r *Report) MeasureCoverage(path string) error {
 	}
 	prefix := fmt.Sprintf("%s/", filepath.ToSlash(gitRoot))
 	for _, f := range cov.Files {
-		f.File = strings.TrimPrefix(strings.TrimPrefix(filepath.ToSlash(f.File), prefix), "./")
+		rel, err := filepath.Rel(prefix, filepath.ToSlash(f.File))
+		if err != nil {
+			f.File = rel
+		}
 	}
 	r.Coverage = cov
 	r.rp = rp
