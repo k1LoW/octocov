@@ -14,6 +14,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -163,7 +164,7 @@ func (c *Config) Build() {
 	if c.Repository == "" {
 		c.Repository = os.Getenv("GITHUB_REPOSITORY")
 	}
-	gitRoot, _ := traverseGitPath(c.Root())
+	gitRoot, _ := internal.TraverseGitPath(c.Root())
 	c.GitRoot = gitRoot
 
 	if c.Coverage == nil {
@@ -390,32 +391,6 @@ func CheckIf(cond string) (bool, error) {
 		return false, err
 	}
 	return ok.(bool), nil
-}
-
-func traverseGitPath(base string) (string, error) {
-	p, err := filepath.Abs(base)
-	if err != nil {
-		return "", err
-	}
-	for {
-		fi, err := os.Stat(p)
-		if err != nil {
-			return "", err
-		}
-		if !fi.IsDir() {
-			p = filepath.Dir(p)
-			continue
-		}
-		gitConfig := filepath.Join(p, ".git", "config")
-		if fi, err := os.Stat(gitConfig); err == nil && !fi.IsDir() {
-			return p, nil
-		}
-		if p == "/" {
-			break
-		}
-		p = filepath.Dir(p)
-	}
-	return "", fmt.Errorf("failed to traverse the Git root path: %s", base)
 }
 
 func envMap() map[string]string {

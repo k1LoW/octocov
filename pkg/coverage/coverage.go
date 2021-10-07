@@ -1,7 +1,9 @@
 package coverage
 
 import (
+	"errors"
 	"fmt"
+	"path/filepath"
 	"strings"
 )
 
@@ -163,6 +165,38 @@ func (fcs FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) {
 		}
 	}
 	return nil, fmt.Errorf("file name not found: %s", file)
+}
+
+func (fcs FileCoverages) PathPrefix() (string, error) {
+	if len(fcs) == 0 {
+		return "", errors.New("no file coverages")
+	}
+	p := strings.Split(filepath.Dir(filepath.ToSlash(fcs[0].File)), "/")
+	for _, fc := range fcs {
+		d := strings.Split(filepath.Dir(filepath.ToSlash(fc.File)), "/")
+		i := 0
+		for {
+			if len(p) <= i {
+				break
+			}
+			if len(d) <= i {
+				break
+			}
+			if p[i] != d[i] {
+				break
+			}
+			i += 1
+		}
+		p = p[:i]
+	}
+	s := strings.Join(p, "/")
+	if s == "" && strings.HasPrefix(fcs[0].File, "/") {
+		s = "/"
+	}
+	if s == "." {
+		s = ""
+	}
+	return s, nil
 }
 
 func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
