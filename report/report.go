@@ -14,6 +14,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
 	"github.com/olekukonko/tablewriter"
@@ -236,6 +237,14 @@ func (r *Report) MeasureCoverage(path string) error {
 		}
 		r.rp = path
 		return nil
+	}
+	gitRoot, err := internal.TraverseGitPath(path)
+	if err != nil {
+		return err
+	}
+	prefix := fmt.Sprintf("%s/", filepath.ToSlash(gitRoot))
+	for _, f := range cov.Files {
+		f.File = strings.TrimPrefix(strings.TrimPrefix(filepath.ToSlash(f.File), prefix), "./")
 	}
 	r.Coverage = cov
 	r.rp = rp
