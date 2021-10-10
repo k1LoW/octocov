@@ -22,7 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 
@@ -47,8 +46,8 @@ var viewCmd = &cobra.Command{
 			return err
 		}
 		c.Build()
-		if !c.CoverageConfigReady() {
-			return errors.New("invalid .octocov.yml")
+		if err := c.CoverageConfigReady(); err != nil {
+			return err
 		}
 		r, err := report.New()
 		if err != nil {

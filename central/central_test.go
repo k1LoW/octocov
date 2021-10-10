@@ -110,9 +110,7 @@ func TestRenderIndex(t *testing.T) {
 		},
 		Badges: "badges",
 	}
-	if err := c.BuildCentralConfig(); err != nil {
-		t.Fatal(err)
-	}
+	c.Build()
 	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)

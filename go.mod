@@ -13,13 +13,14 @@ require (
 	github.com/go-enry/go-enry/v2 v2.7.0
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/goccy/go-json v0.4.13
-	github.com/goccy/go-yaml v1.8.9
+	github.com/goccy/go-yaml v1.9.3
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v35 v35.1.0
 	github.com/hhatto/gocloc v0.4.1
 	github.com/jszwec/s3fs v0.3.1
 	github.com/k1LoW/duration v1.1.0
+	github.com/k1LoW/expand v0.1.0
 	github.com/k1LoW/osfs v0.1.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.0.3

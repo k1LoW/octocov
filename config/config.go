@@ -1,9 +1,7 @@
 package config
 
 import (
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -13,8 +11,8 @@ import (
 	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
+	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -38,7 +36,6 @@ type Config struct {
 	CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
 	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
 	Report            *ConfigReport            `yaml:"report,omitempty"`
-	Datastore         interface{}              `yaml:"datastore,omitempty"`
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`
 	Comment           *ConfigComment           `yaml:"comment,omitempty"`
@@ -138,11 +135,11 @@ func (c *Config) Load(path string) error {
 		return nil
 	}
 	c.path = filepath.Join(c.wd, path)
-	buf, err := ioutil.ReadFile(filepath.Clean(c.path))
+	buf, err := os.ReadFile(filepath.Clean(c.path))
 	if err != nil {
 		return err
 	}
-	if err := yaml.Unmarshal(buf, c); err != nil {
+	if err := yaml.Unmarshal(expand.ExpandenvYAMLBytes(buf), c); err != nil {
 		return err
 	}
 	return nil
@@ -159,135 +156,8 @@ func (c *Config) Loaded() bool {
 	return c.path != ""
 }
 
-func (c *Config) Build() {
-	c.Repository = os.ExpandEnv(c.Repository)
-	if c.Repository == "" {
-		c.Repository = os.Getenv("GITHUB_REPOSITORY")
-	}
-	gitRoot, _ := internal.TraverseGitPath(c.Root())
-	c.GitRoot = gitRoot
-
-	if c.Coverage == nil {
-		c.Coverage = &ConfigCoverage{}
-	}
-	if c.Coverage.Path == "" {
-		c.Coverage.Path = filepath.Dir(c.path)
-	}
-	c.Coverage.Badge.Path = os.ExpandEnv(c.Coverage.Badge.Path)
-
-	if c.CodeToTestRatio != nil {
-		if c.CodeToTestRatio.Code == nil {
-			c.CodeToTestRatio.Code = []string{}
-		}
-		if c.CodeToTestRatio.Test == nil {
-			c.CodeToTestRatio.Test = []string{}
-		}
-	}
-	if c.TestExecutionTime == nil {
-		c.TestExecutionTime = &ConfigTestExecutionTime{}
-	}
-	if c.Central != nil {
-		c.Central.Root = os.ExpandEnv(c.Central.Root)
-		ds := []string{}
-		for _, s := range c.Central.Reports.Datastores {
-			ds = append(ds, os.ExpandEnv(s))
-		}
-		if len(ds) == 0 {
-			ds = append(ds, defaultReportsDatastore)
-		}
-		c.Central.Reports.Datastores = ds
-
-		c.Central.Badges = os.ExpandEnv(c.Central.Badges)
-	}
-	if c.Report != nil {
-		c.Report.Path = os.ExpandEnv(c.Report.Path)
-		ds := []string{}
-		for _, s := range c.Report.Datastores {
-			ds = append(ds, os.ExpandEnv(s))
-		}
-		c.Report.Datastores = ds
-	}
-	if c.Diff != nil {
-		c.Diff.Path = os.ExpandEnv(c.Diff.Path)
-		ds := []string{}
-		for _, s := range c.Diff.Datastores {
-			ds = append(ds, os.ExpandEnv(s))
-		}
-		c.Diff.Datastores = ds
-	}
-}
-
-func (c *Config) CoverageConfigReady() bool {
-	if c.Coverage == nil || c.Coverage.Path == "" {
-		return false
-	}
-	return true
-}
-
-func (c *Config) CodeToTestRatioConfigReady() bool {
-	if c.CodeToTestRatio == nil {
-		return false
-	}
-	if len(c.CodeToTestRatio.Test) == 0 {
-		return false
-	}
-	return true
-}
-
-func (c *Config) TestExecutionTimeConfigReady() bool {
-	if c.TestExecutionTime == nil {
-		return false
-	}
-	if c.CoverageConfigReady() || len(c.TestExecutionTime.Steps) > 0 {
-		return true
-	}
-	return false
-}
-
-func (c *Config) PushConfigReady() bool {
-	if c.Push == nil || !c.Push.Enable || c.GitRoot == "" {
-		return false
-	}
-	ok, err := CheckIf(c.Push.If)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: %v\n", err)
-		return false
-	}
-	if !ok {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: the condition in the `if` section is not met (%s)\n", c.Push.If)
-		return false
-	}
-	return true
-}
-
-func (c *Config) CommentConfigReady() bool {
-	if c.Comment == nil || !c.Comment.Enable {
-		return false
-	}
-	return true
-}
-
-func (c *Config) BuildPushConfig() error {
-	if c.Push == nil {
-		return errors.New("push: not set")
-	}
-	return nil
-}
-
-func (c *Config) CoverageBadgeConfigReady() bool {
-	return c.CoverageConfigReady() && c.Coverage.Badge.Path != ""
-}
-
-func (c *Config) CodeToTestRatioBadgeConfigReady() bool {
-	return c.CodeToTestRatioConfigReady() && c.CodeToTestRatio.Badge.Path != ""
-}
-
-func (c *Config) TestExecutionTimeBadgeConfigReady() bool {
-	return c.TestExecutionTimeConfigReady() && c.TestExecutionTime.Badge.Path != ""
-}
-
 func (c *Config) Acceptable(r *report.Report) error {
-	if c.CoverageConfigReady() && c.Coverage.Acceptable != "" {
+	if err := c.CoverageConfigReady(); err == nil && c.Coverage.Acceptable != "" {
 		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
 		if err != nil {
 			return err
@@ -297,7 +167,7 @@ func (c *Config) Acceptable(r *report.Report) error {
 		}
 	}
 
-	if c.CodeToTestRatioConfigReady() && c.CodeToTestRatio.Acceptable != "" {
+	if err := c.CodeToTestRatioConfigReady(); err == nil && c.CodeToTestRatio.Acceptable != "" {
 		a, err := strconv.ParseFloat(strings.TrimPrefix(c.CodeToTestRatio.Acceptable, "1:"), 64)
 		if err != nil {
 			return err
@@ -307,7 +177,7 @@ func (c *Config) Acceptable(r *report.Report) error {
 		}
 	}
 
-	if c.TestExecutionTimeConfigReady() && r.TestExecutionTime != nil && c.TestExecutionTime.Acceptable != "" {
+	if err := c.TestExecutionTimeConfigReady(); err == nil && r.TestExecutionTime != nil && c.TestExecutionTime.Acceptable != "" {
 		a, err := duration.Parse(c.TestExecutionTime.Acceptable)
 		if err != nil {
 			return err

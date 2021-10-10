@@ -77,9 +77,9 @@ var rootCmd = &cobra.Command{
 			return createBQTable(ctx, c)
 		}
 
-		if c.CentralConfigReady() {
+		if c.Central != nil && c.Central.Enable {
 			cmd.PrintErrln("Central mode enabled")
-			if err := c.BuildCentralConfig(); err != nil {
+			if err := c.CentralConfigReady(); err != nil {
 				return err
 			}
 
@@ -111,8 +111,10 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			// git push
-			if c.CentralPushConfigReady() {
-				_, _ = fmt.Fprintln(os.Stderr, "Commit and push central report")
+			if err := c.CentralPushConfigReady(); err != nil {
+				cmd.PrintErrf("Skip commit and push central report: %v\n", err)
+			} else {
+				cmd.PrintErrln("Commit and push central report")
 				if err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, "Update by octocov"); err != nil {
 					return err
 				}
@@ -125,20 +127,26 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		if c.CoverageConfigReady() {
+		if err := c.CoverageConfigReady(); err != nil {
+			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
+		} else {
 			path := c.Coverage.Path
 			if err := r.MeasureCoverage(path); err != nil {
 				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 			}
 		}
 
-		if c.CodeToTestRatioConfigReady() {
+		if err := c.CodeToTestRatioConfigReady(); err != nil {
+			cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
+		} else {
 			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 				cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
 			}
 		}
 
-		if c.TestExecutionTimeConfigReady() {
+		if err := c.TestExecutionTimeConfigReady(); err != nil {
+			cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
+		} else {
 			stepNames := []string{}
 			if len(c.TestExecutionTime.Steps) > 0 {
 				stepNames = c.TestExecutionTime.Steps
@@ -159,7 +167,7 @@ var rootCmd = &cobra.Command{
 		cmd.Println("")
 
 		// Generate coverage report badge
-		if c.CoverageBadgeConfigReady() || coverageBadge {
+		if err := c.CoverageBadgeConfigReady(); err == nil || coverageBadge {
 			if err := func() error {
 				if !r.IsMeasuredCoverage() {
 					cmd.PrintErrf("Skip generating badge: %s\n", "coverage is not measured")
@@ -201,7 +209,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Generate code-to-test-ratio report badge
-		if c.CodeToTestRatioBadgeConfigReady() || ratioBadge {
+		if err := c.CodeToTestRatioBadgeConfigReady(); err == nil || ratioBadge {
 			if err := func() error {
 				if !r.IsMeasuredCodeToTestRatio() {
 					cmd.PrintErrf("Skip generating badge: %s\n", "coverage is not measured")
@@ -245,7 +253,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Generate test-execution-time report badge
-		if c.TestExecutionTimeBadgeConfigReady() || timeBadge {
+		if err := c.TestExecutionTimeBadgeConfigReady(); err == nil || timeBadge {
 			if err := func() error {
 				if !r.IsMeasuredTestExecutionTime() {
 					cmd.PrintErrf("Skip generating badge: %s\n", "test-execution-time is not measured")
@@ -289,11 +297,15 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Comment report to pull request
-		if c.CommentConfigReady() {
+		if err := c.CommentConfigReady(); err != nil {
+			cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
+		} else {
 			if err := func() error {
 				cmd.PrintErrln("Commenting report...")
 				var r2 *report.Report
-				if c.DiffConfigReady() {
+				if err := c.DiffConfigReady(); err != nil {
+					cmd.PrintErrf("Skip comparing reports: %v\n", err)
+				} else {
 					owner, repo, err := gh.SplitRepository(c.Repository)
 					if err != nil {
 						return err
@@ -347,11 +359,10 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Store report
-		if c.ReportConfigReady() {
+		if err := c.ReportConfigReady(); err != nil {
+			cmd.PrintErrf("Skip storing the report: %v\n", err)
+		} else {
 			cmd.PrintErrln("Storing report...")
-			if err := c.BuildReportConfig(); err != nil {
-				return err
-			}
 			if c.Report.Path != "" {
 				rp, err := filepath.Abs(filepath.Clean(c.Report.Path))
 				if err != nil {
@@ -379,18 +390,13 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Push generated files
-		if c.PushConfigReady() {
+		if err := c.PushConfigReady(); err != nil {
+			cmd.PrintErrf("Skip pushing generate files: %v\n", err)
+		} else {
 			cmd.PrintErrln("Pushing generated files...")
-			if err := c.BuildPushConfig(); err != nil {
-				return err
-			}
 			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
 				return err
 			}
-		}
-
-		if c.DatastoreConfigReady() {
-			cmd.PrintErrln("Skip storing report: config datastore: is deprecated. the report will never be sent")
 		}
 
 		// Check for acceptable code metrics

@@ -6,12 +6,12 @@ import (
 
 func TestReportConfigReady(t *testing.T) {
 	tests := []struct {
-		c    *Config
-		want bool
+		c       *Config
+		wantErr bool
 	}{
 		{
 			New(),
-			false,
+			true,
 		},
 		{
 			&Config{
@@ -21,13 +21,18 @@ func TestReportConfigReady(t *testing.T) {
 					},
 				},
 			},
-			true,
+			false,
 		},
 	}
 	for _, tt := range tests {
-		got := tt.c.ReportConfigReady()
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
+		if err := tt.c.ReportConfigReady(); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got error %v\n", err)
+			}
+		} else {
+			if tt.wantErr {
+				t.Error("want error\n")
+			}
 		}
 	}
 }
