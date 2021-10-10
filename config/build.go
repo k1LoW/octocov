@@ -47,6 +47,9 @@ func (c *Config) Build() {
 		if !strings.HasPrefix(c.Central.Root, "/") {
 			c.Central.Root = filepath.Clean(filepath.Join(c.Root(), c.Central.Root))
 		}
+		if len(c.Central.Reports.Datastores) == 0 {
+			c.Central.Reports.Datastores = append(c.Central.Reports.Datastores, defaultReportsDatastore)
+		}
 		if c.Central.Badges == "" {
 			c.Central.Badges = defaultBadgesDir
 		}

@@ -13,8 +13,8 @@ import (
 )
 
 func createBQTable(ctx context.Context, c *config.Config) error {
-	if !c.ReportConfigTargetReady() {
-		return errors.New("report.datastores is not set")
+	if err := c.ReportConfigTargetReady(); err != nil {
+		return err
 	}
 	datastores := map[string]datastore.Datastore{}
 	for _, s := range c.Report.Datastores {

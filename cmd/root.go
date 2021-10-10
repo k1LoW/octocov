@@ -297,11 +297,15 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Comment report to pull request
-		if c.CommentConfigReady() {
+		if err := c.CommentConfigReady(); err != nil {
+			cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
+		} else {
 			if err := func() error {
 				cmd.PrintErrln("Commenting report...")
 				var r2 *report.Report
-				if c.DiffConfigReady() {
+				if err := c.DiffConfigReady(); err != nil {
+					cmd.PrintErrf("Skip comparing reports: %v\n", err)
+				} else {
 					owner, repo, err := gh.SplitRepository(c.Repository)
 					if err != nil {
 						return err
@@ -386,7 +390,9 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Push generated files
-		if c.PushConfigReady() {
+		if err := c.PushConfigReady(); err != nil {
+			cmd.PrintErrf("Skip pushing generate files: %v\n", err)
+		} else {
 			cmd.PrintErrln("Pushing generated files...")
 			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
 				return err

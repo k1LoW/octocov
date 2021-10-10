@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 	"fmt"
-	"os"
 )
 
 func (c *Config) CoverageConfigReady() error {
@@ -36,34 +35,41 @@ func (c *Config) TestExecutionTimeConfigReady() error {
 	return nil
 }
 
-func (c *Config) PushConfigReady() bool {
-	if c.Push == nil || !c.Push.Enable || c.GitRoot == "" {
-		return false
+func (c *Config) PushConfigReady() error {
+	if c.Push == nil {
+		return errors.New("push: not set")
+	}
+	if !c.Push.Enable {
+		return errors.New("push.enable: is false")
+	}
+	if c.GitRoot == "" {
+		return errors.New("failed to traverse the Git root path")
 	}
 	ok, err := CheckIf(c.Push.If)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: %v\n", err)
-		return false
+		return err
 	}
 	if !ok {
-		_, _ = fmt.Fprintf(os.Stderr, "Skip pushing badges: the condition in the `if` section is not met (%s)\n", c.Push.If)
-		return false
+		return fmt.Errorf("the condition in the `if` section is not met (%s)\n", c.Push.If)
 	}
-	return true
+	return nil
 }
 
-func (c *Config) CommentConfigReady() bool {
-	if c.Comment == nil || !c.Comment.Enable {
-		return false
+func (c *Config) CommentConfigReady() error {
+	if c.Comment == nil {
+		return errors.New("comment: not set")
 	}
-	return true
+	if !c.Comment.Enable {
+		return errors.New("comment.enable: is false")
+	}
+	return nil
 }
 
 func (c *Config) CoverageBadgeConfigReady() error {
 	if err := c.CoverageConfigReady(); err != nil {
 		return err
 	}
-	if c.Coverage.Badge.Path != "" {
+	if c.Coverage.Badge.Path == "" {
 		return errors.New("coverage.badge.path: not set")
 	}
 	return nil
@@ -73,7 +79,7 @@ func (c *Config) CodeToTestRatioBadgeConfigReady() error {
 	if err := c.CodeToTestRatioConfigReady(); err != nil {
 		return err
 	}
-	if c.CodeToTestRatio.Badge.Path != "" {
+	if c.CodeToTestRatio.Badge.Path == "" {
 		return errors.New("codeToTestRatio.badge.path: not set")
 	}
 	return nil
@@ -83,7 +89,7 @@ func (c *Config) TestExecutionTimeBadgeConfigReady() error {
 	if err := c.TestExecutionTimeConfigReady(); err != nil {
 		return err
 	}
-	if c.TestExecutionTime.Badge.Path != "" {
+	if c.TestExecutionTime.Badge.Path == "" {
 		return errors.New("testExecutionTime.badge.path: not set")
 	}
 	return nil
@@ -125,16 +131,22 @@ func (c *Config) CentralPushConfigReady() error {
 	return nil
 }
 
-func (c *Config) DiffConfigReady() bool {
-	return (c.Diff != nil && (c.Diff.Path != "" || len(c.Diff.Datastores) > 0))
+func (c *Config) DiffConfigReady() error {
+	if c.Diff == nil {
+		return errors.New("diff: not set")
+	}
+	if c.Diff.Path == "" && len(c.Diff.Datastores) == 0 {
+		return errors.New("diff.path: and diff.datastores: are not set")
+	}
+	return nil
 }
 
 func (c *Config) ReportConfigReady() error {
 	if c.Report == nil {
 		return errors.New("report: not set")
 	}
-	if !c.ReportConfigTargetReady() {
-		return errors.New("report.datastores and report.path are not set")
+	if err := c.ReportConfigTargetReady(); err != nil {
+		return err
 	}
 	ok, err := CheckIf(c.Report.If)
 	if err != nil {
@@ -146,6 +158,12 @@ func (c *Config) ReportConfigReady() error {
 	return nil
 }
 
-func (c *Config) ReportConfigTargetReady() bool {
-	return (c.Report != nil && (c.Report.Path != "" || len(c.Report.Datastores) > 0))
+func (c *Config) ReportConfigTargetReady() error {
+	if c.Report == nil {
+		return errors.New("report: not set")
+	}
+	if c.Report.Path == "" && len(c.Report.Datastores) == 0 {
+		return errors.New("report.datastores: and report.path: are not set")
+	}
+	return nil
 }
