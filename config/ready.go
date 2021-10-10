@@ -7,27 +7,27 @@ import (
 
 func (c *Config) CoverageConfigReady() error {
 	if c.Coverage == nil {
-		return errors.New("coverage: not set")
+		return errors.New("coverage: is not set")
 	}
 	if c.Coverage.Path == "" {
-		return errors.New("coverage.path: not set")
+		return errors.New("coverage.path: is not set")
 	}
 	return nil
 }
 
 func (c *Config) CodeToTestRatioConfigReady() error {
 	if c.CodeToTestRatio == nil {
-		return errors.New("codeToTestRatio: not set")
+		return errors.New("codeToTestRatio: is not set")
 	}
 	if len(c.CodeToTestRatio.Test) == 0 {
-		return errors.New("codeToTestRatio.test: not set")
+		return errors.New("codeToTestRatio.test: is not set")
 	}
 	return nil
 }
 
 func (c *Config) TestExecutionTimeConfigReady() error {
 	if c.TestExecutionTime == nil {
-		return errors.New("testExecutionTime: not set")
+		return errors.New("testExecutionTime: is not set")
 	}
 	if err := c.CoverageConfigReady(); err != nil && len(c.TestExecutionTime.Steps) == 0 {
 		return err
@@ -37,7 +37,7 @@ func (c *Config) TestExecutionTimeConfigReady() error {
 
 func (c *Config) PushConfigReady() error {
 	if c.Push == nil {
-		return errors.New("push: not set")
+		return errors.New("push: is not set")
 	}
 	if !c.Push.Enable {
 		return errors.New("push.enable: is false")
@@ -57,7 +57,7 @@ func (c *Config) PushConfigReady() error {
 
 func (c *Config) CommentConfigReady() error {
 	if c.Comment == nil {
-		return errors.New("comment: not set")
+		return errors.New("comment: is not set")
 	}
 	if !c.Comment.Enable {
 		return errors.New("comment.enable: is false")
@@ -70,7 +70,7 @@ func (c *Config) CoverageBadgeConfigReady() error {
 		return err
 	}
 	if c.Coverage.Badge.Path == "" {
-		return errors.New("coverage.badge.path: not set")
+		return errors.New("coverage.badge.path: is not set")
 	}
 	return nil
 }
@@ -80,7 +80,7 @@ func (c *Config) CodeToTestRatioBadgeConfigReady() error {
 		return err
 	}
 	if c.CodeToTestRatio.Badge.Path == "" {
-		return errors.New("codeToTestRatio.badge.path: not set")
+		return errors.New("codeToTestRatio.badge.path: is not set")
 	}
 	return nil
 }
@@ -90,14 +90,14 @@ func (c *Config) TestExecutionTimeBadgeConfigReady() error {
 		return err
 	}
 	if c.TestExecutionTime.Badge.Path == "" {
-		return errors.New("testExecutionTime.badge.path: not set")
+		return errors.New("testExecutionTime.badge.path: is not set")
 	}
 	return nil
 }
 
 func (c *Config) CentralConfigReady() error {
 	if c.Central == nil {
-		return errors.New("central: not set")
+		return errors.New("central: is not set")
 	}
 	if !c.Central.Enable {
 		return errors.New("central.enable: is false")
@@ -133,7 +133,7 @@ func (c *Config) CentralPushConfigReady() error {
 
 func (c *Config) DiffConfigReady() error {
 	if c.Diff == nil {
-		return errors.New("diff: not set")
+		return errors.New("diff: is not set")
 	}
 	if c.Diff.Path == "" && len(c.Diff.Datastores) == 0 {
 		return errors.New("diff.path: and diff.datastores: are not set")
@@ -143,7 +143,7 @@ func (c *Config) DiffConfigReady() error {
 
 func (c *Config) ReportConfigReady() error {
 	if c.Report == nil {
-		return errors.New("report: not set")
+		return errors.New("report: is not set")
 	}
 	if err := c.ReportConfigTargetReady(); err != nil {
 		return err
@@ -160,7 +160,7 @@ func (c *Config) ReportConfigReady() error {
 
 func (c *Config) ReportConfigTargetReady() error {
 	if c.Report == nil {
-		return errors.New("report: not set")
+		return errors.New("report: is not set")
 	}
 	if c.Report.Path == "" && len(c.Report.Datastores) == 0 {
 		return errors.New("report.datastores: and report.path: are not set")
