@@ -51,7 +51,9 @@ var dumpCmd = &cobra.Command{
 			return err
 		}
 
-		if c.CoverageConfigReady() {
+		if err := c.CoverageConfigReady(); err != nil {
+			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
+		} else {
 			path := c.Coverage.Path
 			if reportPath != "" {
 				path = reportPath
@@ -61,13 +63,17 @@ var dumpCmd = &cobra.Command{
 			}
 		}
 
-		if c.CodeToTestRatioConfigReady() {
+		if err := c.CodeToTestRatioConfigReady(); err != nil {
+			cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
+		} else {
 			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 				cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
 			}
 		}
 
-		if c.TestExecutionTimeConfigReady() {
+		if err := c.TestExecutionTimeConfigReady(); err != nil {
+			cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
+		} else {
 			stepNames := []string{}
 			if len(c.TestExecutionTime.Steps) > 0 {
 				stepNames = c.TestExecutionTime.Steps
