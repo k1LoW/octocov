@@ -11,11 +11,68 @@ Key features of `octocov` are:
 - **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
 - **[Have a mechanism to aggregate reports from multiple repositories](#store-report-to-central-datastore).**
 
+## Getting Started
+
+### On GitHub Actions
+
 **:octocat: GitHub Actions for octocov is [here](https://github.com/k1LoW/octocov-action) !!**
 
-## Usage
+First, run test with [coverage report output](#supported-coverage-report-formats).
 
-First, run test with coverage report output.
+For example, in case of Go language, add `-coverprofile=coverage.out` option as follows
+
+``` console
+$ go test ./... -coverprofile=coverage.out
+```
+Add `.octocov.yml` ( or `octocov.yml` ) file to your repository.
+
+``` yaml
+# .octocov.yml
+coverage:
+  path: coverage.out
+codeToTestRatio:
+  code:
+    - '**/*.go'
+    - '!**/*_test.go'
+  test:
+    - '**/*_test.go'
+comment:
+  enable: true
+```
+
+And set up a workflow file as follows and run octocov on GitHub Actions.
+
+``` yaml
+# .github/workflows/ci.yml
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        uses: actions/checkout@v2
+      -
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      -
+        name: Run tests with coverage report output
+        run: go test ./... -coverprofile=coverage.out
+      -
+        uses: k1LoW/octocov-action@v0
+```
+
+Then, octocov comment the report of the code metrics to the pull request.
+
+![comment](docs/comment.png)
+
+### On Terminal
+
+octocov acts as a code metrics viewer on the terminal.
 
 For example, in case of Go language, add `-coverprofile=coverage.out` option as follows
 
@@ -23,11 +80,11 @@ For example, in case of Go language, add `-coverprofile=coverage.out` option as 
 $ go test ./... -coverprofile=coverage.out
 ```
 
-Add `.octocov.yml` ( or `octocov.yml` ) file to your repository, and run `octocov`
+And run `octocov ls-files` , `octocov view [FILE...]` and `octocov diff [REPORT_A] [REPORT_B]`
 
-``` console
-$ octocov
-```
+![term](docs/term.svg)
+
+## Usage example
 
 ### Comment report to pull request
 
@@ -221,9 +278,11 @@ central:
 
 ### View code coverage report of file
 
+`octocov ls-files` command can be used to list files logged in code coverage report.
+
 `octocov view` (alias: `octocov cat`) command can be used to view the file coverage report.
 
-![view](docs/view.svg)
+![term](docs/term.svg)
 
 ## Configuration
 
