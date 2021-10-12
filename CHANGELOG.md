@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.21.1](https://github.com/k1LoW/octocov/compare/v0.21.0...v0.21.1) (2021-10-12)
+
+* Fix nil pointer dereference when no code coverage metrics [#79](https://github.com/k1LoW/octocov/pull/79) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.21.0](https://github.com/k1LoW/octocov/compare/v0.20.1...v0.21.0) (2021-10-11)
 
 * Add Getting Started [#78](https://github.com/k1LoW/octocov/pull/78) ([k1LoW](https://github.com/k1LoW))
