@@ -251,6 +251,7 @@ func (r *Report) MeasureCoverage(path string) error {
 		if err == nil && rel != "" {
 			f.File = rel
 		}
+		f.File = strings.TrimPrefix(f.File, "./")
 	}
 	r.Coverage = cov
 	r.rp = rp
