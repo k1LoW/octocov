@@ -373,7 +373,9 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, rp)
 			}
-			r.Coverage.FlushBlockCoverages()
+			if r.Coverage != nil {
+				r.Coverage.FlushBlockCoverages()
+			}
 			datastores := []datastore.Datastore{}
 			for _, s := range c.Report.Datastores {
 				d, err := datastore.New(ctx, s, c.Root())
