@@ -85,15 +85,17 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		p, err := r.Coverage.Files.PathPrefix()
-		if err != nil {
-			return err
-		}
-		prefix := fmt.Sprintf("%s/", filepath.Join(p, rel))
+		rel2 := filepath.Clean(rel)
 		for _, f := range r.Coverage.Files {
-			if !strings.HasPrefix(f.File, prefix) {
+			p := filepath.Clean(f.File)
+			rel, err := filepath.Rel(rel2, f.File)
+			if err != nil {
 				continue
 			}
+			if strings.Contains(rel, "..") {
+				continue
+			}
+			p = filepath.Clean(rel)
 			cover := float64(f.Covered) / float64(f.Total) * 100
 			if f.Total == 0 {
 				cover = 0.0
@@ -104,7 +106,7 @@ var lsFilesCmd = &cobra.Command{
 				return err
 			}
 			w := len(strconv.Itoa(t))*2 + 1
-			cmd.Printf("%s [%s] %s\n", c.Sprint(fmt.Sprintf("%5s%%", fmt.Sprintf("%.1f", cover))), fmt.Sprintf(fmt.Sprintf("%%%ds", w), fmt.Sprintf("%d/%d", f.Covered, f.Total)), strings.TrimPrefix(f.File, prefix))
+			cmd.Printf("%s [%s] %s\n", c.Sprint(fmt.Sprintf("%5s%%", fmt.Sprintf("%.1f", cover))), fmt.Sprintf(fmt.Sprintf("%%%ds", w), fmt.Sprintf("%d/%d", f.Covered, f.Total)), p)
 		}
 
 		return nil
