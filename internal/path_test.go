@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestTraverseGitPath(t *testing.T) {
+func TestGetRootPath(t *testing.T) {
 	dir := t.TempDir()
 	if err := os.MkdirAll(filepath.Join(dir, "a", "b", "c", "d"), 0700); err != nil {
 		t.Fatal(err)
@@ -30,7 +30,7 @@ func TestTraverseGitPath(t *testing.T) {
 		{filepath.Join(dir, "a"), true},
 	}
 	for _, tt := range tests {
-		got, err := TraverseGitPath(tt.base)
+		got, err := GetRootPath(tt.base)
 		if err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
