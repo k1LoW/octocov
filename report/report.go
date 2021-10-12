@@ -98,6 +98,7 @@ func (r *Report) Table() string {
 	table := tablewriter.NewWriter(buf)
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.Append(m)
@@ -109,6 +110,7 @@ func (r *Report) Out(w io.Writer) error {
 	table := tablewriter.NewWriter(w)
 	table.SetHeader([]string{"", makeHeadTitle(r.Ref, r.Commit, r.rp)})
 	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
 	table.SetCenterSeparator("")
 	table.SetColumnSeparator("")
 	table.SetRowSeparator("-")
@@ -181,6 +183,7 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	h := []string{"Files", "Coverage"}
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	for _, v := range rows {

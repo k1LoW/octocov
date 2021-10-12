@@ -41,6 +41,7 @@ type DiffTestExecutionTime struct {
 func (d *DiffReport) Out(w io.Writer) {
 	table := tablewriter.NewWriter(w)
 	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
 	table.SetCenterSeparator("")
 	table.SetColumnSeparator("")
 	table.SetRowSeparator("-")
@@ -64,6 +65,7 @@ func (d *DiffReport) Table() string {
 	buf := new(bytes.Buffer)
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
@@ -294,6 +296,7 @@ func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	h := []string{"Files", "Coverage", "+/-"}
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	for _, v := range rows {
