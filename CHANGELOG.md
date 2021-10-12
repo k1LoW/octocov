@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.21.0](https://github.com/k1LoW/octocov/compare/v0.20.1...v0.21.0) (2021-10-11)
+
+* Add Getting Started [#78](https://github.com/k1LoW/octocov/pull/78) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Fix config [#77](https://github.com/k1LoW/octocov/pull/77) ([k1LoW](https://github.com/k1LoW))
+* Fix ls-files file detection [#76](https://github.com/k1LoW/octocov/pull/76) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Change each file path in the coverage report to be relative to git root [#75](https://github.com/k1LoW/octocov/pull/75) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.20.1](https://github.com/k1LoW/octocov/compare/v0.20.0...v0.20.1) (2021-09-27)
 
 * Fix: panic: assignment to entry in nil map [#74](https://github.com/k1LoW/octocov/pull/74) ([k1LoW](https://github.com/k1LoW))
