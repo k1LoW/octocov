@@ -65,6 +65,6 @@ func (c *Config) Build() {
 	// Diff
 
 	// GitRoot
-	gitRoot, _ := internal.TraverseGitPath(c.Root())
+	gitRoot, _ := internal.GetRootPath(c.Root())
 	c.GitRoot = gitRoot
 }

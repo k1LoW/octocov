@@ -238,7 +238,7 @@ func (r *Report) MeasureCoverage(path string) error {
 		r.rp = path
 		return nil
 	}
-	gitRoot, err := internal.TraverseGitPath(path)
+	gitRoot, err := internal.GetRootPath(path)
 	if err != nil {
 		return err
 	}

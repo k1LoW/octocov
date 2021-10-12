@@ -77,7 +77,7 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		gitRoot, err := internal.TraverseGitPath(wd)
+		gitRoot, err := internal.GetRootPath(wd)
 		if err != nil {
 			return err
 		}
