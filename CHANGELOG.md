@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.22.1](https://github.com/k1LoW/octocov/compare/v0.22.0...v0.22.1) (2021-10-12)
+
+* Fix file path relativization process of coverage [#82](https://github.com/k1LoW/octocov/pull/82) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.22.0](https://github.com/k1LoW/octocov/compare/v0.21.1...v0.22.0) (2021-10-12)
 
 * Fix markdown table when long branch name [#81](https://github.com/k1LoW/octocov/pull/81) ([k1LoW](https://github.com/k1LoW))
