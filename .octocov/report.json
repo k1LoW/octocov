@@ -1,12 +1,12 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "8ff3e0032c7879e534899cf01b76f5ddf1df5cfd",
+  "commit": "931a26a457ba7ab0bb76ecebc6e735179c570ea2",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
-    "total": 1390,
-    "covered": 921,
+    "total": 1392,
+    "covered": 922,
     "files": [
       {
         "file": "github.com/k1LoW/octocov/central/central.go",
@@ -317,7 +317,7 @@
             "end_line": 120,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 23
+            "count": 20
           },
           {
             "type": "statement",
@@ -2844,122 +2844,140 @@
       },
       {
         "file": "github.com/k1LoW/octocov/internal/path.go",
-        "total": 17,
-        "covered": 13,
+        "total": 19,
+        "covered": 14,
         "blocks": [
           {
             "type": "statement",
-            "start_line": 9,
-            "start_col": 51,
-            "end_line": 11,
+            "start_line": 10,
+            "start_col": 47,
+            "end_line": 12,
             "end_col": 16,
             "num_stmt": 2,
             "count": 4
           },
           {
             "type": "statement",
-            "start_line": 11,
+            "start_line": 12,
             "start_col": 16,
-            "end_line": 13,
+            "end_line": 14,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 14,
+            "start_line": 15,
             "start_col": 2,
-            "end_line": 14,
+            "end_line": 15,
+            "end_col": 96,
+            "num_stmt": 1,
+            "count": 4
+          },
+          {
+            "type": "statement",
+            "start_line": 15,
+            "start_col": 96,
+            "end_line": 17,
+            "end_col": 3,
+            "num_stmt": 1,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 18,
+            "start_col": 2,
+            "end_line": 18,
             "end_col": 6,
             "num_stmt": 1,
             "count": 4
           },
           {
             "type": "statement",
-            "start_line": 14,
+            "start_line": 18,
             "start_col": 6,
-            "end_line": 16,
+            "end_line": 20,
             "end_col": 17,
             "num_stmt": 2,
             "count": 11
           },
           {
             "type": "statement",
-            "start_line": 16,
+            "start_line": 20,
             "start_col": 17,
-            "end_line": 18,
+            "end_line": 22,
             "end_col": 4,
             "num_stmt": 1,
-            "count": 0
-          },
-          {
-            "type": "statement",
-            "start_line": 19,
-            "start_col": 3,
-            "end_line": 19,
-            "end_col": 18,
-            "num_stmt": 1,
-            "count": 11
-          },
-          {
-            "type": "statement",
-            "start_line": 19,
-            "start_col": 18,
-            "end_line": 21,
-            "end_col": 12,
-            "num_stmt": 2,
             "count": 0
           },
           {
             "type": "statement",
             "start_line": 23,
             "start_col": 3,
-            "end_line": 24,
+            "end_line": 23,
+            "end_col": 18,
+            "num_stmt": 1,
+            "count": 11
+          },
+          {
+            "type": "statement",
+            "start_line": 23,
+            "start_col": 18,
+            "end_line": 25,
+            "end_col": 12,
+            "num_stmt": 2,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 27,
+            "start_col": 3,
+            "end_line": 28,
             "end_col": 63,
             "num_stmt": 2,
             "count": 11
           },
           {
             "type": "statement",
-            "start_line": 24,
+            "start_line": 28,
             "start_col": 63,
-            "end_line": 26,
+            "end_line": 30,
             "end_col": 4,
             "num_stmt": 1,
             "count": 3
           },
           {
             "type": "statement",
-            "start_line": 27,
+            "start_line": 31,
             "start_col": 3,
-            "end_line": 27,
+            "end_line": 31,
             "end_col": 15,
             "num_stmt": 1,
             "count": 8
           },
           {
             "type": "statement",
-            "start_line": 27,
+            "start_line": 31,
             "start_col": 15,
-            "end_line": 28,
+            "end_line": 32,
             "end_col": 9,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 30,
+            "start_line": 34,
             "start_col": 3,
-            "end_line": 30,
+            "end_line": 34,
             "end_col": 22,
             "num_stmt": 1,
             "count": 7
           },
           {
             "type": "statement",
-            "start_line": 32,
+            "start_line": 36,
             "start_col": 2,
-            "end_line": 32,
+            "end_line": 36,
             "end_col": 73,
             "num_stmt": 1,
             "count": 1
@@ -8419,9 +8437,9 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 4358,
+    "code": 4362,
     "test": 1342
   },
-  "test_execution_time": 23000000000,
-  "timestamp": "2021-10-12T08:58:07.434547835Z"
+  "test_execution_time": 24000000000,
+  "timestamp": "2021-10-12T09:12:29.064896166Z"
 }
