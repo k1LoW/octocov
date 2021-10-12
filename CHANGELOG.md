@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.22.0](https://github.com/k1LoW/octocov/compare/v0.21.1...v0.22.0) (2021-10-12)
+
+* Fix markdown table when long branch name [#81](https://github.com/k1LoW/octocov/pull/81) ([k1LoW](https://github.com/k1LoW))
+* Detect root path using env `GITHUB_WORKSPACE` [#80](https://github.com/k1LoW/octocov/pull/80) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.21.1](https://github.com/k1LoW/octocov/compare/v0.21.0...v0.21.1) (2021-10-12)
 
 * Fix nil pointer dereference when no code coverage metrics [#79](https://github.com/k1LoW/octocov/pull/79) ([k1LoW](https://github.com/k1LoW))
