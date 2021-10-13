@@ -81,13 +81,12 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		rel, err := filepath.Rel(gitRoot, wd)
+		rrel, err := filepath.Rel(gitRoot, wd)
 		if err != nil {
 			return err
 		}
-		rel2 := filepath.Clean(rel)
 		for _, f := range r.Coverage.Files {
-			rel, err := filepath.Rel(rel2, filepath.Clean(f.File))
+			rel, err := filepath.Rel(rrel, filepath.Clean(f.File))
 			if err != nil {
 				continue
 			}
