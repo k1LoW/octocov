@@ -87,15 +87,14 @@ var lsFilesCmd = &cobra.Command{
 		}
 		rel2 := filepath.Clean(rel)
 		for _, f := range r.Coverage.Files {
-			p := filepath.Clean(f.File)
-			rel, err := filepath.Rel(rel2, f.File)
+			rel, err := filepath.Rel(rel2, filepath.Clean(f.File))
 			if err != nil {
 				continue
 			}
 			if strings.Contains(rel, "..") {
 				continue
 			}
-			p = filepath.Clean(rel)
+			p := filepath.Clean(rel)
 			cover := float64(f.Covered) / float64(f.Total) * 100
 			if f.Total == 0 {
 				cover = 0.0
