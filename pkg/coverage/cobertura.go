@@ -3,7 +3,6 @@ package coverage
 import (
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -83,7 +82,7 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	b, err := ioutil.ReadFile(filepath.Clean(rp))
+	b, err := os.ReadFile(filepath.Clean(rp))
 	if err != nil {
 		return nil, "", err
 	}
@@ -102,7 +101,7 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	flm := map[string]BlockCoverages{}
 	for _, p := range r.Packages.Package {
 		for _, c := range p.Classes.Class {
-			n := filepath.Join(p.Name, c.Filename)
+			n := c.Filename
 			f, ok := flm[n]
 			if !ok {
 				f = BlockCoverages{}
