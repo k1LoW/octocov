@@ -63,6 +63,8 @@ func TestDetectPrefix(t *testing.T) {
 		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"/path/to/foo/file.txt"}, "/path/to"},
 		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"/path/to/bar/foo/file.txt"}, "/path/to/bar"},
 		{"/path/to", "/path/to/foo", []string{"/path/to/foo/file.txt"}, []string{"/path/to/bar/foo/file.txt"}, "/path/to/bar/foo"},
+		{"/path/to", "/path/to/foo", []string{"/path/to/foo/file.txt"}, []string{"./foo/file.txt"}, "foo"},
+		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"./foo/file.txt"}, ""},
 	}
 	for _, tt := range tests {
 		got := DetectPrefix(tt.gitRoot, tt.wd, tt.files, tt.cfiles)
