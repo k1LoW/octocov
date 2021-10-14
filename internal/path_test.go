@@ -45,3 +45,29 @@ func TestGetRootPath(t *testing.T) {
 		}
 	}
 }
+
+func TestDetectPrefix(t *testing.T) {
+	tests := []struct {
+		gitRoot string
+		wd      string
+		files   []string
+		cfiles  []string
+		want    string
+	}{
+		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"github.com/owner/repo/foo/file.txt"}, "github.com/owner/repo"},
+		{"/path/to", "/path/to/foo", []string{"/path/to/foo/file.txt"}, []string{"github.com/owner/repo/foo/file.txt"}, "github.com/owner/repo/foo"},
+		{"/path/to", "/path/to/bar", []string{"/path/to/foo/file.txt"}, []string{"github.com/owner/repo/foo/file.txt"}, "github.com/owner/repo/bar"},
+		{"/path/to", "/path/to", []string{"/path/to/central/central.go"}, []string{"github.com/owner/repo/central/central.go"}, "github.com/owner/repo"},
+		{"/path/to/github.com/owner/repo", "/path/to/github.com/owner/repo", []string{"/path/to/github.com/owner/repo/central/central.go"}, []string{"github.com/owner/repo/central/central.go"}, "github.com/owner/repo"},
+		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"/other/to/foo/file.txt"}, "/other/to"},
+		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"/path/to/foo/file.txt"}, "/path/to"},
+		{"/path/to", "/path/to", []string{"/path/to/foo/file.txt"}, []string{"/path/to/bar/foo/file.txt"}, "/path/to/bar"},
+		{"/path/to", "/path/to/foo", []string{"/path/to/foo/file.txt"}, []string{"/path/to/bar/foo/file.txt"}, "/path/to/bar/foo"},
+	}
+	for _, tt := range tests {
+		got := DetectPrefix(tt.gitRoot, tt.wd, tt.files, tt.cfiles)
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}

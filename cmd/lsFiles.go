@@ -81,19 +81,35 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		rrel, err := filepath.Rel(gitRoot, wd)
-		if err != nil {
+		cfiles := []string{}
+		for _, f := range r.Coverage.Files {
+			cfiles = append(cfiles, f.File)
+		}
+		files := []string{}
+		if err := filepath.Walk(gitRoot, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+			if info.IsDir() && strings.Contains(path, ".git/") {
+				return filepath.SkipDir
+			}
+			if !info.IsDir() && !strings.Contains(path, ".git/") {
+				files = append(files, path)
+			}
+			return nil
+		}); err != nil {
 			return err
 		}
+		sort.Slice(files, func(i int, j int) bool {
+			return files[i] < files[j]
+		})
+
+		prefix := internal.DetectPrefix(gitRoot, wd, files, cfiles)
 		for _, f := range r.Coverage.Files {
-			rel, err := filepath.Rel(rrel, filepath.Clean(f.File))
-			if err != nil {
+			if !strings.HasPrefix(f.File, prefix) {
 				continue
 			}
-			if strings.Contains(rel, "..") {
-				continue
-			}
-			p := filepath.Clean(rel)
+			p := strings.TrimPrefix(strings.TrimPrefix(f.File, prefix), "/")
 			cover := float64(f.Covered) / float64(f.Total) * 100
 			if f.Total == 0 {
 				cover = 0.0
