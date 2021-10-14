@@ -81,7 +81,6 @@ func DetectPrefix(gitRoot, wd string, files, cfiles []string) string {
 
 				if len(fp) < len(gitRoot) {
 					cfp = filepath.Join(cfp, strings.TrimPrefix(gitRoot, fp))
-					fp = gitRoot
 				}
 
 				return filepath.Join(cfp, strings.TrimPrefix(wd, gitRoot))
