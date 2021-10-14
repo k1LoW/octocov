@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.23.0](https://github.com/k1LoW/octocov/compare/v0.22.2...v0.23.0) (2021-10-14)
+
+* [BREAKING] Fix handle coverage file path [#85](https://github.com/k1LoW/octocov/pull/85) ([k1LoW](https://github.com/k1LoW))
+* Fix handle filepath of cobertura  [#84](https://github.com/k1LoW/octocov/pull/84) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.22.2](https://github.com/k1LoW/octocov/compare/v0.22.1...v0.22.2) (2021-10-13)
 
 * Fix ls-files path detection [#83](https://github.com/k1LoW/octocov/pull/83) ([k1LoW](https://github.com/k1LoW))
