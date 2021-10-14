@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.23.1](https://github.com/k1LoW/octocov/compare/v0.23.0...v0.23.1) (2021-10-14)
+
+* If the prefix is ".", convert it to "". [#86](https://github.com/k1LoW/octocov/pull/86) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.23.0](https://github.com/k1LoW/octocov/compare/v0.22.2...v0.23.0) (2021-10-14)
 
 * [BREAKING] Fix handle coverage file path [#85](https://github.com/k1LoW/octocov/pull/85) ([k1LoW](https://github.com/k1LoW))
