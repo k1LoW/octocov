@@ -83,7 +83,11 @@ func DetectPrefix(gitRoot, wd string, files, cfiles []string) string {
 					cfp = filepath.Join(cfp, strings.TrimPrefix(gitRoot, fp))
 				}
 
-				return filepath.Join(cfp, strings.TrimPrefix(wd, gitRoot))
+				prefix := filepath.Join(cfp, strings.TrimPrefix(wd, gitRoot))
+				if prefix == "." {
+					return ""
+				}
+				return prefix
 			}
 
 			for k := range rcfiles[i] {

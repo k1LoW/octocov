@@ -106,10 +106,11 @@ var lsFilesCmd = &cobra.Command{
 
 		prefix := internal.DetectPrefix(gitRoot, wd, files, cfiles)
 		for _, f := range r.Coverage.Files {
-			if !strings.HasPrefix(f.File, prefix) {
+			p := filepath.Clean(f.File)
+			if !strings.HasPrefix(p, prefix) {
 				continue
 			}
-			p := strings.TrimPrefix(strings.TrimPrefix(f.File, prefix), "/")
+			trimed := strings.TrimPrefix(strings.TrimPrefix(p, prefix), "/")
 			cover := float64(f.Covered) / float64(f.Total) * 100
 			if f.Total == 0 {
 				cover = 0.0
@@ -120,7 +121,7 @@ var lsFilesCmd = &cobra.Command{
 				return err
 			}
 			w := len(strconv.Itoa(t))*2 + 1
-			cmd.Printf("%s [%s] %s\n", c.Sprint(fmt.Sprintf("%5s%%", fmt.Sprintf("%.1f", cover))), fmt.Sprintf(fmt.Sprintf("%%%ds", w), fmt.Sprintf("%d/%d", f.Covered, f.Total)), p)
+			cmd.Printf("%s [%s] %s\n", c.Sprint(fmt.Sprintf("%5s%%", fmt.Sprintf("%.1f", cover))), fmt.Sprintf(fmt.Sprintf("%%%ds", w), fmt.Sprintf("%d/%d", f.Covered, f.Total)), trimed)
 		}
 
 		return nil
