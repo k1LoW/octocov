@@ -52,6 +52,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 		for fn, fc := range c.Coverage {
 			fcov := NewFileCoverage(fn)
 			for l, c := range fc.Lines {
+				ll := l + 1
 				switch v := c.(type) {
 				case float64:
 					fcov.Total += 1
@@ -59,10 +60,11 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 					if count > 0 {
 						fcov.Covered += 1
 					}
+
 					fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 						Type:      TypeLOC,
-						StartLine: &l,
-						EndLine:   &l,
+						StartLine: &ll,
+						EndLine:   &ll,
 						Count:     &count,
 					})
 				}
