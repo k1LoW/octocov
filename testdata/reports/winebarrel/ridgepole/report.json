@@ -9,7 +9,7 @@
     "covered": 1147,
     "files": [
       {
-        "file": "lib/ridgepole.rb",
+        "file": "./lib/ridgepole.rb",
         "total": 30,
         "covered": 30,
         "blocks": [
@@ -196,7 +196,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/cli/config.rb",
+        "file": "./lib/ridgepole/cli/config.rb",
         "total": 39,
         "covered": 32,
         "blocks": [
@@ -437,7 +437,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/client.rb",
+        "file": "./lib/ridgepole/client.rb",
         "total": 53,
         "covered": 52,
         "blocks": [
@@ -762,7 +762,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/connection_adapters.rb",
+        "file": "./lib/ridgepole/connection_adapters.rb",
         "total": 6,
         "covered": 6,
         "blocks": [
@@ -805,7 +805,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/default_limit.rb",
+        "file": "./lib/ridgepole/default_limit.rb",
         "total": 12,
         "covered": 11,
         "blocks": [
@@ -884,7 +884,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/delta.rb",
+        "file": "./lib/ridgepole/delta.rb",
         "total": 274,
         "covered": 266,
         "blocks": [
@@ -2535,7 +2535,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/diff.rb",
+        "file": "./lib/ridgepole/diff.rb",
         "total": 337,
         "covered": 325,
         "blocks": [
@@ -4564,7 +4564,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/dsl_parser.rb",
+        "file": "./lib/ridgepole/dsl_parser.rb",
         "total": 26,
         "covered": 26,
         "blocks": [
@@ -4727,7 +4727,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/dsl_parser/context.rb",
+        "file": "./lib/ridgepole/dsl_parser/context.rb",
         "total": 65,
         "covered": 62,
         "blocks": [
@@ -5124,7 +5124,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/dsl_parser/table_definition.rb",
+        "file": "./lib/ridgepole/dsl_parser/table_definition.rb",
         "total": 63,
         "covered": 63,
         "blocks": [
@@ -5509,7 +5509,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/dumper.rb",
+        "file": "./lib/ridgepole/dumper.rb",
         "total": 56,
         "covered": 56,
         "blocks": [
@@ -5852,7 +5852,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/execute_expander.rb",
+        "file": "./lib/ridgepole/execute_expander.rb",
         "total": 57,
         "covered": 53,
         "blocks": [
@@ -6201,7 +6201,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/ext/abstract_adapter/disable_table_options.rb",
+        "file": "./lib/ridgepole/ext/abstract_adapter/disable_table_options.rb",
         "total": 21,
         "covered": 21,
         "blocks": [
@@ -6334,7 +6334,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/ext/abstract_mysql_adapter/dump_auto_increment.rb",
+        "file": "./lib/ridgepole/ext/abstract_mysql_adapter/dump_auto_increment.rb",
         "total": 13,
         "covered": 10,
         "blocks": [
@@ -6419,7 +6419,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/ext/pp_sort_hash.rb",
+        "file": "./lib/ridgepole/ext/pp_sort_hash.rb",
         "total": 18,
         "covered": 18,
         "blocks": [
@@ -6534,7 +6534,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/ext/schema_dumper.rb",
+        "file": "./lib/ridgepole/ext/schema_dumper.rb",
         "total": 27,
         "covered": 27,
         "blocks": [
@@ -6703,7 +6703,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/external_sql_executer.rb",
+        "file": "./lib/ridgepole/external_sql_executer.rb",
         "total": 30,
         "covered": 24,
         "blocks": [
@@ -6890,7 +6890,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/logger.rb",
+        "file": "./lib/ridgepole/logger.rb",
         "total": 13,
         "covered": 11,
         "blocks": [
@@ -6975,7 +6975,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/migration_ext.rb",
+        "file": "./lib/ridgepole/migration_ext.rb",
         "total": 35,
         "covered": 35,
         "blocks": [
@@ -7192,7 +7192,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/schema_dumper_ext.rb",
+        "file": "./lib/ridgepole/schema_dumper_ext.rb",
         "total": 10,
         "covered": 10,
         "blocks": [
@@ -7259,7 +7259,7 @@
         ]
       },
       {
-        "file": "lib/ridgepole/schema_statements_ext.rb",
+        "file": "./lib/ridgepole/schema_statements_ext.rb",
         "total": 17,
         "covered": 9,
         "blocks": [
@@ -7373,5 +7373,5 @@
     "code": 1832,
     "test": 13924
   },
-  "timestamp": "2021-10-07T01:59:54.998085Z"
+  "timestamp": "2021-10-13T13:00:05.36342Z"
 }
