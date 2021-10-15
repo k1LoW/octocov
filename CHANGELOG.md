@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.23.2](https://github.com/k1LoW/octocov/compare/v0.23.1...v0.23.2) (2021-10-15)
+
+* Fix simplecov block line [#87](https://github.com/k1LoW/octocov/pull/87) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.23.1](https://github.com/k1LoW/octocov/compare/v0.23.0...v0.23.1) (2021-10-14)
 
 * If the prefix is ".", convert it to "". [#86](https://github.com/k1LoW/octocov/pull/86) ([k1LoW](https://github.com/k1LoW))
