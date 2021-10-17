@@ -78,7 +78,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
 			client, err = storage.NewClient(ctx, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"))))
 		} else {
-			client, err = storage.NewClient(ctx, nil)
+			client, err = storage.NewClient(ctx)
 		}
 		if err != nil {
 			return nil, err
