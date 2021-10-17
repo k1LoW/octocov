@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.23.3](https://github.com/k1LoW/octocov/compare/v0.23.2...v0.23.3) (2021-10-17)
+
+* Fix Cloud Storage (gcs) client creation using default application credentials [#88](https://github.com/k1LoW/octocov/pull/88) ([dragon3](https://github.com/dragon3))
+
 ## [v0.23.2](https://github.com/k1LoW/octocov/compare/v0.23.1...v0.23.2) (2021-10-15)
 
 * Fix simplecov block line [#87](https://github.com/k1LoW/octocov/pull/87) ([k1LoW](https://github.com/k1LoW))
