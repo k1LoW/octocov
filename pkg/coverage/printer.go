@@ -3,6 +3,7 @@ package coverage
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -12,6 +13,8 @@ import (
 	"github.com/spiegel-im-spiegel/gnkf/enc"
 	"github.com/spiegel-im-spiegel/gnkf/guess"
 )
+
+const maxSrcSize = 1073741824 //1GB
 
 type Printer struct {
 	fc *FileCoverage
@@ -25,7 +28,13 @@ func NewPrinter(fc *FileCoverage) *Printer {
 
 func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	dup := new(bytes.Buffer)
-	io.Copy(dup, src)
+	size, err := io.CopyN(dup, src, maxSrcSize)
+	if !errors.Is(err, io.EOF) {
+		return err
+	}
+	if size >= maxSrcSize {
+		return fmt.Errorf("too large file size to copy: %d >= %d", size, maxSrcSize)
+	}
 	b := dup.Bytes()
 	c := bytes.Count(b, []byte{'\n'})
 
