@@ -25,11 +25,10 @@ func NewPrinter(fc *FileCoverage) *Printer {
 
 func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	dup := new(bytes.Buffer)
+	io.Copy(dup, src)
+	b := dup.Bytes()
+	c := bytes.Count(b, []byte{'\n'})
 
-	c, err := countLines(io.TeeReader(src, dup))
-	if err != nil {
-		return err
-	}
 	w := len(strconv.Itoa(c))
 	c2 := 0
 	if p.fc != nil {
@@ -41,12 +40,12 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	}
 	w2 := len(strconv.Itoa(c2))
 
-	d, err := guess.EncodingBytes(dup.Bytes())
+	e, err := guess.EncodingBytes(b)
 	if err != nil {
 		return err
 	}
 	dup2 := new(bytes.Buffer)
-	if err := enc.Convert("UTF-8", dup2, d[0], dup); err != nil {
+	if err := enc.Convert("UTF-8", dup2, e[0], dup); err != nil {
 		return err
 	}
 
@@ -63,24 +62,6 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 		return err
 	}
 	return nil
-}
-
-func countLines(r io.Reader) (int, error) {
-	buf := make([]byte, 1024)
-	count := 0
-	sep := []byte{'\n'}
-
-	for {
-		n, err := r.Read(buf)
-		if err != nil {
-			if n == 0 && err == io.EOF {
-				err = nil
-			}
-			return count, err
-		}
-
-		count += bytes.Count(buf[:n], sep)
-	}
 }
 
 func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
