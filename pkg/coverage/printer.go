@@ -3,13 +3,18 @@ package coverage
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/spiegel-im-spiegel/gnkf/enc"
+	"github.com/spiegel-im-spiegel/gnkf/guess"
 )
+
+const maxSrcSize = 1073741824 //1GB
 
 type Printer struct {
 	fc *FileCoverage
@@ -22,13 +27,17 @@ func NewPrinter(fc *FileCoverage) *Printer {
 }
 
 func (p *Printer) Print(src io.Reader, dest io.Writer) error {
-	r2 := new(bytes.Buffer)
-	r1 := io.TeeReader(src, r2)
-
-	c, err := countLines(r1)
-	if err != nil {
+	dup := new(bytes.Buffer)
+	size, err := io.CopyN(dup, src, maxSrcSize)
+	if !errors.Is(err, io.EOF) {
 		return err
 	}
+	if size >= maxSrcSize {
+		return fmt.Errorf("too large file size to copy: %d >= %d", size, maxSrcSize)
+	}
+	b := dup.Bytes()
+	c := bytes.Count(b, []byte{'\n'})
+
 	w := len(strconv.Itoa(c))
 	c2 := 0
 	if p.fc != nil {
@@ -40,7 +49,16 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	}
 	w2 := len(strconv.Itoa(c2))
 
-	scanner := bufio.NewScanner(r2)
+	e, err := guess.EncodingBytes(b)
+	if err != nil {
+		return err
+	}
+	dup2 := new(bytes.Buffer)
+	if err := enc.Convert("UTF-8", dup2, e[0], dup); err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(dup2)
 	n := 1
 	cl := color.New(color.FgYellow)
 	cl.EnableColor()
@@ -53,24 +71,6 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 		return err
 	}
 	return nil
-}
-
-func countLines(r io.Reader) (int, error) {
-	buf := make([]byte, 1024)
-	count := 0
-	sep := []byte{'\n'}
-
-	for {
-		n, err := r.Read(buf)
-		if err != nil {
-			if n == 0 && err == io.EOF {
-				err = nil
-			}
-			return count, err
-		}
-
-		count += bytes.Count(buf[:n], sep)
-	}
 }
 
 func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {

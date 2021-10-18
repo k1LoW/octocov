@@ -28,8 +28,9 @@ require (
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.2.1
+	github.com/spiegel-im-spiegel/gnkf v0.6.4
 	golang.org/x/exp v0.0.0-20200224162631-6cc2880d07d6
-	golang.org/x/image v0.0.0-20190802002840-cff245a6509b
+	golang.org/x/image v0.0.0-20210220032944-ac19c3e999fb
 	golang.org/x/tools v0.1.5
 	google.golang.org/api v0.52.0
 )
