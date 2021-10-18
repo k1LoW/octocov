@@ -9,6 +9,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
+	"github.com/spiegel-im-spiegel/gnkf/enc"
+	"github.com/spiegel-im-spiegel/gnkf/guess"
 )
 
 type Printer struct {
@@ -22,10 +24,9 @@ func NewPrinter(fc *FileCoverage) *Printer {
 }
 
 func (p *Printer) Print(src io.Reader, dest io.Writer) error {
-	r2 := new(bytes.Buffer)
-	r1 := io.TeeReader(src, r2)
+	dup := new(bytes.Buffer)
 
-	c, err := countLines(r1)
+	c, err := countLines(io.TeeReader(src, dup))
 	if err != nil {
 		return err
 	}
@@ -40,7 +41,16 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	}
 	w2 := len(strconv.Itoa(c2))
 
-	scanner := bufio.NewScanner(r2)
+	d, err := guess.EncodingBytes(dup.Bytes())
+	if err != nil {
+		return err
+	}
+	dup2 := new(bytes.Buffer)
+	if err := enc.Convert("UTF-8", dup2, d[0], dup); err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(dup2)
 	n := 1
 	cl := color.New(color.FgYellow)
 	cl.EnableColor()
