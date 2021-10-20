@@ -50,7 +50,7 @@ func (c *Config) PushConfigReady() error {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("the condition in the `if` section is not met (%s)\n", c.Push.If)
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Push.If)
 	}
 	return nil
 }
@@ -126,7 +126,7 @@ func (c *Config) CentralPushConfigReady() error {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("the condition in the `if` section is not met (%s)\n", c.Push.If)
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Push.If)
 	}
 	return nil
 }
@@ -137,6 +137,13 @@ func (c *Config) DiffConfigReady() error {
 	}
 	if c.Diff.Path == "" && len(c.Diff.Datastores) == 0 {
 		return errors.New("diff.path: and diff.datastores: are not set")
+	}
+	ok, err := CheckIf(c.Diff.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Diff.If)
 	}
 	return nil
 }
@@ -153,7 +160,7 @@ func (c *Config) ReportConfigReady() error {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("the condition in the `if` section is not met (%s)\n", c.Report.If)
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Report.If)
 	}
 	return nil
 }
