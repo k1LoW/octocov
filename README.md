@@ -441,7 +441,7 @@ diff:
 
 ``` yaml
 diff:
-  path: .octocov/owner/repo/report.json
+  path: path/to/report.json
 ```
 
 ### `diff.datastores:`
@@ -453,6 +453,17 @@ diff:
   datastores:
     - local://.octocov       # Use .octocov/owner/repo/report.json
     - s3://my-bucket/reports # Use s3://my-bucket/reports/owner/repo/report.json
+```
+
+### `diff.if:`
+
+Conditions for comparing reports
+
+``` yaml
+# .octocov.yml
+report:
+  if: github.event_name == 'pull_request'
+  path: path/to/report.json
 ```
 
 ### `report:`
