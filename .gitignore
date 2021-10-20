@@ -8,3 +8,4 @@ octocov
 .DS_Store
 /.tmp/
 /*.cast
+.idea
