@@ -103,6 +103,7 @@ type ConfigComment struct {
 type ConfigDiff struct {
 	Path       string   `yaml:"path,omitempty"`
 	Datastores []string `yaml:"datastores,omitempty"`
+	If         string   `yaml:"if,omitempty"`
 }
 
 func New() *Config {
