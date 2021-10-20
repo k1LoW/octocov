@@ -184,7 +184,7 @@ func (c *Config) Acceptable(r *report.Report) error {
 			return err
 		}
 		if *r.TestExecutionTime > float64(a) {
-			return fmt.Errorf("test execution time is %v, which is below the accepted %v", time.Duration(*r.TestExecutionTime), a)
+			return fmt.Errorf("test execution time is %v, which is above the accepted %v", time.Duration(*r.TestExecutionTime), a)
 		}
 	}
 

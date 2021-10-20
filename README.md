@@ -175,7 +175,7 @@ testExecutionTime:
 
 ``` console
 $ octocov
-Error: test execution time is 1m15s, which is below the accepted 1m
+Error: test execution time is 1m15s, which is above the accepted 1m
 ```
 
 ### Generate report badges self.
