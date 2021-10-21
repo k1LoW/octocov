@@ -136,6 +136,405 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 	}
 }
 
+func TestPushConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{},
+			"push: is not set",
+		},
+		{
+			&Config{
+				Push: &ConfigPush{},
+			},
+			"push.enable: is false",
+		},
+		{
+			&Config{
+				Push: &ConfigPush{
+					Enable: true,
+				},
+			},
+			"failed to traverse the Git root path",
+		},
+		{
+			&Config{
+				GitRoot: "/path/to",
+				Push: &ConfigPush{
+					Enable: true,
+				},
+			},
+			"",
+		},
+		{
+			&Config{
+				GitRoot: "/path/to",
+				Push: &ConfigPush{
+					Enable: true,
+					If:     "false",
+				},
+			},
+			"the condition in the `if` section is not met (false)",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.PushConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestCommentConfigReady(t *testing.T) {
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{},
+			"comment: is not set",
+		},
+		{
+			&Config{
+				Comment: &ConfigComment{},
+			},
+			"comment.enable: is false",
+		},
+		{
+			&Config{
+				Comment: &ConfigComment{
+					Enable: true,
+				},
+			},
+			"",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.CommentConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestCoverageBadgeConfigReady(t *testing.T) {
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{
+				Coverage: &ConfigCoverage{
+					Path: "path/to/coverage.xml",
+				},
+			},
+			"coverage.badge.path: is not set",
+		},
+		{
+			&Config{
+				Coverage: &ConfigCoverage{
+					Path: "path/to/coverage.xml",
+					Badge: ConfigCoverageBadge{
+						Path: "path/to/coverage.svg",
+					},
+				},
+			},
+			"",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.CoverageBadgeConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestCodeToTestRatioBadgeConfigReady(t *testing.T) {
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{
+				CodeToTestRatio: &ConfigCodeToTestRatio{
+					Test: []string{
+						"**_test.go",
+					},
+				},
+			},
+			"codeToTestRatio.badge.path: is not set",
+		},
+		{
+			&Config{
+				CodeToTestRatio: &ConfigCodeToTestRatio{
+					Test: []string{
+						"**_test.go",
+					},
+					Badge: ConfigCodeToTestRatioBadge{
+						Path: "path/to/ratio.svg",
+					},
+				},
+			},
+			"",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.CodeToTestRatioBadgeConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestTestExecutionTimeBadgeConfigReady(t *testing.T) {
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{
+				TestExecutionTime: &ConfigTestExecutionTime{
+					Steps: []string{
+						"Run tests",
+					},
+				},
+			},
+			"testExecutionTime.badge.path: is not set",
+		},
+		{
+			&Config{
+				TestExecutionTime: &ConfigTestExecutionTime{
+					Steps: []string{
+						"Run tests",
+					},
+					Badge: ConfigTestExecutionTimeBadge{
+						Path: "path/to/time.svg",
+					},
+				},
+			},
+			"",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.TestExecutionTimeBadgeConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestCentralConfigReady(t *testing.T) {
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{},
+			"central: is not set",
+		},
+		{
+			&Config{
+				Central: &ConfigCentral{},
+			},
+			"central.enable: is false",
+		},
+		{
+			&Config{
+				Central: &ConfigCentral{
+					Enable: true,
+				},
+			},
+			"repository: not set (or env GITHUB_REPOSITORY is not set)",
+		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: true,
+				},
+			},
+			"central.reports.datastores is not set",
+		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: true,
+					Reports: ConfigCentralReports{
+						Datastores: []string{
+							"s3://bucket/reports",
+						},
+					},
+				},
+			},
+			"",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.CentralConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestCentralPushConfigReady(t *testing.T) {
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: true,
+					Reports: ConfigCentralReports{
+						Datastores: []string{
+							"s3://bucket/reports",
+						},
+					},
+				},
+			},
+			"central.puth.enable: is false",
+		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: true,
+					Reports: ConfigCentralReports{
+						Datastores: []string{
+							"s3://bucket/reports",
+						},
+					},
+					Push: ConfigPush{
+						Enable: true,
+					},
+				},
+			},
+			"failed to traverse the Git root path",
+		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: true,
+					Reports: ConfigCentralReports{
+						Datastores: []string{
+							"s3://bucket/reports",
+						},
+					},
+					Push: ConfigPush{
+						Enable: true,
+					},
+				},
+				GitRoot: "/path/to",
+			},
+			"",
+		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: true,
+					Reports: ConfigCentralReports{
+						Datastores: []string{
+							"s3://bucket/reports",
+						},
+					},
+					Push: ConfigPush{
+						Enable: true,
+						If:     "false",
+					},
+				},
+				GitRoot: "/path/to",
+			},
+			"the condition in the `if` section is not met (false)",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.CentralPushConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
 func TestDiffConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
@@ -173,6 +572,63 @@ func TestDiffConfigReady(t *testing.T) {
 	}
 	for _, tt := range tests {
 		err := tt.c.DiffConfigReady()
+		if err == nil && tt.want != "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want == "" {
+			t.Errorf("got %v\nwant %v", err, tt.want)
+			continue
+		}
+		if err != nil && tt.want != "" {
+			if got := err.Error(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		}
+	}
+}
+
+func TestReportConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	tests := []struct {
+		c    *Config
+		want string
+	}{
+		{
+			&Config{},
+			"report: is not set",
+		},
+		{
+			&Config{
+				Report: &ConfigReport{},
+			},
+			"report.datastores: and report.path: are not set",
+		},
+		{
+			&Config{
+				Report: &ConfigReport{
+					Datastores: []string{
+						"s3://bucket/reports",
+					},
+				},
+			},
+			"",
+		},
+		{
+			&Config{
+				Report: &ConfigReport{
+					Datastores: []string{
+						"s3://bucket/reports",
+					},
+					If: "false",
+				},
+			},
+			"the condition in the `if` section is not met (false)",
+		},
+	}
+	for _, tt := range tests {
+		err := tt.c.ReportConfigReady()
 		if err == nil && tt.want != "" {
 			t.Errorf("got %v\nwant %v", err, tt.want)
 			continue
