@@ -70,6 +70,8 @@ Then, octocov comment the report of the code metrics to the pull request.
 
 ![comment](docs/comment.png)
 
+**Notice:** Note that only pull requests opened from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
+
 ### On Terminal
 
 octocov acts as a code metrics viewer on the terminal.
