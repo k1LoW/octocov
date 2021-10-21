@@ -126,7 +126,7 @@ func (c *Config) CentralPushConfigReady() error {
 		return err
 	}
 	if !ok {
-		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Push.If)
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Central.Push.If)
 	}
 	return nil
 }
