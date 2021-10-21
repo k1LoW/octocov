@@ -149,9 +149,6 @@ func (c *Config) DiffConfigReady() error {
 }
 
 func (c *Config) ReportConfigReady() error {
-	if c.Report == nil {
-		return errors.New("report: is not set")
-	}
 	if err := c.ReportConfigTargetReady(); err != nil {
 		return err
 	}
