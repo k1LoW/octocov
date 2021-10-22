@@ -38,6 +38,7 @@ import (
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 	"github.com/k1LoW/octocov/version"
@@ -77,7 +78,7 @@ var rootCmd = &cobra.Command{
 			return createBQTable(ctx, c)
 		}
 
-		if c.Central != nil && c.Central.Enable {
+		if c.Central != nil && internal.IsEnable(c.Central.Enable) {
 			cmd.PrintErrln("Central mode enabled")
 			if err := c.CentralConfigReady(); err != nil {
 				return err

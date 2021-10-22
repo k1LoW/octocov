@@ -37,7 +37,6 @@ codeToTestRatio:
   test:
     - '**/*_test.go'
 comment:
-  enable: true
 ```
 
 And set up a workflow file as follows and run octocov on GitHub Actions.
@@ -97,7 +96,6 @@ By setting `comment:`, [comment the reports to pull request](https://github.com/
 ``` yaml
 # .octocov.yml
 comment:
-  enable: true
   hideFooterLink: false # hide octocov link
 ```
 
@@ -107,7 +105,6 @@ If you want to measure **"Code to Test Ratio"**, set `codeToTestRatio:`.
 
 ``` yaml
 comment:
-  enable: true
 codeToTestRatio:
   code:
     - '**/*.go'
@@ -120,7 +117,6 @@ By setting `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is po
 
 ``` yaml
 comment:
-  enable: true
 diff:
   datastores:
     - s3://bucket/reports
@@ -217,7 +213,7 @@ You can display the coverage badge without external communication by setting a l
 
 ### Push report badges self.
 
-By setting `push.enable:`, git push report badges self.
+By setting `push:`, git push report badges self.
 
 ``` yaml
 # .octocov.yml
@@ -225,7 +221,6 @@ coverage:
   badge:
     path: docs/coverage.svg
 push:
-  enable: true
 ```
 
 ### Store report to datastores
@@ -261,13 +256,11 @@ By enabling `central:`, `octocov` acts as a central repository for collecting re
 ``` yaml
 # .octocov.yml for central mode
 central:
-  enable: true
-  root:                    .             # root directory or index file path of collected coverage reports pages. default: .
+  root: .                                # root directory or index file path of collected coverage reports pages. default: .
   reports:
     - bq://my-project/my-dataset/reports # datastore paths (URLs) where reports are stored. default: local://reports
   badges: badges                         # directory where badges are generated. default: badges
-  push:
-    enable: true                         # enable self git push
+  push:                                  # enable self git push
 ```
 
 #### Supported datastores
@@ -399,11 +392,17 @@ Configuration for `git push` badges self.
 
 ### `push.enable:`
 
-Enable `git push`
+Enable / disable `git push`
 
 ``` yaml
 push:
-  enable: true
+  enable: false
+```
+
+It can be omitted if `enable: true` as follows.
+
+``` yaml
+push:
 ```
 
 ### `comment:`
@@ -412,11 +411,17 @@ Set this if want to comment report to pull request
 
 ### `comment.enable:`
 
-Enable comment.
+Enable / disable comment.
 
 ``` yaml
 comment:
   enable: true
+```
+
+It can be omitted if `enable: true` as follows.
+
+``` yaml
+comment:
 ```
 
 ### `comment.hideFooterLink:`
@@ -615,11 +620,17 @@ The variables available in the `if` section are as follows
 
 ### `central.enable:`
 
-Enable central mode.
+Enable / disable central mode.
 
 ``` yaml
 central:
-  enable: true
+  enable: false
+```
+
+It can be omitted if `enable: true` as follows.
+
+``` yaml
+central:
 ```
 
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
@@ -664,7 +675,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - local://reports
@@ -688,7 +698,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - s3://my-s3-bucket/reports
@@ -723,7 +732,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - gs://my-gcs-bucket/reports
@@ -757,7 +765,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - bq://my-project/my-dataset/reports
@@ -791,11 +798,17 @@ Configuration for `git push` index file and badges self.
 
 ### `central.push.enable:`
 
-Enable `git push`
+Enable / disable `git push`
 
 ``` yaml
 push:
   enable: true
+```
+
+It can be omitted if `enable: true` as follows.
+
+``` yaml
+push:
 ```
 
 ## Supported coverage report formats

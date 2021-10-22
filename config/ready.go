@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+
+	"github.com/k1LoW/octocov/internal"
 )
 
 func (c *Config) CoverageConfigReady() error {
@@ -39,7 +41,7 @@ func (c *Config) PushConfigReady() error {
 	if c.Push == nil {
 		return errors.New("push: is not set")
 	}
-	if !c.Push.Enable {
+	if !internal.IsEnable(c.Push.Enable) {
 		return errors.New("push.enable: is false")
 	}
 	if c.GitRoot == "" {
@@ -59,7 +61,7 @@ func (c *Config) CommentConfigReady() error {
 	if c.Comment == nil {
 		return errors.New("comment: is not set")
 	}
-	if !c.Comment.Enable {
+	if !internal.IsEnable(c.Comment.Enable) {
 		return errors.New("comment.enable: is false")
 	}
 	return nil
@@ -99,7 +101,7 @@ func (c *Config) CentralConfigReady() error {
 	if c.Central == nil {
 		return errors.New("central: is not set")
 	}
-	if !c.Central.Enable {
+	if !internal.IsEnable(c.Central.Enable) {
 		return errors.New("central.enable: is false")
 	}
 	if c.Repository == "" {
@@ -115,7 +117,10 @@ func (c *Config) CentralPushConfigReady() error {
 	if err := c.CentralConfigReady(); err != nil {
 		return err
 	}
-	if !c.Central.Push.Enable {
+	if c.Central.Push == nil {
+		return errors.New("central.push: is not set")
+	}
+	if !internal.IsEnable(c.Central.Push.Enable) {
 		return errors.New("central.puth.enable: is false")
 	}
 	if c.GitRoot == "" {

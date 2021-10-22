@@ -1,9 +1,7 @@
 central:
-  enable: true
   root: ../example/central
   reports:
     datastores:
       - local://reports
   badges: ../example/central/badges
   push:
-    enable: true
