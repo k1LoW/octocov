@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "7dfa4a7a6eabad452d57d75e74ee2c69852281cd",
+  "commit": "ea5d8f5e1f6f394be86f1d32c41ff8ca36ec9ea0",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -317,7 +317,7 @@
             "end_line": 120,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 12
+            "count": 15
           },
           {
             "type": "statement",
@@ -1015,7 +1015,7 @@
             "end_line": 114,
             "end_col": 2,
             "num_stmt": 2,
-            "count": 15
+            "count": 16
           },
           {
             "type": "statement",
@@ -1042,7 +1042,7 @@
             "end_line": 125,
             "end_col": 16,
             "num_stmt": 1,
-            "count": 4
+            "count": 5
           },
           {
             "type": "statement",
@@ -1096,7 +1096,7 @@
             "end_line": 135,
             "end_col": 16,
             "num_stmt": 1,
-            "count": 4
+            "count": 5
           },
           {
             "type": "statement",
@@ -1114,7 +1114,7 @@
             "end_line": 140,
             "end_col": 16,
             "num_stmt": 3,
-            "count": 3
+            "count": 4
           },
           {
             "type": "statement",
@@ -1132,7 +1132,7 @@
             "end_line": 143,
             "end_col": 74,
             "num_stmt": 1,
-            "count": 2
+            "count": 3
           },
           {
             "type": "statement",
@@ -1150,7 +1150,7 @@
             "end_line": 146,
             "end_col": 12,
             "num_stmt": 1,
-            "count": 2
+            "count": 3
           },
           {
             "type": "statement",
@@ -8706,8 +8706,8 @@
   },
   "code_to_test_ratio": {
     "code": 4455,
-    "test": 1401
+    "test": 1414
   },
-  "test_execution_time": 45000000000,
-  "timestamp": "2021-10-22T06:00:49.830964304Z"
+  "test_execution_time": 47000000000,
+  "timestamp": "2021-10-22T06:05:39.761424705Z"
 }
