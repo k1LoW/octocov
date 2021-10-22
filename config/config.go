@@ -96,8 +96,9 @@ type ConfigPush struct {
 }
 
 type ConfigComment struct {
-	Enable         *bool `yaml:"enable,omitempty"`
-	HideFooterLink bool  `yaml:"hideFooterLink"`
+	Enable         *bool  `yaml:"enable,omitempty"`
+	HideFooterLink bool   `yaml:"hideFooterLink"`
+	If             string `yaml:"if,omitempty"`
 }
 
 type ConfigDiff struct {

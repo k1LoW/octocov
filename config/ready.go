@@ -64,6 +64,13 @@ func (c *Config) CommentConfigReady() error {
 	if !internal.IsEnable(c.Comment.Enable) {
 		return errors.New("comment.enable: is false")
 	}
+	ok, err := CheckIf(c.Comment.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Comment.If)
+	}
 	return nil
 }
 
