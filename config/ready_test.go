@@ -202,6 +202,8 @@ func TestPushConfigReady(t *testing.T) {
 }
 
 func TestCommentConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
 		c    *Config
 		want string
@@ -223,6 +225,14 @@ func TestCommentConfigReady(t *testing.T) {
 				},
 			},
 			"",
+		},
+		{
+			&Config{
+				Comment: &ConfigComment{
+					If: "false",
+				},
+			},
+			"the condition in the `if` section is not met (false)",
 		},
 	}
 	for _, tt := range tests {
