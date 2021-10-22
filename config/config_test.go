@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
 	"github.com/k1LoW/octocov/report"
@@ -45,6 +46,19 @@ func TestLoad(t *testing.T) {
 				t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
 			}
 		}
+	}
+}
+
+func TestLoadConfigAndOmitEnableFlag(t *testing.T) {
+	wd := filepath.Join(testdataDir(t), "config")
+	p := ".octocov.yml"
+	c := New()
+	c.wd = wd
+	if err := c.Load(p); err != nil {
+		t.Fatal(err)
+	}
+	if !internal.IsEnable(c.Comment.Enable) {
+		t.Errorf("got %v\nwant true", *c.Comment.Enable)
 	}
 }
 

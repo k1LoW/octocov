@@ -2,3 +2,5 @@ coverage:
   acceptable: 75%
   badge:
     path: docs/coverage.svg
+comment:
+  hideFooterLink: false
