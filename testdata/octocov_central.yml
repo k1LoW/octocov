@@ -5,3 +5,4 @@ central:
       - local://reports
   badges: ../example/central/badges
   push:
+    enable: true

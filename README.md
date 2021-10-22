@@ -37,6 +37,7 @@ codeToTestRatio:
   test:
     - '**/*_test.go'
 comment:
+  enable: true
 ```
 
 And set up a workflow file as follows and run octocov on GitHub Actions.
@@ -96,6 +97,7 @@ By setting `comment:`, [comment the reports to pull request](https://github.com/
 ``` yaml
 # .octocov.yml
 comment:
+  enable: true
   hideFooterLink: false # hide octocov link
 ```
 
@@ -105,6 +107,7 @@ If you want to measure **"Code to Test Ratio"**, set `codeToTestRatio:`.
 
 ``` yaml
 comment:
+  enable: true
 codeToTestRatio:
   code:
     - '**/*.go'
@@ -117,6 +120,7 @@ By setting `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is po
 
 ``` yaml
 comment:
+  enable: true
 diff:
   datastores:
     - s3://bucket/reports
@@ -221,6 +225,7 @@ coverage:
   badge:
     path: docs/coverage.svg
 push:
+  enable: true
 ```
 
 ### Store report to datastores
@@ -256,11 +261,13 @@ By enabling `central:`, `octocov` acts as a central repository for collecting re
 ``` yaml
 # .octocov.yml for central mode
 central:
-  root: .                                # root directory or index file path of collected coverage reports pages. default: .
+  enable: true
+  root:                    .             # root directory or index file path of collected coverage reports pages. default: .
   reports:
     - bq://my-project/my-dataset/reports # datastore paths (URLs) where reports are stored. default: local://reports
   badges: badges                         # directory where badges are generated. default: badges
-  push:                                  # enable self git push
+  push:
+    enable: true                         # enable self git push
 ```
 
 #### Supported datastores
@@ -399,12 +406,6 @@ push:
   enable: false
 ```
 
-It can be omitted if `enable: true` as follows.
-
-``` yaml
-push:
-```
-
 ### `comment:`
 
 Set this if want to comment report to pull request
@@ -418,10 +419,11 @@ comment:
   enable: true
 ```
 
-It can be omitted if `enable: true` as follows.
+`enable: true` can be omitted if any other parameters are set as follows.
 
 ``` yaml
 comment:
+  hideFooterLink: true
 ```
 
 ### `comment.hideFooterLink:`
@@ -627,10 +629,14 @@ central:
   enable: false
 ```
 
-It can be omitted if `enable: true` as follows.
+`enable: true` can be omitted if any other parameters are set as follows.
 
 ``` yaml
 central:
+  reports:
+    datastores:
+      - local://reports
+      - gs://my-gcs-bucket/reports
 ```
 
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
@@ -803,12 +809,6 @@ Enable / disable `git push`
 ``` yaml
 push:
   enable: true
-```
-
-It can be omitted if `enable: true` as follows.
-
-``` yaml
-push:
 ```
 
 ## Supported coverage report formats

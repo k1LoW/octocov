@@ -19,6 +19,7 @@ diff:
 push:
   if: env.GITHUB_REF == 'refs/heads/main'
 comment:
+  enable: true
 report:
   if: env.GITHUB_REF == 'refs/heads/main'
   path: .octocov/report.json
