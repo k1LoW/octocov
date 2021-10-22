@@ -217,7 +217,7 @@ You can display the coverage badge without external communication by setting a l
 
 ### Push report badges self.
 
-By setting `push.enable:`, git push report badges self.
+By setting `push:`, git push report badges self.
 
 ``` yaml
 # .octocov.yml
@@ -399,11 +399,11 @@ Configuration for `git push` badges self.
 
 ### `push.enable:`
 
-Enable `git push`
+Enable / disable `git push`
 
 ``` yaml
 push:
-  enable: true
+  enable: false
 ```
 
 ### `comment:`
@@ -412,11 +412,18 @@ Set this if want to comment report to pull request
 
 ### `comment.enable:`
 
-Enable comment.
+Enable / disable comment.
 
 ``` yaml
 comment:
   enable: true
+```
+
+`enable: true` can be omitted if any other parameters are set as follows.
+
+``` yaml
+comment:
+  hideFooterLink: true
 ```
 
 ### `comment.hideFooterLink:`
@@ -615,11 +622,21 @@ The variables available in the `if` section are as follows
 
 ### `central.enable:`
 
-Enable central mode.
+Enable / disable central mode.
 
 ``` yaml
 central:
-  enable: true
+  enable: false
+```
+
+`enable: true` can be omitted if any other parameters are set as follows.
+
+``` yaml
+central:
+  reports:
+    datastores:
+      - local://reports
+      - gs://my-gcs-bucket/reports
 ```
 
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
@@ -664,7 +681,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - local://reports
@@ -688,7 +704,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - s3://my-s3-bucket/reports
@@ -723,7 +738,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - gs://my-gcs-bucket/reports
@@ -757,7 +771,6 @@ report:
 ``` yaml
 # .octocov.yml for central repo
 central:
-  enable: true
   reports:
     datastores:
       - bq://my-project/my-dataset/reports
@@ -791,7 +804,7 @@ Configuration for `git push` index file and badges self.
 
 ### `central.push.enable:`
 
-Enable `git push`
+Enable / disable `git push`
 
 ``` yaml
 push:

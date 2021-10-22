@@ -79,11 +79,11 @@ type ConfigTestExecutionTimeBadge struct {
 }
 
 type ConfigCentral struct {
-	Enable  bool                 `yaml:"enable"`
+	Enable  *bool                `yaml:"enable,omitempty"`
 	Root    string               `yaml:"root"`
 	Reports ConfigCentralReports `yaml:"reports"`
 	Badges  string               `yaml:"badges"`
-	Push    ConfigPush           `yaml:"push"`
+	Push    *ConfigPush          `yaml:"push"`
 }
 
 type ConfigCentralReports struct {
@@ -91,13 +91,13 @@ type ConfigCentralReports struct {
 }
 
 type ConfigPush struct {
-	Enable bool   `yaml:"enable"`
+	Enable *bool  `yaml:"enable,omitempty"`
 	If     string `yaml:"if,omitempty"`
 }
 
 type ConfigComment struct {
-	Enable         bool `yaml:"enable"`
-	HideFooterLink bool `yaml:"hideFooterLink"`
+	Enable         *bool `yaml:"enable,omitempty"`
+	HideFooterLink bool  `yaml:"hideFooterLink"`
 }
 
 type ConfigDiff struct {

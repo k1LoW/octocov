@@ -1,5 +1,4 @@
 central:
-  enable: true
   root: ../example/central
   reports:
     datastores:

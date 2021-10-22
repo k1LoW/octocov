@@ -4,6 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/k1LoW/octocov/internal"
 )
 
 func TestCoverageConfigReady(t *testing.T) {
@@ -151,12 +153,12 @@ func TestPushConfigReady(t *testing.T) {
 			&Config{
 				Push: &ConfigPush{},
 			},
-			"push.enable: is false",
+			"failed to traverse the Git root path",
 		},
 		{
 			&Config{
 				Push: &ConfigPush{
-					Enable: true,
+					Enable: internal.Bool(true),
 				},
 			},
 			"failed to traverse the Git root path",
@@ -165,7 +167,7 @@ func TestPushConfigReady(t *testing.T) {
 			&Config{
 				GitRoot: "/path/to",
 				Push: &ConfigPush{
-					Enable: true,
+					Enable: internal.Bool(true),
 				},
 			},
 			"",
@@ -174,7 +176,7 @@ func TestPushConfigReady(t *testing.T) {
 			&Config{
 				GitRoot: "/path/to",
 				Push: &ConfigPush{
-					Enable: true,
+					Enable: internal.Bool(true),
 					If:     "false",
 				},
 			},
@@ -212,12 +214,12 @@ func TestCommentConfigReady(t *testing.T) {
 			&Config{
 				Comment: &ConfigComment{},
 			},
-			"comment.enable: is false",
+			"",
 		},
 		{
 			&Config{
 				Comment: &ConfigComment{
-					Enable: true,
+					Enable: internal.Bool(true),
 				},
 			},
 			"",
@@ -391,12 +393,20 @@ func TestCentralConfigReady(t *testing.T) {
 			&Config{
 				Central: &ConfigCentral{},
 			},
+			"repository: not set (or env GITHUB_REPOSITORY is not set)",
+		},
+		{
+			&Config{
+				Central: &ConfigCentral{
+					Enable: internal.Bool(false),
+				},
+			},
 			"central.enable: is false",
 		},
 		{
 			&Config{
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 				},
 			},
 			"repository: not set (or env GITHUB_REPOSITORY is not set)",
@@ -405,7 +415,7 @@ func TestCentralConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 				},
 			},
 			"central.reports.datastores is not set",
@@ -414,7 +424,7 @@ func TestCentralConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 					Reports: ConfigCentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
@@ -452,7 +462,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 					Reports: ConfigCentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
@@ -460,20 +470,20 @@ func TestCentralPushConfigReady(t *testing.T) {
 					},
 				},
 			},
-			"central.puth.enable: is false",
+			"central.push: is not set",
 		},
 		{
 			&Config{
 				Repository: "owner/repo",
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 					Reports: ConfigCentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
 					},
-					Push: ConfigPush{
-						Enable: true,
+					Push: &ConfigPush{
+						Enable: internal.Bool(true),
 					},
 				},
 			},
@@ -483,14 +493,14 @@ func TestCentralPushConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 					Reports: ConfigCentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
 					},
-					Push: ConfigPush{
-						Enable: true,
+					Push: &ConfigPush{
+						Enable: internal.Bool(true),
 					},
 				},
 				GitRoot: "/path/to",
@@ -501,14 +511,14 @@ func TestCentralPushConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Central: &ConfigCentral{
-					Enable: true,
+					Enable: internal.Bool(true),
 					Reports: ConfigCentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
 					},
-					Push: ConfigPush{
-						Enable: true,
+					Push: &ConfigPush{
+						Enable: internal.Bool(true),
 						If:     "false",
 					},
 				},
