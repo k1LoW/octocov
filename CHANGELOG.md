@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.25.0](https://github.com/k1LoW/octocov/compare/v0.24.0...v0.25.0) (2021-10-22)
+
+* Add comment.if: section [#93](https://github.com/k1LoW/octocov/pull/93) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] `enable: true` can be omitted if any other parameters are set. [#92](https://github.com/k1LoW/octocov/pull/92) ([k1LoW](https://github.com/k1LoW))
+* fix(error): improve execution time violation message [#91](https://github.com/k1LoW/octocov/pull/91) ([rizalgowandy](https://github.com/rizalgowandy))
+* Add diff.if: section [#90](https://github.com/k1LoW/octocov/pull/90) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.24.0](https://github.com/k1LoW/octocov/compare/v0.23.3...v0.24.0) (2021-10-18)
 
 * Detect file encoding [#89](https://github.com/k1LoW/octocov/pull/89) ([k1LoW](https://github.com/k1LoW))
