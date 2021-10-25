@@ -84,6 +84,7 @@ type ConfigCentral struct {
 	Reports ConfigCentralReports `yaml:"reports"`
 	Badges  string               `yaml:"badges"`
 	Push    *ConfigPush          `yaml:"push"`
+	If      string               `yaml:"if,omitempty"`
 }
 
 type ConfigCentralReports struct {
