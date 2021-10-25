@@ -821,6 +821,19 @@ push:
   enable: true
 ```
 
+### `central.if:`
+
+Conditions for central mode.
+
+``` yaml
+# .octocov.yml
+central:
+  if: env.GITHUB_REF == 'refs/heads/main'
+  reports:
+    datastores:
+      - s3://my-s3-bucket/reports
+```
+
 ## Supported coverage report formats
 
 octocov supports multiple coverage report formats.
