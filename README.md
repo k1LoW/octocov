@@ -435,6 +435,16 @@ comment:
   hideFooterLink: true
 ```
 
+### `comment.if:`
+
+Conditions for commenting report.
+
+``` yaml
+# .octocov.yml
+comment:
+  if: github.event_name == 'pull_request'
+```
+
 ### `diff:`
 
 Configuration for comparing reports.
