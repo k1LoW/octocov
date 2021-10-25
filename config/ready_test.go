@@ -444,6 +444,21 @@ func TestCentralConfigReady(t *testing.T) {
 			},
 			"",
 		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Central: &ConfigCentral{
+					Enable: internal.Bool(true),
+					Reports: ConfigCentralReports{
+						Datastores: []string{
+							"s3://bucket/reports",
+						},
+					},
+					If: "false",
+				},
+			},
+			"the condition in the `if` section is not met (false)",
+		},
 	}
 	for _, tt := range tests {
 		err := tt.c.CentralConfigReady()

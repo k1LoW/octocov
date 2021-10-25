@@ -117,6 +117,13 @@ func (c *Config) CentralConfigReady() error {
 	if len(c.Central.Reports.Datastores) == 0 {
 		return errors.New("central.reports.datastores is not set")
 	}
+	ok, err := CheckIf(c.Central.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Central.If)
+	}
 	return nil
 }
 
