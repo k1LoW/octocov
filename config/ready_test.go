@@ -139,6 +139,7 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 }
 
 func TestPushConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
@@ -202,6 +203,7 @@ func TestPushConfigReady(t *testing.T) {
 }
 
 func TestCommentConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
@@ -571,6 +573,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 }
 
 func TestDiffConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
@@ -624,6 +627,7 @@ func TestDiffConfigReady(t *testing.T) {
 }
 
 func TestReportConfigReady(t *testing.T) {
+	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {

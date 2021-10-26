@@ -627,6 +627,7 @@ The variables available in the `if` section are as follows
 | `github.event_name` | `string` | Event name of GitHub Actions ( ex. `issues`, `pull_request` )|
 | `github.event` | `object` | Detailed data for each event of GitHub Actions (ex. `github.event.action`, `github.event.label.name` ) |
 | `env.<env_name>` | `string` | The value of a specific environment variable |
+| `is_pull_request` | `boolean` | Whether the job is related to an opened pull request (ex. a job fired by `on.push` will be true if it is related to a opened pull request) |
 
 ### `central:`
 

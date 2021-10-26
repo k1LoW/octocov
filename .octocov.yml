@@ -15,6 +15,7 @@ testExecutionTime:
   badge:
     path: docs/time.svg
 diff:
+  if: github.event_name == 'pull_request'
   path: .octocov/report.json
 push:
   if: env.GITHUB_REF == 'refs/heads/main'
