@@ -204,6 +204,7 @@ func TestPushConfigReady(t *testing.T) {
 
 func TestCommentConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	os.Setenv("GITHUB_REF", "refs/pull/123/merge")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
