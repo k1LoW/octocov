@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.26.1](https://github.com/k1LoW/octocov/compare/v0.26.0...v0.26.1) (2021-10-26)
+
+* Check if a job is related to a opened pull request in CommentConfigReady() [#96](https://github.com/k1LoW/octocov/pull/96) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.26.0](https://github.com/k1LoW/octocov/compare/v0.25.0...v0.26.0) (2021-10-26)
 
 * Add value `is_pull_request` in the `if:` section  [#95](https://github.com/k1LoW/octocov/pull/95) ([k1LoW](https://github.com/k1LoW))
