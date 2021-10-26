@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.26.0](https://github.com/k1LoW/octocov/compare/v0.25.0...v0.26.0) (2021-10-26)
+
+* Add value `is_pull_request` in the `if:` section  [#95](https://github.com/k1LoW/octocov/pull/95) ([k1LoW](https://github.com/k1LoW))
+* Add central.if: section [#94](https://github.com/k1LoW/octocov/pull/94) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.25.0](https://github.com/k1LoW/octocov/compare/v0.24.0...v0.25.0) (2021-10-22)
 
 * Add comment.if: section [#93](https://github.com/k1LoW/octocov/pull/93) ([k1LoW](https://github.com/k1LoW))
