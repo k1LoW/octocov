@@ -50,7 +50,7 @@ func (c *Config) PushConfigReady() error {
 	if c.GitRoot == "" {
 		return errors.New("failed to traverse the Git root path")
 	}
-	ok, err := CheckIf(c.Push.If)
+	ok, err := c.CheckIf(c.Push.If)
 	if err != nil {
 		return err
 	}
@@ -76,14 +76,17 @@ func (c *Config) CommentConfigReady() error {
 	if err != nil {
 		return err
 	}
-	g, err := gh.New()
-	if err != nil {
+	if c.gh == nil {
+		g, err := gh.New()
+		if err != nil {
+			return err
+		}
+		c.gh = g
+	}
+	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, owner, repo); err != nil {
 		return err
 	}
-	if _, err := g.DetectCurrentPullRequestNumber(ctx, owner, repo); err != nil {
-		return err
-	}
-	ok, err := CheckIf(c.Comment.If)
+	ok, err := c.CheckIf(c.Comment.If)
 	if err != nil {
 		return err
 	}
@@ -136,7 +139,7 @@ func (c *Config) CentralConfigReady() error {
 	if len(c.Central.Reports.Datastores) == 0 {
 		return errors.New("central.reports.datastores is not set")
 	}
-	ok, err := CheckIf(c.Central.If)
+	ok, err := c.CheckIf(c.Central.If)
 	if err != nil {
 		return err
 	}
@@ -159,7 +162,7 @@ func (c *Config) CentralPushConfigReady() error {
 	if c.GitRoot == "" {
 		return errors.New("failed to traverse the Git root path")
 	}
-	ok, err := CheckIf(c.Central.Push.If)
+	ok, err := c.CheckIf(c.Central.Push.If)
 	if err != nil {
 		return err
 	}
@@ -176,7 +179,7 @@ func (c *Config) DiffConfigReady() error {
 	if c.Diff.Path == "" && len(c.Diff.Datastores) == 0 {
 		return errors.New("diff.path: and diff.datastores: are not set")
 	}
-	ok, err := CheckIf(c.Diff.If)
+	ok, err := c.CheckIf(c.Diff.If)
 	if err != nil {
 		return err
 	}
@@ -190,7 +193,7 @@ func (c *Config) ReportConfigReady() error {
 	if err := c.ReportConfigTargetReady(); err != nil {
 		return err
 	}
-	ok, err := CheckIf(c.Report.If)
+	ok, err := c.CheckIf(c.Report.If)
 	if err != nil {
 		return err
 	}

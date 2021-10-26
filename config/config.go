@@ -46,6 +46,7 @@ type Config struct {
 	wd string
 	// config file path
 	path string
+	gh   *gh.Gh
 }
 
 type ConfigCoverage struct {
@@ -239,7 +240,7 @@ func (c *Config) TestExecutionTimeColor(d time.Duration) string {
 	}
 }
 
-func CheckIf(cond string) (bool, error) {
+func (c *Config) CheckIf(cond string) (bool, error) {
 	if cond == "" {
 		return true, nil
 	}
@@ -256,12 +257,15 @@ func CheckIf(cond string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	g, err := gh.New()
-	if err != nil {
-		return false, err
+	if c.gh == nil {
+		g, err := gh.New()
+		if err != nil {
+			return false, err
+		}
+		c.gh = g
 	}
 	isPullRequest := false
-	if _, err := g.DetectCurrentPullRequestNumber(ctx, owner, repo); err == nil {
+	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, owner, repo); err == nil {
 		isPullRequest = true
 	}
 	now := time.Now()
