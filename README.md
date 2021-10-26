@@ -70,7 +70,7 @@ Then, octocov comment the report of the code metrics to the pull request.
 
 ![comment](docs/comment.png)
 
-**Notice:** Note that only pull requests opened from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
+**Notice:** Note that only pull requests from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
 
 ### On Terminal
 
@@ -627,7 +627,7 @@ The variables available in the `if` section are as follows
 | `github.event_name` | `string` | Event name of GitHub Actions ( ex. `issues`, `pull_request` )|
 | `github.event` | `object` | Detailed data for each event of GitHub Actions (ex. `github.event.action`, `github.event.label.name` ) |
 | `env.<env_name>` | `string` | The value of a specific environment variable |
-| `is_pull_request` | `boolean` | Whether the job is related to an opened pull request (ex. a job fired by `on.push` will be true if it is related to a opened pull request) |
+| `is_pull_request` | `boolean` | Whether the job is related to an pull request (ex. a job fired by `on.push` will be true if it is related to a pull request) |
 
 ### `central:`
 
