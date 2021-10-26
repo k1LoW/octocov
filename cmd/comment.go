@@ -14,15 +14,15 @@ func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Repor
 	if err != nil {
 		return err
 	}
-	gh, err := gh.New()
+	g, err := gh.New()
 	if err != nil {
 		return err
 	}
-	n, err := gh.DetectCurrentPullRequestNumber(ctx, owner, repo)
+	n, err := g.DetectCurrentPullRequestNumber(ctx, owner, repo)
 	if err != nil {
 		return err
 	}
-	files, err := gh.GetPullRequestFiles(ctx, owner, repo, n)
+	files, err := g.GetPullRequestFiles(ctx, owner, repo, n)
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Repor
 		"---",
 		footer,
 	}, "\n")
-	if err := gh.PutComment(ctx, owner, repo, n, comment); err != nil {
+	if err := g.PutComment(ctx, owner, repo, n, comment); err != nil {
 		return err
 	}
 	return nil
