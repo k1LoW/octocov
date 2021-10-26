@@ -246,6 +246,7 @@ func CheckIf(cond string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	isPullRequest := strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/")
 	now := time.Now()
 	variables := map[string]interface{}{
 		"year":    now.UTC().Year(),
@@ -257,7 +258,8 @@ func CheckIf(cond string) (bool, error) {
 			"event_name": e.Name,
 			"event":      e.Payload,
 		},
-		"env": envMap(),
+		"env":             envMap(),
+		"is_pull_request": isPullRequest,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
