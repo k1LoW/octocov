@@ -20,6 +20,11 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
+      - name: Debug
+        run: |
+          env
+          cat $GITHUB_EVENT_PATH
+
       - name: Check out source code
         uses: actions/checkout@v2
 

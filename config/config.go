@@ -1,6 +1,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -246,7 +247,23 @@ func CheckIf(cond string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	isPullRequest := strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/")
+	s := os.Getenv("GITHUB_REPOSITORY")
+	if s == "" {
+		return false, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+	}
+	ctx := context.Background()
+	owner, repo, err := gh.SplitRepository(s)
+	if err != nil {
+		return false, err
+	}
+	g, err := gh.New()
+	if err != nil {
+		return false, err
+	}
+	isPullRequest := false
+	if _, err := g.DetectCurrentPullRequestNumber(ctx, owner, repo); err == nil {
+		isPullRequest = true
+	}
 	now := time.Now()
 	variables := map[string]interface{}{
 		"year":    now.UTC().Year(),

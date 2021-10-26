@@ -211,6 +211,9 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 
 func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo string) (int, error) {
 	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch-name
+	if len(splitted) < 3 {
+		return 0, fmt.Errorf("env %s is not set", "GITHUB_REF")
+	}
 	if strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/") {
 		prNumber := splitted[2]
 		return strconv.Atoi(prNumber)
