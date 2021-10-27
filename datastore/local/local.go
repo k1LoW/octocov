@@ -35,7 +35,15 @@ func (l *Local) StoreReport(ctx context.Context, r *report.Report) error {
 }
 
 func (l *Local) Put(ctx context.Context, path string, content []byte) error {
-	return os.WriteFile(filepath.Join(l.root, path), content, os.ModePerm)
+	p := filepath.Join(l.root, path)
+	dir := filepath.Dir(p)
+	if _, err := os.Stat(dir); err != nil {
+		err := os.MkdirAll(dir, 0755) // #nosec
+		if err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(p, content, os.ModePerm)
 }
 
 func (l *Local) FS() (fs.FS, error) {
