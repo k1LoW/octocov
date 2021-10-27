@@ -88,7 +88,7 @@ func (b *Badge) Render(wr io.Writer) error {
 	iw := 0.0
 	var icon string
 	if b.Icon != nil {
-		iw = 14.0
+		iw = 14.5
 		if issvg.Is(b.Icon) {
 			imgdoc, err := xmlquery.Parse(bytes.NewReader(b.Icon))
 			if err != nil {
