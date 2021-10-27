@@ -1,6 +1,7 @@
 package central
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"encoding/json"
@@ -14,6 +15,8 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/pkg/badge"
@@ -32,8 +35,8 @@ type CentralConfig struct {
 	Repository             string
 	Wd                     string
 	Index                  string
-	Badges                 string
-	Reports                []fs.FS
+	Badges                 []datastore.Datastore
+	Reports                []datastore.Datastore
 	CoverageColor          func(cover float64) string
 	CodeToTestRatioColor   func(ratio float64) string
 	TestExecutionTimeColor func(d time.Duration) string
@@ -79,7 +82,11 @@ func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
 
 	// collect reports
-	for _, fsys := range c.config.Reports {
+	for _, d := range c.config.Reports {
+		fsys, err := d.FS()
+		if err != nil {
+			return err
+		}
 		if err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				return err
@@ -123,19 +130,12 @@ func (c *Central) collectReports() error {
 }
 
 func (c *Central) generateBadges() ([]string, error) {
-	generatedPaths := []string{}
-
+	ctx := context.Background()
+	badges := map[string][]byte{}
 	for _, r := range c.reports {
 		cp := r.CoveragePercent()
-		err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
-		if err != nil {
-			return nil, err
-		}
-		bp := filepath.Join(c.config.Badges, r.Repository, "coverage.svg")
-		out, err := os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-		if err != nil {
-			return nil, err
-		}
+		bp := filepath.Join(r.Repository, "coverage.svg")
+		out := new(bytes.Buffer)
 		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
 		b.MessageColor = c.config.CoverageColor(cp)
 		if err := b.AddIcon(internal.Icon); err != nil {
@@ -144,20 +144,13 @@ func (c *Central) generateBadges() ([]string, error) {
 		if err := b.Render(out); err != nil {
 			return nil, err
 		}
-		generatedPaths = append(generatedPaths, bp)
+		badges[bp] = out.Bytes()
 
 		// Code to Test Ratio
 		if r.CodeToTestRatio != nil {
 			tr := r.CodeToTestRatioRatio()
-			err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
-			if err != nil {
-				return nil, err
-			}
-			bp := filepath.Join(c.config.Badges, r.Repository, "ratio.svg")
-			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-			if err != nil {
-				return nil, err
-			}
+			bp := filepath.Join(r.Repository, "ratio.svg")
+			out := new(bytes.Buffer)
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
 			b.MessageColor = c.config.CodeToTestRatioColor(tr)
 			if err := b.AddIcon(internal.Icon); err != nil {
@@ -166,21 +159,14 @@ func (c *Central) generateBadges() ([]string, error) {
 			if err := b.Render(out); err != nil {
 				return nil, err
 			}
-			generatedPaths = append(generatedPaths, bp)
+			badges[bp] = out.Bytes()
 		}
 
 		// Test Execution Time
 		if r.TestExecutionTime != nil {
 			d := time.Duration(*r.TestExecutionTime)
-			err := os.MkdirAll(filepath.Join(c.config.Badges, r.Repository), 0755) // #nosec
-			if err != nil {
-				return nil, err
-			}
-			bp := filepath.Join(c.config.Badges, r.Repository, "time.svg")
-			out, err = os.OpenFile(bp, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-			if err != nil {
-				return nil, err
-			}
+			bp := filepath.Join(r.Repository, "time.svg")
+			out := new(bytes.Buffer)
 			b := badge.New("test execution time", d.String())
 			b.MessageColor = c.config.TestExecutionTimeColor(d)
 			if err := b.AddIcon(internal.Icon); err != nil {
@@ -189,7 +175,19 @@ func (c *Central) generateBadges() ([]string, error) {
 			if err := b.Render(out); err != nil {
 				return nil, err
 			}
-			generatedPaths = append(generatedPaths, bp)
+			badges[bp] = out.Bytes()
+		}
+	}
+	generatedPaths := []string{}
+	for _, d := range c.config.Badges {
+		for path, content := range badges {
+			if err := d.Put(ctx, path, content); err != nil {
+				return nil, err
+			}
+			switch v := d.(type) {
+			case *local.Local:
+				generatedPaths = append(generatedPaths, filepath.Join(v.Root(), path))
+			}
 		}
 	}
 	return generatedPaths, nil
@@ -224,12 +222,20 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		croot = filepath.Dir(c.config.Index)
 	}
 
-	badgesLinkRel, err := filepath.Rel(croot, c.config.Badges)
+	var broot string
+	for _, d := range c.config.Badges {
+		switch v := d.(type) {
+		case *local.Local:
+			broot = v.Root()
+		}
+	}
+
+	badgesLinkRel, err := filepath.Rel(croot, broot)
 	if err != nil {
 		return err
 	}
 
-	badgesURLRel, err := filepath.Rel(proot, c.config.Badges)
+	badgesURLRel, err := filepath.Rel(proot, broot)
 	if err != nil {
 		return err
 	}

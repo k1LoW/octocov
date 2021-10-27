@@ -2,24 +2,23 @@ package central
 
 import (
 	"bytes"
-	"io/fs"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/internal"
 )
 
 func TestCollectReports(t *testing.T) {
 	c := config.New()
-	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
+	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.FS()
+	bd, err := local.New(t.TempDir())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,8 +26,8 @@ func TestCollectReports(t *testing.T) {
 		Repository:             "owner/repo",
 		Index:                  ".",
 		Wd:                     c.Getwd(),
-		Badges:                 "badges",
-		Reports:                []fs.FS{fsys},
+		Badges:                 []datastore.Datastore{bd},
+		Reports:                []datastore.Datastore{rd},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -45,13 +44,13 @@ func TestCollectReports(t *testing.T) {
 }
 
 func TestGenerateBadges(t *testing.T) {
-	bd := t.TempDir()
 	c := config.New()
-	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
+	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.FS()
+	td := t.TempDir()
+	bd, err := local.New(td)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,8 +58,8 @@ func TestGenerateBadges(t *testing.T) {
 		Repository:             "owner/repo",
 		Index:                  ".",
 		Wd:                     c.Getwd(),
-		Badges:                 bd,
-		Reports:                []fs.FS{fsys},
+		Badges:                 []datastore.Datastore{bd},
+		Reports:                []datastore.Datastore{rd},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -78,7 +77,7 @@ func TestGenerateBadges(t *testing.T) {
 	}
 
 	got := []string{}
-	if err := filepath.Walk(bd, func(path string, fi os.FileInfo, err error) error {
+	if err := filepath.Walk(td, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -109,24 +108,25 @@ func TestRenderIndex(t *testing.T) {
 		Reports: config.ConfigCentralReports{
 			Datastores: []string{"reports"},
 		},
-		Badges: "badges",
+		Badges: config.ConfigCentralBadges{
+			Datastores: []string{"badges"},
+		},
 	}
 	c.Build()
-	l, err := local.New(filepath.Join(testdataDir(t), "reports"))
+	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	fsys, err := l.FS()
+	bd, err := local.New(filepath.Join(c.Getwd(), "example/central/badges"))
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	ctr := New(&CentralConfig{
 		Repository:             c.Repository,
 		Index:                  c.Central.Root,
 		Wd:                     c.Getwd(),
-		Badges:                 c.Central.Badges,
-		Reports:                []fs.FS{fsys},
+		Badges:                 []datastore.Datastore{bd},
+		Reports:                []datastore.Datastore{rd},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -141,7 +141,7 @@ func TestRenderIndex(t *testing.T) {
 	}
 
 	got := buf.String()
-	b, err := ioutil.ReadFile(filepath.Join(testdataDir(t), "central_README.md.golden"))
+	b, err := os.ReadFile(filepath.Join(testdataDir(t), "central_README.md.golden"))
 	if err != nil {
 		t.Fatal(err)
 	}

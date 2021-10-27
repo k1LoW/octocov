@@ -50,11 +50,8 @@ func (c *Config) Build() {
 		if len(c.Central.Reports.Datastores) == 0 {
 			c.Central.Reports.Datastores = append(c.Central.Reports.Datastores, defaultReportsDatastore)
 		}
-		if c.Central.Badges == "" {
-			c.Central.Badges = defaultBadgesDir
-		}
-		if !strings.HasPrefix(c.Central.Badges, "/") {
-			c.Central.Badges = filepath.Clean(filepath.Join(c.Root(), c.Central.Badges))
+		if len(c.Central.Badges.Datastores) == 0 {
+			c.Central.Badges.Datastores = append(c.Central.Badges.Datastores, defaultBadgesDatastore)
 		}
 	}
 

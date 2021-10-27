@@ -17,7 +17,11 @@ type Local struct {
 }
 
 func New(root string) (*Local, error) {
-	fi, err := os.Stat(root)
+	p, err := filepath.Abs(root)
+	if err != nil {
+		return nil, err
+	}
+	fi, err := os.Stat(p)
 	if err != nil {
 		return nil, err
 	}
@@ -27,6 +31,10 @@ func New(root string) (*Local, error) {
 	return &Local{
 		root: root,
 	}, nil
+}
+
+func (l *Local) Root() string {
+	return l.root
 }
 
 func (l *Local) StoreReport(ctx context.Context, r *report.Report) error {

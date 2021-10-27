@@ -27,7 +27,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -84,24 +83,29 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 
-			reports := []fs.FS{}
+			badges := []datastore.Datastore{}
+			for _, s := range c.Central.Badges.Datastores {
+				d, err := datastore.New(ctx, s, c.Root())
+				if err != nil {
+					return err
+				}
+				badges = append(badges, d)
+			}
+
+			reports := []datastore.Datastore{}
 			for _, s := range c.Central.Reports.Datastores {
 				d, err := datastore.New(ctx, s, c.Root())
 				if err != nil {
 					return err
 				}
-				fsys, err := d.FS()
-				if err != nil {
-					return err
-				}
-				reports = append(reports, fsys)
+				reports = append(reports, d)
 			}
 
 			ctr := central.New(&central.CentralConfig{
 				Repository:             c.Repository,
 				Index:                  c.Central.Root,
 				Wd:                     c.Getwd(),
-				Badges:                 c.Central.Badges,
+				Badges:                 badges,
 				Reports:                reports,
 				CoverageColor:          c.CoverageColor,
 				CodeToTestRatioColor:   c.CodeToTestRatioColor,
