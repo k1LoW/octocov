@@ -27,10 +27,13 @@ func New(client *storage.Client, bucket, prefix string) (*GCS, error) {
 
 func (g *GCS) StoreReport(ctx context.Context, r *report.Report) error {
 	path := fmt.Sprintf("%s/report.json", r.Repository)
-	content := r.String()
+	return g.Put(ctx, path, r.Bytes())
+}
+
+func (g *GCS) Put(ctx context.Context, path string, content []byte) error {
 	o := filepath.Join(g.prefix, path)
 	w := g.client.Bucket(g.bucket).Object(o).NewWriter(ctx)
-	if _, err := w.Write([]byte(content)); err != nil {
+	if _, err := w.Write(content); err != nil {
 		return err
 	}
 	if err := w.Close(); err != nil {

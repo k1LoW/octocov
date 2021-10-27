@@ -31,7 +31,11 @@ func New(root string) (*Local, error) {
 
 func (l *Local) StoreReport(ctx context.Context, r *report.Report) error {
 	path := fmt.Sprintf("%s/report.json", r.Repository)
-	return os.WriteFile(filepath.Join(l.root, path), r.Bytes(), os.ModePerm)
+	return l.Put(ctx, path, r.Bytes())
+}
+
+func (l *Local) Put(ctx context.Context, path string, content []byte) error {
+	return os.WriteFile(filepath.Join(l.root, path), content, os.ModePerm)
 }
 
 func (l *Local) FS() (fs.FS, error) {

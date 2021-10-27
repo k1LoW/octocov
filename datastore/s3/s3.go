@@ -30,12 +30,15 @@ func New(client s3iface.S3API, bucket, prefix string) (*S3, error) {
 
 func (s *S3) StoreReport(ctx context.Context, r *report.Report) error {
 	path := fmt.Sprintf("%s/report.json", r.Repository)
-	content := r.String()
+	return s.Put(ctx, path, r.Bytes())
+}
+
+func (s *S3) Put(ctx context.Context, path string, content []byte) error {
 	key := filepath.Join(s.prefix, path)
 	_, err := s.client.PutObject(&s3.PutObjectInput{
 		Bucket:        &s.bucket,
 		Key:           &key,
-		Body:          bytes.NewReader([]byte(content)),
+		Body:          bytes.NewReader(content),
 		ContentLength: aws.Int64(int64(len(content))),
 	})
 	if err != nil {

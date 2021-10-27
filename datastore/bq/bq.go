@@ -3,6 +3,7 @@ package bq
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io/fs"
 	"testing/fstest"
@@ -106,6 +107,10 @@ func (b *BQ) StoreReport(ctx context.Context, r *report.Report) error {
 		}
 	}
 	return u.Put(ctx, []*ReportRecord{rr})
+}
+
+func (b *BQ) Put(ctx context.Context, path string, context []byte) error {
+	return errors.New("not implemented")
 }
 
 func (b *BQ) CreateTable(ctx context.Context) error {
