@@ -404,6 +404,9 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 	if err != nil {
 		return err
 	}
+	if err := w.Pull(&git.PullOptions{}); err != nil && err != git.NoErrAlreadyUpToDate {
+		return err
+	}
 	push := false
 	for _, p := range addPaths {
 		rel, err := filepath.Rel(gitRoot, p)
