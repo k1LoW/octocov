@@ -29,7 +29,7 @@ func New(root string) (*Local, error) {
 	}, nil
 }
 
-func (l *Local) Store(ctx context.Context, r *report.Report) error {
+func (l *Local) StoreReport(ctx context.Context, r *report.Report) error {
 	path := fmt.Sprintf("%s/report.json", r.Repository)
 	return os.WriteFile(filepath.Join(l.root, path), r.Bytes(), os.ModePerm)
 }

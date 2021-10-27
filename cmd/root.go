@@ -395,7 +395,7 @@ var rootCmd = &cobra.Command{
 				datastores = append(datastores, d)
 			}
 			for _, d := range datastores {
-				if err := d.Store(ctx, r); err != nil {
+				if err := d.StoreReport(ctx, r); err != nil {
 					return err
 				}
 			}

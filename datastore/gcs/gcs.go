@@ -25,7 +25,7 @@ func New(client *storage.Client, bucket, prefix string) (*GCS, error) {
 	}, nil
 }
 
-func (g *GCS) Store(ctx context.Context, r *report.Report) error {
+func (g *GCS) StoreReport(ctx context.Context, r *report.Report) error {
 	path := fmt.Sprintf("%s/report.json", r.Repository)
 	content := r.String()
 	o := filepath.Join(g.prefix, path)

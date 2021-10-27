@@ -59,7 +59,7 @@ var reportsSchema = bigquery.Schema{
 	&bigquery.FieldSchema{Name: "raw", Type: bigquery.StringFieldType, Required: true},
 }
 
-func (b *BQ) Store(ctx context.Context, r *report.Report) error {
+func (b *BQ) StoreReport(ctx context.Context, r *report.Report) error {
 	u := b.client.Dataset(b.dataset).Table(b.table).Uploader()
 	owner, repo, err := gh.SplitRepository(r.Repository)
 	if err != nil {

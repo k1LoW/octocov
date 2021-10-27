@@ -33,7 +33,7 @@ var (
 )
 
 type Datastore interface {
-	Store(ctx context.Context, r *report.Report) error
+	StoreReport(ctx context.Context, r *report.Report) error
 	FS() (fs.FS, error)
 }
 
