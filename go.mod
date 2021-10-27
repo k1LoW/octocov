@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.8.0
 	cloud.google.com/go/storage v1.16.0
 	github.com/Microsoft/go-winio v0.4.17 // indirect
+	github.com/antchfx/xmlquery v1.3.8
 	github.com/antonmedv/expr v1.8.9
 	github.com/aws/aws-sdk-go v1.40.11
 	github.com/bmatcuk/doublestar/v4 v4.0.1
@@ -17,6 +18,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v35 v35.1.0
+	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hhatto/gocloc v0.4.1
 	github.com/jszwec/s3fs v0.3.1
 	github.com/k1LoW/duration v1.1.0

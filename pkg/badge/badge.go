@@ -1,13 +1,21 @@
 package badge
 
 import (
+	"bytes"
 	_ "embed"
+	"encoding/base64"
 	"fmt"
+	"image"
 	"image/color"
+	_ "image/gif"
+	_ "image/jpeg"
+	_ "image/png"
 	"io"
 	"text/template"
 
+	"github.com/antchfx/xmlquery"
 	"github.com/golang/freetype/truetype"
+	issvg "github.com/h2non/go-is-svg"
 	"golang.org/x/exp/utf8string"
 	"golang.org/x/image/font"
 )
@@ -22,6 +30,7 @@ type Badge struct {
 	Message      string
 	LabelColor   string
 	MessageColor string
+	Icon         []byte
 	drawer       *font.Drawer
 }
 
@@ -53,6 +62,11 @@ func New(l, m string) *Badge {
 	}
 }
 
+func (b *Badge) AddIcon(imgf []byte) error {
+	b.Icon = imgf
+	return nil
+}
+
 func (b *Badge) Render(wr io.Writer) error {
 	tmpl := template.Must(template.New("badge").Parse(string(badgeTmpl)))
 
@@ -61,17 +75,37 @@ func (b *Badge) Render(wr io.Writer) error {
 	mw := 4 + b.stringWidth(b.Message) + 6
 	lx := lw * 10 / 2
 	mx := (lw * 10) + (mw * 10 / 2)
+	iw := 0.0
+	var icon string
+	if b.Icon != nil {
+		iw = 14.0
+		if issvg.Is(b.Icon) {
+			imgdoc, err := xmlquery.Parse(bytes.NewReader(b.Icon))
+			if err != nil {
+				return err
+			}
+			s := xmlquery.FindOne(imgdoc, "//svg")
+			icon = fmt.Sprintf("data:image/svg+xml;base64,%s", base64.StdEncoding.EncodeToString([]byte(s.OutputXML(true))))
+		} else {
+			_, format, err := image.DecodeConfig(bytes.NewReader(b.Icon))
+			if err != nil {
+				return err
+			}
+			icon = fmt.Sprintf("data:image/%s;base64,%s", format, base64.StdEncoding.EncodeToString(b.Icon))
+		}
+	}
 
 	d := map[string]interface{}{
 		"Label":        b.Label,
 		"Message":      b.Message,
 		"LabelColor":   b.LabelColor,
 		"MessageColor": b.MessageColor,
-		"Width":        lw + mw,
-		"LabelWidth":   lw,
+		"Width":        lw + mw + iw,
+		"LabelWidth":   lw + iw,
 		"MessageWidth": mw,
-		"LabelX":       lx,
-		"MessageX":     mx,
+		"LabelX":       lx + (iw * 10),
+		"MessageX":     mx + (iw * 10),
+		"Icon":         icon,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err
