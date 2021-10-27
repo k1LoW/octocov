@@ -22,6 +22,8 @@ jobs:
 
       - name: Check out source code
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
@@ -31,7 +33,12 @@ jobs:
 
       - name: Run test_central
         if: ${{ github.event_name == 'pull_request' }}
-        run: make test_central
+        run:
+          pwd
+          git branch
+          git status
+          git pull
+          make test_central
 
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@master
