@@ -3,6 +3,8 @@ central:
   reports:
     datastores:
       - local://reports
-  badges: ../example/central/badges
+  badges:
+    datastores:
+      - local://../example/central/badges
   push:
     enable: true

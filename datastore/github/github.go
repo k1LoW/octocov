@@ -16,6 +16,7 @@ type Github struct {
 	repository string
 	branch     string
 	prefix     string
+	from       string
 }
 
 func New(gh *gh.Gh, r, b, prefix string) (*Github, error) {
@@ -27,17 +28,21 @@ func New(gh *gh.Gh, r, b, prefix string) (*Github, error) {
 	}, nil
 }
 
-func (g *Github) Store(ctx context.Context, r *report.Report) error {
+func (g *Github) StoreReport(ctx context.Context, r *report.Report) error {
 	path := fmt.Sprintf("%s/report.json", r.Repository)
+	g.from = r.Repository
+	return g.Put(ctx, path, r.Bytes())
+}
+
+func (g *Github) Put(ctx context.Context, path string, content []byte) error {
 	branch := g.branch
-	content := r.String()
-	message := fmt.Sprintf("Store coverage report of %s", r.Repository)
+	message := fmt.Sprintf("Store coverage report of %s", g.from)
 	owner, repo, err := gh.SplitRepository(g.repository)
 	if err != nil {
 		return err
 	}
 	cp := filepath.Join(g.prefix, path)
-	return g.gh.PushContent(ctx, owner, repo, branch, content, cp, message)
+	return g.gh.PushContent(ctx, owner, repo, branch, string(content), cp, message)
 }
 
 func (g *Github) FS() (fs.FS, error) {

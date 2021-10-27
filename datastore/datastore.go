@@ -33,7 +33,8 @@ var (
 )
 
 type Datastore interface {
-	Store(ctx context.Context, r *report.Report) error
+	Put(ctx context.Context, path string, content []byte) error
+	StoreReport(ctx context.Context, r *report.Report) error
 	FS() (fs.FS, error)
 }
 

@@ -17,7 +17,7 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-const defaultBadgesDir = "badges"
+const defaultBadgesDatastore = "local://reports"
 const defaultReportsDatastore = "local://reports"
 
 const (
@@ -84,12 +84,16 @@ type ConfigCentral struct {
 	Enable  *bool                `yaml:"enable,omitempty"`
 	Root    string               `yaml:"root"`
 	Reports ConfigCentralReports `yaml:"reports"`
-	Badges  string               `yaml:"badges"`
+	Badges  ConfigCentralBadges  `yaml:"badges"`
 	Push    *ConfigPush          `yaml:"push"`
 	If      string               `yaml:"if,omitempty"`
 }
 
 type ConfigCentralReports struct {
+	Datastores []string `yaml:"datastores"`
+}
+
+type ConfigCentralBadges struct {
 	Datastores []string `yaml:"datastores"`
 }
 

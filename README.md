@@ -806,14 +806,17 @@ central:
 
 ### `central.badges:`
 
-Directory where badges are generated. default: `badges`
+### `central.badges.datastores:`
+
+Datastore paths (URLs) where badges are generated. default: `local://badges`
 
 ``` yaml
 central:
-  badges: badges
+  badges:
+    datastores:
+      - local://badges
+      - s3://my-s3-buckets/badges
 ```
-
-Support local only.
 
 ### `central.push:`
 

@@ -3,6 +3,7 @@ package bq
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"io/fs"
 	"testing/fstest"
@@ -59,7 +60,7 @@ var reportsSchema = bigquery.Schema{
 	&bigquery.FieldSchema{Name: "raw", Type: bigquery.StringFieldType, Required: true},
 }
 
-func (b *BQ) Store(ctx context.Context, r *report.Report) error {
+func (b *BQ) StoreReport(ctx context.Context, r *report.Report) error {
 	u := b.client.Dataset(b.dataset).Table(b.table).Uploader()
 	owner, repo, err := gh.SplitRepository(r.Repository)
 	if err != nil {
@@ -106,6 +107,10 @@ func (b *BQ) Store(ctx context.Context, r *report.Report) error {
 		}
 	}
 	return u.Put(ctx, []*ReportRecord{rr})
+}
+
+func (b *BQ) Put(ctx context.Context, path string, context []byte) error {
+	return errors.New("not implemented")
 }
 
 func (b *BQ) CreateTable(ctx context.Context) error {
