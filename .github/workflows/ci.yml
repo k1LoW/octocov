@@ -36,6 +36,7 @@ jobs:
         run:
           pwd
           git branch
+          git branch -r
           git status
           git pull
           make test_central
