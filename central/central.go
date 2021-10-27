@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/pkg/badge"
 	"github.com/k1LoW/octocov/report"
 )
@@ -137,6 +138,9 @@ func (c *Central) generateBadges() ([]string, error) {
 		}
 		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
 		b.MessageColor = c.config.CoverageColor(cp)
+		if err := b.AddIcon(internal.Icon); err != nil {
+			return nil, err
+		}
 		if err := b.Render(out); err != nil {
 			return nil, err
 		}
@@ -156,6 +160,9 @@ func (c *Central) generateBadges() ([]string, error) {
 			}
 			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
 			b.MessageColor = c.config.CodeToTestRatioColor(tr)
+			if err := b.AddIcon(internal.Icon); err != nil {
+				return nil, err
+			}
 			if err := b.Render(out); err != nil {
 				return nil, err
 			}
@@ -176,6 +183,9 @@ func (c *Central) generateBadges() ([]string, error) {
 			}
 			b := badge.New("test execution time", d.String())
 			b.MessageColor = c.config.TestExecutionTimeColor(d)
+			if err := b.AddIcon(internal.Icon); err != nil {
+				return nil, err
+			}
 			if err := b.Render(out); err != nil {
 				return nil, err
 			}
