@@ -62,11 +62,7 @@ func New() (*Report, error) {
 }
 
 func (r *Report) String() string {
-	b, err := json.MarshalIndent(r, "", "  ")
-	if err != nil {
-		panic(err)
-	}
-	return string(b)
+	return string(r.Bytes())
 }
 
 func (r *Report) Bytes() []byte {
