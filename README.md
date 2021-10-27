@@ -1,6 +1,6 @@
 <p align="center">
 <br>
-<img src="https://github.com/k1LoW/octocov/raw/logo/docs/logo.png" width="200" alt="octocov">
+<img src="https://github.com/k1LoW/octocov/raw/main/docs/logo.png" width="200" alt="octocov">
 <br><br>
 </p>
 

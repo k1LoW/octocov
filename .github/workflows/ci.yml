@@ -34,11 +34,6 @@ jobs:
       - name: Run test_central
         if: ${{ github.event_name == 'pull_request' }}
         run:
-          pwd
-          git branch
-          git branch -r
-          git status
-          git pull
           make test_central
 
       - name: Run Trivy vulnerability scanner in repo mode
