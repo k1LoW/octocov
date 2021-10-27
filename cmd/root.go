@@ -197,6 +197,9 @@ var rootCmd = &cobra.Command{
 
 				b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
 				b.MessageColor = c.CoverageColor(cp)
+				if err := b.AddIcon(internal.Icon); err != nil {
+					return err
+				}
 				if err := b.Render(out); err != nil {
 					return err
 				}
@@ -240,6 +243,9 @@ var rootCmd = &cobra.Command{
 
 				b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
 				b.MessageColor = c.CodeToTestRatioColor(tr)
+				if err := b.AddIcon(internal.Icon); err != nil {
+					return err
+				}
 				if err := b.Render(out); err != nil {
 					return err
 				}
@@ -284,6 +290,9 @@ var rootCmd = &cobra.Command{
 				d := time.Duration(*r.TestExecutionTime)
 				b := badge.New("test execution time", d.String())
 				b.MessageColor = c.TestExecutionTimeColor(d)
+				if err := b.AddIcon(internal.Icon); err != nil {
+					return err
+				}
 				if err := b.Render(out); err != nil {
 					return err
 				}
