@@ -1,24 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="169.5" height="20" role="img" aria-label="octocov::badge">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="168.5" height="20" role="img" aria-label="octocov::badge">
     <title>octocov::badge</title>
     <linearGradient id="s" x2="0" y2="100%">
         <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
         <stop offset="1" stop-opacity=".1"/>
     </linearGradient>
     <clipPath id="r">
-        <rect width="169.5" height="20" rx="3" fill="#fff"/>
+        <rect width="168.5" height="20" rx="3" fill="#fff"/>
     </clipPath>
     <g clip-path="url(#r)">
-        <rect width="125.5" height="20" fill="#24292E"/>
-        <rect x="125.5" width="44" height="20" fill="#E05D44"/>
-        <rect width="169.5" height="20" fill="url(#s)"/>
+        <rect width="124.5" height="20" fill="#24292E"/>
+        <rect x="124.5" width="44" height="20" fill="#E05D44"/>
+        <rect width="168.5" height="20" fill="url(#s)"/>
     </g>
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
         
         <image x="5" y="3" width="14" height="14" xlink:href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxuczpzZXJpZj0iaHR0cDovL3d3dy5zZXJpZi5jb20vIiBzdHlsZT0iZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjI7Ij4mI3hBOyAgICA8cGF0aCBkPSJNOTUuODgxLDMwLjg5OUw2OS4xMDEsNC4xMTlMMzAuODk5LDQuMTE5TDQuMTE5LDMwLjg5OUw0LjExOSw2OS4xMDFMMzAuODk5LDk1Ljg4MUw2OS4xMDEsOTUuODgxTDk1Ljg4MSw2OS4xMDFMOTUuODgxLDMwLjg5OVpNNjMuMTE0LDE4LjU2M0w4MS40MzcsMzYuODg2TDgxLjQzNyw2My4xMTRMNjMuMTE0LDgxLjQzN0wzNi44ODYsODEuNDM3TDE4LjU2Myw2My4xMTRMMTguNTYzLDM2Ljg4NkwzNi44ODYsMTguNTYzTDYzLjExNCwxOC41NjNaIiBzdHlsZT0iZmlsbDpyZ2IoMTQ5LDE1NywxNjUpOyI+PC9wYXRoPiYjeEE7PC9zdmc+"/>
         
-        <text aria-hidden="true" x="710" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">code to test ratio</text>
-        <text x="710" y="140" transform="scale(.1)" fill="#fff">code to test ratio</text>
-        <text aria-hidden="true" x="1475" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">1:0.3</text>
-        <text x="1475" y="140" transform="scale(.1)" fill="#fff">1:0.3</text>
+        <text aria-hidden="true" x="700" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">code to test ratio</text>
+        <text x="700" y="140" transform="scale(.1)" fill="#fff">code to test ratio</text>
+        <text aria-hidden="true" x="1465" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">1:0.3</text>
+        <text x="1465" y="140" transform="scale(.1)" fill="#fff">1:0.3</text>
     </g>
 </svg>
