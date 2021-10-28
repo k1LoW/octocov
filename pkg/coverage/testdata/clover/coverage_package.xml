@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1619680221">
+  <project timestamp="1619680221">
+    <file name="/path/to/src/Framework/Exception.php">
+      <metrics loc="19" ncloc="8" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+    </file>
+    <file name="/path/to/src/Framework/Assert.php">
+      <class name="My\Framework\Assert" namespace="global">
+        <metrics complexity="225" methods="170" coveredmethods="153" conditionals="0" coveredconditionals="0" statements="586" coveredstatements="544" elements="756" coveredelements="697"/>
+      </class>
+      <line num="101" type="method" name="assertTrue" visibility="public" complexity="5" crap="5" count="9"/>
+      <line num="103" type="stmt" count="9"/>
+      <line num="104" type="stmt" count="1"/>
+      <line num="105" type="stmt" count="1"/>
+      <line num="106" type="stmt" count="1"/>
+      <line num="110" type="stmt" count="8"/>
+      <line num="111" type="stmt" count="1"/>
+      <line num="112" type="stmt" count="1"/>
+      <line num="113" type="stmt" count="1"/>
+      <line num="117" type="stmt" count="7"/>
+      <line num="88" type="stmt" count="1"/>
+      <metrics loc="90" ncloc="76" classes="1" methods="1" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="36" coveredstatements="28" elements="37" coveredelements="28"/>
+    </file>
+    <package name="App\Libs">
+      <file name="/path/to/src/app/libs/Util.php">
+        <metrics loc="19" ncloc="8" classes="0" methods="0" coveredmethods="0" conditionals="0" coveredconditionals="0" statements="0" coveredstatements="0" elements="0" coveredelements="0"/>
+        <line num="111" type="stmt" count="1"/>
+      </file>
+    </package>
+    <metrics files="468" loc="45374" ncloc="34432" classes="378" methods="2233" coveredmethods="1649" conditionals="0" coveredconditionals="0" statements="11707" coveredstatements="9430" elements="13940" coveredelements="11079"/>
+  </project>
+</coverage>
