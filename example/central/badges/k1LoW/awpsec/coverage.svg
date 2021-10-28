@@ -1,24 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="132" height="20" role="img" aria-label="octocov::badge">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="133.5" height="20" role="img" aria-label="octocov::badge">
     <title>octocov::badge</title>
     <linearGradient id="s" x2="0" y2="100%">
         <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
         <stop offset="1" stop-opacity=".1"/>
     </linearGradient>
     <clipPath id="r">
-        <rect width="132" height="20" rx="3" fill="#fff"/>
+        <rect width="133.5" height="20" rx="3" fill="#fff"/>
     </clipPath>
     <g clip-path="url(#r)">
-        <rect width="82" height="20" fill="#24292E"/>
-        <rect x="82" width="50" height="20" fill="#FE7D37"/>
-        <rect width="132" height="20" fill="url(#s)"/>
+        <rect width="83.5" height="20" fill="#24292E"/>
+        <rect x="83.5" width="50" height="20" fill="#FE7D37"/>
+        <rect width="133.5" height="20" fill="url(#s)"/>
     </g>
     <g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110">
         
-        <image x="5" y="3" width="14" height="14" xlink:href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxuczpzZXJpZj0iaHR0cDovL3d3dy5zZXJpZi5jb20vIiBzdHlsZT0iZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjI7Ij4mI3hBOyAgICA8ZyB0cmFuc2Zvcm09Im1hdHJpeCgxLjEwMjQ0LDAsMCwxLjEwMjQ0LC01LjEyMjIyLC01LjEyMjIyKSI+JiN4QTsgICAgICAgIDxwYXRoIGQ9Ik05MS42MTcsMzIuNjc0TDY3LjMyNiw4LjM4M0wzMi42NzQsOC4zODNMOC4zODMsMzIuNjc0TDguMzgzLDY3LjMyNkwzMi42NzQsOTEuNjE3TDY3LjMyNiw5MS42MTdMOTEuNjE3LDY3LjMyNkw5MS42MTcsMzIuNjc0Wk02Mi41MzksMTkuOTRMODAuMDYsMzcuNDYxTDgwLjA2LDYyLjUzOUw2Mi41MzksODAuMDZMMzcuNDYxLDgwLjA2TDE5Ljk0LDYyLjUzOUwxOS45NCwzNy40NjFMMzcuNDYxLDE5Ljk0TDYyLjUzOSwxOS45NFoiIHN0eWxlPSJmaWxsOnJnYigxNDksMTU3LDE2NSk7Ij48L3BhdGg+JiN4QTsgICAgPC9nPiYjeEE7PC9zdmc+"/>
+        <image x="5" y="3" width="14" height="14" xlink:href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB4bWw6c3BhY2U9InByZXNlcnZlIiB4bWxuczpzZXJpZj0iaHR0cDovL3d3dy5zZXJpZi5jb20vIiBzdHlsZT0iZmlsbC1ydWxlOmV2ZW5vZGQ7Y2xpcC1ydWxlOmV2ZW5vZGQ7c3Ryb2tlLWxpbmVqb2luOnJvdW5kO3N0cm9rZS1taXRlcmxpbWl0OjI7Ij4mI3hBOyAgICA8cGF0aCBkPSJNOTUuODgxLDMwLjg5OUw2OS4xMDEsNC4xMTlMMzAuODk5LDQuMTE5TDQuMTE5LDMwLjg5OUw0LjExOSw2OS4xMDFMMzAuODk5LDk1Ljg4MUw2OS4xMDEsOTUuODgxTDk1Ljg4MSw2OS4xMDFMOTUuODgxLDMwLjg5OVpNNjMuMTE0LDE4LjU2M0w4MS40MzcsMzYuODg2TDgxLjQzNyw2My4xMTRMNjMuMTE0LDgxLjQzN0wzNi44ODYsODEuNDM3TDE4LjU2Myw2My4xMTRMMTguNTYzLDM2Ljg4NkwzNi44ODYsMTguNTYzTDYzLjExNCwxOC41NjNaIiBzdHlsZT0iZmlsbDpyZ2IoMTQ5LDE1NywxNjUpOyI+PC9wYXRoPiYjeEE7PC9zdmc+"/>
         
-        <text aria-hidden="true" x="480" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">coverage</text>
-        <text x="480" y="140" transform="scale(.1)" fill="#fff">coverage</text>
-        <text aria-hidden="true" x="1070" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">38.8%</text>
-        <text x="1070" y="140" transform="scale(.1)" fill="#fff">38.8%</text>
+        <text aria-hidden="true" x="495" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">coverage</text>
+        <text x="495" y="140" transform="scale(.1)" fill="#fff">coverage</text>
+        <text aria-hidden="true" x="1085" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">38.8%</text>
+        <text x="1085" y="140" transform="scale(.1)" fill="#fff">38.8%</text>
     </g>
 </svg>
