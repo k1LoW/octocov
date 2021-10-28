@@ -21,8 +21,9 @@ type CloverReport struct {
 }
 
 type CloverReportProject struct {
-	Timestamp string             `xml:"timestamp,attr"`
-	File      []CloverReportFile `xml:"file"`
+	Timestamp string                `xml:"timestamp,attr"`
+	File      []CloverReportFile    `xml:"file"`
+	Package   []CloverReportPackage `xml:"package"`
 	Metrics   struct {
 		Files               int `xml:"files,attr"`
 		Loc                 int `xml:"loc,attr"`
@@ -37,6 +38,12 @@ type CloverReportProject struct {
 		Elements            int `xml:"elements,attr"`
 		Coveredelements     int `xml:"coveredelements,attr"`
 	} `xml:"metrics"`
+}
+
+type CloverReportPackage struct {
+	XMLName xml.Name           `xml:"package"`
+	Name    string             `xml:"name,attr"`
+	File    []CloverReportFile `xml:"file"`
 }
 
 type CloverReportFile struct {
@@ -110,31 +117,43 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	cov.Type = TypeStmt
 	cov.Format = c.Name()
 	for _, f := range r.Project.File {
-		fcov := NewFileCoverage(f.Name)
-		fcov.Covered = f.Metrics.Coveredstatements
-		fcov.Total = f.Metrics.Statements
-		for _, l := range f.Line {
-			if l.Type != "stmt" {
-				continue
-			}
-			sl := l.Num
-			el := l.Num
-			ns := 1
-			c := l.Count
-			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
-				Type:      TypeStmt,
-				StartLine: &sl,
-				EndLine:   &el,
-				NumStmt:   &ns,
-				Count:     &c,
-			})
-		}
+		fcov := parseReportFile(f)
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 		cov.Files = append(cov.Files, fcov)
 	}
-
+	for _, p := range r.Project.Package {
+		for _, f := range p.File {
+			fcov := parseReportFile(f)
+			cov.Total += fcov.Total
+			cov.Covered += fcov.Covered
+			cov.Files = append(cov.Files, fcov)
+		}
+	}
 	return cov, rp, nil
+}
+
+func parseReportFile(f CloverReportFile) *FileCoverage {
+	fcov := NewFileCoverage(f.Name)
+	fcov.Covered = f.Metrics.Coveredstatements
+	fcov.Total = f.Metrics.Statements
+	for _, l := range f.Line {
+		if l.Type != "stmt" {
+			continue
+		}
+		sl := l.Num
+		el := l.Num
+		ns := 1
+		c := l.Count
+		fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
+			Type:      TypeStmt,
+			StartLine: &sl,
+			EndLine:   &el,
+			NumStmt:   &ns,
+			Count:     &c,
+		})
+	}
+	return fcov
 }
 
 func (c *Clover) detectReportPath(path string) (string, error) {
