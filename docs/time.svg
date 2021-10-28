@@ -18,7 +18,7 @@
         
         <text aria-hidden="true" x="750" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">test execution time</text>
         <text x="750" y="140" transform="scale(.1)" fill="#fff">test execution time</text>
-        <text aria-hidden="true" x="1530" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">40s</text>
-        <text x="1530" y="140" transform="scale(.1)" fill="#fff">40s</text>
+        <text aria-hidden="true" x="1530" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)">44s</text>
+        <text x="1530" y="140" transform="scale(.1)" fill="#fff">44s</text>
     </g>
 </svg>
