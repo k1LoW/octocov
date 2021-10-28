@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.27.0](https://github.com/k1LoW/octocov/compare/v0.26.1...v0.27.0) (2021-10-28)
+
+* [BREAKING] Add `central.badges.datastores:` section instead of `central.badges:` [#98](https://github.com/k1LoW/octocov/pull/98) ([k1LoW](https://github.com/k1LoW))
+* Add octocov logo [#97](https://github.com/k1LoW/octocov/pull/97) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.26.1](https://github.com/k1LoW/octocov/compare/v0.26.0...v0.26.1) (2021-10-26)
 
 * Check if a job is related to a opened pull request in CommentConfigReady() [#96](https://github.com/k1LoW/octocov/pull/96) ([k1LoW](https://github.com/k1LoW))
