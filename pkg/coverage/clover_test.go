@@ -39,6 +39,24 @@ func TestClover(t *testing.T) {
 	}
 }
 
+func TestCloverPackage(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "clover", "coverage_package.xml")
+	clover := NewClover()
+	got, _, err := clover.ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cover := false
+	for _, f := range got.Files {
+		if f.File == "/path/to/src/app/libs/Util.php" {
+			cover = true
+		}
+	}
+	if !cover {
+		t.Error("does not parse <package> section")
+	}
+}
+
 func TestCloverParseAllFormat(t *testing.T) {
 	tests := []struct {
 		path    string
