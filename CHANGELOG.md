@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.27.1](https://github.com/k1LoW/octocov/compare/v0.27.0...v0.27.1) (2021-10-28)
+
+* Fix handle coverage.yml of Clover format [#99](https://github.com/k1LoW/octocov/pull/99) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.27.0](https://github.com/k1LoW/octocov/compare/v0.26.1...v0.27.0) (2021-10-28)
 
 * [BREAKING] Add `central.badges.datastores:` section instead of `central.badges:` [#98](https://github.com/k1LoW/octocov/pull/98) ([k1LoW](https://github.com/k1LoW))
