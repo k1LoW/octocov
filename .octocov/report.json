@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "3de9a27f2eea6736e552aea748c8f9c3f6c46ba2",
+  "commit": "e6f09761818ad435866077090af43cbec67a9f8c",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 17
+            "count": 22
           },
           {
             "type": "statement",
@@ -9174,6 +9174,6 @@
     "code": 4646,
     "test": 1522
   },
-  "test_execution_time": 45000000000,
-  "timestamp": "2021-10-29T02:29:07.632418331Z"
+  "test_execution_time": 46000000000,
+  "timestamp": "2021-10-29T11:48:13.495423145Z"
 }
