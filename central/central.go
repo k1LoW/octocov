@@ -205,7 +205,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	owner, repo, err := gh.SplitRepository(c.config.Repository)
+	owner, repo, err := gh.Parse(c.config.Repository)
 	if err != nil {
 		return err
 	}

@@ -320,7 +320,7 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				} else {
-					owner, repo, err := gh.SplitRepository(c.Repository)
+					owner, repo, err := gh.Parse(c.Repository)
 					if err != nil {
 						return err
 					}

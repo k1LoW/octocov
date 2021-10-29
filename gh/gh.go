@@ -509,7 +509,7 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	return i, nil
 }
 
-func SplitRepository(r string) (string, string, error) {
+func Parse(r string) (string, string, error) {
 	splitted := strings.Split(r, "/")
 	if len(splitted) != 2 {
 		return "", "", errors.New("could not get owner and repo")

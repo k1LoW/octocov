@@ -37,7 +37,7 @@ func (g *Github) StoreReport(ctx context.Context, r *report.Report) error {
 func (g *Github) Put(ctx context.Context, path string, content []byte) error {
 	branch := g.branch
 	message := fmt.Sprintf("Store coverage report of %s", g.from)
-	owner, repo, err := gh.SplitRepository(g.repository)
+	owner, repo, err := gh.Parse(g.repository)
 	if err != nil {
 		return err
 	}

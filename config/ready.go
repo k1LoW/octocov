@@ -70,7 +70,7 @@ func (c *Config) CommentConfigReady() error {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	ctx := context.Background()
-	owner, repo, err := gh.SplitRepository(c.Repository)
+	owner, repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return err
 	}

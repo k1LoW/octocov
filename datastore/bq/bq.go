@@ -62,7 +62,7 @@ var reportsSchema = bigquery.Schema{
 
 func (b *BQ) StoreReport(ctx context.Context, r *report.Report) error {
 	u := b.client.Dataset(b.dataset).Table(b.table).Uploader()
-	owner, repo, err := gh.SplitRepository(r.Repository)
+	owner, repo, err := gh.Parse(r.Repository)
 	if err != nil {
 		return nil
 	}

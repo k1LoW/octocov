@@ -53,7 +53,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 			return nil, err
 		}
 		if branch == "" {
-			owner, repo, err := gh.SplitRepository(ownerrepo)
+			owner, repo, err := gh.Parse(ownerrepo)
 			if err != nil {
 				return nil, err
 			}

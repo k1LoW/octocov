@@ -10,7 +10,7 @@ import (
 )
 
 func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Report) error {
-	owner, repo, err := gh.SplitRepository(c.Repository)
+	owner, repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return err
 	}
