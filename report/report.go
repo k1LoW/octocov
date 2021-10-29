@@ -254,9 +254,10 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 	if r.Repository == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
-	splitted := strings.Split(r.Repository, "/")
-	owner := splitted[0]
-	repo := splitted[1]
+	owner, repo, err := gh.SplitRepository(r.Repository)
+	if err != nil {
+		return err
+	}
 	g, err := gh.New()
 	if err != nil {
 		return err
