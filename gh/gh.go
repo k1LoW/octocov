@@ -509,18 +509,18 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	return i, nil
 }
 
-type Repogitory struct {
+type Repository struct {
 	Owner string
 	Repo  string
 	Path  string
 }
 
-func Parse(raw string) (*Repogitory, error) {
+func Parse(raw string) (*Repository, error) {
 	splitted := strings.Split(raw, "/")
 	if len(splitted) < 2 {
 		return nil, fmt.Errorf("could not parse: %s", raw)
 	}
-	r := &Repogitory{
+	r := &Repository{
 		Owner: splitted[0],
 		Repo:  splitted[1],
 	}

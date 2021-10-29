@@ -9,11 +9,11 @@ import (
 func TestParse(t *testing.T) {
 	tests := []struct {
 		in      string
-		want    *Repogitory
+		want    *Repository
 		wantErr bool
 	}{
-		{"owner/repo", &Repogitory{Owner: "owner", Repo: "repo"}, false},
-		{"owner/repo/path/to", &Repogitory{Owner: "owner", Repo: "repo", Path: "path/to"}, false},
+		{"owner/repo", &Repository{Owner: "owner", Repo: "repo"}, false},
+		{"owner/repo/path/to", &Repository{Owner: "owner", Repo: "repo", Path: "path/to"}, false},
 		{"owner", nil, true},
 	}
 	for _, tt := range tests {
