@@ -45,7 +45,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 	}
 	switch d {
 	case "github":
-		repo := args[0]
+		ownerrepo := args[0]
 		branch := args[1]
 		prefix := args[2]
 		g, err := gh.New()
@@ -53,7 +53,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 			return nil, err
 		}
 		if branch == "" {
-			owner, repo, err := gh.SplitRepository(repo)
+			owner, repo, err := gh.SplitRepository(ownerrepo)
 			if err != nil {
 				return nil, err
 			}
@@ -62,7 +62,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 				return nil, err
 			}
 		}
-		return github.New(g, repo, branch, prefix)
+		return github.New(g, ownerrepo, branch, prefix)
 	case "s3":
 		bucket := args[0]
 		prefix := args[1]
