@@ -38,10 +38,10 @@ func New() (*Report, error) {
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	ref := os.Getenv("GITHUB_REF")
 	if ref == "" {
-		b, err := os.ReadFile(".git/HEAD")
+		cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+		b, err := cmd.Output()
 		if err == nil {
-			splitted := strings.Split(strings.TrimSuffix(string(b), "\n"), " ")
-			ref = splitted[1]
+			ref = strings.TrimSuffix(string(b), "\n")
 		}
 	}
 	commit := os.Getenv("GITHUB_SHA")
