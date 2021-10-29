@@ -34,14 +34,16 @@ type Report struct {
 	rp string
 }
 
-func New() (*Report, error) {
-	repo := os.Getenv("GITHUB_REPOSITORY")
+func New(ownerrepo string) (*Report, error) {
+	if ownerrepo == "" {
+		ownerrepo = os.Getenv("GITHUB_REPOSITORY")
+	}
 	ref := os.Getenv("GITHUB_REF")
 	if ref == "" {
-		b, err := os.ReadFile(".git/HEAD")
+		cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+		b, err := cmd.Output()
 		if err == nil {
-			splitted := strings.Split(strings.TrimSuffix(string(b), "\n"), " ")
-			ref = splitted[1]
+			ref = strings.TrimSuffix(string(b), "\n")
 		}
 	}
 	commit := os.Getenv("GITHUB_SHA")
@@ -54,7 +56,7 @@ func New() (*Report, error) {
 	}
 
 	return &Report{
-		Repository: repo,
+		Repository: ownerrepo,
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
@@ -254,9 +256,10 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 	if r.Repository == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
-	splitted := strings.Split(r.Repository, "/")
-	owner := splitted[0]
-	repo := splitted[1]
+	repo, err := gh.Parse(r.Repository)
+	if err != nil {
+		return err
+	}
 	g, err := gh.New()
 	if err != nil {
 		return err
@@ -264,7 +267,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 	if len(stepNames) > 0 {
 		steps := []gh.Step{}
 		for _, n := range stepNames {
-			s, err := g.GetStepsByName(ctx, owner, repo, n)
+			s, err := g.GetStepsByName(ctx, repo.Owner, repo.Repo, n)
 			if err != nil {
 				return err
 			}
@@ -279,11 +282,11 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 	if err != nil {
 		return err
 	}
-	jobID, err := g.DetectCurrentJobID(ctx, owner, repo)
+	jobID, err := g.DetectCurrentJobID(ctx, repo.Owner, repo.Repo)
 	if err != nil {
 		return err
 	}
-	d, err := g.GetStepExecutionTimeByTime(ctx, owner, repo, jobID, fi.ModTime())
+	d, err := g.GetStepExecutionTimeByTime(ctx, repo.Owner, repo.Repo, jobID, fi.ModTime())
 	if err != nil {
 		return err
 	}

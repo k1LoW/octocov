@@ -509,14 +509,42 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	return i, nil
 }
 
-func SplitRepository(r string) (string, string, error) {
-	splitted := strings.Split(r, "/")
-	if len(splitted) != 2 {
-		return "", "", errors.New("could not get owner and repo")
+type Repository struct {
+	Owner string
+	Repo  string
+	Path  string
+}
+
+func (r *Repository) Reponame() string {
+	if r.Path == "" {
+		return r.Repo
 	}
-	owner := splitted[0]
-	repo := splitted[1]
-	return owner, repo, nil
+	return fmt.Sprintf("%s/%s", r.Repo, r.Path)
+}
+
+func Parse(raw string) (*Repository, error) {
+	splitted := strings.Split(raw, "/")
+	if len(splitted) < 2 {
+		return nil, fmt.Errorf("could not parse: %s", raw)
+	}
+	for _, p := range splitted {
+		if p == "" {
+			return nil, fmt.Errorf("invalid repository path: %s", raw)
+		}
+		if strings.Trim(p, ".") == "" {
+			return nil, fmt.Errorf("invalid repository path: %s", raw)
+		}
+	}
+
+	r := &Repository{
+		Owner: splitted[0],
+		Repo:  splitted[1],
+	}
+	if len(splitted) > 2 {
+		r.Path = strings.Join(splitted[2:], "/")
+	}
+
+	return r, nil
 }
 
 type roundTripper struct {

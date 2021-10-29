@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"os"
 
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
@@ -67,12 +66,11 @@ func (c *Config) CommentConfigReady() error {
 	if !internal.IsEnable(c.Comment.Enable) {
 		return errors.New("comment.enable: is false")
 	}
-	s := os.Getenv("GITHUB_REPOSITORY")
-	if s == "" {
+	if c.Repository == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	ctx := context.Background()
-	owner, repo, err := gh.SplitRepository(s)
+	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return err
 	}
@@ -83,7 +81,7 @@ func (c *Config) CommentConfigReady() error {
 		}
 		c.gh = g
 	}
-	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, owner, repo); err != nil {
+	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err != nil {
 		return err
 	}
 	ok, err := c.CheckIf(c.Comment.If)

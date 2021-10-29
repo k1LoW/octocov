@@ -37,12 +37,12 @@ func (g *Github) StoreReport(ctx context.Context, r *report.Report) error {
 func (g *Github) Put(ctx context.Context, path string, content []byte) error {
 	branch := g.branch
 	message := fmt.Sprintf("Store coverage report of %s", g.from)
-	owner, repo, err := gh.SplitRepository(g.repository)
+	repo, err := gh.Parse(g.repository)
 	if err != nil {
 		return err
 	}
 	cp := filepath.Join(g.prefix, path)
-	return g.gh.PushContent(ctx, owner, repo, branch, string(content), cp, message)
+	return g.gh.PushContent(ctx, repo.Owner, repo.Repo, branch, string(content), cp, message)
 }
 
 func (g *Github) FS() (fs.FS, error) {
