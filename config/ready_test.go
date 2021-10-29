@@ -139,7 +139,6 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 }
 
 func TestPushConfigReady(t *testing.T) {
-	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
@@ -147,17 +146,21 @@ func TestPushConfigReady(t *testing.T) {
 		want string
 	}{
 		{
-			&Config{},
+			&Config{
+				Repository: "owner/repo",
+			},
 			"push: is not set",
 		},
 		{
 			&Config{
-				Push: &ConfigPush{},
+				Repository: "owner/repo",
+				Push:       &ConfigPush{},
 			},
 			"failed to traverse the Git root path",
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Push: &ConfigPush{
 					Enable: internal.Bool(true),
 				},
@@ -166,7 +169,8 @@ func TestPushConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				GitRoot: "/path/to",
+				Repository: "owner/repo",
+				GitRoot:    "/path/to",
 				Push: &ConfigPush{
 					Enable: internal.Bool(true),
 				},
@@ -175,7 +179,8 @@ func TestPushConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				GitRoot: "/path/to",
+				Repository: "owner/repo",
+				GitRoot:    "/path/to",
 				Push: &ConfigPush{
 					Enable: internal.Bool(true),
 					If:     "false",
@@ -203,7 +208,6 @@ func TestPushConfigReady(t *testing.T) {
 }
 
 func TestCommentConfigReady(t *testing.T) {
-	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_REF", "refs/pull/123/merge")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
@@ -212,17 +216,21 @@ func TestCommentConfigReady(t *testing.T) {
 		want string
 	}{
 		{
-			&Config{},
+			&Config{
+				Repository: "owner/repo",
+			},
 			"comment: is not set",
 		},
 		{
 			&Config{
-				Comment: &ConfigComment{},
+				Repository: "owner/repo",
+				Comment:    &ConfigComment{},
 			},
 			"",
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Comment: &ConfigComment{
 					Enable: internal.Bool(true),
 				},
@@ -231,6 +239,7 @@ func TestCommentConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Comment: &ConfigComment{
 					If: "false",
 				},
@@ -574,7 +583,6 @@ func TestCentralPushConfigReady(t *testing.T) {
 }
 
 func TestDiffConfigReady(t *testing.T) {
-	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
@@ -582,17 +590,21 @@ func TestDiffConfigReady(t *testing.T) {
 		want string
 	}{
 		{
-			&Config{},
+			&Config{
+				Repository: "owner/repo",
+			},
 			"diff: is not set",
 		},
 		{
 			&Config{
-				Diff: &ConfigDiff{},
+				Repository: "owner/repo",
+				Diff:       &ConfigDiff{},
 			},
 			"diff.path: and diff.datastores: are not set",
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Diff: &ConfigDiff{
 					Path: "path/to/report.json",
 				},
@@ -601,6 +613,7 @@ func TestDiffConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Diff: &ConfigDiff{
 					Path: "path/to/report.json",
 					If:   "false",
@@ -628,7 +641,6 @@ func TestDiffConfigReady(t *testing.T) {
 }
 
 func TestReportConfigReady(t *testing.T) {
-	os.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
 	tests := []struct {
@@ -636,17 +648,21 @@ func TestReportConfigReady(t *testing.T) {
 		want string
 	}{
 		{
-			&Config{},
+			&Config{
+				Repository: "owner/repo",
+			},
 			"report: is not set",
 		},
 		{
 			&Config{
-				Report: &ConfigReport{},
+				Repository: "owner/repo",
+				Report:     &ConfigReport{},
 			},
 			"report.datastores: and report.path: are not set",
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Report: &ConfigReport{
 					Datastores: []string{
 						"s3://bucket/reports",
@@ -657,6 +673,7 @@ func TestReportConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
+				Repository: "owner/repo",
 				Report: &ConfigReport{
 					Datastores: []string{
 						"s3://bucket/reports",

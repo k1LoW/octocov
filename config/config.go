@@ -252,12 +252,11 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	s := os.Getenv("GITHUB_REPOSITORY")
-	if s == "" {
+	if c.Repository == "" {
 		return false, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	ctx := context.Background()
-	owner, repo, err := gh.SplitRepository(s)
+	owner, repo, err := gh.SplitRepository(c.Repository)
 	if err != nil {
 		return false, err
 	}
