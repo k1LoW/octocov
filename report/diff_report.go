@@ -253,7 +253,7 @@ func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	if len(files) == 0 {
 		return ""
 	}
-	var t, c int
+	var t, c, pt, pc int
 	exist := false
 	rows := [][]string{}
 	for _, f := range files {
@@ -270,6 +270,10 @@ func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
 			c += fc.FileCoverageB.Covered
 			t += fc.FileCoverageB.Total
 		}
+		if fc.FileCoverageA != nil {
+			pc += fc.FileCoverageA.Covered
+			pt += fc.FileCoverageA.Total
+		}
 		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", fc.B), diff})
 	}
 	if !exist {
@@ -279,7 +283,12 @@ func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	if t == 0 {
 		coverAll = 0.0
 	}
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%)", coverAll)
+	prevAll := float64(pc) / float64(pt) * 100
+	if pt == 0 {
+		prevAll = 0.0
+	}
+	arrow := "→"
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", prevAll, arrow, coverAll)
 	buf := new(bytes.Buffer)
 	buf.WriteString(fmt.Sprintf("%s\n\n", title))
 
