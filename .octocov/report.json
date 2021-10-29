@@ -1,11 +1,11 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "cb9b4433fc48a38ce88f72586210a4941d1502df",
+  "commit": "74a35a826ad4ec8920f75d2494c496f3bf21bef2",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
-    "total": 1510,
+    "total": 1517,
     "covered": 1104,
     "files": [
       {
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 18
+            "count": 15
           },
           {
             "type": "statement",
@@ -6951,7 +6951,7 @@
       },
       {
         "file": "github.com/k1LoW/octocov/report/diff_report.go",
-        "total": 191,
+        "total": 198,
         "covered": 132,
         "blocks": [
           {
@@ -7760,35 +7760,35 @@
             "start_line": 273,
             "start_col": 3,
             "end_line": 273,
+            "end_col": 30,
+            "num_stmt": 1,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 273,
+            "start_col": 30,
+            "end_line": 276,
+            "end_col": 4,
+            "num_stmt": 2,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 277,
+            "start_col": 3,
+            "end_line": 277,
             "end_col": 115,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 275,
-            "start_col": 2,
-            "end_line": 275,
-            "end_col": 12,
-            "num_stmt": 1,
-            "count": 0
-          },
-          {
-            "type": "statement",
-            "start_line": 275,
-            "start_col": 12,
-            "end_line": 277,
-            "end_col": 3,
-            "num_stmt": 1,
-            "count": 0
-          },
-          {
-            "type": "statement",
-            "start_line": 278,
+            "start_line": 279,
             "start_col": 2,
             "end_line": 279,
             "end_col": 12,
-            "num_stmt": 2,
+            "num_stmt": 1,
             "count": 0
           },
           {
@@ -7804,79 +7804,115 @@
             "type": "statement",
             "start_line": 282,
             "start_col": 2,
-            "end_line": 286,
-            "end_col": 30,
-            "num_stmt": 4,
+            "end_line": 283,
+            "end_col": 12,
+            "num_stmt": 2,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 283,
+            "start_col": 12,
+            "end_line": 285,
+            "end_col": 3,
+            "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
             "start_line": 286,
-            "start_col": 30,
+            "start_col": 2,
+            "end_line": 287,
+            "end_col": 13,
+            "num_stmt": 2,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 287,
+            "start_col": 13,
             "end_line": 289,
+            "end_col": 3,
+            "num_stmt": 1,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 290,
+            "start_col": 2,
+            "end_line": 295,
+            "end_col": 30,
+            "num_stmt": 5,
+            "count": 0
+          },
+          {
+            "type": "statement",
+            "start_line": 295,
+            "start_col": 30,
+            "end_line": 298,
             "end_col": 3,
             "num_stmt": 2,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 291,
+            "start_line": 300,
             "start_col": 2,
-            "end_line": 291,
+            "end_line": 300,
             "end_col": 30,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 291,
+            "start_line": 300,
             "start_col": 30,
-            "end_line": 293,
+            "end_line": 302,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 295,
+            "start_line": 304,
             "start_col": 2,
-            "end_line": 302,
+            "end_line": 311,
             "end_col": 25,
             "num_stmt": 8,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 302,
+            "start_line": 311,
             "start_col": 25,
-            "end_line": 304,
+            "end_line": 313,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 305,
+            "start_line": 314,
             "start_col": 2,
-            "end_line": 307,
+            "end_line": 316,
             "end_col": 30,
             "num_stmt": 2,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 307,
+            "start_line": 316,
             "start_col": 30,
-            "end_line": 309,
+            "end_line": 318,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 311,
+            "start_line": 320,
             "start_col": 2,
-            "end_line": 311,
+            "end_line": 320,
             "end_col": 98,
             "num_stmt": 1,
             "count": 0
@@ -9135,9 +9171,9 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 4637,
+    "code": 4646,
     "test": 1522
   },
-  "test_execution_time": 53000000000,
-  "timestamp": "2021-10-28T22:25:26.355476837Z"
+  "test_execution_time": 39000000000,
+  "timestamp": "2021-10-29T02:25:48.266303588Z"
 }
