@@ -357,7 +357,7 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 func makeHeadTitle(ref, commit, rp string) string {
 	ref = strings.TrimPrefix(ref, "refs/heads/")
 	if strings.HasPrefix(ref, "refs/pull/") {
-		ref = strings.Replace(strings.TrimSuffix(ref, "/head"), "refs/pull/", "#", 1)
+		ref = strings.Replace(strings.TrimSuffix(strings.TrimSuffix(ref, "/head"), "/merge"), "refs/pull/", "#", 1)
 	}
 	if len(commit) > 7 {
 		commit = commit[:7]
