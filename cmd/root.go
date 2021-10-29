@@ -127,7 +127,7 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		r, err := report.New()
+		r, err := report.New(c.Repository)
 		if err != nil {
 			return err
 		}
@@ -352,7 +352,7 @@ var rootCmd = &cobra.Command{
 						}
 					}
 					if c.Diff.Path != "" {
-						rt, err := report.New()
+						rt, err := report.New(c.Repository)
 						if err != nil {
 							return err
 						}

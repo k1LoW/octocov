@@ -46,7 +46,7 @@ var dumpCmd = &cobra.Command{
 		}
 		c.Build()
 
-		r, err := report.New()
+		r, err := report.New(c.Repository)
 		if err != nil {
 			return err
 		}

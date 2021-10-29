@@ -49,7 +49,7 @@ var viewCmd = &cobra.Command{
 		if err := c.CoverageConfigReady(); err != nil {
 			return err
 		}
-		r, err := report.New()
+		r, err := report.New(c.Repository)
 		if err != nil {
 			return err
 		}

@@ -34,8 +34,10 @@ type Report struct {
 	rp string
 }
 
-func New() (*Report, error) {
-	repo := os.Getenv("GITHUB_REPOSITORY")
+func New(ownerrepo string) (*Report, error) {
+	if ownerrepo == "" {
+		ownerrepo = os.Getenv("GITHUB_REPOSITORY")
+	}
 	ref := os.Getenv("GITHUB_REF")
 	if ref == "" {
 		cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
@@ -54,7 +56,7 @@ func New() (*Report, error) {
 	}
 
 	return &Report{
-		Repository: repo,
+		Repository: ownerrepo,
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
