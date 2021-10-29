@@ -515,6 +515,13 @@ type Repository struct {
 	Path  string
 }
 
+func (r *Repository) Reponame() string {
+	if r.Path == "" {
+		return r.Repo
+	}
+	return fmt.Sprintf("%s/%s", r.Repo, r.Path)
+}
+
 func Parse(raw string) (*Repository, error) {
 	splitted := strings.Split(raw, "/")
 	if len(splitted) < 2 {

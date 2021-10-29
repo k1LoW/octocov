@@ -73,7 +73,7 @@ func (b *BQ) StoreReport(ctx context.Context, r *report.Report) error {
 	rr := &ReportRecord{
 		Id:        id.String(),
 		Owner:     repo.Owner,
-		Repo:      repo.Repo,
+		Repo:      repo.Reponame(),
 		Ref:       r.Ref,
 		Commit:    r.Commit,
 		Timestamp: r.Timestamp,

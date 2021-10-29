@@ -14,6 +14,7 @@ func TestParse(t *testing.T) {
 	}{
 		{"owner/repo", &Repository{Owner: "owner", Repo: "repo"}, false},
 		{"owner/repo/path/to", &Repository{Owner: "owner", Repo: "repo", Path: "path/to"}, false},
+		{"owner/repo@sub", &Repository{Owner: "owner", Repo: "repo@sub"}, false},
 		{"owner", nil, true},
 	}
 	for _, tt := range tests {
