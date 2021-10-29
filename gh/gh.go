@@ -527,6 +527,15 @@ func Parse(raw string) (*Repository, error) {
 	if len(splitted) < 2 {
 		return nil, fmt.Errorf("could not parse: %s", raw)
 	}
+	for _, p := range splitted {
+		if p == "" {
+			return nil, fmt.Errorf("invalid repository path: %s", raw)
+		}
+		if strings.Trim(p, ".") == "" {
+			return nil, fmt.Errorf("invalid repository path: %s", raw)
+		}
+	}
+
 	r := &Repository{
 		Owner: splitted[0],
 		Repo:  splitted[1],
