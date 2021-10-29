@@ -256,7 +256,7 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		return false, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	ctx := context.Background()
-	owner, repo, err := gh.Parse(c.Repository)
+	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return false, err
 	}
@@ -268,7 +268,7 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		c.gh = g
 	}
 	isPullRequest := false
-	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, owner, repo); err == nil {
+	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
 		isPullRequest = true
 	}
 	now := time.Now()

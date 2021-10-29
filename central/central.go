@@ -205,11 +205,11 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	owner, repo, err := gh.Parse(c.config.Repository)
+	repo, err := gh.Parse(c.config.Repository)
 	if err != nil {
 		return err
 	}
-	rawRootURL, err := g.GetRawRootURL(ctx, owner, repo)
+	rawRootURL, err := g.GetRawRootURL(ctx, repo.Owner, repo.Repo)
 	if err != nil {
 		return err
 	}

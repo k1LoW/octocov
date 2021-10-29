@@ -320,11 +320,11 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				} else {
-					owner, repo, err := gh.Parse(c.Repository)
+					repo, err := gh.Parse(c.Repository)
 					if err != nil {
 						return err
 					}
-					path := fmt.Sprintf("%s/%s/report.json", owner, repo)
+					path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Repo)
 					for _, s := range c.Diff.Datastores {
 						d, err := datastore.New(ctx, s, c.Root())
 						if err != nil {
