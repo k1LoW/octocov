@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.28.2](https://github.com/k1LoW/octocov/compare/v0.28.1...v0.28.2) (2021-10-30)
+
+* Fix the bug of getting reports for diff [#103](https://github.com/k1LoW/octocov/pull/103) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.28.1](https://github.com/k1LoW/octocov/compare/v0.28.0...v0.28.1) (2021-10-30)
 
 * Fix root dir of Code to Test Ratio [#102](https://github.com/k1LoW/octocov/pull/102) ([k1LoW](https://github.com/k1LoW))
