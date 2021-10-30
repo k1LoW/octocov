@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.28.1](https://github.com/k1LoW/octocov/compare/v0.28.0...v0.28.1) (2021-10-30)
+
+* Fix root dir of Code to Test Ratio [#102](https://github.com/k1LoW/octocov/pull/102) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.28.0](https://github.com/k1LoW/octocov/compare/v0.27.1...v0.28.0) (2021-10-30)
 
 * [BREAKING] Support code metrics for each application in the monorepo [#101](https://github.com/k1LoW/octocov/pull/101) ([k1LoW](https://github.com/k1LoW))
