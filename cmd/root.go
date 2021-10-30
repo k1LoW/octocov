@@ -324,7 +324,7 @@ var rootCmd = &cobra.Command{
 					if err != nil {
 						return err
 					}
-					path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Repo)
+					path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
 					for _, s := range c.Diff.Datastores {
 						d, err := datastore.New(ctx, s, c.Root())
 						if err != nil {
