@@ -243,8 +243,8 @@ func (r *Report) MeasureCoverage(path string) error {
 	return nil
 }
 
-func (r *Report) MeasureCodeToTestRatio(code, test []string) error {
-	ratio, err := ratio.Measure(".", code, test)
+func (r *Report) MeasureCodeToTestRatio(root string, code, test []string) error {
+	ratio, err := ratio.Measure(root, code, test)
 	if err != nil {
 		return err
 	}
