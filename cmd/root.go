@@ -144,7 +144,7 @@ var rootCmd = &cobra.Command{
 		if err := c.CodeToTestRatioConfigReady(); err != nil {
 			cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
 		} else {
-			if err := r.MeasureCodeToTestRatio(c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
+			if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 				cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
 			}
 		}

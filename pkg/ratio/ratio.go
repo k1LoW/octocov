@@ -49,6 +49,7 @@ func (r *Ratio) Compare(r2 *Ratio) *DiffRatio {
 }
 
 func Measure(root string, code, test []string) (*Ratio, error) {
+	log.Printf("root: %s", root)
 	ratio := New()
 	defined := gocloc.NewDefinedLanguages()
 	opts := gocloc.NewClocOptions()
