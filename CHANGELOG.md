@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.28.0](https://github.com/k1LoW/octocov/compare/v0.27.1...v0.28.0) (2021-10-30)
+
+* [BREAKING] Support code metrics for each application in the monorepo [#101](https://github.com/k1LoW/octocov/pull/101) ([k1LoW](https://github.com/k1LoW))
+* Fix report comment [#100](https://github.com/k1LoW/octocov/pull/100) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.27.1](https://github.com/k1LoW/octocov/compare/v0.27.0...v0.27.1) (2021-10-28)
 
 * Fix handle coverage.yml of Clover format [#99](https://github.com/k1LoW/octocov/pull/99) ([k1LoW](https://github.com/k1LoW))
