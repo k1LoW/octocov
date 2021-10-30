@@ -290,6 +290,20 @@ central:
 
 ## Configuration
 
+### `repository:`
+
+The name of the repository.
+
+It should be in the format `owner/repo`.
+
+By default, the value of the environment variable `GITHUB_REPOSITORY` is set.
+
+In case of monorepo, code metrics can be reported to datastore separately by specifying `owner/repo/project-a` or `owner/repo@project-a`.
+
+``` yaml
+repository: k1LoW/octocov
+```
+
 ### `coverage:`
 
 Configuration for code coverage.
