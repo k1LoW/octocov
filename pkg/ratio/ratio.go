@@ -55,6 +55,9 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 	opts := gocloc.NewClocOptions()
 
 	if err := filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if fi.IsDir() {
 			if ignore(path) {
 				return filepath.SkipDir
@@ -68,6 +71,11 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		isCode := false
 		isTest := false
 
+		rel, err := filepath.Rel(root, path)
+		if err != nil {
+			return err
+		}
+
 		// check path
 		if len(code) == 0 {
 			isCode = true
@@ -78,7 +86,7 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 				p = strings.TrimPrefix(p, "!")
 				not = true
 			}
-			match, err := doublestar.PathMatch(p, path)
+			match, err := doublestar.PathMatch(p, rel)
 			if err != nil {
 				return err
 			}
@@ -97,7 +105,7 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 				p = strings.TrimPrefix(p, "!")
 				not = true
 			}
-			match, err := doublestar.PathMatch(p, path)
+			match, err := doublestar.PathMatch(p, rel)
 			if err != nil {
 				return err
 			}
@@ -124,21 +132,13 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		}
 		cf := gocloc.AnalyzeFile(path, defined.Langs[l], opts)
 		if isCode {
-			log.Printf("code: %s,%d", path, cf.Code)
+			log.Printf("code: %s,%d", rel, cf.Code)
 			ratio.Code += int(cf.Code)
-			rel, err := filepath.Rel(root, path)
-			if err != nil {
-				return err
-			}
 			ratio.CodeFiles = append(ratio.CodeFiles, rel)
 		}
 		if isTest {
-			log.Printf("test: %s,%d", path, cf.Code)
+			log.Printf("test: %s,%d", rel, cf.Code)
 			ratio.Test += int(cf.Code)
-			rel, err := filepath.Rel(root, path)
-			if err != nil {
-				return err
-			}
 			ratio.TestFiles = append(ratio.TestFiles, rel)
 		}
 		return nil

@@ -29,8 +29,8 @@ func TestRoot(t *testing.T) {
 		} else {
 			if tt.wantErr {
 				t.Error("want err")
+				continue
 			}
-			continue
 		}
 		got := l.Root()
 		if got != tt.want {
