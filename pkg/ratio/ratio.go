@@ -55,6 +55,9 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 	opts := gocloc.NewClocOptions()
 
 	if err := filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 		if fi.IsDir() {
 			if ignore(path) {
 				return filepath.SkipDir
