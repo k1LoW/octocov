@@ -7,9 +7,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
-	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,7 +18,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/go-github/v35/github"
+	"github.com/google/go-github/v39/github"
+	"github.com/k1LoW/go-github-client/v39/factory"
 	"github.com/lestrrat-go/backoff/v2"
 )
 
@@ -34,25 +32,12 @@ type Gh struct {
 }
 
 func New() (*Gh, error) {
-	// GITHUB_TOKEN
-	token := os.Getenv("GITHUB_TOKEN")
-	if token == "" {
-		return nil, fmt.Errorf("env %s is not set", "GITHUB_TOKEN")
+	client, err := factory.NewGithubClient(factory.Timeout(10 * time.Second))
+	if err != nil {
+		return nil, err
 	}
-	v3c := github.NewClient(httpClient(token))
-	if v3ep := os.Getenv("GITHUB_API_URL"); v3ep != "" {
-		baseEndpoint, err := url.Parse(v3ep)
-		if err != nil {
-			return nil, err
-		}
-		if !strings.HasSuffix(baseEndpoint.Path, "/") {
-			baseEndpoint.Path += "/"
-		}
-		v3c.BaseURL = baseEndpoint
-	}
-
 	return &Gh{
-		client: v3c,
+		client: client,
 	}, nil
 }
 
@@ -545,31 +530,4 @@ func Parse(raw string) (*Repository, error) {
 	}
 
 	return r, nil
-}
-
-type roundTripper struct {
-	transport   *http.Transport
-	accessToken string
-}
-
-func (rt roundTripper) RoundTrip(r *http.Request) (*http.Response, error) {
-	r.Header.Set("Authorization", fmt.Sprintf("token %s", rt.accessToken))
-	return rt.transport.RoundTrip(r)
-}
-
-func httpClient(token string) *http.Client {
-	t := &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout: 5 * time.Second,
-		}).Dial,
-		TLSHandshakeTimeout: 5 * time.Second,
-	}
-	rt := roundTripper{
-		transport:   t,
-		accessToken: token,
-	}
-	return &http.Client{
-		Timeout:   time.Second * 10,
-		Transport: rt,
-	}
 }
