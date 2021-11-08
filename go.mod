@@ -23,7 +23,8 @@ require (
 	github.com/jszwec/s3fs v0.3.1
 	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/expand v0.1.0
-	github.com/k1LoW/go-github-client/v39 v39.2.0
+	github.com/k1LoW/ghfs v0.5.0
+	github.com/k1LoW/go-github-client/v39 v39.2.2
 	github.com/k1LoW/osfs v0.1.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.0.3

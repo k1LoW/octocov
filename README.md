@@ -710,6 +710,18 @@ report:
 central:
   reports:
     datastores:
+      - github://owner/central-repo/reports
+  push:
+    enable: true
+```
+
+or
+
+``` yaml
+# .octocov.yml for central repo
+central:
+  reports:
+    datastores:
       - local://reports
   push:
     enable: true
