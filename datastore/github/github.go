@@ -2,11 +2,11 @@ package github
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io/fs"
 	"path/filepath"
 
+	"github.com/k1LoW/ghfs"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
@@ -46,5 +46,13 @@ func (g *Github) Put(ctx context.Context, path string, content []byte) error {
 }
 
 func (g *Github) FS() (fs.FS, error) {
-	return nil, errors.New("not implemented")
+	r, err := gh.Parse(g.repository)
+	if err != nil {
+		return nil, err
+	}
+	fsys, err := ghfs.New(r.Owner, r.Repo, ghfs.Client(g.gh.Client()), ghfs.Branch(g.branch))
+	if err != nil {
+		return nil, err
+	}
+	return fs.Sub(fsys, g.prefix)
 }

@@ -41,6 +41,10 @@ func New() (*Gh, error) {
 	}, nil
 }
 
+func (g *Gh) Client() *github.Client {
+	return g.client
+}
+
 func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, message string) error {
 	srv := g.client.Git
 	dRef, _, err := srv.GetRef(ctx, owner, repo, path.Join("heads", branch))
