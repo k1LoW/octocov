@@ -165,37 +165,67 @@ func (c *Config) Loaded() bool {
 	return c.path != ""
 }
 
-func (c *Config) Acceptable(r *report.Report) error {
-	if err := c.CoverageConfigReady(); err == nil && c.Coverage.Acceptable != "" {
-		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
-		if err != nil {
+func (c *Config) Acceptable(r, rPrev *report.Report) error {
+	if err := c.CoverageConfigReady(); err == nil {
+		if err := coverageAcceptable(r.CoveragePercent(), c.Coverage.Acceptable); err != nil {
 			return err
-		}
-		if r.CoveragePercent() < a {
-			return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
 		}
 	}
 
-	if err := c.CodeToTestRatioConfigReady(); err == nil && c.CodeToTestRatio.Acceptable != "" {
-		a, err := strconv.ParseFloat(strings.TrimPrefix(c.CodeToTestRatio.Acceptable, "1:"), 64)
-		if err != nil {
+	if err := c.CodeToTestRatioConfigReady(); err == nil {
+		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), c.CodeToTestRatio.Acceptable); err != nil {
 			return err
-		}
-		if r.CodeToTestRatioRatio() < a {
-			return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", r.CodeToTestRatioRatio(), a)
 		}
 	}
 
-	if err := c.TestExecutionTimeConfigReady(); err == nil && r.TestExecutionTime != nil && c.TestExecutionTime.Acceptable != "" {
-		a, err := duration.Parse(c.TestExecutionTime.Acceptable)
-		if err != nil {
+	if err := c.TestExecutionTimeConfigReady(); err == nil {
+		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), c.TestExecutionTime.Acceptable); err != nil {
 			return err
-		}
-		if *r.TestExecutionTime > float64(a) {
-			return fmt.Errorf("test execution time is %v, which is above the accepted %v", time.Duration(*r.TestExecutionTime), a)
 		}
 	}
 
+	return nil
+}
+
+func coverageAcceptable(cov float64, cond string) error {
+	if cond == "" {
+		return nil
+	}
+	a, err := strconv.ParseFloat(strings.TrimSuffix(cond, "%"), 64)
+	if err != nil {
+		return err
+	}
+	if cov < a {
+		return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", cov, a)
+	}
+	return nil
+}
+
+func codeToTestRatioAcceptable(ratio float64, cond string) error {
+	if cond == "" {
+		return nil
+	}
+	a, err := strconv.ParseFloat(strings.TrimPrefix(cond, "1:"), 64)
+	if err != nil {
+		return err
+	}
+	if ratio < a {
+		return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", ratio, a)
+	}
+	return nil
+}
+
+func testExecutionTimeAcceptable(t float64, cond string) error {
+	if cond == "" {
+		return nil
+	}
+	a, err := duration.Parse(cond)
+	if err != nil {
+		return err
+	}
+	if t > float64(a) {
+		return fmt.Errorf("test execution time is %v, which is above the accepted %v", time.Duration(t), a)
+	}
 	return nil
 }
 

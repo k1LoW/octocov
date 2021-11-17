@@ -9,7 +9,7 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Report) error {
+func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Report) error {
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return err
@@ -31,8 +31,8 @@ func commentReport(ctx context.Context, c *config.Config, r, rOrig *report.Repor
 		footer = "Reported by octocov"
 	}
 	var table, fileTable string
-	if rOrig != nil {
-		d := rOrig.Compare(r)
+	if rPrev != nil {
+		d := rPrev.Compare(r)
 		table = d.Table()
 		fileTable = d.FileCoveagesTable(files)
 	} else {

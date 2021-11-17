@@ -79,11 +79,12 @@ func TestCoverageAcceptable(t *testing.T) {
 		c.Build()
 
 		r := &report.Report{}
+		rPrev := &report.Report{}
 		r.Coverage = &coverage.Coverage{
 			Covered: 50,
 			Total:   100,
 		}
-		if err := c.Acceptable(r); err != nil {
+		if err := c.Acceptable(r, rPrev); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -113,11 +114,12 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 		}
 		c.Build()
 		r := &report.Report{}
+		rPrev := &report.Report{}
 		r.CodeToTestRatio = &ratio.Ratio{
 			Code: 100,
 			Test: 100,
 		}
-		if err := c.Acceptable(r); err != nil {
+		if err := c.Acceptable(r, rPrev); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -145,9 +147,10 @@ func TestTestExecutionTimeAcceptable(t *testing.T) {
 		}
 		c.Build()
 		r := &report.Report{}
+		rPrev := &report.Report{}
 		e := float64(time.Minute)
 		r.TestExecutionTime = &e
-		if err := c.Acceptable(r); err != nil {
+		if err := c.Acceptable(r, rPrev); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}

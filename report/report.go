@@ -88,7 +88,7 @@ func (r *Report) Table() string {
 	}
 	if r.TestExecutionTime != nil {
 		h = append(h, "Test Execution Time")
-		d := time.Duration(*r.TestExecutionTime)
+		d := time.Duration(r.TestExecutionTimeNano())
 		m = append(m, d.String())
 	}
 	buf := new(bytes.Buffer)
@@ -309,6 +309,13 @@ func (r *Report) CodeToTestRatioRatio() float64 {
 	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
 }
 
+func (r *Report) TestExecutionTimeNano() float64 {
+	if r.TestExecutionTime == nil {
+		return 0.0
+	}
+	return *r.TestExecutionTime
+}
+
 func (r *Report) Validate() error {
 	if r.Repository == "" {
 		return fmt.Errorf("coverage report '%s' (env %s) is not set", "repository", "GITHUB_REPOSITORY")
@@ -347,9 +354,9 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 			TestExecutionTimeB: r2.TestExecutionTime,
 		}
 		var t1, t2 float64
-		t1 = *r.TestExecutionTime
+		t1 = r.TestExecutionTimeNano()
 		if r2.TestExecutionTime != nil {
-			t2 = *r2.TestExecutionTime
+			t2 = r2.TestExecutionTimeNano()
 		}
 		dt.Diff = t2 - t1
 		d.TestExecutionTime = dt

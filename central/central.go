@@ -164,7 +164,7 @@ func (c *Central) generateBadges() ([]string, error) {
 
 		// Test Execution Time
 		if r.TestExecutionTime != nil {
-			d := time.Duration(*r.TestExecutionTime)
+			d := time.Duration(r.TestExecutionTimeNano())
 			bp := filepath.Join(r.Repository, "time.svg")
 			out := new(bytes.Buffer)
 			b := badge.New("test execution time", d.String())
@@ -269,7 +269,7 @@ func funcs() map[string]interface{} {
 			if r.TestExecutionTime == nil {
 				return "-"
 			}
-			return time.Duration(*r.TestExecutionTime).String()
+			return time.Duration(r.TestExecutionTimeNano()).String()
 		},
 	}
 }

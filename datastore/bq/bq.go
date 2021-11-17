@@ -102,7 +102,7 @@ func (b *BQ) StoreReport(ctx context.Context, r *report.Report) error {
 	}
 	if r.TestExecutionTime != nil {
 		rr.TestExecutionTime = bigquery.NullFloat64{
-			Float64: *r.TestExecutionTime,
+			Float64: r.TestExecutionTimeNano(),
 			Valid:   true,
 		}
 	}
