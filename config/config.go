@@ -20,6 +20,7 @@ import (
 
 const defaultBadgesDatastore = "local://reports"
 const defaultReportsDatastore = "local://reports"
+const largeEnoughTime = float64(99 * time.Hour)
 
 const (
 	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
@@ -168,19 +169,23 @@ func (c *Config) Loaded() bool {
 
 func (c *Config) Acceptable(r, rPrev *report.Report) error {
 	if err := c.CoverageConfigReady(); err == nil {
-		if err := coverageAcceptable(r.CoveragePercent(), c.Coverage.Acceptable); err != nil {
+		if err := coverageAcceptable(r.CoveragePercent(), rPrev.CoveragePercent(), c.Coverage.Acceptable); err != nil {
 			return err
 		}
 	}
 
 	if err := c.CodeToTestRatioConfigReady(); err == nil {
-		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), c.CodeToTestRatio.Acceptable); err != nil {
+		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), rPrev.CodeToTestRatioRatio(), c.CodeToTestRatio.Acceptable); err != nil {
 			return err
 		}
 	}
 
 	if err := c.TestExecutionTimeConfigReady(); err == nil {
-		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), c.TestExecutionTime.Acceptable); err != nil {
+		tPrev := rPrev.TestExecutionTimeNano()
+		if !rPrev.IsMeasuredTestExecutionTime() {
+			tPrev = largeEnoughTime
+		}
+		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), tPrev, c.TestExecutionTime.Acceptable); err != nil {
 			return err
 		}
 	}
@@ -197,7 +202,7 @@ var (
 	durationRe        = regexp.MustCompile(`[\d.]+[a-z]+`)
 )
 
-func coverageAcceptable(cov float64, cond string) error {
+func coverageAcceptable(current, prev float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
@@ -205,13 +210,15 @@ func coverageAcceptable(cov float64, cond string) error {
 	cond = trimPercentRe.ReplaceAllString(cond, "$1")
 
 	if numberOnlyRe.MatchString(cond) {
-		cond = fmt.Sprintf("coverage >= %s", cond)
+		cond = fmt.Sprintf("current >= %s", cond)
 	} else if compOpRe.MatchString(cond) {
-		cond = fmt.Sprintf("coverage %s", cond)
+		cond = fmt.Sprintf("current %s", cond)
 	}
 
 	variables := map[string]interface{}{
-		"coverage": cov,
+		"current": current,
+		"prev":    prev,
+		"diff":    current - prev,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -219,12 +226,12 @@ func coverageAcceptable(cov float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", cov, cond)
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", current, cond)
 	}
 	return nil
 }
 
-func codeToTestRatioAcceptable(ratio float64, cond string) error {
+func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
@@ -232,13 +239,15 @@ func codeToTestRatioAcceptable(ratio float64, cond string) error {
 	cond = trimRatioPrefixRe.ReplaceAllString(cond, "$1")
 
 	if numberOnlyRe.MatchString(cond) {
-		cond = fmt.Sprintf("ratio >= %s", cond)
+		cond = fmt.Sprintf("current >= %s", cond)
 	} else if compOpRe.MatchString(cond) {
-		cond = fmt.Sprintf("ratio %s", cond)
+		cond = fmt.Sprintf("current %s", cond)
 	}
 
 	variables := map[string]interface{}{
-		"ratio": ratio,
+		"current": current,
+		"prev":    prev,
+		"diff":    current - prev,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -246,12 +255,12 @@ func codeToTestRatioAcceptable(ratio float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", ratio, cond)
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", current, cond)
 	}
 	return nil
 }
 
-func testExecutionTimeAcceptable(t float64, cond string) error {
+func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
@@ -265,13 +274,15 @@ func testExecutionTimeAcceptable(t float64, cond string) error {
 	}
 
 	if numberOnlyRe.MatchString(cond) {
-		cond = fmt.Sprintf("time <= %s", cond)
+		cond = fmt.Sprintf("current <= %s", cond)
 	} else if compOpRe.MatchString(cond) {
-		cond = fmt.Sprintf("time %s", cond)
+		cond = fmt.Sprintf("current %s", cond)
 	}
 
 	variables := map[string]interface{}{
-		"time": t,
+		"current": current,
+		"prev":    prev,
+		"diff":    current - prev,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -279,7 +290,7 @@ func testExecutionTimeAcceptable(t float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(t), cond)
+		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(current), cond)
 	}
 	return nil
 }

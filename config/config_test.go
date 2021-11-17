@@ -63,23 +63,29 @@ func TestCoverageAcceptable(t *testing.T) {
 	tests := []struct {
 		cond    string
 		cov     float64
+		prev    float64
 		wantErr bool
 	}{
-		{"60%", 50.0, true},
-		{"50%", 50.0, false},
-		{"49.9%", 50.0, false},
-		{"49.9", 50.0, false},
-		{">= 60%", 50.0, true},
-		{">= 50%", 50.0, false},
-		{">= 49.9%", 50.0, false},
-		{">= 49.9", 50.0, false},
-		{">=60%", 50.0, true},
-		{">=50%", 50.0, false},
-		{">=49.9%", 50.0, false},
-		{">=49.9", 50.0, false},
+		{"60%", 50.0, 0, true},
+		{"50%", 50.0, 0, false},
+		{"49.9%", 50.0, 0, false},
+		{"49.9", 50.0, 0, false},
+		{">= 60%", 50.0, 0, true},
+		{">= 50%", 50.0, 0, false},
+		{">= 49.9%", 50.0, 0, false},
+		{">= 49.9", 50.0, 0, false},
+		{">=60%", 50.0, 0, true},
+		{">=50%", 50.0, 0, false},
+		{">=49.9%", 50.0, 0, false},
+		{">=49.9", 50.0, 0, false},
+
+		{"current >= 60%", 50.0, 0, true},
+		{"current > prev", 50.0, 49.0, false},
+		{"diff >= 0", 50.0, 49.0, false},
+		{"current >= 50% && diff >= 0", 50.0, 49.0, false},
 	}
 	for _, tt := range tests {
-		if err := coverageAcceptable(tt.cov, tt.cond); err != nil {
+		if err := coverageAcceptable(tt.cov, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -95,23 +101,29 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 	tests := []struct {
 		cond    string
 		ratio   float64
+		prev    float64
 		wantErr bool
 	}{
-		{"1:1", 1.0, false},
-		{"1:1.1", 1.0, true},
-		{"1", 1.0, false},
-		{"1.1", 1.0, true},
-		{">= 1:1", 1.0, false},
-		{">= 1:1.1", 1.0, true},
-		{">= 1", 1.0, false},
-		{">= 1.1", 1.0, true},
-		{">=1:1", 1.0, false},
-		{">=1:1.1", 1.0, true},
-		{">=1", 1.0, false},
-		{">=1.1", 1.0, true},
+		{"1:1", 1.0, 0, false},
+		{"1:1.1", 1.0, 0, true},
+		{"1", 1.0, 0, false},
+		{"1.1", 1.0, 0, true},
+		{">= 1:1", 1.0, 0, false},
+		{">= 1:1.1", 1.0, 0, true},
+		{">= 1", 1.0, 0, false},
+		{">= 1.1", 1.0, 0, true},
+		{">=1:1", 1.0, 0, false},
+		{">=1:1.1", 1.0, 0, true},
+		{">=1", 1.0, 0, false},
+		{">=1.1", 1.0, 0, true},
+
+		{"current >= 1.1", 1.2, 1.1, false},
+		{"current > prev", 1.2, 1.1, false},
+		{"diff >= 0", 1.2, 1.1, false},
+		{"current >= 1.1 && diff >= 0", 1.2, 1.1, false},
 	}
 	for _, tt := range tests {
-		if err := codeToTestRatioAcceptable(tt.ratio, tt.cond); err != nil {
+		if err := codeToTestRatioAcceptable(tt.ratio, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -127,20 +139,26 @@ func TestTestExecutionTimeAcceptable(t *testing.T) {
 	tests := []struct {
 		cond    string
 		ti      float64
+		prev    float64
 		wantErr bool
 	}{
-		{"1min", float64(time.Minute), false},
-		{"59s", float64(time.Minute), true},
-		{"61sec", float64(time.Minute), false},
-		{"<= 1min", float64(time.Minute), false},
-		{"<= 59s", float64(time.Minute), true},
-		{"<= 61sec", float64(time.Minute), false},
-		{"<=1min", float64(time.Minute), false},
-		{"<=59s", float64(time.Minute), true},
-		{"<=61sec", float64(time.Minute), false},
+		{"1min", float64(time.Minute), 0, false},
+		{"59s", float64(time.Minute), 0, true},
+		{"61sec", float64(time.Minute), 0, false},
+		{"<= 1min", float64(time.Minute), 0, false},
+		{"<= 59s", float64(time.Minute), 0, true},
+		{"<= 61sec", float64(time.Minute), 0, false},
+		{"<=1min", float64(time.Minute), 0, false},
+		{"<=59s", float64(time.Minute), 0, true},
+		{"<=61sec", float64(time.Minute), 0, false},
+
+		{"current <= 1min", float64(time.Minute), float64(59 * time.Second), false},
+		{"current > prev", float64(time.Minute), float64(59 * time.Second), false},
+		{"diff <= 1sec", float64(time.Minute), float64(59 * time.Second), false},
+		{"current <= 1min && diff <= 1sec", float64(time.Minute), float64(59 * time.Second), false},
 	}
 	for _, tt := range tests {
-		if err := testExecutionTimeAcceptable(tt.ti, tt.cond); err != nil {
+		if err := testExecutionTimeAcceptable(tt.ti, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
