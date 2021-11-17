@@ -8,9 +8,6 @@ import (
 	"time"
 
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/pkg/coverage"
-	"github.com/k1LoW/octocov/pkg/ratio"
-	"github.com/k1LoW/octocov/report"
 )
 
 func TestMain(m *testing.M) {
@@ -64,27 +61,17 @@ func TestLoadConfigAndOmitEnableFlag(t *testing.T) {
 
 func TestCoverageAcceptable(t *testing.T) {
 	tests := []struct {
-		in      string
+		cond    string
+		cov     float64
 		wantErr bool
 	}{
-		{"60%", true},
-		{"50%", false},
-		{"49.9%", false},
-		{"49.9", false},
+		{"60%", 50.0, true},
+		{"50%", 50.0, false},
+		{"49.9%", 50.0, false},
+		{"49.9", 50.0, false},
 	}
 	for _, tt := range tests {
-		c := New()
-		c.Coverage = &ConfigCoverage{}
-		c.Coverage.Acceptable = tt.in
-		c.Build()
-
-		r := &report.Report{}
-		rPrev := &report.Report{}
-		r.Coverage = &coverage.Coverage{
-			Covered: 50,
-			Total:   100,
-		}
-		if err := c.Acceptable(r, rPrev); err != nil {
+		if err := coverageAcceptable(tt.cov, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -98,28 +85,17 @@ func TestCoverageAcceptable(t *testing.T) {
 
 func TestCodeToTestRatioAcceptable(t *testing.T) {
 	tests := []struct {
-		in      string
+		cond    string
+		ratio   float64
 		wantErr bool
 	}{
-		{"1:1", false},
-		{"1:1.1", true},
-		{"1", false},
-		{"1.1", true},
+		{"1:1", 1.0, false},
+		{"1:1.1", 1.0, true},
+		{"1", 1.0, false},
+		{"1.1", 1.0, true},
 	}
 	for _, tt := range tests {
-		c := New()
-		c.CodeToTestRatio = &ConfigCodeToTestRatio{
-			Acceptable: tt.in,
-			Test:       []string{"*_test.go"},
-		}
-		c.Build()
-		r := &report.Report{}
-		rPrev := &report.Report{}
-		r.CodeToTestRatio = &ratio.Ratio{
-			Code: 100,
-			Test: 100,
-		}
-		if err := c.Acceptable(r, rPrev); err != nil {
+		if err := codeToTestRatioAcceptable(tt.ratio, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -133,24 +109,16 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 
 func TestTestExecutionTimeAcceptable(t *testing.T) {
 	tests := []struct {
-		in      string
+		cond    string
+		ti      float64
 		wantErr bool
 	}{
-		{"1min", false},
-		{"59s", true},
-		{"61sec", false},
+		{"1min", float64(time.Minute), false},
+		{"59s", float64(time.Minute), true},
+		{"61sec", float64(time.Minute), false},
 	}
 	for _, tt := range tests {
-		c := New()
-		c.TestExecutionTime = &ConfigTestExecutionTime{
-			Acceptable: tt.in,
-		}
-		c.Build()
-		r := &report.Report{}
-		rPrev := &report.Report{}
-		e := float64(time.Minute)
-		r.TestExecutionTime = &e
-		if err := c.Acceptable(r, rPrev); err != nil {
+		if err := testExecutionTimeAcceptable(tt.ti, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
