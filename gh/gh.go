@@ -45,6 +45,10 @@ func (g *Gh) Client() *github.Client {
 	return g.client
 }
 
+func (g *Gh) SetClient(client *github.Client) {
+	g.client = client
+}
+
 func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, message string) error {
 	srv := g.client.Git
 	dRef, _, err := srv.GetRef(ctx, owner, repo, path.Join("heads", branch))
@@ -196,6 +200,20 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 	}
 
 	return 0, errors.New("could not detect id of current job")
+}
+
+func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
+	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch-name
+	if len(splitted) < 3 {
+		return "", fmt.Errorf("env %s is not set", "GITHUB_REF")
+	}
+	if strings.Contains(os.Getenv("GITHUB_REF"), "refs/heads/") {
+		return splitted[2], nil
+	}
+	if os.Getenv("GITHUB_HEAD_REF") == "" {
+		return "", fmt.Errorf("env %s is not set", "GITHUB_HEAD_REF")
+	}
+	return os.Getenv("GITHUB_HEAD_REF"), nil
 }
 
 func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo string) (int, error) {

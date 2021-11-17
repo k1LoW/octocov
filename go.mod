@@ -29,6 +29,7 @@ require (
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.0.3
 	github.com/mauri870/gcsfs v0.0.0-20210217184550-8b539458430a
+	github.com/migueleliasweb/go-github-mock v0.0.5
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.2.1
