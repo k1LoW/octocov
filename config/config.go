@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -187,16 +188,38 @@ func (c *Config) Acceptable(r, rPrev *report.Report) error {
 	return nil
 }
 
+var (
+	trimPercentRe = regexp.MustCompile(`([\d.]+)%`)
+	numberOnlyRe  = regexp.MustCompile(`^\s*[\d]+\.?[\d]*\s*$`)
+	compOpRe      = regexp.MustCompile(`^\s*[><=].+$`)
+
+	trimRatioPrefixRe = regexp.MustCompile(`1:([\d.]+)`)
+	durationRe        = regexp.MustCompile(`[\d.]+[a-z]+`)
+)
+
 func coverageAcceptable(cov float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
-	a, err := strconv.ParseFloat(strings.TrimSuffix(cond, "%"), 64)
+	// Trim '%'
+	cond = trimPercentRe.ReplaceAllString(cond, "$1")
+
+	if numberOnlyRe.MatchString(cond) {
+		cond = fmt.Sprintf("coverage >= %s", cond)
+	} else if compOpRe.MatchString(cond) {
+		cond = fmt.Sprintf("coverage %s", cond)
+	}
+
+	variables := map[string]interface{}{
+		"coverage": cov,
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
 		return err
 	}
-	if cov < a {
-		return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", cov, a)
+
+	if !ok.(bool) {
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", cov, cond)
 	}
 	return nil
 }
@@ -205,12 +228,25 @@ func codeToTestRatioAcceptable(ratio float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
-	a, err := strconv.ParseFloat(strings.TrimPrefix(cond, "1:"), 64)
+	// Trim '1:'
+	cond = trimRatioPrefixRe.ReplaceAllString(cond, "$1")
+
+	if numberOnlyRe.MatchString(cond) {
+		cond = fmt.Sprintf("ratio >= %s", cond)
+	} else if compOpRe.MatchString(cond) {
+		cond = fmt.Sprintf("ratio %s", cond)
+	}
+
+	variables := map[string]interface{}{
+		"ratio": ratio,
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
 		return err
 	}
-	if ratio < a {
-		return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", ratio, a)
+
+	if !ok.(bool) {
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", ratio, cond)
 	}
 	return nil
 }
@@ -219,12 +255,31 @@ func testExecutionTimeAcceptable(t float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
-	a, err := duration.Parse(cond)
+	matches := durationRe.FindAllString(cond, -1)
+	for _, m := range matches {
+		d, err := duration.Parse(m)
+		if err != nil {
+			return err
+		}
+		cond = strings.Replace(cond, m, strconv.FormatFloat(float64(d), 'f', -1, 64), 1)
+	}
+
+	if numberOnlyRe.MatchString(cond) {
+		cond = fmt.Sprintf("time <= %s", cond)
+	} else if compOpRe.MatchString(cond) {
+		cond = fmt.Sprintf("time %s", cond)
+	}
+
+	variables := map[string]interface{}{
+		"time": t,
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
 		return err
 	}
-	if t > float64(a) {
-		return fmt.Errorf("test execution time is %v, which is above the accepted %v", time.Duration(t), a)
+
+	if !ok.(bool) {
+		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(t), cond)
 	}
 	return nil
 }

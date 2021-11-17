@@ -69,6 +69,14 @@ func TestCoverageAcceptable(t *testing.T) {
 		{"50%", 50.0, false},
 		{"49.9%", 50.0, false},
 		{"49.9", 50.0, false},
+		{">= 60%", 50.0, true},
+		{">= 50%", 50.0, false},
+		{">= 49.9%", 50.0, false},
+		{">= 49.9", 50.0, false},
+		{">=60%", 50.0, true},
+		{">=50%", 50.0, false},
+		{">=49.9%", 50.0, false},
+		{">=49.9", 50.0, false},
 	}
 	for _, tt := range tests {
 		if err := coverageAcceptable(tt.cov, tt.cond); err != nil {
@@ -93,6 +101,14 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 		{"1:1.1", 1.0, true},
 		{"1", 1.0, false},
 		{"1.1", 1.0, true},
+		{">= 1:1", 1.0, false},
+		{">= 1:1.1", 1.0, true},
+		{">= 1", 1.0, false},
+		{">= 1.1", 1.0, true},
+		{">=1:1", 1.0, false},
+		{">=1:1.1", 1.0, true},
+		{">=1", 1.0, false},
+		{">=1.1", 1.0, true},
 	}
 	for _, tt := range tests {
 		if err := codeToTestRatioAcceptable(tt.ratio, tt.cond); err != nil {
@@ -116,6 +132,12 @@ func TestTestExecutionTimeAcceptable(t *testing.T) {
 		{"1min", float64(time.Minute), false},
 		{"59s", float64(time.Minute), true},
 		{"61sec", float64(time.Minute), false},
+		{"<= 1min", float64(time.Minute), false},
+		{"<= 59s", float64(time.Minute), true},
+		{"<= 61sec", float64(time.Minute), false},
+		{"<=1min", float64(time.Minute), false},
+		{"<=59s", float64(time.Minute), true},
+		{"<=61sec", float64(time.Minute), false},
 	}
 	for _, tt := range tests {
 		if err := testExecutionTimeAcceptable(tt.ti, tt.cond); err != nil {
