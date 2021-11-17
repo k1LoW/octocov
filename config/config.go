@@ -267,6 +267,17 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		}
 		c.gh = g
 	}
+	defaultBranch, err := c.gh.GetDefaultBranch(ctx, repo.Owner, repo.Repo)
+	if err != nil {
+		return false, err
+	}
+	isDefaultBranch := false
+	if b, err := c.gh.DetectCurrentBranch(ctx); err == nil {
+		if b == defaultBranch {
+			isDefaultBranch = true
+		}
+	}
+
 	isPullRequest := false
 	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
 		isPullRequest = true
@@ -282,8 +293,9 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 			"event_name": e.Name,
 			"event":      e.Payload,
 		},
-		"env":             envMap(),
-		"is_pull_request": isPullRequest,
+		"env":               envMap(),
+		"is_default_branch": isDefaultBranch,
+		"is_pull_request":   isPullRequest,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {

@@ -1,11 +1,17 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/google/go-github/v39/github"
+	"github.com/k1LoW/go-github-client/v39/factory"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
+	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
 
 func TestCoverageConfigReady(t *testing.T) {
@@ -141,6 +147,8 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 func TestPushConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
+	mg := mockedGh(t)
 	tests := []struct {
 		c    *Config
 		want string
@@ -148,6 +156,7 @@ func TestPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
+				gh:         mg,
 			},
 			"push: is not set",
 		},
@@ -155,6 +164,7 @@ func TestPushConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Push:       &ConfigPush{},
+				gh:         mg,
 			},
 			"failed to traverse the Git root path",
 		},
@@ -164,6 +174,7 @@ func TestPushConfigReady(t *testing.T) {
 				Push: &ConfigPush{
 					Enable: internal.Bool(true),
 				},
+				gh: mg,
 			},
 			"failed to traverse the Git root path",
 		},
@@ -174,6 +185,7 @@ func TestPushConfigReady(t *testing.T) {
 				Push: &ConfigPush{
 					Enable: internal.Bool(true),
 				},
+				gh: mg,
 			},
 			"",
 		},
@@ -185,6 +197,7 @@ func TestPushConfigReady(t *testing.T) {
 					Enable: internal.Bool(true),
 					If:     "false",
 				},
+				gh: mg,
 			},
 			"the condition in the `if` section is not met (false)",
 		},
@@ -200,6 +213,8 @@ func TestPushConfigReady(t *testing.T) {
 			continue
 		}
 		if err != nil && tt.want != "" {
+			fmt.Printf("%s\n", err)
+
 			if got := err.Error(); got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
@@ -211,6 +226,7 @@ func TestCommentConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_REF", "refs/pull/123/merge")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	mg := mockedGh(t)
 	tests := []struct {
 		c    *Config
 		want string
@@ -218,6 +234,7 @@ func TestCommentConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
+				gh:         mockedGh(t),
 			},
 			"comment: is not set",
 		},
@@ -225,6 +242,7 @@ func TestCommentConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Comment:    &ConfigComment{},
+				gh:         mockedGh(t),
 			},
 			"",
 		},
@@ -234,6 +252,7 @@ func TestCommentConfigReady(t *testing.T) {
 				Comment: &ConfigComment{
 					Enable: internal.Bool(true),
 				},
+				gh: mg,
 			},
 			"",
 		},
@@ -243,6 +262,7 @@ func TestCommentConfigReady(t *testing.T) {
 				Comment: &ConfigComment{
 					If: "false",
 				},
+				gh: mg,
 			},
 			"the condition in the `if` section is not met (false)",
 		},
@@ -403,6 +423,8 @@ func TestTestExecutionTimeBadgeConfigReady(t *testing.T) {
 }
 
 func TestCentralConfigReady(t *testing.T) {
+	mg := mockedGh(t)
+
 	tests := []struct {
 		c    *Config
 		want string
@@ -414,6 +436,7 @@ func TestCentralConfigReady(t *testing.T) {
 		{
 			&Config{
 				Central: &ConfigCentral{},
+				gh:      mockedGh(t),
 			},
 			"repository: not set (or env GITHUB_REPOSITORY is not set)",
 		},
@@ -422,6 +445,7 @@ func TestCentralConfigReady(t *testing.T) {
 				Central: &ConfigCentral{
 					Enable: internal.Bool(false),
 				},
+				gh: mg,
 			},
 			"central.enable: is false",
 		},
@@ -430,6 +454,7 @@ func TestCentralConfigReady(t *testing.T) {
 				Central: &ConfigCentral{
 					Enable: internal.Bool(true),
 				},
+				gh: mg,
 			},
 			"repository: not set (or env GITHUB_REPOSITORY is not set)",
 		},
@@ -439,6 +464,7 @@ func TestCentralConfigReady(t *testing.T) {
 				Central: &ConfigCentral{
 					Enable: internal.Bool(true),
 				},
+				gh: mg,
 			},
 			"central.reports.datastores is not set",
 		},
@@ -453,6 +479,7 @@ func TestCentralConfigReady(t *testing.T) {
 						},
 					},
 				},
+				gh: mg,
 			},
 			"",
 		},
@@ -468,6 +495,7 @@ func TestCentralConfigReady(t *testing.T) {
 					},
 					If: "false",
 				},
+				gh: mg,
 			},
 			"the condition in the `if` section is not met (false)",
 		},
@@ -491,6 +519,7 @@ func TestCentralConfigReady(t *testing.T) {
 }
 
 func TestCentralPushConfigReady(t *testing.T) {
+	mg := mockedGh(t)
 	tests := []struct {
 		c    *Config
 		want string
@@ -506,6 +535,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 						},
 					},
 				},
+				gh: mg,
 			},
 			"central.push: is not set",
 		},
@@ -523,6 +553,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 						Enable: internal.Bool(true),
 					},
 				},
+				gh: mg,
 			},
 			"failed to traverse the Git root path",
 		},
@@ -541,6 +572,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 					},
 				},
 				GitRoot: "/path/to",
+				gh:      mg,
 			},
 			"",
 		},
@@ -560,6 +592,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 					},
 				},
 				GitRoot: "/path/to",
+				gh:      mg,
 			},
 			"the condition in the `if` section is not met (false)",
 		},
@@ -585,6 +618,8 @@ func TestCentralPushConfigReady(t *testing.T) {
 func TestDiffConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
+	mg := mockedGh(t)
 	tests := []struct {
 		c    *Config
 		want string
@@ -592,6 +627,7 @@ func TestDiffConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
+				gh:         mg,
 			},
 			"diff: is not set",
 		},
@@ -599,6 +635,7 @@ func TestDiffConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Diff:       &ConfigDiff{},
+				gh:         mg,
 			},
 			"diff.path: and diff.datastores: are not set",
 		},
@@ -608,6 +645,7 @@ func TestDiffConfigReady(t *testing.T) {
 				Diff: &ConfigDiff{
 					Path: "path/to/report.json",
 				},
+				gh: mg,
 			},
 			"",
 		},
@@ -618,6 +656,7 @@ func TestDiffConfigReady(t *testing.T) {
 					Path: "path/to/report.json",
 					If:   "false",
 				},
+				gh: mg,
 			},
 			"the condition in the `if` section is not met (false)",
 		},
@@ -643,6 +682,8 @@ func TestDiffConfigReady(t *testing.T) {
 func TestReportConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
 	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
+	mg := mockedGh(t)
 	tests := []struct {
 		c    *Config
 		want string
@@ -650,6 +691,7 @@ func TestReportConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
+				gh:         mg,
 			},
 			"report: is not set",
 		},
@@ -657,6 +699,7 @@ func TestReportConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Report:     &ConfigReport{},
+				gh:         mg,
 			},
 			"report.datastores: and report.path: are not set",
 		},
@@ -668,6 +711,7 @@ func TestReportConfigReady(t *testing.T) {
 						"s3://bucket/reports",
 					},
 				},
+				gh: mg,
 			},
 			"",
 		},
@@ -680,6 +724,7 @@ func TestReportConfigReady(t *testing.T) {
 					},
 					If: "false",
 				},
+				gh: mg,
 			},
 			"the condition in the `if` section is not met (false)",
 		},
@@ -700,4 +745,25 @@ func TestReportConfigReady(t *testing.T) {
 			}
 		}
 	}
+}
+
+func mockedGh(t *testing.T) *gh.Gh {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mock.WithRequestMatch(
+			mock.GetReposByOwnerByRepo,
+			github.Repository{
+				DefaultBranch: github.String("main"),
+			},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := gh.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+	return g
 }
