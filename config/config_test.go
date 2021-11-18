@@ -151,6 +151,9 @@ func TestTestExecutionTimeAcceptable(t *testing.T) {
 		{"<=1min", float64(time.Minute), 0, false},
 		{"<=59s", float64(time.Minute), 0, true},
 		{"<=61sec", float64(time.Minute), 0, false},
+		{"1 min", float64(time.Minute), 0, false},
+		{"59 s", float64(time.Minute), 0, true},
+		{"61 sec", float64(time.Minute), 0, false},
 
 		{"current <= 1min", float64(time.Minute), float64(59 * time.Second), false},
 		{"current > prev", float64(time.Minute), float64(59 * time.Second), false},

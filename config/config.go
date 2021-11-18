@@ -199,7 +199,7 @@ var (
 	compOpRe      = regexp.MustCompile(`^\s*[><=].+$`)
 
 	trimRatioPrefixRe = regexp.MustCompile(`1:([\d.]+)`)
-	durationRe        = regexp.MustCompile(`[\d.]+[a-z]+`)
+	durationRe        = regexp.MustCompile(`[\d.]+\s*[a-z]+`)
 )
 
 func coverageAcceptable(current, prev float64, cond string) error {
