@@ -70,10 +70,11 @@ var viewCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				defer func() {
-					_ = fp.Close()
-				}()
 				if err := coverage.NewPrinter(fc).Print(fp, os.Stdout); err != nil {
+					_ = fp.Close()
+					return err
+				}
+				if err := fp.Close(); err != nil {
 					return err
 				}
 				return nil

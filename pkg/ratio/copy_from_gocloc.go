@@ -105,19 +105,19 @@ func getFileTypeByShebang(path string) (shebangLang string, ok bool) {
 	if err != nil {
 		return // ignore error
 	}
-	defer func() {
-		_ = f.Close()
-	}()
-
 	reader := bufio.NewReader(f)
 	line, err := reader.ReadBytes('\n')
 	if err != nil {
+		_ = f.Close()
 		return
 	}
 	line = bytes.TrimLeftFunc(line, unicode.IsSpace)
 
 	if len(line) > 2 && line[0] == '#' && line[1] == '!' {
+		_ = f.Close()
 		return getShebang(string(line))
 	}
+	_ = f.Close()
+
 	return
 }

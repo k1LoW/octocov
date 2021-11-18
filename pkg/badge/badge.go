@@ -12,6 +12,7 @@ import (
 	_ "image/png"
 	"io"
 	"os"
+	"path/filepath"
 	"text/template"
 
 	"github.com/antchfx/xmlquery"
@@ -69,7 +70,7 @@ func (b *Badge) AddIcon(imgf []byte) error {
 }
 
 func (b *Badge) AddIconFile(f string) error {
-	imgf, err := os.ReadFile(f)
+	imgf, err := os.ReadFile(filepath.Clean(f))
 	if err != nil {
 		return err
 	}
