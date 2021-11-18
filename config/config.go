@@ -169,23 +169,34 @@ func (c *Config) Loaded() bool {
 
 func (c *Config) Acceptable(r, rPrev *report.Report) error {
 	if err := c.CoverageConfigReady(); err == nil {
-		if err := coverageAcceptable(r.CoveragePercent(), rPrev.CoveragePercent(), c.Coverage.Acceptable); err != nil {
+		prev := 0.0
+		if rPrev != nil {
+			prev = rPrev.CoveragePercent()
+		}
+		if err := coverageAcceptable(r.CoveragePercent(), prev, c.Coverage.Acceptable); err != nil {
 			return err
 		}
 	}
 
 	if err := c.CodeToTestRatioConfigReady(); err == nil {
-		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), rPrev.CodeToTestRatioRatio(), c.CodeToTestRatio.Acceptable); err != nil {
+		prev := 0.0
+		if rPrev != nil {
+			prev = rPrev.CodeToTestRatioRatio()
+		}
+		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), prev, c.CodeToTestRatio.Acceptable); err != nil {
 			return err
 		}
 	}
 
 	if err := c.TestExecutionTimeConfigReady(); err == nil {
-		tPrev := rPrev.TestExecutionTimeNano()
-		if !rPrev.IsMeasuredTestExecutionTime() {
-			tPrev = largeEnoughTime
+		prev := largeEnoughTime
+		if rPrev != nil {
+			if rPrev.IsMeasuredTestExecutionTime() {
+				prev = rPrev.TestExecutionTimeNano()
+			}
 		}
-		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), tPrev, c.TestExecutionTime.Acceptable); err != nil {
+
+		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), prev, c.TestExecutionTime.Acceptable); err != nil {
 			return err
 		}
 	}
