@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.29.0](https://github.com/k1LoW/octocov/compare/v0.28.3...v0.29.0) (2021-11-18)
+
+* Update `acceptable` section logic [#108](https://github.com/k1LoW/octocov/pull/108) ([k1LoW](https://github.com/k1LoW))
+* Add value `is_default_branch` in the `if:` section [#107](https://github.com/k1LoW/octocov/pull/107) ([k1LoW](https://github.com/k1LoW))
+* Fully implemented the github datastore. [#106](https://github.com/k1LoW/octocov/pull/106) ([k1LoW](https://github.com/k1LoW))
+* Use k1LoW/go-github-client [#105](https://github.com/k1LoW/octocov/pull/105) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.28.3](https://github.com/k1LoW/octocov/compare/v0.28.2...v0.28.3) (2021-11-01)
 
 * Fix handle of loc [#104](https://github.com/k1LoW/octocov/pull/104) ([k1LoW](https://github.com/k1LoW))
