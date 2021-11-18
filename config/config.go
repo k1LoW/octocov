@@ -210,13 +210,14 @@ var (
 	compOpRe      = regexp.MustCompile(`^\s*[><=].+$`)
 
 	trimRatioPrefixRe = regexp.MustCompile(`1:([\d.]+)`)
-	durationRe        = regexp.MustCompile(`[\d.]+\s*[a-z]+`)
+	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
 func coverageAcceptable(current, prev float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
+	org := cond
 	// Trim '%'
 	cond = trimPercentRe.ReplaceAllString(cond, "$1")
 
@@ -237,7 +238,7 @@ func coverageAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", current, cond)
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", current, org)
 	}
 	return nil
 }
@@ -246,6 +247,7 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
+	org := cond
 	// Trim '1:'
 	cond = trimRatioPrefixRe.ReplaceAllString(cond, "$1")
 
@@ -266,7 +268,7 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", current, cond)
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", current, org)
 	}
 	return nil
 }
@@ -275,6 +277,7 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 	if cond == "" {
 		return nil
 	}
+	org := cond
 	matches := durationRe.FindAllString(cond, -1)
 	for _, m := range matches {
 		d, err := duration.Parse(m)
@@ -301,7 +304,7 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(current), cond)
+		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(current), org)
 	}
 	return nil
 }
