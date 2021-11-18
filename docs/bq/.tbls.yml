@@ -1,0 +1,21 @@
+name: BigQuery schema for octocov datasource
+dsn: json://schema.json
+docPath: schema
+er:
+  format: svg
+comments:
+- table: reports
+  tableComment: Table to store reports of code metrics sent from octocov.
+  columnComments:
+    code_to_test_ratio_code: The number of lines counted as "code" when measuring the code to test ratio.
+    code_to_test_ratio_test: The number of lines counted as "test code" when measuring the code to test ratio.
+    commit: Commit hash when code metrics are retrieved.
+    coverage_covered: The number of lines covered by the test.
+    coverage_total: The number of lines counted as code.
+    id: ID ( using [ULID](https://github.com/ulid/spec) ).
+    owner: User name or organization name of the repository owner.
+    raw: Raw data of code metrics.
+    ref: Ref when code metrics are retrieved.
+    repo: Repository name. In some cases, the name of a monorepo subproject.
+    test_execution_time: Test execution time (nanoseconds).
+    timestamp: Time when the code metrics were collected.

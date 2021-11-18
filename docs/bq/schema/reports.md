@@ -2,22 +2,24 @@
 
 ## Description
 
+Table to store reports of code metrics sent from octocov.
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Description |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| id | STRING |  | false |  |  |  |
-| owner | STRING |  | false |  |  |  |
-| repo | STRING |  | false |  |  |  |
-| ref | STRING |  | false |  |  |  |
-| commit | STRING |  | false |  |  |  |
-| coverage_total | INTEGER |  | true |  |  |  |
-| coverage_covered | INTEGER |  | true |  |  |  |
-| code_to_test_ratio_code | INTEGER |  | true |  |  |  |
-| code_to_test_ratio_test | INTEGER |  | true |  |  |  |
-| test_execution_time | NUMERIC |  | true |  |  |  |
-| timestamp | TIMESTAMP |  | false |  |  |  |
-| raw | STRING |  | false |  |  |  |
+| id | STRING |  | false |  |  | ID ( using [ULID](https://github.com/ulid/spec) ). |
+| owner | STRING |  | false |  |  | User name or organization name of the repository owner. |
+| repo | STRING |  | false |  |  | Repository name. In some cases, the name of a monorepo subproject. |
+| ref | STRING |  | false |  |  | Ref when code metrics are retrieved. |
+| commit | STRING |  | false |  |  | Commit hash when code metrics are retrieved. |
+| coverage_total | INTEGER |  | true |  |  | The number of lines counted as code. |
+| coverage_covered | INTEGER |  | true |  |  | The number of lines covered by the test. |
+| code_to_test_ratio_code | INTEGER |  | true |  |  | The number of lines counted as "code" when measuring the code to test ratio. |
+| code_to_test_ratio_test | INTEGER |  | true |  |  | The number of lines counted as "test code" when measuring the code to test ratio. |
+| test_execution_time | NUMERIC |  | true |  |  | Test execution time (nanoseconds). |
+| timestamp | TIMESTAMP |  | false |  |  | Time when the code metrics were collected. |
+| raw | STRING |  | false |  |  | Raw data of code metrics. |
 
 ## Relations
 

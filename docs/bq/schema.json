@@ -1,0 +1,111 @@
+{
+  "name": "octocov-test:octocov_test_dataset",
+  "desc": "",
+  "tables": [
+    {
+      "name": "reports",
+      "type": "TABLE",
+      "comment": "",
+      "columns": [
+        {
+          "name": "id",
+          "type": "STRING",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "owner",
+          "type": "STRING",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "repo",
+          "type": "STRING",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "ref",
+          "type": "STRING",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "commit",
+          "type": "STRING",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "coverage_total",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "coverage_covered",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "code_to_test_ratio_code",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "code_to_test_ratio_test",
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "test_execution_time",
+          "type": "NUMERIC",
+          "nullable": true,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "timestamp",
+          "type": "TIMESTAMP",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        },
+        {
+          "name": "raw",
+          "type": "STRING",
+          "nullable": false,
+          "default": null,
+          "comment": ""
+        }
+      ],
+      "indexes": [],
+      "constraints": [],
+      "triggers": [],
+      "def": ""
+    }
+  ],
+  "relations": [],
+  "driver": {
+    "name": "bigquery",
+    "database_version": "",
+    "meta": {
+      "dict": {
+        "Comment": "Description"
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@
 
 | Name | Columns | Description | Type |
 | ---- | ------- | ------- | ---- |
-| [reports](reports.md) | 12 |  | TABLE |
+| [reports](reports.md) | 12 | Table to store reports of code metrics sent from octocov. | TABLE |
 
 ## Relations
 
