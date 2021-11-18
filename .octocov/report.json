@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "efe9a5ce1b7dee9369292a7361e0226aba5224ab",
+  "commit": "65380d70714a29696f36f132f5c3ff7ac133fd5d",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 23
+            "count": 20
           },
           {
             "type": "statement",
@@ -8124,7 +8124,7 @@
             "end_line": 57,
             "end_col": 13,
             "num_stmt": 3,
-            "count": 281
+            "count": 283
           },
           {
             "type": "statement",
@@ -8160,7 +8160,7 @@
             "end_line": 68,
             "end_col": 14,
             "num_stmt": 1,
-            "count": 281
+            "count": 283
           },
           {
             "type": "statement",
@@ -8223,7 +8223,7 @@
             "end_line": 83,
             "end_col": 31,
             "num_stmt": 1,
-            "count": 281
+            "count": 283
           },
           {
             "type": "statement",
@@ -8259,7 +8259,7 @@
             "end_line": 93,
             "end_col": 8,
             "num_stmt": 2,
-            "count": 280
+            "count": 282
           },
           {
             "type": "statement",
@@ -8277,7 +8277,7 @@
             "end_line": 97,
             "end_col": 19,
             "num_stmt": 1,
-            "count": 279
+            "count": 281
           },
           {
             "type": "statement",
@@ -8286,7 +8286,7 @@
             "end_line": 99,
             "end_col": 3,
             "num_stmt": 1,
-            "count": 275
+            "count": 277
           },
           {
             "type": "statement",
@@ -8304,7 +8304,7 @@
             "end_line": 105,
             "end_col": 16,
             "num_stmt": 2,
-            "count": 280
+            "count": 282
           },
           {
             "type": "statement",
@@ -8322,7 +8322,7 @@
             "end_line": 110,
             "end_col": 16,
             "num_stmt": 3,
-            "count": 280
+            "count": 282
           },
           {
             "type": "statement",
@@ -8340,7 +8340,7 @@
             "end_line": 116,
             "end_col": 55,
             "num_stmt": 2,
-            "count": 275
+            "count": 277
           },
           {
             "type": "statement",
@@ -8358,7 +8358,7 @@
             "end_line": 122,
             "end_col": 8,
             "num_stmt": 2,
-            "count": 274
+            "count": 276
           }
         ]
       },
@@ -8437,7 +8437,7 @@
             "end_line": 58,
             "end_col": 17,
             "num_stmt": 1,
-            "count": 960
+            "count": 970
           },
           {
             "type": "statement",
@@ -8455,7 +8455,7 @@
             "end_line": 61,
             "end_col": 17,
             "num_stmt": 1,
-            "count": 960
+            "count": 970
           },
           {
             "type": "statement",
@@ -8491,7 +8491,7 @@
             "end_line": 67,
             "end_col": 19,
             "num_stmt": 1,
-            "count": 665
+            "count": 675
           },
           {
             "type": "statement",
@@ -8509,7 +8509,7 @@
             "end_line": 75,
             "end_col": 17,
             "num_stmt": 4,
-            "count": 660
+            "count": 670
           },
           {
             "type": "statement",
@@ -8527,7 +8527,7 @@
             "end_line": 80,
             "end_col": 21,
             "num_stmt": 1,
-            "count": 660
+            "count": 670
           },
           {
             "type": "statement",
@@ -8536,7 +8536,7 @@
             "end_line": 82,
             "end_col": 4,
             "num_stmt": 1,
-            "count": 132
+            "count": 134
           },
           {
             "type": "statement",
@@ -8545,7 +8545,7 @@
             "end_line": 83,
             "end_col": 26,
             "num_stmt": 1,
-            "count": 660
+            "count": 670
           },
           {
             "type": "statement",
@@ -8554,7 +8554,7 @@
             "end_line": 85,
             "end_col": 33,
             "num_stmt": 2,
-            "count": 924
+            "count": 938
           },
           {
             "type": "statement",
@@ -8563,7 +8563,7 @@
             "end_line": 88,
             "end_col": 5,
             "num_stmt": 2,
-            "count": 396
+            "count": 402
           },
           {
             "type": "statement",
@@ -8572,7 +8572,7 @@
             "end_line": 90,
             "end_col": 18,
             "num_stmt": 2,
-            "count": 924
+            "count": 938
           },
           {
             "type": "statement",
@@ -8590,7 +8590,7 @@
             "end_line": 93,
             "end_col": 13,
             "num_stmt": 1,
-            "count": 924
+            "count": 938
           },
           {
             "type": "statement",
@@ -8626,7 +8626,7 @@
             "end_line": 102,
             "end_col": 26,
             "num_stmt": 1,
-            "count": 660
+            "count": 670
           },
           {
             "type": "statement",
@@ -8635,7 +8635,7 @@
             "end_line": 104,
             "end_col": 33,
             "num_stmt": 2,
-            "count": 132
+            "count": 134
           },
           {
             "type": "statement",
@@ -8653,7 +8653,7 @@
             "end_line": 109,
             "end_col": 18,
             "num_stmt": 2,
-            "count": 132
+            "count": 134
           },
           {
             "type": "statement",
@@ -8671,7 +8671,7 @@
             "end_line": 112,
             "end_col": 13,
             "num_stmt": 1,
-            "count": 132
+            "count": 134
           },
           {
             "type": "statement",
@@ -8707,7 +8707,7 @@
             "end_line": 120,
             "end_col": 25,
             "num_stmt": 1,
-            "count": 660
+            "count": 670
           },
           {
             "type": "statement",
@@ -8716,7 +8716,7 @@
             "end_line": 122,
             "end_col": 4,
             "num_stmt": 1,
-            "count": 379
+            "count": 387
           },
           {
             "type": "statement",
@@ -8725,7 +8725,7 @@
             "end_line": 124,
             "end_col": 10,
             "num_stmt": 2,
-            "count": 281
+            "count": 283
           },
           {
             "type": "statement",
@@ -8743,7 +8743,7 @@
             "end_line": 129,
             "end_col": 10,
             "num_stmt": 2,
-            "count": 277
+            "count": 279
           },
           {
             "type": "statement",
@@ -8761,7 +8761,7 @@
             "end_line": 134,
             "end_col": 13,
             "num_stmt": 2,
-            "count": 235
+            "count": 237
           },
           {
             "type": "statement",
@@ -8770,7 +8770,7 @@
             "end_line": 138,
             "end_col": 4,
             "num_stmt": 3,
-            "count": 216
+            "count": 218
           },
           {
             "type": "statement",
@@ -8779,7 +8779,7 @@
             "end_line": 139,
             "end_col": 13,
             "num_stmt": 1,
-            "count": 235
+            "count": 237
           },
           {
             "type": "statement",
@@ -8797,7 +8797,7 @@
             "end_line": 144,
             "end_col": 13,
             "num_stmt": 1,
-            "count": 235
+            "count": 237
           },
           {
             "type": "statement",
@@ -8842,7 +8842,7 @@
             "end_line": 161,
             "end_col": 2,
             "num_stmt": 1,
-            "count": 960
+            "count": 970
           },
           {
             "type": "statement",
@@ -8851,7 +8851,7 @@
             "end_line": 164,
             "end_col": 22,
             "num_stmt": 1,
-            "count": 962
+            "count": 972
           },
           {
             "type": "statement",
@@ -8860,7 +8860,7 @@
             "end_line": 165,
             "end_col": 13,
             "num_stmt": 1,
-            "count": 7731
+            "count": 7811
           },
           {
             "type": "statement",
@@ -8878,7 +8878,7 @@
             "end_line": 169,
             "end_col": 14,
             "num_stmt": 1,
-            "count": 946
+            "count": 956
           }
         ]
       },
@@ -11170,6 +11170,6 @@
     "code": 4781,
     "test": 1586
   },
-  "test_execution_time": 51000000000,
-  "timestamp": "2021-11-18T02:21:26.506817261Z"
+  "test_execution_time": 45000000000,
+  "timestamp": "2021-11-18T22:11:11.44172884Z"
 }
