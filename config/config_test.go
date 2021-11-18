@@ -8,9 +8,6 @@ import (
 	"time"
 
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/pkg/coverage"
-	"github.com/k1LoW/octocov/pkg/ratio"
-	"github.com/k1LoW/octocov/report"
 )
 
 func TestMain(m *testing.M) {
@@ -64,26 +61,31 @@ func TestLoadConfigAndOmitEnableFlag(t *testing.T) {
 
 func TestCoverageAcceptable(t *testing.T) {
 	tests := []struct {
-		in      string
+		cond    string
+		cov     float64
+		prev    float64
 		wantErr bool
 	}{
-		{"60%", true},
-		{"50%", false},
-		{"49.9%", false},
-		{"49.9", false},
+		{"60%", 50.0, 0, true},
+		{"50%", 50.0, 0, false},
+		{"49.9%", 50.0, 0, false},
+		{"49.9", 50.0, 0, false},
+		{">= 60%", 50.0, 0, true},
+		{">= 50%", 50.0, 0, false},
+		{">= 49.9%", 50.0, 0, false},
+		{">= 49.9", 50.0, 0, false},
+		{">=60%", 50.0, 0, true},
+		{">=50%", 50.0, 0, false},
+		{">=49.9%", 50.0, 0, false},
+		{">=49.9", 50.0, 0, false},
+
+		{"current >= 60%", 50.0, 0, true},
+		{"current > prev", 50.0, 49.0, false},
+		{"diff >= 0", 50.0, 49.0, false},
+		{"current >= 50% && diff >= 0", 50.0, 49.0, false},
 	}
 	for _, tt := range tests {
-		c := New()
-		c.Coverage = &ConfigCoverage{}
-		c.Coverage.Acceptable = tt.in
-		c.Build()
-
-		r := &report.Report{}
-		r.Coverage = &coverage.Coverage{
-			Covered: 50,
-			Total:   100,
-		}
-		if err := c.Acceptable(r); err != nil {
+		if err := coverageAcceptable(tt.cov, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -97,27 +99,31 @@ func TestCoverageAcceptable(t *testing.T) {
 
 func TestCodeToTestRatioAcceptable(t *testing.T) {
 	tests := []struct {
-		in      string
+		cond    string
+		ratio   float64
+		prev    float64
 		wantErr bool
 	}{
-		{"1:1", false},
-		{"1:1.1", true},
-		{"1", false},
-		{"1.1", true},
+		{"1:1", 1.0, 0, false},
+		{"1:1.1", 1.0, 0, true},
+		{"1", 1.0, 0, false},
+		{"1.1", 1.0, 0, true},
+		{">= 1:1", 1.0, 0, false},
+		{">= 1:1.1", 1.0, 0, true},
+		{">= 1", 1.0, 0, false},
+		{">= 1.1", 1.0, 0, true},
+		{">=1:1", 1.0, 0, false},
+		{">=1:1.1", 1.0, 0, true},
+		{">=1", 1.0, 0, false},
+		{">=1.1", 1.0, 0, true},
+
+		{"current >= 1.1", 1.2, 1.1, false},
+		{"current > prev", 1.2, 1.1, false},
+		{"diff >= 0", 1.2, 1.1, false},
+		{"current >= 1.1 && diff >= 0", 1.2, 1.1, false},
 	}
 	for _, tt := range tests {
-		c := New()
-		c.CodeToTestRatio = &ConfigCodeToTestRatio{
-			Acceptable: tt.in,
-			Test:       []string{"*_test.go"},
-		}
-		c.Build()
-		r := &report.Report{}
-		r.CodeToTestRatio = &ratio.Ratio{
-			Code: 100,
-			Test: 100,
-		}
-		if err := c.Acceptable(r); err != nil {
+		if err := codeToTestRatioAcceptable(tt.ratio, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
@@ -131,23 +137,36 @@ func TestCodeToTestRatioAcceptable(t *testing.T) {
 
 func TestTestExecutionTimeAcceptable(t *testing.T) {
 	tests := []struct {
-		in      string
+		cond    string
+		ti      float64
+		prev    float64
 		wantErr bool
 	}{
-		{"1min", false},
-		{"59s", true},
-		{"61sec", false},
+		{"1min", float64(time.Minute), 0, false},
+		{"59s", float64(time.Minute), 0, true},
+		{"61sec", float64(time.Minute), 0, false},
+		{"<= 1min", float64(time.Minute), 0, false},
+		{"<= 59s", float64(time.Minute), 0, true},
+		{"<= 61sec", float64(time.Minute), 0, false},
+		{"<=1min", float64(time.Minute), 0, false},
+		{"<=59s", float64(time.Minute), 0, true},
+		{"<=61sec", float64(time.Minute), 0, false},
+		{"1 min", float64(time.Minute), 0, false},
+		{"59 s", float64(time.Minute), 0, true},
+		{"61 sec", float64(time.Minute), 0, false},
+
+		{"1min1sec", float64(time.Minute), 0, false},
+		{"<=1min1sec", float64(time.Minute), 0, false},
+		{"<= 1 min 1 sec", float64(time.Minute), 0, false},
+		{"current <= 1 min 1 sec", float64(time.Minute), 0, false},
+
+		{"current <= 1min", float64(time.Minute), float64(59 * time.Second), false},
+		{"current > prev", float64(time.Minute), float64(59 * time.Second), false},
+		{"diff <= 1sec", float64(time.Minute), float64(59 * time.Second), false},
+		{"current <= 1min && diff <= 1sec", float64(time.Minute), float64(59 * time.Second), false},
 	}
 	for _, tt := range tests {
-		c := New()
-		c.TestExecutionTime = &ConfigTestExecutionTime{
-			Acceptable: tt.in,
-		}
-		c.Build()
-		r := &report.Report{}
-		e := float64(time.Minute)
-		r.TestExecutionTime = &e
-		if err := c.Acceptable(r); err != nil {
+		if err := testExecutionTimeAcceptable(tt.ti, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}

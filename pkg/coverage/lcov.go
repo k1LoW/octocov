@@ -33,9 +33,6 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	defer func() {
-		_ = r.Close()
-	}()
 	scanner := bufio.NewScanner(r)
 	var (
 		fileName       string
@@ -76,14 +73,17 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			total += 1
 			nums := strings.Split(splitted[1], ",")
 			if len(nums) != 2 {
+				_ = r.Close()
 				return nil, "", fmt.Errorf("can not parse: %s", l)
 			}
 			line, err := strconv.Atoi(nums[0])
 			if err != nil {
+				_ = r.Close()
 				return nil, "", err
 			}
 			count, err := strconv.Atoi(nums[1])
 			if err != nil {
+				_ = r.Close()
 				return nil, "", err
 			}
 			if count > 0 {
@@ -98,6 +98,9 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 		default:
 			// not implemented
 		}
+	}
+	if err := r.Close(); err != nil {
+		return nil, "", err
 	}
 	if !parsed {
 		return nil, "", errors.New("can not parse")

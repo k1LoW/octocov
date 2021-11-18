@@ -291,7 +291,7 @@ var rootCmd = &cobra.Command{
 					addPaths = append(addPaths, bp)
 				}
 
-				d := time.Duration(*r.TestExecutionTime)
+				d := time.Duration(r.TestExecutionTimeNano())
 				b := badge.New("test execution time", d.String())
 				b.MessageColor = c.TestExecutionTimeColor(d)
 				if err := b.AddIcon(internal.Icon); err != nil {
@@ -310,60 +310,63 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Get previous report for comparing reports
+		var rPrev *report.Report
+		if err := c.DiffConfigReady(); err == nil {
+			repo, err := gh.Parse(c.Repository)
+			if err != nil {
+				return err
+			}
+			path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
+			for _, s := range c.Diff.Datastores {
+				d, err := datastore.New(ctx, s, c.Root())
+				if err != nil {
+					return err
+				}
+				fsys, err := d.FS()
+				if err != nil {
+					return err
+				}
+				f, err := fsys.Open(path)
+				if err != nil {
+					continue
+				}
+				defer f.Close()
+				b, err := io.ReadAll(f)
+				if err != nil {
+					continue
+				}
+				rt := &report.Report{}
+				if err := json.Unmarshal(b, rt); err != nil {
+					continue
+				}
+				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+					rPrev = rt
+				}
+			}
+			if c.Diff.Path != "" {
+				rt, err := report.New(c.Repository)
+				if err != nil {
+					return err
+				}
+				if err := rt.MeasureCoverage(c.Diff.Path); err == nil {
+					if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+						rPrev = rt
+					}
+				}
+			}
+		}
+
 		// Comment report to pull request
 		if err := c.CommentConfigReady(); err != nil {
 			cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
 		} else {
 			if err := func() error {
 				cmd.PrintErrln("Commenting report...")
-				var r2 *report.Report
-				if err := c.DiffConfigReady(); err != nil {
+				if err := c.DiffConfigReady(); rPrev == nil || err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
-				} else {
-					repo, err := gh.Parse(c.Repository)
-					if err != nil {
-						return err
-					}
-					path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
-					for _, s := range c.Diff.Datastores {
-						d, err := datastore.New(ctx, s, c.Root())
-						if err != nil {
-							return err
-						}
-						fsys, err := d.FS()
-						if err != nil {
-							return err
-						}
-						f, err := fsys.Open(path)
-						if err != nil {
-							continue
-						}
-						defer f.Close()
-						b, err := io.ReadAll(f)
-						if err != nil {
-							continue
-						}
-						rt := &report.Report{}
-						if err := json.Unmarshal(b, rt); err != nil {
-							continue
-						}
-						if r2 == nil || r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
-							r2 = rt
-						}
-					}
-					if c.Diff.Path != "" {
-						rt, err := report.New(c.Repository)
-						if err != nil {
-							return err
-						}
-						if err := rt.MeasureCoverage(c.Diff.Path); err == nil {
-							if r2 == nil || r2.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
-								r2 = rt
-							}
-						}
-					}
 				}
-				if err := commentReport(ctx, c, r, r2); err != nil {
+				if err := commentReport(ctx, c, r, rPrev); err != nil {
 					return err
 				}
 				return nil
@@ -416,7 +419,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check for acceptable code metrics
-		if err := c.Acceptable(r); err != nil {
+		if err := c.Acceptable(r, rPrev); err != nil {
 			return err
 		}
 

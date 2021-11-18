@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -19,6 +20,7 @@ import (
 
 const defaultBadgesDatastore = "local://reports"
 const defaultReportsDatastore = "local://reports"
+const largeEnoughTime = float64(99 * time.Hour)
 
 const (
 	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
@@ -165,37 +167,145 @@ func (c *Config) Loaded() bool {
 	return c.path != ""
 }
 
-func (c *Config) Acceptable(r *report.Report) error {
-	if err := c.CoverageConfigReady(); err == nil && c.Coverage.Acceptable != "" {
-		a, err := strconv.ParseFloat(strings.TrimSuffix(c.Coverage.Acceptable, "%"), 64)
-		if err != nil {
-			return err
+func (c *Config) Acceptable(r, rPrev *report.Report) error {
+	if err := c.CoverageConfigReady(); err == nil {
+		prev := 0.0
+		if rPrev != nil {
+			prev = rPrev.CoveragePercent()
 		}
-		if r.CoveragePercent() < a {
-			return fmt.Errorf("code coverage is %.1f%%, which is below the accepted %.1f%%", r.CoveragePercent(), a)
+		if err := coverageAcceptable(r.CoveragePercent(), prev, c.Coverage.Acceptable); err != nil {
+			return err
 		}
 	}
 
-	if err := c.CodeToTestRatioConfigReady(); err == nil && c.CodeToTestRatio.Acceptable != "" {
-		a, err := strconv.ParseFloat(strings.TrimPrefix(c.CodeToTestRatio.Acceptable, "1:"), 64)
-		if err != nil {
-			return err
+	if err := c.CodeToTestRatioConfigReady(); err == nil {
+		prev := 0.0
+		if rPrev != nil {
+			prev = rPrev.CodeToTestRatioRatio()
 		}
-		if r.CodeToTestRatioRatio() < a {
-			return fmt.Errorf("code to test ratio is 1:%.1f, which is below the accepted 1:%.1f", r.CodeToTestRatioRatio(), a)
+		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), prev, c.CodeToTestRatio.Acceptable); err != nil {
+			return err
 		}
 	}
 
-	if err := c.TestExecutionTimeConfigReady(); err == nil && r.TestExecutionTime != nil && c.TestExecutionTime.Acceptable != "" {
-		a, err := duration.Parse(c.TestExecutionTime.Acceptable)
-		if err != nil {
-			return err
+	if err := c.TestExecutionTimeConfigReady(); err == nil {
+		prev := largeEnoughTime
+		if rPrev != nil {
+			if rPrev.IsMeasuredTestExecutionTime() {
+				prev = rPrev.TestExecutionTimeNano()
+			}
 		}
-		if *r.TestExecutionTime > float64(a) {
-			return fmt.Errorf("test execution time is %v, which is above the accepted %v", time.Duration(*r.TestExecutionTime), a)
+
+		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), prev, c.TestExecutionTime.Acceptable); err != nil {
+			return err
 		}
 	}
 
+	return nil
+}
+
+var (
+	trimPercentRe = regexp.MustCompile(`([\d.]+)%`)
+	numberOnlyRe  = regexp.MustCompile(`^\s*[\d]+\.?[\d]*\s*$`)
+	compOpRe      = regexp.MustCompile(`^\s*[><=].+$`)
+
+	trimRatioPrefixRe = regexp.MustCompile(`1:([\d.]+)`)
+	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
+)
+
+func coverageAcceptable(current, prev float64, cond string) error {
+	if cond == "" {
+		return nil
+	}
+	org := cond
+	// Trim '%'
+	cond = trimPercentRe.ReplaceAllString(cond, "$1")
+
+	if numberOnlyRe.MatchString(cond) {
+		cond = fmt.Sprintf("current >= %s", cond)
+	} else if compOpRe.MatchString(cond) {
+		cond = fmt.Sprintf("current %s", cond)
+	}
+
+	variables := map[string]interface{}{
+		"current": current,
+		"prev":    prev,
+		"diff":    current - prev,
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		return err
+	}
+
+	if !ok.(bool) {
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", current, org)
+	}
+	return nil
+}
+
+func codeToTestRatioAcceptable(current, prev float64, cond string) error {
+	if cond == "" {
+		return nil
+	}
+	org := cond
+	// Trim '1:'
+	cond = trimRatioPrefixRe.ReplaceAllString(cond, "$1")
+
+	if numberOnlyRe.MatchString(cond) {
+		cond = fmt.Sprintf("current >= %s", cond)
+	} else if compOpRe.MatchString(cond) {
+		cond = fmt.Sprintf("current %s", cond)
+	}
+
+	variables := map[string]interface{}{
+		"current": current,
+		"prev":    prev,
+		"diff":    current - prev,
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		return err
+	}
+
+	if !ok.(bool) {
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", current, org)
+	}
+	return nil
+}
+
+func testExecutionTimeAcceptable(current, prev float64, cond string) error {
+	if cond == "" {
+		return nil
+	}
+	org := cond
+	matches := durationRe.FindAllString(cond, -1)
+	for _, m := range matches {
+		d, err := duration.Parse(m)
+		if err != nil {
+			return err
+		}
+		cond = strings.Replace(cond, m, strconv.FormatFloat(float64(d), 'f', -1, 64), 1)
+	}
+
+	if numberOnlyRe.MatchString(cond) {
+		cond = fmt.Sprintf("current <= %s", cond)
+	} else if compOpRe.MatchString(cond) {
+		cond = fmt.Sprintf("current %s", cond)
+	}
+
+	variables := map[string]interface{}{
+		"current": current,
+		"prev":    prev,
+		"diff":    current - prev,
+	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		return err
+	}
+
+	if !ok.(bool) {
+		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(current), org)
+	}
 	return nil
 }
 
