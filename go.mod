@@ -24,7 +24,6 @@ require (
 	github.com/k1LoW/expand v0.1.0
 	github.com/k1LoW/ghfs v0.6.0
 	github.com/k1LoW/go-github-client/v39 v39.2.2
-	github.com/k1LoW/osfs v0.1.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mauri870/gcsfs v0.0.0-20210217184550-8b539458430a

@@ -6,10 +6,8 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/k1LoW/octocov/report"
-	"github.com/k1LoW/osfs"
 )
 
 type Local struct {
@@ -55,5 +53,5 @@ func (l *Local) Put(ctx context.Context, path string, content []byte) error {
 }
 
 func (l *Local) FS() (fs.FS, error) {
-	return osfs.New().Sub(strings.TrimPrefix(l.root, "/"))
+	return os.DirFS(l.root), nil
 }
