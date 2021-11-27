@@ -4,7 +4,7 @@
 
 [![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions) ![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg) ![time](docs/time.svg)
 
-`octocov` is a tool for collecting code metrics (code coverage, code to test ratio and test execution time).
+`octocov` is a toolkit for collecting code metrics (code coverage, code to test ratio and test execution time).
 
 Key features of `octocov` are:
 
@@ -944,12 +944,6 @@ $ brew install k1LoW/tap/octocov
 **manually:**
 
 Download binary from [releases page](https://github.com/k1LoW/octocov/releases)
-
-**go get:**
-
-```console
-$ go get github.com/k1LoW/octocov
-```
 
 **docker:**
 

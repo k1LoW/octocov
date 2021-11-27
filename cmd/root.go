@@ -54,8 +54,8 @@ var (
 
 var rootCmd = &cobra.Command{
 	Use:          "octocov",
-	Short:        "octocov is a tool for collecting code metrics",
-	Long:         `octocov is a tool for collecting code metrics.`,
+	Short:        "octocov is a toolkit for collecting code metrics",
+	Long:         `octocov is a toolkit for collecting code metrics.`,
 	Version:      version.Version,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
