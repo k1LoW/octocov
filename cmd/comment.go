@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/k1LoW/octocov/config"
@@ -48,6 +49,11 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 		"---",
 		footer,
 	}, "\n")
+
+	if err := c.Acceptable(r, rPrev); err != nil {
+		comment = fmt.Sprintf("**:no_entry_sign: %s**\n\n%s", err.Error(), comment)
+	}
+
 	if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, comment); err != nil {
 		return err
 	}
