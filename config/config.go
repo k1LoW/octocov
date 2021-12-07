@@ -12,6 +12,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/goccy/go-yaml"
+	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
@@ -168,13 +169,14 @@ func (c *Config) Loaded() bool {
 }
 
 func (c *Config) Acceptable(r, rPrev *report.Report) error {
+	var result *multierror.Error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := 0.0
 		if rPrev != nil {
 			prev = rPrev.CoveragePercent()
 		}
 		if err := coverageAcceptable(r.CoveragePercent(), prev, c.Coverage.Acceptable); err != nil {
-			return err
+			result = multierror.Append(result, err)
 		}
 	}
 
@@ -184,7 +186,7 @@ func (c *Config) Acceptable(r, rPrev *report.Report) error {
 			prev = rPrev.CodeToTestRatioRatio()
 		}
 		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), prev, c.CodeToTestRatio.Acceptable); err != nil {
-			return err
+			result = multierror.Append(result, err)
 		}
 	}
 
@@ -197,11 +199,11 @@ func (c *Config) Acceptable(r, rPrev *report.Report) error {
 		}
 
 		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), prev, c.TestExecutionTime.Acceptable); err != nil {
-			return err
+			result = multierror.Append(result, err)
 		}
 	}
 
-	return nil
+	return result.ErrorOrNil()
 }
 
 var (

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
@@ -51,7 +52,15 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 	}, "\n")
 
 	if err := c.Acceptable(r, rPrev); err != nil {
-		comment = fmt.Sprintf("**:no_entry_sign: Error: %s**\n\n%s", err.Error(), comment)
+		merr := err.(*multierror.Error)
+		merr.ErrorFormat = func(errors []error) string {
+			var out string
+			for _, err := range errors {
+				out += fmt.Sprintf("**:no_entry_sign: Error: %s**\n", err.Error())
+			}
+			return out
+		}
+		comment = fmt.Sprintf("%s\n\n%s", merr.Error(), comment)
 	}
 
 	if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, comment); err != nil {
