@@ -82,7 +82,7 @@ func TestCoverageAcceptable(t *testing.T) {
 		{"current >= 60%", 50.0, 0, true},
 		{"current > prev", 50.0, 49.0, false},
 		{"diff >= 0", 50.0, 49.0, false},
-		{"current >= 50% && diff >= 0", 50.0, 49.0, false},
+		{"current >= 50% && diff >= 0%", 50.0, 49.0, false},
 	}
 	for _, tt := range tests {
 		if err := coverageAcceptable(tt.cov, tt.prev, tt.cond); err != nil {

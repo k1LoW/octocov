@@ -51,7 +51,7 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 	}, "\n")
 
 	if err := c.Acceptable(r, rPrev); err != nil {
-		comment = fmt.Sprintf("**:no_entry_sign: %s**\n\n%s", err.Error(), comment)
+		comment = fmt.Sprintf("**:no_entry_sign: Error: %s**\n\n%s", err.Error(), comment)
 	}
 
 	if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, comment); err != nil {

@@ -238,7 +238,7 @@ func coverageAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code coverage is %.1f%%. the condition in the `acceptable` section is not met (%s)", current, org)
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", current, org)
 	}
 	return nil
 }
@@ -268,7 +268,7 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `acceptable` section is not met (%s)", current, org)
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", current, org)
 	}
 	return nil
 }
@@ -304,7 +304,7 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("test execution time is %v. the condition in the `acceptable` section is not met (%s)", time.Duration(current), org)
+		return fmt.Errorf("test execution time is %v. the condition in the `testExecutionTime.acceptable:` section is not met (`%s`)", time.Duration(current), org)
 	}
 	return nil
 }
