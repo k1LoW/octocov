@@ -132,9 +132,9 @@ diff:
 
 ### Check for acceptable score
 
-By setting `coverage.acceptable:`, the minimum acceptable coverage is specified.
+By setting `coverage.acceptable:`, the condition of acceptable coverage is specified.
 
-If it is less than that value, the command will exit with exit status `1`.
+If this condition is not met, the command will exit with exit status `1`.
 
 ``` yaml
 # .octocov.yml
@@ -144,12 +144,12 @@ coverage:
 
 ``` console
 $ octocov
-Error: code coverage is 54.9%, which is below the accepted 60.0%
+Error: code coverage is 54.9%. the condition in the `coverage.acceptable:` section is not met (`60%`)
 ```
 
-By setting `codeToTestRatio.acceptable:`, the minimum acceptable "Code to Test Ratio" is specified.
+By setting `codeToTestRatio.acceptable:`, the condition of acceptable "Code to Test Ratio" is specified.
 
-If it is less than that value, the command will exit with exit status `1`.
+If this condition is not met, the command will exit with exit status `1`.
 
 ``` yaml
 # .octocov.yml
@@ -164,12 +164,12 @@ codeToTestRatio:
 
 ``` console
 $ octocov
-Error: code to test ratio is 1:1.1, which is below the accepted 1:1.2
+Error: code to test ratio is 1:1.1, the condition in the `codeToTestRatio.acceptable:` section is not met (`1:1.2`)
 ```
 
-By setting `testExecutionTime.acceptable:`, the maximum acceptable "Test Execution Time" is specified **(on GitHub Actions only)** .
+By setting `testExecutionTime.acceptable:`, the condition of acceptable "Test Execution Time" is specified **(on GitHub Actions only)** .
 
-If it is greater than that value, the command will exit with exit status `1`.
+If this condition is not met, the command will exit with exit status `1`.
 
 ``` yaml
 # .octocov.yml
@@ -179,7 +179,7 @@ testExecutionTime:
 
 ``` console
 $ octocov
-Error: test execution time is 1m15s, which is above the accepted 1m
+Error: test execution time is 1m15s, the condition in the `testExecutionTime.acceptable:` section is not met (`1 min`)
 ```
 
 ### Generate report badges self.
@@ -321,12 +321,32 @@ coverage:
 
 ### `coverage.acceptable:`
 
-The minimum acceptable coverage.
+acceptable coverage condition.
 
 ``` yaml
 coverage:
   acceptable: 60%
 ```
+
+``` yaml
+coverage:
+  acceptable: current >= 60% && diff >= 0.5%
+```
+
+The variables that can be used are as follows.
+
+| value | description |
+| --- | --- |
+| `current` | Current code metrics value |
+| `prev` | Previous value. This value is taken from `diff.datastores:`. |
+| `diff` | The result of `current - prev` |
+
+It is also possible to omit the expression as follows
+
+| Omitted expression | Expanded expression |
+| --- | --- |
+| `60%` | `current >= 60%` |
+| `> 60%` | `current > 60%` |
 
 ### `coverage.badge:`
 
@@ -361,12 +381,32 @@ codeToTestRatio:
 
 ### `codeToTestRatio.acceptable:`
 
-The minimum acceptable ratio.
+acceptable ratio condition.
 
 ``` yaml
 codeToTestRatio:
   acceptable: 1:1.2
 ```
+
+``` yaml
+codeToTestRatio:
+  acceptable: current >= 1.2 && diff >= 0.0
+```
+
+The variables that can be used are as follows.
+
+| value | description |
+| --- | --- |
+| `current` | Current code metrics value |
+| `prev` | Previous value. This value is taken from `diff.datastores:`. |
+| `diff` | The result of `current - prev` |
+
+It is also possible to omit the expression as follows
+
+| Omitted expression | Expanded expression |
+| --- | --- |
+| `1:1.2` | `current >= 1.2` |
+| `> 1:1.2` | `current > 1.2` |
 
 ### `codeToTestRatio.badge:`
 
@@ -388,12 +428,32 @@ Configuration for test execution time.
 
 ### `testExecutionTime.acceptable`
 
-The minimum acceptable time.
+acceptable time condition.
 
 ``` yaml
 testExecutionTime:
   acceptable: 1min
 ```
+
+``` yaml
+testExecutionTime:
+  acceptable: current <= 1min && diff <= 1sec
+```
+
+The variables that can be used are as follows.
+
+| value | description |
+| --- | --- |
+| `current` | Current code metrics value |
+| `prev` | Previous value. This value is taken from `diff.datastores:`. |
+| `diff` | The result of `current - prev` |
+
+It is also possible to omit the expression as follows
+
+| Omitted expression | Expanded expression |
+| --- | --- |
+| `1min` | `current <= 1min` |
+| `< 1min` | `current < 1min` |
 
 ### `testExecutionTime.badge`
 
