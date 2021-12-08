@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.30.0](https://github.com/k1LoW/octocov/compare/v0.29.0...v0.30.0) (2021-12-08)
+
+* If the condition in the `*.acceptable:` section is not met, add an error message to the comment of the pull request. [#111](https://github.com/k1LoW/octocov/pull/111) ([k1LoW](https://github.com/k1LoW))
+* Use os.DirFS instead of k1LoW/osfs [#110](https://github.com/k1LoW/octocov/pull/110) ([k1LoW](https://github.com/k1LoW))
+* Update packages and Go [#109](https://github.com/k1LoW/octocov/pull/109) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.29.0](https://github.com/k1LoW/octocov/compare/v0.28.3...v0.29.0) (2021-11-18)
 
 * Update `acceptable` section logic [#108](https://github.com/k1LoW/octocov/pull/108) ([k1LoW](https://github.com/k1LoW))
