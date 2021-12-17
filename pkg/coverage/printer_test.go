@@ -72,23 +72,3 @@ func IsOK(in string) error {
 		}
 	}
 }
-
-func newBlockCoverage(t Type, sl, sc, el, ec, ns, c int) *BlockCoverage {
-	bc := &BlockCoverage{
-		Type:      t,
-		StartLine: &sl,
-		EndLine:   &el,
-		Count:     &c,
-	}
-	if sc >= 0 {
-		bc.StartCol = &sc
-	}
-	if ec >= 0 {
-		bc.EndCol = &ec
-	}
-	if ns >= 0 {
-		bc.NumStmt = &ns
-	}
-
-	return bc
-}

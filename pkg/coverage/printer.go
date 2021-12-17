@@ -39,15 +39,7 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	c := bytes.Count(b, []byte{'\n'})
 
 	w := len(strconv.Itoa(c))
-	c2 := 0
-	if p.fc != nil {
-		for _, b := range p.fc.Blocks {
-			if *b.Count > c2 {
-				c2 = *b.Count
-			}
-		}
-	}
-	w2 := len(strconv.Itoa(c2))
+	w2 := len(strconv.Itoa(p.fc.Blocks.MaxCount()))
 
 	e, err := guess.EncodingBytes(b)
 	if err != nil {
@@ -113,8 +105,8 @@ func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
 			}
 		}
 
-		if *b.Count > c {
-			c = *b.Count
+		if *b.Count > 0 {
+			c += *b.Count
 		}
 	}
 

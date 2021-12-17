@@ -231,3 +231,25 @@ func (dfcs DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, e
 	}
 	return nil, fmt.Errorf("file name not found: %s", file)
 }
+
+func (bcs BlockCoverages) MaxCount() int {
+	c := map[int]int{}
+	for _, bc := range bcs {
+		sl := *bc.StartLine
+		el := *bc.EndLine
+		for i := sl; i <= el; i++ {
+			_, ok := c[i]
+			if !ok {
+				c[i] = 0
+			}
+			c[i] += *bc.Count
+		}
+	}
+	max := 0
+	for _, v := range c {
+		if v > max {
+			max = v
+		}
+	}
+	return max
+}

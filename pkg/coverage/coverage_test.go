@@ -140,3 +140,55 @@ func TestPathPrefix(t *testing.T) {
 		}
 	}
 }
+
+func TestMaxCount(t *testing.T) {
+	tests := []struct {
+		blocks BlockCoverages
+		want   int
+	}{
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeLOC, 6, -1, 6, -1, -1, 10),
+				newBlockCoverage(TypeLOC, 7, -1, 7, -1, -1, 100),
+				newBlockCoverage(TypeLOC, 8, -1, 8, -1, -1, 11),
+				newBlockCoverage(TypeLOC, 9, -1, 9, -1, -1, 1),
+			},
+			100,
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeLOC, 6, -1, 7, -1, -1, 10),
+				newBlockCoverage(TypeLOC, 7, -1, 7, -1, -1, 100),
+				newBlockCoverage(TypeLOC, 7, -1, 8, -1, -1, 11),
+				newBlockCoverage(TypeLOC, 9, -1, 9, -1, -1, 1),
+			},
+			121,
+		},
+	}
+	for _, tt := range tests {
+		got := tt.blocks.MaxCount()
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func newBlockCoverage(t Type, sl, sc, el, ec, ns, c int) *BlockCoverage {
+	bc := &BlockCoverage{
+		Type:      t,
+		StartLine: &sl,
+		EndLine:   &el,
+		Count:     &c,
+	}
+	if sc >= 0 {
+		bc.StartCol = &sc
+	}
+	if ec >= 0 {
+		bc.EndCol = &ec
+	}
+	if ns >= 0 {
+		bc.NumStmt = &ns
+	}
+
+	return bc
+}
