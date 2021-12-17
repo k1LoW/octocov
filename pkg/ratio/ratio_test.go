@@ -99,7 +99,14 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if contains(got.CodeFiles, "pkg/ratio/ratio_test.go") {
+		want := "pkg/ratio/ratio_test.go"
+		ok := false
+		for _, f := range got.CodeFiles {
+			if f.Path == want {
+				ok = true
+			}
+		}
+		if ok {
 			t.Error("pkg/ratio/ratio_test.go should not be contained")
 		}
 	}
@@ -113,7 +120,14 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !contains(got.CodeFiles, "pkg/ratio/ratio_test.go") {
+		want := "pkg/ratio/ratio_test.go"
+		ok := false
+		for _, f := range got.CodeFiles {
+			if f.Path == want {
+				ok = true
+			}
+		}
+		if !ok {
 			t.Error("pkg/ratio/ratio_test.go should be contained")
 		}
 	}
