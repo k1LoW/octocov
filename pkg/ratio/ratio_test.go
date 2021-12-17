@@ -95,7 +95,11 @@ func TestPathMatch(t *testing.T) {
 			"**/*.go",
 			"!**/*_test.go",
 		}
-		got, err := Measure(root, code, []string{})
+		test := []string{
+			"!**/*.go",
+			"**/*_test.go",
+		}
+		got, err := Measure(root, code, test)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -130,6 +134,25 @@ func TestPathMatch(t *testing.T) {
 		if !ok {
 			t.Error("pkg/ratio/ratio_test.go should be contained")
 		}
+	}
+}
+
+func TestFlushFiles(t *testing.T) {
+	root := filepath.Join(testdataDir(t), "..")
+	code := []string{
+		"**/*.go",
+		"!**/*_test.go",
+	}
+	got, err := Measure(root, code, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.CodeFiles) == 0 {
+		t.Errorf("got %v\nwant >0", len(got.CodeFiles))
+	}
+	got.FlushFiles()
+	if len(got.CodeFiles) > 0 {
+		t.Errorf("got %v\nwant 0", len(got.CodeFiles))
 	}
 }
 
