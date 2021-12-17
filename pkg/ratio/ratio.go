@@ -11,11 +11,21 @@ import (
 	"github.com/hhatto/gocloc"
 )
 
+type File struct {
+	Code     int    `json:"code"`
+	Comments int    `json:"comment"`
+	Blanks   int    `json:"blank"`
+	Path     string `json:"path"`
+	Lang     string `json:"language"`
+}
+
+type Files []*File
+
 type Ratio struct {
-	Code      int      `json:"code"`
-	Test      int      `json:"test"`
-	CodeFiles []string `json:"-"`
-	TestFiles []string `json:"-"`
+	Code      int   `json:"code"`
+	Test      int   `json:"test"`
+	CodeFiles Files `json:"code_files"`
+	TestFiles Files `json:"test_files"`
 }
 
 type DiffRatio struct {
@@ -46,6 +56,11 @@ func (r *Ratio) Compare(r2 *Ratio) *DiffRatio {
 	d.B = ratioB
 	d.Diff = ratioB - ratioA
 	return d
+}
+
+func (r *Ratio) FlushFiles() {
+	r.CodeFiles = Files{}
+	r.TestFiles = Files{}
 }
 
 func Measure(root string, code, test []string) (*Ratio, error) {
@@ -134,12 +149,24 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		if isCode {
 			log.Printf("code: %s,%d", rel, cf.Code)
 			ratio.Code += int(cf.Code)
-			ratio.CodeFiles = append(ratio.CodeFiles, rel)
+			ratio.CodeFiles = append(ratio.CodeFiles, &File{
+				Code:     int(cf.Code),
+				Comments: int(cf.Comments),
+				Blanks:   int(cf.Blanks),
+				Path:     rel,
+				Lang:     cf.Lang,
+			})
 		}
 		if isTest {
 			log.Printf("test: %s,%d", rel, cf.Code)
 			ratio.Test += int(cf.Code)
-			ratio.TestFiles = append(ratio.TestFiles, rel)
+			ratio.TestFiles = append(ratio.TestFiles, &File{
+				Code:     int(cf.Code),
+				Comments: int(cf.Comments),
+				Blanks:   int(cf.Blanks),
+				Path:     rel,
+				Lang:     cf.Lang,
+			})
 		}
 		return nil
 	}); err != nil {

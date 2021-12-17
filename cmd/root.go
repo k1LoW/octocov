@@ -393,6 +393,9 @@ var rootCmd = &cobra.Command{
 			if r.Coverage != nil {
 				r.Coverage.FlushBlockCoverages()
 			}
+			if r.CodeToTestRatio != nil {
+				r.CodeToTestRatio.FlushFiles()
+			}
 			datastores := []datastore.Datastore{}
 			for _, s := range c.Report.Datastores {
 				d, err := datastore.New(ctx, s, c.Root())

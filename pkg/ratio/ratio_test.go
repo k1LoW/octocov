@@ -95,11 +95,22 @@ func TestPathMatch(t *testing.T) {
 			"**/*.go",
 			"!**/*_test.go",
 		}
-		got, err := Measure(root, code, []string{})
+		test := []string{
+			"!**/*.go",
+			"**/*_test.go",
+		}
+		got, err := Measure(root, code, test)
 		if err != nil {
 			t.Fatal(err)
 		}
-		if contains(got.CodeFiles, "pkg/ratio/ratio_test.go") {
+		want := "pkg/ratio/ratio_test.go"
+		ok := false
+		for _, f := range got.CodeFiles {
+			if f.Path == want {
+				ok = true
+			}
+		}
+		if ok {
 			t.Error("pkg/ratio/ratio_test.go should not be contained")
 		}
 	}
@@ -113,9 +124,35 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if !contains(got.CodeFiles, "pkg/ratio/ratio_test.go") {
+		want := "pkg/ratio/ratio_test.go"
+		ok := false
+		for _, f := range got.CodeFiles {
+			if f.Path == want {
+				ok = true
+			}
+		}
+		if !ok {
 			t.Error("pkg/ratio/ratio_test.go should be contained")
 		}
+	}
+}
+
+func TestFlushFiles(t *testing.T) {
+	root := filepath.Join(testdataDir(t), "..")
+	code := []string{
+		"**/*.go",
+		"!**/*_test.go",
+	}
+	got, err := Measure(root, code, []string{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got.CodeFiles) == 0 {
+		t.Errorf("got %v\nwant >0", len(got.CodeFiles))
+	}
+	got.FlushFiles()
+	if len(got.CodeFiles) > 0 {
+		t.Errorf("got %v\nwant 0", len(got.CodeFiles))
 	}
 }
 
