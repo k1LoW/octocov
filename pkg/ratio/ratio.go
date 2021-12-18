@@ -58,7 +58,7 @@ func (r *Ratio) Compare(r2 *Ratio) *DiffRatio {
 	return d
 }
 
-func (r *Ratio) FlushFiles() {
+func (r *Ratio) DeleteFiles() {
 	r.CodeFiles = Files{}
 	r.TestFiles = Files{}
 }

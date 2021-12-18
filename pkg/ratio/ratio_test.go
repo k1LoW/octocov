@@ -137,7 +137,7 @@ func TestPathMatch(t *testing.T) {
 	}
 }
 
-func TestFlushFiles(t *testing.T) {
+func TestDeleteFiles(t *testing.T) {
 	root := filepath.Join(testdataDir(t), "..")
 	code := []string{
 		"**/*.go",
@@ -150,7 +150,7 @@ func TestFlushFiles(t *testing.T) {
 	if len(got.CodeFiles) == 0 {
 		t.Errorf("got %v\nwant >0", len(got.CodeFiles))
 	}
-	got.FlushFiles()
+	got.DeleteFiles()
 	if len(got.CodeFiles) > 0 {
 		t.Errorf("got %v\nwant 0", len(got.CodeFiles))
 	}

@@ -65,7 +65,7 @@ func NewFileCoverage(file string) *FileCoverage {
 	}
 }
 
-func (c *Coverage) FlushBlockCoverages() {
+func (c *Coverage) DeleteBlockCoverages() {
 	for _, f := range c.Files {
 		f.Blocks = BlockCoverages{}
 	}
