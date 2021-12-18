@@ -109,11 +109,13 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 			for _, l := range c.Lines.Line {
 				sl := l.Number
 				el := l.Number
+				ns := 1
 				c := l.Hits
 				f = append(f, &BlockCoverage{
 					Type:      TypeLOC,
 					StartLine: &sl,
 					EndLine:   &el,
+					NumStmt:   &ns,
 					Count:     &c,
 				})
 			}

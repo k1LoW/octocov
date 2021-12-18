@@ -60,11 +60,13 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 					if count > 0 {
 						fcov.Covered += 1
 					}
+					ns := 1
 
 					fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 						Type:      TypeLOC,
 						StartLine: &ll,
 						EndLine:   &ll,
+						NumStmt:   &ns,
 						Count:     &count,
 					})
 				}
