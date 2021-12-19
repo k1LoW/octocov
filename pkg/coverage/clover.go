@@ -114,7 +114,10 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	}
 
 	cov := New()
-	cov.Type = TypeStmt
+	// ref: https://openclover.org/doc/manual/latest/general--about-code-coverage.html
+	// > As Clover uses source code instrumentation, it actually "sees" a real code structure.
+	// > Therefore, Clover offers a Statement Coverage metric, which is similar to a Line Coverage metric in terms of it's granularity and precision.
+	cov.Type = TypeLOC
 	cov.Format = c.Name()
 	for _, f := range r.Project.File {
 		fcov := parseReportFile(f)
@@ -146,7 +149,7 @@ func parseReportFile(f CloverReportFile) *FileCoverage {
 		ns := 1
 		c := l.Count
 		fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
-			Type:      TypeStmt,
+			Type:      TypeLOC,
 			StartLine: &sl,
 			EndLine:   &el,
 			NumStmt:   &ns,
