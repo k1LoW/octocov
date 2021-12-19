@@ -26,6 +26,7 @@ func TestGocover(t *testing.T) {
 		total := 0
 		covered := 0
 		for _, b := range f.Blocks {
+			// Statement
 			total = total + *b.NumStmt
 			if *b.Count > 0 {
 				covered += *b.NumStmt

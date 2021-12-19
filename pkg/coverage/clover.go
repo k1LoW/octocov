@@ -146,13 +146,11 @@ func parseReportFile(f CloverReportFile) *FileCoverage {
 		}
 		sl := l.Num
 		el := l.Num
-		ns := 1
 		c := l.Count
 		fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 			Type:      TypeLOC,
 			StartLine: &sl,
 			EndLine:   &el,
-			NumStmt:   &ns,
 			Count:     &c,
 		})
 	}

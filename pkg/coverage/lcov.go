@@ -89,12 +89,10 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			if count > 0 {
 				covered += 1
 			}
-			ns := 1
 			blocks = append(blocks, &BlockCoverage{
 				Type:      TypeLOC,
 				StartLine: &line,
 				EndLine:   &line,
-				NumStmt:   &ns,
 				Count:     &count,
 			})
 		default:
