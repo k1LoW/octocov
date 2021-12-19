@@ -26,9 +26,10 @@ func TestSimplecov(t *testing.T) {
 		total := 0
 		covered := 0
 		for _, b := range f.Blocks {
-			total = total + *b.NumStmt
+			// LOC
+			total = total + 1
 			if *b.Count > 0 {
-				covered += *b.NumStmt
+				covered += 1
 			}
 		}
 		if got := f.Total; got != total {
