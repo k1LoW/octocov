@@ -9,6 +9,28 @@ import (
 	"github.com/k1LoW/octocov/gh"
 )
 
+func TestNew(t *testing.T) {
+	tests := []struct {
+		envrepo   string
+		ownerrepo string
+		want      string
+	}{
+		{"", "", ""},
+	}
+	for _, tt := range tests {
+		t.Setenv("GITHUB_REPOSITORY", tt.envrepo)
+		r, err := New(tt.ownerrepo)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		got := r.Repository
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
 func TestTable(t *testing.T) {
 	tests := []struct {
 		path string
