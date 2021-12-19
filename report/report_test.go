@@ -16,6 +16,9 @@ func TestNew(t *testing.T) {
 		want      string
 	}{
 		{"", "", ""},
+		{"owner/repo", "", "owner/repo"},
+		{"", "owner/repo", "owner/repo"},
+		{"owner/repoenv", "owner/repo", "owner/repo"},
 	}
 	for _, tt := range tests {
 		t.Setenv("GITHUB_REPOSITORY", tt.envrepo)
