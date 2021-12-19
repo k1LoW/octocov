@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "7db16be44aefe051ed99c4cfe86eb98f69038cb8",
+  "commit": "0ee8b77dcb264b05fddcdefcea02da3222df9486",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 17
+            "count": 23
           },
           {
             "type": "statement",
@@ -9918,7 +9918,7 @@
             "end_line": 38,
             "end_col": 21,
             "num_stmt": 1,
-            "count": 1
+            "count": 4
           },
           {
             "type": "statement",
@@ -9927,7 +9927,7 @@
             "end_line": 40,
             "end_col": 3,
             "num_stmt": 1,
-            "count": 1
+            "count": 2
           },
           {
             "type": "statement",
@@ -9936,7 +9936,7 @@
             "end_line": 42,
             "end_col": 15,
             "num_stmt": 2,
-            "count": 1
+            "count": 4
           },
           {
             "type": "statement",
@@ -9963,7 +9963,7 @@
             "end_line": 50,
             "end_col": 18,
             "num_stmt": 2,
-            "count": 1
+            "count": 4
           },
           {
             "type": "statement",
@@ -9990,7 +9990,7 @@
             "end_line": 63,
             "end_col": 8,
             "num_stmt": 1,
-            "count": 1
+            "count": 4
           },
           {
             "type": "statement",
@@ -11222,7 +11222,7 @@
   },
   "code_to_test_ratio": {
     "code": 4844,
-    "test": 1674,
+    "test": 1677,
     "code_files": [
       {
         "code": 241,
@@ -11605,7 +11605,7 @@
         "language": "Go"
       },
       {
-        "code": 214,
+        "code": 217,
         "comment": 0,
         "blank": 9,
         "path": "report/report_test.go",
@@ -11620,6 +11620,6 @@
       }
     ]
   },
-  "test_execution_time": 42000000000,
-  "timestamp": "2021-12-19T04:05:36.929964062Z"
+  "test_execution_time": 47000000000,
+  "timestamp": "2021-12-19T04:08:48.682383039Z"
 }
