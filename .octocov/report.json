@@ -1,12 +1,12 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "4c52fbb98351650e193afaa51705a96a203bfc3c",
+  "commit": "7db16be44aefe051ed99c4cfe86eb98f69038cb8",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
-    "total": 1846,
-    "covered": 1141,
+    "total": 1842,
+    "covered": 1144,
     "files": [
       {
         "file": "github.com/k1LoW/octocov/central/central.go",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 22
+            "count": 17
           },
           {
             "type": "statement",
@@ -5662,8 +5662,8 @@
       },
       {
         "file": "github.com/k1LoW/octocov/pkg/coverage/clover.go",
-        "total": 48,
-        "covered": 44,
+        "total": 47,
+        "covered": 43,
         "blocks": [
           {
             "type": "statement",
@@ -5759,160 +5759,160 @@
             "type": "statement",
             "start_line": 116,
             "start_col": 2,
-            "end_line": 119,
+            "end_line": 122,
             "end_col": 35,
             "num_stmt": 4,
             "count": 3
           },
           {
             "type": "statement",
-            "start_line": 119,
+            "start_line": 122,
             "start_col": 35,
-            "end_line": 124,
+            "end_line": 127,
             "end_col": 3,
             "num_stmt": 4,
             "count": 938
           },
           {
             "type": "statement",
-            "start_line": 125,
+            "start_line": 128,
             "start_col": 2,
-            "end_line": 125,
+            "end_line": 128,
             "end_col": 38,
             "num_stmt": 1,
             "count": 3
           },
           {
             "type": "statement",
-            "start_line": 125,
+            "start_line": 128,
             "start_col": 38,
-            "end_line": 126,
+            "end_line": 129,
             "end_col": 28,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 126,
+            "start_line": 129,
             "start_col": 28,
-            "end_line": 131,
+            "end_line": 134,
             "end_col": 4,
             "num_stmt": 4,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 133,
+            "start_line": 136,
             "start_col": 2,
-            "end_line": 133,
+            "end_line": 136,
             "end_col": 21,
             "num_stmt": 1,
             "count": 3
           },
           {
             "type": "statement",
-            "start_line": 136,
+            "start_line": 139,
             "start_col": 56,
-            "end_line": 140,
+            "end_line": 143,
             "end_col": 27,
             "num_stmt": 4,
             "count": 939
           },
           {
             "type": "statement",
-            "start_line": 140,
+            "start_line": 143,
             "start_col": 27,
-            "end_line": 141,
+            "end_line": 144,
             "end_col": 23,
             "num_stmt": 1,
             "count": 27892
           },
           {
             "type": "statement",
-            "start_line": 141,
+            "start_line": 144,
             "start_col": 23,
-            "end_line": 142,
+            "end_line": 145,
             "end_col": 12,
             "num_stmt": 1,
             "count": 4467
           },
           {
             "type": "statement",
-            "start_line": 144,
+            "start_line": 147,
             "start_col": 3,
-            "end_line": 154,
+            "end_line": 155,
             "end_col": 5,
-            "num_stmt": 5,
+            "num_stmt": 4,
             "count": 23425
           },
           {
             "type": "statement",
-            "start_line": 156,
+            "start_line": 157,
             "start_col": 2,
-            "end_line": 156,
+            "end_line": 157,
             "end_col": 13,
             "num_stmt": 1,
             "count": 939
           },
           {
             "type": "statement",
-            "start_line": 159,
+            "start_line": 160,
             "start_col": 64,
-            "end_line": 161,
+            "end_line": 162,
             "end_col": 16,
             "num_stmt": 2,
             "count": 7
           },
           {
             "type": "statement",
-            "start_line": 161,
+            "start_line": 162,
             "start_col": 16,
-            "end_line": 163,
+            "end_line": 164,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 164,
+            "start_line": 165,
             "start_col": 2,
-            "end_line": 164,
+            "end_line": 165,
             "end_col": 15,
             "num_stmt": 1,
             "count": 7
           },
           {
             "type": "statement",
-            "start_line": 164,
+            "start_line": 165,
             "start_col": 15,
-            "end_line": 166,
+            "end_line": 167,
             "end_col": 3,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 167,
+            "start_line": 168,
             "start_col": 2,
-            "end_line": 167,
+            "end_line": 168,
             "end_col": 41,
             "num_stmt": 1,
             "count": 7
           },
           {
             "type": "statement",
-            "start_line": 167,
+            "start_line": 168,
             "start_col": 41,
-            "end_line": 169,
+            "end_line": 170,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 170,
+            "start_line": 171,
             "start_col": 2,
-            "end_line": 170,
+            "end_line": 171,
             "end_col": 18,
             "num_stmt": 1,
             "count": 7
@@ -5921,8 +5921,8 @@
       },
       {
         "file": "github.com/k1LoW/octocov/pkg/coverage/cobertura.go",
-        "total": 49,
-        "covered": 45,
+        "total": 48,
+        "covered": 44,
         "blocks": [
           {
             "type": "statement",
@@ -6063,133 +6063,133 @@
             "type": "statement",
             "start_line": 109,
             "start_col": 35,
-            "end_line": 121,
+            "end_line": 119,
             "end_col": 5,
-            "num_stmt": 5,
+            "num_stmt": 4,
             "count": 15424
           },
           {
             "type": "statement",
-            "start_line": 122,
+            "start_line": 120,
             "start_col": 4,
-            "end_line": 122,
+            "end_line": 120,
             "end_col": 14,
             "num_stmt": 1,
             "count": 610
           },
           {
             "type": "statement",
-            "start_line": 126,
+            "start_line": 124,
             "start_col": 2,
-            "end_line": 126,
+            "end_line": 124,
             "end_col": 29,
             "num_stmt": 1,
             "count": 2
           },
           {
             "type": "statement",
-            "start_line": 126,
+            "start_line": 124,
             "start_col": 29,
-            "end_line": 128,
+            "end_line": 126,
             "end_col": 28,
             "num_stmt": 2,
             "count": 610
           },
           {
             "type": "statement",
-            "start_line": 128,
+            "start_line": 126,
             "start_col": 28,
-            "end_line": 130,
+            "end_line": 128,
             "end_col": 20,
             "num_stmt": 2,
             "count": 15424
           },
           {
             "type": "statement",
-            "start_line": 130,
+            "start_line": 128,
             "start_col": 20,
-            "end_line": 132,
+            "end_line": 130,
             "end_col": 5,
             "num_stmt": 1,
             "count": 15412
           },
           {
             "type": "statement",
-            "start_line": 134,
+            "start_line": 132,
             "start_col": 3,
-            "end_line": 137,
+            "end_line": 135,
             "end_col": 38,
             "num_stmt": 4,
             "count": 610
           },
           {
             "type": "statement",
-            "start_line": 140,
+            "start_line": 138,
             "start_col": 2,
-            "end_line": 140,
+            "end_line": 138,
             "end_col": 21,
             "num_stmt": 1,
             "count": 2
           },
           {
             "type": "statement",
-            "start_line": 143,
+            "start_line": 141,
             "start_col": 67,
-            "end_line": 145,
+            "end_line": 143,
             "end_col": 16,
             "num_stmt": 2,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 145,
+            "start_line": 143,
             "start_col": 16,
-            "end_line": 147,
+            "end_line": 145,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 148,
+            "start_line": 146,
             "start_col": 2,
-            "end_line": 148,
+            "end_line": 146,
             "end_col": 15,
             "num_stmt": 1,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 148,
+            "start_line": 146,
             "start_col": 15,
-            "end_line": 150,
+            "end_line": 148,
             "end_col": 3,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 151,
+            "start_line": 149,
             "start_col": 2,
-            "end_line": 151,
+            "end_line": 149,
             "end_col": 41,
             "num_stmt": 1,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 151,
+            "start_line": 149,
             "start_col": 41,
-            "end_line": 153,
+            "end_line": 151,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 154,
+            "start_line": 152,
             "start_col": 2,
-            "end_line": 154,
+            "end_line": 152,
             "end_col": 18,
             "num_stmt": 1,
             "count": 6
@@ -6838,7 +6838,7 @@
             "end_line": 252,
             "end_col": 4,
             "num_stmt": 1,
-            "count": 5
+            "count": 6
           },
           {
             "type": "statement",
@@ -7076,8 +7076,8 @@
       },
       {
         "file": "github.com/k1LoW/octocov/pkg/coverage/lcov.go",
-        "total": 70,
-        "covered": 59,
+        "total": 69,
+        "covered": 58,
         "blocks": [
           {
             "type": "statement",
@@ -7290,133 +7290,133 @@
             "type": "statement",
             "start_line": 92,
             "start_col": 4,
-            "end_line": 99,
+            "end_line": 97,
             "end_col": 6,
-            "num_stmt": 2,
+            "num_stmt": 1,
             "count": 2404
           },
           {
             "type": "statement",
-            "start_line": 100,
+            "start_line": 98,
             "start_col": 11,
-            "end_line": 100,
+            "end_line": 98,
             "end_col": 11,
             "num_stmt": 0,
             "count": 2384
           },
           {
             "type": "statement",
-            "start_line": 104,
+            "start_line": 102,
             "start_col": 2,
-            "end_line": 104,
+            "end_line": 102,
             "end_col": 34,
             "num_stmt": 1,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 104,
+            "start_line": 102,
             "start_col": 34,
-            "end_line": 106,
+            "end_line": 104,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 107,
+            "start_line": 105,
             "start_col": 2,
-            "end_line": 107,
+            "end_line": 105,
             "end_col": 13,
             "num_stmt": 1,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 107,
+            "start_line": 105,
             "start_col": 13,
-            "end_line": 109,
+            "end_line": 107,
             "end_col": 3,
             "num_stmt": 1,
             "count": 4
           },
           {
             "type": "statement",
-            "start_line": 110,
+            "start_line": 108,
             "start_col": 2,
-            "end_line": 110,
+            "end_line": 108,
             "end_col": 21,
             "num_stmt": 1,
             "count": 2
           },
           {
             "type": "statement",
-            "start_line": 113,
+            "start_line": 111,
             "start_col": 62,
-            "end_line": 115,
+            "end_line": 113,
             "end_col": 16,
             "num_stmt": 2,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 115,
+            "start_line": 113,
             "start_col": 16,
-            "end_line": 117,
+            "end_line": 115,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 118,
+            "start_line": 116,
             "start_col": 2,
-            "end_line": 118,
+            "end_line": 116,
             "end_col": 15,
             "num_stmt": 1,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 118,
+            "start_line": 116,
             "start_col": 15,
-            "end_line": 121,
+            "end_line": 119,
             "end_col": 40,
             "num_stmt": 2,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 121,
+            "start_line": 119,
             "start_col": 40,
-            "end_line": 124,
+            "end_line": 122,
             "end_col": 41,
             "num_stmt": 2,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 124,
+            "start_line": 122,
             "start_col": 41,
-            "end_line": 126,
+            "end_line": 124,
             "end_col": 5,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 128,
+            "start_line": 126,
             "start_col": 3,
-            "end_line": 128,
+            "end_line": 126,
             "end_col": 12,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 130,
+            "start_line": 128,
             "start_col": 2,
-            "end_line": 130,
+            "end_line": 128,
             "end_col": 18,
             "num_stmt": 1,
             "count": 6
@@ -7846,8 +7846,8 @@
       },
       {
         "file": "github.com/k1LoW/octocov/pkg/coverage/simplecov.go",
-        "total": 41,
-        "covered": 36,
+        "total": 40,
+        "covered": 35,
         "blocks": [
           {
             "type": "statement",
@@ -7979,97 +7979,97 @@
             "type": "statement",
             "start_line": 63,
             "start_col": 6,
-            "end_line": 71,
+            "end_line": 68,
             "end_col": 8,
-            "num_stmt": 2,
+            "num_stmt": 1,
             "count": 6043
           },
           {
             "type": "statement",
-            "start_line": 74,
+            "start_line": 71,
             "start_col": 4,
-            "end_line": 76,
+            "end_line": 73,
             "end_col": 39,
             "num_stmt": 3,
             "count": 335
           },
           {
             "type": "statement",
-            "start_line": 79,
+            "start_line": 76,
             "start_col": 2,
-            "end_line": 79,
+            "end_line": 76,
             "end_col": 21,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 82,
+            "start_line": 79,
             "start_col": 67,
-            "end_line": 84,
+            "end_line": 81,
             "end_col": 16,
             "num_stmt": 2,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 84,
+            "start_line": 81,
             "start_col": 16,
-            "end_line": 86,
+            "end_line": 83,
             "end_col": 3,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 87,
+            "start_line": 84,
             "start_col": 2,
-            "end_line": 87,
+            "end_line": 84,
             "end_col": 15,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 87,
+            "start_line": 84,
             "start_col": 15,
-            "end_line": 90,
+            "end_line": 87,
             "end_col": 40,
             "num_stmt": 2,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 90,
+            "start_line": 87,
             "start_col": 40,
-            "end_line": 93,
+            "end_line": 90,
             "end_col": 41,
             "num_stmt": 2,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 93,
+            "start_line": 90,
             "start_col": 41,
-            "end_line": 95,
+            "end_line": 92,
             "end_col": 5,
             "num_stmt": 1,
             "count": 0
           },
           {
             "type": "statement",
-            "start_line": 97,
+            "start_line": 94,
             "start_col": 3,
-            "end_line": 97,
+            "end_line": 94,
             "end_col": 12,
             "num_stmt": 1,
             "count": 1
           },
           {
             "type": "statement",
-            "start_line": 99,
+            "start_line": 96,
             "start_col": 2,
-            "end_line": 99,
+            "end_line": 96,
             "end_col": 18,
             "num_stmt": 1,
             "count": 1
@@ -9909,7 +9909,7 @@
       {
         "file": "github.com/k1LoW/octocov/report/report.go",
         "total": 232,
-        "covered": 117,
+        "covered": 124,
         "blocks": [
           {
             "type": "statement",
@@ -9918,7 +9918,7 @@
             "end_line": 38,
             "end_col": 21,
             "num_stmt": 1,
-            "count": 0
+            "count": 1
           },
           {
             "type": "statement",
@@ -9927,7 +9927,7 @@
             "end_line": 40,
             "end_col": 3,
             "num_stmt": 1,
-            "count": 0
+            "count": 1
           },
           {
             "type": "statement",
@@ -9936,7 +9936,7 @@
             "end_line": 42,
             "end_col": 15,
             "num_stmt": 2,
-            "count": 0
+            "count": 1
           },
           {
             "type": "statement",
@@ -9963,7 +9963,7 @@
             "end_line": 50,
             "end_col": 18,
             "num_stmt": 2,
-            "count": 0
+            "count": 1
           },
           {
             "type": "statement",
@@ -9990,7 +9990,7 @@
             "end_line": 63,
             "end_col": 8,
             "num_stmt": 1,
-            "count": 0
+            "count": 1
           },
           {
             "type": "statement",
@@ -11221,8 +11221,8 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 4852,
-    "test": 1653,
+    "code": 4844,
+    "test": 1674,
     "code_files": [
       {
         "code": 241,
@@ -11393,14 +11393,14 @@
         "language": "Go"
       },
       {
-        "code": 157,
-        "comment": 0,
+        "code": 155,
+        "comment": 3,
         "blank": 14,
         "path": "pkg/coverage/clover.go",
         "language": "Go"
       },
       {
-        "code": 140,
+        "code": 138,
         "comment": 0,
         "blank": 15,
         "path": "pkg/coverage/cobertura.go",
@@ -11421,7 +11421,7 @@
         "language": "Go"
       },
       {
-        "code": 120,
+        "code": 118,
         "comment": 3,
         "blank": 8,
         "path": "pkg/coverage/lcov.go",
@@ -11435,9 +11435,9 @@
         "language": "Go"
       },
       {
-        "code": 85,
+        "code": 83,
         "comment": 2,
-        "blank": 13,
+        "blank": 12,
         "path": "pkg/coverage/simplecov.go",
         "language": "Go"
       },
@@ -11543,14 +11543,14 @@
       },
       {
         "code": 73,
-        "comment": 0,
+        "comment": 1,
         "blank": 4,
         "path": "pkg/coverage/clover_test.go",
         "language": "Go"
       },
       {
         "code": 56,
-        "comment": 0,
+        "comment": 1,
         "blank": 4,
         "path": "pkg/coverage/cobertura_test.go",
         "language": "Go"
@@ -11564,14 +11564,14 @@
       },
       {
         "code": 69,
-        "comment": 0,
+        "comment": 1,
         "blank": 4,
         "path": "pkg/coverage/gocover_test.go",
         "language": "Go"
       },
       {
         "code": 59,
-        "comment": 0,
+        "comment": 1,
         "blank": 4,
         "path": "pkg/coverage/lcov_test.go",
         "language": "Go"
@@ -11585,7 +11585,7 @@
       },
       {
         "code": 38,
-        "comment": 0,
+        "comment": 1,
         "blank": 3,
         "path": "pkg/coverage/simplecov_test.go",
         "language": "Go"
@@ -11605,9 +11605,9 @@
         "language": "Go"
       },
       {
-        "code": 193,
+        "code": 214,
         "comment": 0,
-        "blank": 8,
+        "blank": 9,
         "path": "report/report_test.go",
         "language": "Go"
       },
@@ -11620,6 +11620,6 @@
       }
     ]
   },
-  "test_execution_time": 47000000000,
-  "timestamp": "2021-12-18T03:16:10.222909109Z"
+  "test_execution_time": 42000000000,
+  "timestamp": "2021-12-19T04:05:36.929964062Z"
 }
