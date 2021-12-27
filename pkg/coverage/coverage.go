@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
+	"github.com/zhangyunhao116/skipmap"
 )
 
 type Type string
@@ -174,4 +176,150 @@ func (bcs BlockCoverages) MaxCount() int {
 		}
 	}
 	return max
+}
+
+const (
+	startPos = -1
+	endPos   = 99999
+)
+
+type PosCoverage struct {
+	Pos   int
+	Count int
+}
+
+type PosCoverages []*PosCoverage
+
+type LineCoverage struct {
+	Line         int
+	Count        int
+	PosCoverages PosCoverages
+}
+
+type LineCoverages []*LineCoverage
+
+func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
+	m := skipmap.NewInt()
+
+	for _, bc := range bcs {
+		sl := *bc.StartLine
+		el := *bc.EndLine
+		for i := sl; i <= el; i++ {
+			var mm *skipmap.IntMap
+			v, ok := m.Load(i)
+			if ok {
+				mm = v.(*skipmap.IntMap)
+			} else {
+				mm = skipmap.NewInt()
+			}
+			m.Store(i, mm)
+
+			if bc.Type == TypeLOC || (sl < i && i < el) {
+				// TypeLOC or TypeStmt
+				mm.Range(func(key int, v interface{}) bool {
+					mm.Store(key, v.(int)+*bc.Count)
+					return true
+				})
+				if _, ok := mm.Load(startPos); !ok {
+					mm.Store(startPos, *bc.Count)
+				}
+				if _, ok := mm.Load(endPos); !ok {
+					mm.Store(endPos, *bc.Count)
+				}
+				continue
+			}
+
+			// TypeStmt
+			startCount := 0
+			endCount := 0
+			startTo := startPos
+			endFrom := endPos
+			pos := []int{}
+			counts := []int{}
+			mm.Range(func(key int, v interface{}) bool {
+				pos = append(pos, key)
+				counts = append(counts, v.(int))
+				return true
+			})
+
+			if len(pos) > 1 && pos[0] == startPos {
+				startCount = counts[0]
+				startTo = pos[1] - 1
+			}
+
+			if len(pos) > 1 && pos[len(pos)-1] == endPos {
+				endCount = counts[len(pos)-1]
+				endFrom = pos[len(pos)-2] + 1
+			}
+
+			switch {
+			case i == sl && i != el:
+				mm.Range(func(key int, v interface{}) bool {
+					if key >= *bc.StartCol {
+						mm.Store(key, v.(int)+*bc.Count)
+					}
+					return true
+				})
+				if _, ok := mm.Load(*bc.StartCol); !ok {
+					mm.Store(*bc.StartCol, *bc.Count)
+				}
+				if _, ok := mm.Load(endPos); !ok {
+					mm.Store(endPos, *bc.Count)
+				}
+			case i == sl && i == el:
+				for j := *bc.StartCol; j <= *bc.EndCol; j++ {
+					v, ok := mm.Load(j)
+					if ok {
+						mm.Store(j, v.(int)+*bc.Count)
+					} else {
+						if j <= startTo {
+							mm.Store(j, startCount+*bc.Count)
+						} else if endFrom <= j {
+							mm.Store(j, endCount+*bc.Count)
+						} else {
+							mm.Store(j, *bc.Count)
+						}
+					}
+				}
+			case i != sl && i == el:
+				mm.Range(func(key int, v interface{}) bool {
+					if key <= *bc.EndCol {
+						mm.Store(key, v.(int)+*bc.Count)
+					}
+					return true
+				})
+				if _, ok := mm.Load(startPos); !ok {
+					mm.Store(startPos, *bc.Count)
+				}
+				if _, ok := mm.Load(*bc.EndCol); !ok {
+					mm.Store(*bc.EndCol, *bc.Count)
+				}
+			}
+		}
+	}
+
+	lcs := LineCoverages{}
+	m.Range(func(line int, mmi interface{}) bool {
+		mm := mmi.(*skipmap.IntMap)
+		lc := &LineCoverage{
+			Line:         line,
+			Count:        0,
+			PosCoverages: PosCoverages{},
+		}
+		mm.Range(func(pos int, ci interface{}) bool {
+			c := ci.(int)
+			lc.PosCoverages = append(lc.PosCoverages, &PosCoverage{
+				Pos:   pos,
+				Count: c,
+			})
+			if c > lc.Count {
+				lc.Count = c
+			}
+			return true
+		})
+		lcs = append(lcs, lc)
+		return true
+	})
+
+	return lcs
 }
