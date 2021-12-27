@@ -13,7 +13,7 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			}
 		}
 		if deleted {
-			return errors.New("can not merge: BlockCoverages already deleted.")
+			return errors.New("can not merge: BlockCoverages are already deleted.")
 		}
 	}
 	{
@@ -30,7 +30,7 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			}
 		}
 		if deleted {
-			return errors.New("can not merge: BlockCoverages already deleted.")
+			return errors.New("can not merge: BlockCoverages are already deleted.")
 		}
 	}
 	if c.Type != c2.Type {
