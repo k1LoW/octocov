@@ -190,6 +190,39 @@ type PosCoverage struct {
 
 type PosCoverages []*PosCoverage
 
+func (ps PosCoverages) FindCountByPos(pos int) (int, error) {
+	before := PosCoverages{}
+	after := PosCoverages{}
+	for _, p := range ps {
+		switch {
+		case p.Pos < pos:
+			before = append(before, p)
+		case p.Pos == pos:
+			return p.Count, nil
+		case p.Pos > pos:
+			after = append(after, p)
+		}
+	}
+
+	if len(before) == 0 || len(after) == 0 {
+		return 0, fmt.Errorf("count not found: %d", pos)
+	}
+
+	if before[len(before)-1].Pos != startPos && after[0].Pos != endPos {
+		return 0, fmt.Errorf("count not found: %d", pos)
+	}
+
+	if before[len(before)-1].Pos == startPos {
+		return before[len(before)-1].Count, nil
+	}
+
+	if after[0].Pos == endPos {
+		return after[0].Count, nil
+	}
+
+	return 0, errors.New("invalid pos")
+}
+
 type LineCoverage struct {
 	Line         int
 	Count        int
@@ -197,6 +230,15 @@ type LineCoverage struct {
 }
 
 type LineCoverages []*LineCoverage
+
+func (lcs LineCoverages) FindByLine(l int) (*LineCoverage, error) {
+	for _, lc := range lcs {
+		if lc.Line == l {
+			return lc, nil
+		}
+	}
+	return nil, fmt.Errorf("no line coverage: %d", l)
+}
 
 func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 	m := skipmap.NewInt()

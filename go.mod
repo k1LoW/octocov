@@ -32,6 +32,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.3.0
 	github.com/spiegel-im-spiegel/gnkf v0.6.4
+	github.com/zhangyunhao116/skipmap v0.7.0
 	golang.org/x/exp v0.0.0-20211214223157-bafe2e20209a
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
 	golang.org/x/tools v0.1.8
@@ -67,6 +68,9 @@ require (
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spiegel-im-spiegel/errs v1.0.5 // indirect
+	github.com/zhangyunhao116/fastrand v0.1.0 // indirect
+	github.com/zhangyunhao116/sbconv v0.2.1 // indirect
+	github.com/zhangyunhao116/wyhash v0.3.2 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
