@@ -12,8 +12,9 @@ import (
 type Type string
 
 const (
-	TypeLOC  Type = "loc"
-	TypeStmt Type = "statement"
+	TypeLOC    Type = "loc"
+	TypeStmt   Type = "statement"
+	TypeMerged Type = "merged"
 )
 
 type Coverage struct {
