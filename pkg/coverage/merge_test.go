@@ -144,7 +144,9 @@ func TestMerge(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		tt.c1.Merge(tt.c2)
+		if err := tt.c1.Merge(tt.c2); err != nil {
+			t.Fatal(err)
+		}
 		got := tt.c1
 
 		opts := []cmp.Option{
