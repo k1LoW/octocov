@@ -157,10 +157,10 @@ func TestMaxCount(t *testing.T) {
 		},
 		{
 			BlockCoverages{
-				newBlockCoverage(TypeLOC, 6, -1, 7, -1, -1, 10),
-				newBlockCoverage(TypeLOC, 7, -1, 7, -1, -1, 100),
-				newBlockCoverage(TypeLOC, 7, -1, 8, -1, -1, 11),
-				newBlockCoverage(TypeLOC, 9, -1, 9, -1, -1, 1),
+				newBlockCoverage(TypeStmt, 6, 1, 7, 10, 1, 10),
+				newBlockCoverage(TypeStmt, 7, 1, 7, 10, 1, 100),
+				newBlockCoverage(TypeStmt, 7, 1, 8, 10, 1, 11),
+				newBlockCoverage(TypeStmt, 9, 1, 9, 10, 1, 1),
 			},
 			121,
 		},
@@ -169,6 +169,100 @@ func TestMaxCount(t *testing.T) {
 		got := tt.blocks.MaxCount()
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestToLineCoverages(t *testing.T) {
+	tests := []struct {
+		blocks BlockCoverages
+		want   LineCoverages
+	}{
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeLOC, 6, -1, 6, -1, -1, 10),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 10, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 10}, &PosCoverage{Pos: endPos, Count: 10}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeLOC, 6, -1, 6, -1, -1, 10),
+				newBlockCoverage(TypeLOC, 8, -1, 8, -1, -1, 11),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 10, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 10}, &PosCoverage{Pos: endPos, Count: 10}}},
+				&LineCoverage{Line: 8, Count: 11, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 11}, &PosCoverage{Pos: endPos, Count: 11}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeLOC, 6, -1, 6, -1, -1, 3),
+				newBlockCoverage(TypeLOC, 6, -1, 6, -1, -1, 7),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 10, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 10}, &PosCoverage{Pos: endPos, Count: 10}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeStmt, 6, 0, 8, 10, 1, 7),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: 0, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 8, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 10, Count: 7}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeStmt, 6, 0, 6, 3, 1, 7),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: 0, Count: 7}, &PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 2, Count: 7}, &PosCoverage{Pos: 3, Count: 7}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeStmt, 6, 0, 8, 10, 1, 7),
+				newBlockCoverage(TypeStmt, 6, 0, 6, 3, 1, 7),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 14, PosCoverages: PosCoverages{&PosCoverage{Pos: 0, Count: 14}, &PosCoverage{Pos: 1, Count: 14}, &PosCoverage{Pos: 2, Count: 14}, &PosCoverage{Pos: 3, Count: 14}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 8, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 10, Count: 7}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeStmt, 6, 1, 7, 1, 1, 7),
+				newBlockCoverage(TypeStmt, 7, 3, 7, 3, 1, 7),
+				newBlockCoverage(TypeStmt, 7, 5, 8, 3, 1, 7),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 3, Count: 7}, &PosCoverage{Pos: 5, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 8, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 3, Count: 7}}},
+			},
+		},
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeStmt, 6, 1, 6, 3, 1, 7),
+				newBlockCoverage(TypeStmt, 6, 3, 7, 1, 1, 7),
+				newBlockCoverage(TypeStmt, 6, 3, 6, 5, 1, 7),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 21, PosCoverages: PosCoverages{&PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 2, Count: 7}, &PosCoverage{Pos: 3, Count: 21}, &PosCoverage{Pos: 4, Count: 14}, &PosCoverage{Pos: 5, Count: 14}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 1, Count: 7}}},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		got := tt.blocks.ToLineCoverages()
+		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+			t.Errorf("%s", diff)
 		}
 	}
 }

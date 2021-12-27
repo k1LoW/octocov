@@ -63,10 +63,10 @@ func TestTable(t *testing.T) {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 		orig := r.String()
-		r.Coverage.FlushBlockCoverages()
-		flushed := r.String()
-		if len(orig) <= len(flushed) {
-			t.Error("FlushBlockCoverages error")
+		r.Coverage.DeleteBlockCoverages()
+		deleted := r.String()
+		if len(orig) <= len(deleted) {
+			t.Error("DeleteBlockCoverages error")
 		}
 	}
 }

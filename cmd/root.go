@@ -391,10 +391,10 @@ var rootCmd = &cobra.Command{
 				addPaths = append(addPaths, rp)
 			}
 			if r.Coverage != nil {
-				r.Coverage.FlushBlockCoverages()
+				r.Coverage.DeleteBlockCoverages()
 			}
 			if r.CodeToTestRatio != nil {
-				r.CodeToTestRatio.FlushFiles()
+				r.CodeToTestRatio.DeleteFiles()
 			}
 			datastores := []datastore.Datastore{}
 			for _, s := range c.Report.Datastores {

@@ -50,12 +50,15 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 		return err
 	}
 
+	lcs := p.fc.Blocks.ToLineCoverages()
+
 	scanner := bufio.NewScanner(dup2)
 	n := 1
 	cl := color.New(color.FgYellow)
 	cl.EnableColor()
 	for scanner.Scan() {
-		c, out := paintLine(n, w2, scanner.Text(), p.fc.FindBlocksByLine(n))
+		lc, _ := lcs.FindByLine(n)
+		c, out := paintLine(n, w2, scanner.Text(), lc)
 		_, _ = fmt.Fprintf(dest, "%s %s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out)
 		n += 1
 	}
@@ -65,50 +68,40 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	return nil
 }
 
-func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
+const (
+	posGreen = "g"
+	posRed   = "r"
+)
+
+func lineCovered(lcnt int, lc *LineCoverage) (int, []string) {
+	l := make([]string, lcnt)
+	if lc == nil {
+		return 0, l
+	}
+
+	for i := 0; i < lcnt; i++ {
+		c, err := lc.PosCoverages.FindCountByPos(i + 1)
+		if err != nil {
+			continue
+		}
+		if c > 0 {
+			l[i] = posGreen
+		} else {
+			l[i] = posRed
+		}
+	}
+
+	return lc.Count, l
+}
+
+func paintLine(n, w int, in string, lc *LineCoverage) (string, string) {
 	g := color.New(color.FgGreen)
 	g.EnableColor()
 	r := color.New(color.FgRed)
 	r.EnableColor()
 
-	lc := len(in)
-	l := make([]string, lc)
-
-	c := 0
-	for _, b := range blocks {
-		var cl string
-		if *b.Count > 0 {
-			cl = "g"
-		} else {
-			cl = "r"
-		}
-		switch b.Type {
-		case TypeLOC:
-			for i := 0; i < lc; i++ {
-				l[i] = cl
-			}
-		case TypeStmt:
-			s := 0
-			if *b.StartLine == n && b.StartCol != nil {
-				s = *b.StartCol - 1
-			}
-			e := lc
-			if *b.EndLine == n && b.EndCol != nil {
-				e = *b.EndCol - 1
-			}
-			if e > lc {
-				// coverage report and source code are out of sync.
-				e = lc
-			}
-			for i := s; i < e; i++ {
-				l[i] = cl
-			}
-		}
-
-		if *b.Count > 0 {
-			c += *b.Count
-		}
-	}
+	lcnt := len(in)
+	c, l := lineCovered(lcnt, lc)
 
 	out := ""
 	pos := 0
@@ -120,9 +113,9 @@ func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
 		switch current {
 		case "":
 			out += in[pos:i]
-		case "g":
+		case posGreen:
 			out += g.Sprint(in[pos:i])
-		case "r":
+		case posRed:
 			out += r.Sprint(in[pos:i])
 		}
 		current = cl
@@ -130,11 +123,11 @@ func paintLine(n, w int, in string, blocks BlockCoverages) (string, string) {
 	}
 	switch current {
 	case "":
-		out += in[pos:lc]
-	case "g":
-		out += g.Sprint(in[pos:lc])
-	case "r":
-		out += r.Sprint(in[pos:lc])
+		out += in[pos:lcnt]
+	case posGreen:
+		out += g.Sprint(in[pos:lcnt])
+	case posRed:
+		out += r.Sprint(in[pos:lcnt])
 	}
 
 	s := strings.Repeat(" ", w)
