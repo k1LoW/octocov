@@ -1,6 +1,7 @@
 package report
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -30,6 +31,31 @@ func TestNew(t *testing.T) {
 		got := r.Repository
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestDeleteBlockCoverages(t *testing.T) {
+	tests := []struct {
+		path string
+	}{
+		{
+			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
+		},
+		{
+			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
+		},
+	}
+	for _, tt := range tests {
+		r := &Report{}
+		if err := r.Load(tt.path); err != nil {
+			t.Fatal(err)
+		}
+		orig := r.String()
+		r.Coverage.DeleteBlockCoverages()
+		deleted := r.String()
+		if len(orig) <= len(deleted) {
+			t.Error("DeleteBlockCoverages error")
 		}
 	}
 }
@@ -67,6 +93,36 @@ func TestTable(t *testing.T) {
 		deleted := r.String()
 		if len(orig) <= len(deleted) {
 			t.Error("DeleteBlockCoverages error")
+		}
+	}
+}
+
+func TestOut(t *testing.T) {
+	tests := []struct {
+		path string
+		want string
+	}{
+		{
+			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
+			"            master (896d3c5)  \n------------------------------\n  \x1b[1mCoverage\x1b[0m             68.5%  \n",
+		},
+		{
+			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
+			"                       master (896d3c5)  \n-----------------------------------------\n  \x1b[1mCoverage\x1b[0m                        68.5%  \n  \x1b[1mCode to Test Ratio\x1b[0m              1:0.5  \n  \x1b[1mTest Execution Time\x1b[0m             4m40s  \n",
+		},
+	}
+	for _, tt := range tests {
+		r := &Report{}
+		if err := r.Load(tt.path); err != nil {
+			t.Fatal(err)
+		}
+		buf := new(bytes.Buffer)
+		if err := r.Out(buf); err != nil {
+			t.Fatal(err)
+		}
+		got := buf.String()
+		if got != tt.want {
+			t.Errorf("got\n%v\n%#v\nwant\n%v\n%#v", got, got, tt.want, tt.want)
 		}
 	}
 }
