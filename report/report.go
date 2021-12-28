@@ -248,7 +248,9 @@ func (r *Report) MeasureCoverage(paths []string) error {
 		if r.Coverage == nil {
 			r.Coverage = cov
 		} else {
-			r.Coverage.Merge(cov)
+			if err := r.Coverage.Merge(cov); err != nil {
+				return err
+			}
 		}
 		r.rp = rp // TODO: multi paths
 	}
