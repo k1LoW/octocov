@@ -9,11 +9,11 @@ import (
 
 func TestDiff(t *testing.T) {
 	a := &Report{}
-	if err := a.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
 		t.Fatal(err)
 	}
 	b := &Report{}
-	if err := b.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
 		t.Fatal(err)
 	}
 	buf := new(bytes.Buffer)
@@ -29,11 +29,11 @@ func TestDiff(t *testing.T) {
 
 func TestDiffTable(t *testing.T) {
 	a := &Report{}
-	if err := a.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
 		t.Fatal(err)
 	}
 	b := &Report{}
-	if err := b.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
 		t.Fatal(err)
 	}
 

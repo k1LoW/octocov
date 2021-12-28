@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,8 +19,15 @@ func (c *Config) Build() {
 	if c.Coverage == nil {
 		c.Coverage = &ConfigCoverage{}
 	}
-	if c.Coverage.Path == "" {
-		c.Coverage.Path = filepath.Dir(c.path)
+	if c.Coverage.Paths == nil {
+		c.Coverage.Paths = []string{}
+	}
+	if c.Coverage.Path != "" {
+		_, _ = fmt.Fprintln(os.Stderr, "Deprecated error: coverage.path: has been deprecated. please use coverage.paths: instead.")
+		c.Coverage.Paths = append(c.Coverage.Paths, c.Coverage.Path)
+	}
+	if len(c.Coverage.Paths) == 0 {
+		c.Coverage.Paths = append(c.Coverage.Paths, filepath.Dir(c.path))
 	}
 
 	// CodeToTestRatio

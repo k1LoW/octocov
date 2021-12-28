@@ -55,11 +55,11 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		path := c.Coverage.Path
+		paths := c.Coverage.Paths
 		if reportPath != "" {
-			path = reportPath
+			paths = append(paths, reportPath)
 		}
-		if err := r.MeasureCoverage(path); err != nil {
+		if err := r.MeasureCoverage(paths); err != nil {
 			return err
 		}
 		t := 0

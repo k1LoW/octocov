@@ -54,6 +54,7 @@ type Config struct {
 
 type ConfigCoverage struct {
 	Path       string              `yaml:"path,omitempty"`
+	Paths      []string            `yaml:"paths,omitempty"`
 	Badge      ConfigCoverageBadge `yaml:"badge,omitempty"`
 	Acceptable string              `yaml:"acceptable,omitempty"`
 }

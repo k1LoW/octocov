@@ -27,12 +27,12 @@ func TestCoverageConfigReady(t *testing.T) {
 			&Config{
 				Coverage: &ConfigCoverage{},
 			},
-			"coverage.path: is not set",
+			"coverage.paths: is not set",
 		},
 		{
 			&Config{
 				Coverage: &ConfigCoverage{
-					Path: "path/to/coverage.svg",
+					Paths: []string{"path/to/coverage.out"},
 				},
 			},
 			"",
@@ -293,7 +293,7 @@ func TestCoverageBadgeConfigReady(t *testing.T) {
 		{
 			&Config{
 				Coverage: &ConfigCoverage{
-					Path: "path/to/coverage.xml",
+					Paths: []string{"path/to/coverage.xml"},
 				},
 			},
 			"coverage.badge.path: is not set",
@@ -301,7 +301,7 @@ func TestCoverageBadgeConfigReady(t *testing.T) {
 		{
 			&Config{
 				Coverage: &ConfigCoverage{
-					Path: "path/to/coverage.xml",
+					Paths: []string{"path/to/coverage.xml"},
 					Badge: ConfigCoverageBadge{
 						Path: "path/to/coverage.svg",
 					},

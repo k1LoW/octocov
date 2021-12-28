@@ -37,7 +37,7 @@ var diffCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		a := &report.Report{}
-		if err := a.MeasureCoverage(args[0]); err != nil {
+		if err := a.Load(args[0]); err != nil {
 			return err
 		}
 		if a.Timestamp.IsZero() {
@@ -49,7 +49,7 @@ var diffCmd = &cobra.Command{
 		}
 
 		b := &report.Report{}
-		if err := b.MeasureCoverage(args[1]); err != nil {
+		if err := b.Load(args[1]); err != nil {
 			return err
 		}
 		if b.Timestamp.IsZero() {

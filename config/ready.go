@@ -13,8 +13,8 @@ func (c *Config) CoverageConfigReady() error {
 	if c.Coverage == nil {
 		return errors.New("coverage: is not set")
 	}
-	if c.Coverage.Path == "" {
-		return errors.New("coverage.path: is not set")
+	if len(c.Coverage.Paths) == 0 {
+		return errors.New("coverage.paths: is not set")
 	}
 	return nil
 }

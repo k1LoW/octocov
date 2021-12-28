@@ -221,25 +221,48 @@ func (r *Report) IsMeasuredTestExecutionTime() bool {
 	return r.TestExecutionTime != nil
 }
 
-func (r *Report) MeasureCoverage(path string) error {
-	cov, rp, cerr := challengeParseReport(path)
-	if cerr != nil {
-		f, err := os.Stat(path)
-		if err != nil || f.IsDir() {
-			return cerr
-		}
-		b, err := os.ReadFile(filepath.Clean(path))
-		if err != nil {
-			return err
-		}
-		if err := json.Unmarshal(b, r); err != nil {
-			return cerr
-		}
-		r.rp = path
-		return nil
+func (r *Report) Load(path string) error {
+	f, err := os.Stat(path)
+	if err != nil || f.IsDir() {
+		return fmt.Errorf("octocov report.json not found: %s", path)
 	}
-	r.Coverage = cov
-	r.rp = rp
+	b, err := os.ReadFile(filepath.Clean(path))
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(b, r); err != nil {
+		return err
+	}
+	r.rp = path
+	return nil
+}
+
+func (r *Report) MeasureCoverage(paths []string) error {
+	var cerr error
+	for _, path := range paths {
+		cov, rp, err := challengeParseReport(path)
+		if err != nil {
+			cerr = err
+			continue
+		}
+		if r.Coverage == nil {
+			r.Coverage = cov
+		} else {
+			if err := r.Coverage.Merge(cov); err != nil {
+				return err
+			}
+		}
+		r.rp = rp // TODO: multi paths
+	}
+
+	// fallback load report.json
+	if r.Coverage == nil || len(paths) == 0 {
+		path := paths[0]
+		if err := r.Load(path); err != nil {
+			return cerr
+		}
+	}
+
 	return nil
 }
 
@@ -428,5 +451,6 @@ func challengeParseReport(path string) (*coverage.Coverage, string, error) {
 	if cov, rp, err := coverage.NewCobertura().ParseReport(path); err == nil {
 		return cov, rp, nil
 	}
+
 	return nil, "", fmt.Errorf("coverage report not found: %s", path)
 }

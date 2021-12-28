@@ -31,7 +31,8 @@ Add `.octocov.yml` ( or `octocov.yml` ) file to your repository.
 ``` yaml
 # .octocov.yml
 coverage:
-  path: coverage.out
+  paths:
+    - coverage.out
 codeToTestRatio:
   code:
     - '**/*.go'
@@ -310,13 +311,18 @@ Configuration for code coverage.
 
 ### `coverage.path:`
 
+`coverage.path:` has been deprecated. Please use `coverage.paths:` instead.
+
+### `coverage.paths:`
+
 The path to the coverage report file.
 
 If no path is specified, the default path for each coverage format will be scanned.
 
 ``` yaml
 coverage:
-  path: tests/coverage.xml
+  paths:
+    - tests/coverage.xml
 ```
 
 ### `coverage.acceptable:`
@@ -937,7 +943,8 @@ If you want to specify the path of the report file, set `coverage.path`
 
 ``` yaml
 coverage:
-  path: /path/to/coverage.txt
+  paths:
+    - /path/to/coverage.txt
 ```
 
 ### Go coverage
