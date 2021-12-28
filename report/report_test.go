@@ -56,7 +56,7 @@ func TestTable(t *testing.T) {
 	}
 	for _, tt := range tests {
 		r := &Report{}
-		if err := r.MeasureCoverage(tt.path); err != nil {
+		if err := r.Load(tt.path); err != nil {
 			t.Fatal(err)
 		}
 		if got := r.Table(); got != tt.want {
@@ -89,7 +89,7 @@ func TestFileCoveagesTable(t *testing.T) {
 	}
 	path := filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")
 	r := &Report{}
-	if err := r.MeasureCoverage(path); err != nil {
+	if err := r.Load(path); err != nil {
 		t.Fatal(err)
 	}
 	for _, tt := range tests {
@@ -181,11 +181,11 @@ func TestMergeExecutionTimes(t *testing.T) {
 
 func TestCompare(t *testing.T) {
 	a := &Report{}
-	if err := a.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
 		t.Fatal(err)
 	}
 	b := &Report{}
-	if err := b.MeasureCoverage(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
 		t.Fatal(err)
 	}
 	got := a.Compare(b)
