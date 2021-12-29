@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.31.0](https://github.com/k1LoW/octocov/compare/v0.30.0...v0.31.0) (2021-12-29)
+
+* Measuring test execution time by identifying steps of GitHub Actions from timestamp of multiple coverage report files [#120](https://github.com/k1LoW/octocov/pull/120) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Support multiple coverage report files [#119](https://github.com/k1LoW/octocov/pull/119) ([k1LoW](https://github.com/k1LoW))
+* Support for merging ratios [#118](https://github.com/k1LoW/octocov/pull/118) ([k1LoW](https://github.com/k1LoW))
+* Support for merging coverages [#117](https://github.com/k1LoW/octocov/pull/117) ([k1LoW](https://github.com/k1LoW))
+* Fix coverage count [#116](https://github.com/k1LoW/octocov/pull/116) ([k1LoW](https://github.com/k1LoW))
+* Fix coverage NumStmt (Cobertura, LCOV, SimpleCov) [#115](https://github.com/k1LoW/octocov/pull/115) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Change ratio.Ratio struct [#114](https://github.com/k1LoW/octocov/pull/114) ([k1LoW](https://github.com/k1LoW))
+* Fix coverage count [#113](https://github.com/k1LoW/octocov/pull/113) ([k1LoW](https://github.com/k1LoW))
+* Update pkgs [#112](https://github.com/k1LoW/octocov/pull/112) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.30.0](https://github.com/k1LoW/octocov/compare/v0.29.0...v0.30.0) (2021-12-08)
 
 * If the condition in the `*.acceptable:` section is not met, add an error message to the comment of the pull request. [#111](https://github.com/k1LoW/octocov/pull/111) ([k1LoW](https://github.com/k1LoW))
