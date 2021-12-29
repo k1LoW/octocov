@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/pkg/coverage"
+	"github.com/k1LoW/octocov/pkg/ratio"
 )
 
 func TestNew(t *testing.T) {
@@ -29,6 +31,25 @@ func TestNew(t *testing.T) {
 			continue
 		}
 		got := r.Repository
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestCountMeasured(t *testing.T) {
+	tet := 1000.0
+	tests := []struct {
+		r    *Report
+		want int
+	}{
+		{&Report{}, 0},
+		{&Report{Coverage: &coverage.Coverage{}}, 1},
+		{&Report{CodeToTestRatio: &ratio.Ratio{}}, 1},
+		{&Report{TestExecutionTime: &tet}, 1},
+	}
+	for _, tt := range tests {
+		got := tt.r.CountMeasured()
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
