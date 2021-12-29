@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/goccy/go-json"
+	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
@@ -240,29 +241,39 @@ func (r *Report) Load(path string) error {
 }
 
 func (r *Report) MeasureCoverage(paths []string) error {
-	var cerr error
+	if len(paths) == 0 {
+		return fmt.Errorf("coverage report not found: %s", paths)
+	}
+
+	var cerr *multierror.Error
 	for _, path := range paths {
 		cov, rp, err := challengeParseReport(path)
 		if err != nil {
-			cerr = err
+			cerr = multierror.Append(cerr, err)
 			continue
 		}
 		if r.Coverage == nil {
 			r.Coverage = cov
 		} else {
 			if err := r.Coverage.Merge(cov); err != nil {
-				return err
+				cerr = multierror.Append(cerr, err)
+				return cerr
 			}
 		}
 		r.covPaths = append(r.covPaths, rp)
 	}
 
 	// fallback load report.json
-	if r.Coverage == nil || len(paths) == 0 {
+	if r.Coverage == nil && len(paths) == 1 {
 		path := paths[0]
 		if err := r.Load(path); err != nil {
+			cerr = multierror.Append(cerr, err)
 			return cerr
 		}
+	}
+
+	if r.Coverage == nil {
+		return cerr
 	}
 
 	return nil
