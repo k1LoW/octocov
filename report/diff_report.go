@@ -126,7 +126,7 @@ func (d *DiffReport) Table() string {
 }
 
 func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool) {
-	table.SetHeader([]string{"", makeHeadTitle(d.RefA, d.CommitA, d.ReportA.rp), makeHeadTitle(d.RefB, d.CommitB, d.ReportB.rp), "+/-"})
+	table.SetHeader([]string{"", makeHeadTitle(d.RefA, d.CommitA, d.ReportA.covPaths), makeHeadTitle(d.RefB, d.CommitB, d.ReportB.covPaths), "+/-"})
 	if d.Coverage != nil {
 		{
 			dd := d.Coverage.Diff

@@ -307,6 +307,40 @@ func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string,
 	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
 }
 
+func (g *Gh) GetStepByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (Step, error) {
+	p := backoff.Exponential(
+		backoff.WithMinInterval(time.Second),
+		backoff.WithMaxInterval(30*time.Second),
+		backoff.WithJitterFactor(0.05),
+		backoff.WithMaxRetries(5),
+	)
+	b := p.Start(ctx)
+	log.Printf("target time: %v", t)
+	for backoff.Continue(b) {
+		job, _, err := g.client.Actions.GetWorkflowJobByID(ctx, owner, repo, jobID)
+		if err != nil {
+			return Step{}, err
+		}
+		l := len(job.Steps)
+		for i, s := range job.Steps {
+			log.Printf("job step [%d/%d]: %s %v-%v", i+1, l, s.GetName(), s.StartedAt, s.CompletedAt)
+			if s.StartedAt == nil || s.CompletedAt == nil {
+				continue
+			}
+			// Truncate less than a second
+			if s.GetStartedAt().Time.Unix() < t.Unix() && t.Unix() <= s.GetCompletedAt().Time.Unix() {
+				log.Print("detect step")
+				return Step{
+					Name:        s.GetName(),
+					StartedAt:   s.GetStartedAt().Time,
+					CompletedAt: s.GetCompletedAt().Time,
+				}, nil
+			}
+		}
+	}
+	return Step{}, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
+}
+
 type Step struct {
 	Name        string
 	StartedAt   time.Time

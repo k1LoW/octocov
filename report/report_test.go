@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/pkg/coverage"
+	"github.com/k1LoW/octocov/pkg/ratio"
 )
 
 func TestNew(t *testing.T) {
@@ -29,6 +31,81 @@ func TestNew(t *testing.T) {
 			continue
 		}
 		got := r.Repository
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestMeasureCoverage(t *testing.T) {
+	tests := []struct {
+		paths   []string
+		want    int
+		wantErr bool
+	}{
+		{
+			[]string{
+				filepath.Join(coverageTestdataDir(t), "gocover"),
+			},
+			1,
+			false,
+		},
+		{
+			[]string{
+				filepath.Join(coverageTestdataDir(t), "gocover"),
+				filepath.Join(coverageTestdataDir(t), "lcov"),
+			},
+			2,
+			false,
+		},
+		{
+			[]string{
+				filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
+			},
+			1,
+			false,
+		},
+		{
+			// Read only one report.json
+			[]string{
+				filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
+				filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
+			},
+			0,
+			true,
+		},
+	}
+	for _, tt := range tests {
+		r := &Report{}
+		if err := r.MeasureCoverage(tt.paths); err != nil {
+			if !tt.wantErr {
+				t.Error(err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		got := len(r.covPaths)
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestCountMeasured(t *testing.T) {
+	tet := 1000.0
+	tests := []struct {
+		r    *Report
+		want int
+	}{
+		{&Report{}, 0},
+		{&Report{Coverage: &coverage.Coverage{}}, 1},
+		{&Report{CodeToTestRatio: &ratio.Ratio{}}, 1},
+		{&Report{TestExecutionTime: &tet}, 1},
+	}
+	for _, tt := range tests {
+		got := tt.r.CountMeasured()
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
@@ -275,6 +352,19 @@ func testdataDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "testdata"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return dir
+}
+
+func coverageTestdataDir(t *testing.T) string {
+	t.Helper()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "pkg", "coverage", "testdata"))
 	if err != nil {
 		t.Fatal(err)
 	}
