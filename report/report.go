@@ -30,8 +30,9 @@ type Report struct {
 	CodeToTestRatio   *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
 	TestExecutionTime *float64           `json:"test_execution_time,omitempty"`
 	Timestamp         time.Time          `json:"timestamp"`
-	// coverage report path
-	rp string
+
+	// coverage report paths
+	covPaths []string
 }
 
 func New(ownerrepo string) (*Report, error) {
@@ -60,6 +61,7 @@ func New(ownerrepo string) (*Report, error) {
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
+		covPaths:   []string{},
 	}, nil
 }
 
@@ -105,7 +107,7 @@ func (r *Report) Table() string {
 
 func (r *Report) Out(w io.Writer) error {
 	table := tablewriter.NewWriter(w)
-	table.SetHeader([]string{"", makeHeadTitle(r.Ref, r.Commit, r.rp)})
+	table.SetHeader([]string{"", makeHeadTitle(r.Ref, r.Commit, r.covPaths)})
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
 	table.SetCenterSeparator("")
@@ -233,7 +235,7 @@ func (r *Report) Load(path string) error {
 	if err := json.Unmarshal(b, r); err != nil {
 		return err
 	}
-	r.rp = path
+	r.covPaths = append(r.covPaths, path)
 	return nil
 }
 
@@ -252,7 +254,7 @@ func (r *Report) MeasureCoverage(paths []string) error {
 				return err
 			}
 		}
-		r.rp = rp // TODO: multi paths
+		r.covPaths = append(r.covPaths, rp)
 	}
 
 	// fallback load report.json
@@ -301,18 +303,25 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		r.TestExecutionTime = &t
 		return nil
 	}
-	fi, err := os.Stat(r.rp)
-	if err != nil {
-		return err
+
+	steps := []gh.Step{}
+	for _, path := range r.covPaths {
+		fi, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		jobID, err := g.DetectCurrentJobID(ctx, repo.Owner, repo.Repo)
+		if err != nil {
+			return err
+		}
+		s, err := g.GetStepByTime(ctx, repo.Owner, repo.Repo, jobID, fi.ModTime())
+		if err != nil {
+			return err
+		}
+		steps = append(steps, s)
 	}
-	jobID, err := g.DetectCurrentJobID(ctx, repo.Owner, repo.Repo)
-	if err != nil {
-		return err
-	}
-	d, err := g.GetStepExecutionTimeByTime(ctx, repo.Owner, repo.Repo, jobID, fi.ModTime())
-	if err != nil {
-		return err
-	}
+
+	d := mergeExecutionTimes(steps)
 	t := float64(d)
 	r.TestExecutionTime = &t
 	return nil
@@ -387,7 +396,7 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 	return d
 }
 
-func makeHeadTitle(ref, commit, rp string) string {
+func makeHeadTitle(ref, commit string, covPaths []string) string {
 	ref = strings.TrimPrefix(ref, "refs/heads/")
 	if strings.HasPrefix(ref, "refs/pull/") {
 		ref = strings.Replace(strings.TrimSuffix(strings.TrimSuffix(ref, "/head"), "/merge"), "refs/pull/", "#", 1)
@@ -398,7 +407,7 @@ func makeHeadTitle(ref, commit, rp string) string {
 		commit = "-"
 	}
 	if ref == "" {
-		return rp
+		return strings.Join(covPaths, ", ")
 	}
 	return fmt.Sprintf("%s (%s)", ref, commit)
 }
