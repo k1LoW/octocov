@@ -45,11 +45,8 @@ import (
 )
 
 var (
-	configPath    string
-	coverageBadge bool
-	ratioBadge    bool
-	timeBadge     bool
-	createTable   bool
+	configPath  string
+	createTable bool
 )
 
 var rootCmd = &cobra.Command{
@@ -171,7 +168,7 @@ var rootCmd = &cobra.Command{
 		cmd.Println("")
 
 		// Generate coverage report badge
-		if err := c.CoverageBadgeConfigReady(); err == nil || coverageBadge {
+		if err := c.CoverageBadgeConfigReady(); err == nil {
 			if err := func() error {
 				if !r.IsMeasuredCoverage() {
 					cmd.PrintErrf("Skip generating badge: %s\n", "coverage is not measured")
@@ -210,13 +207,10 @@ var rootCmd = &cobra.Command{
 			}(); err != nil {
 				return err
 			}
-			if coverageBadge {
-				return nil
-			}
 		}
 
 		// Generate code-to-test-ratio report badge
-		if err := c.CodeToTestRatioBadgeConfigReady(); err == nil || ratioBadge {
+		if err := c.CodeToTestRatioBadgeConfigReady(); err == nil {
 			if err := func() error {
 				if !r.IsMeasuredCodeToTestRatio() {
 					cmd.PrintErrf("Skip generating badge: %s\n", "coverage is not measured")
@@ -256,14 +250,10 @@ var rootCmd = &cobra.Command{
 			}(); err != nil {
 				return err
 			}
-
-			if ratioBadge {
-				return nil
-			}
 		}
 
 		// Generate test-execution-time report badge
-		if err := c.TestExecutionTimeBadgeConfigReady(); err == nil || timeBadge {
+		if err := c.TestExecutionTimeBadgeConfigReady(); err == nil {
 			if err := func() error {
 				if !r.IsMeasuredTestExecutionTime() {
 					cmd.PrintErrf("Skip generating badge: %s\n", "test-execution-time is not measured")
@@ -302,10 +292,6 @@ var rootCmd = &cobra.Command{
 				return nil
 			}(); err != nil {
 				return err
-			}
-
-			if timeBadge {
-				return nil
 			}
 		}
 
@@ -431,9 +417,6 @@ var rootCmd = &cobra.Command{
 
 func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
-	rootCmd.Flags().BoolVarP(&coverageBadge, "coverage-badge", "", false, "generate coverage report badge")
-	rootCmd.Flags().BoolVarP(&ratioBadge, "code-to-test-ratio-badge", "", false, "generate code-to-test-ratio report badge")
-	rootCmd.Flags().BoolVarP(&timeBadge, "test-execution-time-badge", "", false, "generate test-execution-time report badge")
 	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
 }
 
