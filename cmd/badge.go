@@ -24,6 +24,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -40,6 +41,8 @@ const (
 	badgeRatio    = "ratio"
 	badgeTime     = "time"
 )
+
+var outPath string
 
 // badgeCmd represents the badge command
 var badgeCmd = &cobra.Command{
@@ -61,8 +64,21 @@ var badgeCmd = &cobra.Command{
 			return err
 		}
 
-		var out *os.File
-		out = os.Stdout
+		var out io.Writer
+		if outPath != "" {
+			file, err := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+			if err != nil {
+				return err
+			}
+			defer func() {
+				if err := file.Close(); err != nil {
+					os.Exit(1)
+				}
+			}()
+			out = file
+		} else {
+			out = os.Stdout
+		}
 
 		switch args[0] {
 		case badgeCoverage:
@@ -129,4 +145,5 @@ var badgeCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(badgeCmd)
 	badgeCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
+	badgeCmd.Flags().StringVarP(&outPath, "out", "", "", "output file path")
 }
