@@ -2,6 +2,7 @@ package report
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -341,6 +342,27 @@ func TestCompare(t *testing.T) {
 		}
 		if want := -280000000000.000000; got.TestExecutionTime.Diff != want {
 			t.Errorf("got %v\nwant %v", got.TestExecutionTime.Diff, want)
+		}
+	}
+}
+
+func TestValidate(t *testing.T) {
+	tests := []struct {
+		r    *Report
+		want string
+	}{
+		{&Report{}, fmt.Sprintf("coverage report '%s' (env %s) is not set", "repository", "GITHUB_REPOSITORY")},
+		{&Report{Repository: "owner/repo"}, fmt.Sprintf("coverage report '%s' (env %s) is not set", "ref", "GITHUB_REF")},
+		{&Report{Repository: "owner/repo", Ref: "refs/heads/main"}, fmt.Sprintf("coverage report '%s' (env %s) is not set", "commit", "GITHUB_SHA")},
+	}
+	for _, tt := range tests {
+		err := tt.r.Validate()
+		if err == nil {
+			t.Error("should be error")
+			continue
+		}
+		if got := err.Error(); got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
 }
