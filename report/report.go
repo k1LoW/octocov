@@ -3,6 +3,7 @@ package report
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -330,6 +331,10 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 			return err
 		}
 		steps = append(steps, s)
+	}
+
+	if len(steps) == 0 {
+		return errors.New("could not detect test steps")
 	}
 
 	d := mergeExecutionTimes(steps)
