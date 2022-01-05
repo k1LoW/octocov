@@ -35,13 +35,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	badgeCoverage = "coverage"
+	badgeRatio    = "ratio"
+	badgeTime     = "time"
+)
+
 // badgeCmd represents the badge command
 var badgeCmd = &cobra.Command{
 	Use:       "badge",
 	Short:     "generate badge",
 	Long:      `generate badge.`,
 	Args:      cobra.ExactValidArgs(1),
-	ValidArgs: []string{"coverage", "ratio", "time"},
+	ValidArgs: []string{badgeCoverage, badgeRatio, badgeTime},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		c := config.New()
@@ -59,7 +65,7 @@ var badgeCmd = &cobra.Command{
 		out = os.Stdout
 
 		switch args[0] {
-		case "coverage":
+		case badgeCoverage:
 			if err := c.CoverageConfigReady(); err != nil {
 				return err
 			}
@@ -75,7 +81,7 @@ var badgeCmd = &cobra.Command{
 			if err := b.Render(out); err != nil {
 				return err
 			}
-		case "ratio":
+		case badgeRatio:
 			if !c.Loaded() {
 				cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
 			}
@@ -94,7 +100,7 @@ var badgeCmd = &cobra.Command{
 			if err := b.Render(out); err != nil {
 				return err
 			}
-		case "time":
+		case badgeTime:
 			if err := c.TestExecutionTimeConfigReady(); err != nil {
 				return err
 			}
