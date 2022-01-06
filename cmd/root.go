@@ -70,10 +70,6 @@ var rootCmd = &cobra.Command{
 
 		c.Build()
 
-		if createTable {
-			return createBQTable(ctx, c)
-		}
-
 		if c.Central != nil && internal.IsEnable(c.Central.Enable) {
 			cmd.PrintErrln("Central mode enabled")
 			if err := c.CentralConfigReady(); err != nil {
