@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "fe62bac37562cda177b7e18874808efa538977b2",
+  "commit": "f47491634f8dd11093493e35773386eedd62dba5",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 23
+            "count": 12
           },
           {
             "type": "statement",
@@ -12385,7 +12385,7 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 5274,
+    "code": 5292,
     "test": 2179,
     "code_files": [
       {
@@ -12410,13 +12410,6 @@
         "language": "Go"
       },
       {
-        "code": 38,
-        "comment": 0,
-        "blank": 5,
-        "path": "cmd/create_bq_table.go",
-        "language": "Go"
-      },
-      {
         "code": 42,
         "comment": 19,
         "blank": 9,
@@ -12438,9 +12431,16 @@
         "language": "Go"
       },
       {
-        "code": 370,
+        "code": 59,
+        "comment": 19,
+        "blank": 11,
+        "path": "cmd/migrateBqTable.go",
+        "language": "Go"
+      },
+      {
+        "code": 367,
         "comment": 27,
-        "blank": 38,
+        "blank": 37,
         "path": "cmd/root.go",
         "language": "Go"
       },
@@ -12827,5 +12827,5 @@
     ]
   },
   "test_execution_time": 42000000000,
-  "timestamp": "2022-01-05T13:00:11.51584477Z"
+  "timestamp": "2022-01-06T12:07:09.766227427Z"
 }
