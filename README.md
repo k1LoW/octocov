@@ -665,7 +665,7 @@ bq://[project ID]/[dataset ID]/[table]
 If you want to create a table, execute the following command ( require `bigquery.datasets.create` ).
 
 ``` console
-$ octocov --create-bq-table
+$ octocov migrate-bq-table
 ```
 
 #### Local
