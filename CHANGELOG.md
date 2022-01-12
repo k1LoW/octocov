@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.32.0](https://github.com/k1LoW/octocov/compare/v0.31.0...v0.32.0) (2022-01-12)
+
+* [BREAKING] If env CI is not set, `octocov` command only displays metrics [#123](https://github.com/k1LoW/octocov/pull/123) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Add `octocov migrate-bq-table` and remove option `--create-bq-table` [#122](https://github.com/k1LoW/octocov/pull/122) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Add `octocov badge` and remove `--*-badge` [#121](https://github.com/k1LoW/octocov/pull/121) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.31.0](https://github.com/k1LoW/octocov/compare/v0.30.0...v0.31.0) (2021-12-29)
 
 * Measuring test execution time by identifying steps of GitHub Actions from timestamp of multiple coverage report files [#120](https://github.com/k1LoW/octocov/pull/120) ([k1LoW](https://github.com/k1LoW))
