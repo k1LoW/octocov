@@ -54,8 +54,13 @@ var rootCmd = &cobra.Command{
 	Short:        "octocov is a toolkit for collecting code metrics",
 	Long:         `octocov is a toolkit for collecting code metrics.`,
 	Version:      version.Version,
+	Args:         cobra.NoArgs,
 	SilenceUsage: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if os.Getenv("CI") == "" {
+			return printMetrics(cmd)
+		}
+
 		ctx := context.Background()
 		addPaths := []string{}
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
@@ -64,11 +69,11 @@ var rootCmd = &cobra.Command{
 		if err := c.Load(configPath); err != nil {
 			return err
 		}
+		c.Build()
+
 		if !c.Loaded() {
 			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
 		}
-
-		c.Build()
 
 		if c.Central != nil && internal.IsEnable(c.Central.Enable) {
 			cmd.PrintErrln("Central mode enabled")
@@ -409,6 +414,43 @@ var rootCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func printMetrics(cmd *cobra.Command) error {
+	c := config.New()
+	if err := c.Load(configPath); err != nil {
+		return err
+	}
+	c.Build()
+
+	r, err := report.New(c.Repository)
+	if err != nil {
+		return err
+	}
+
+	if err := c.CoverageConfigReady(); err == nil {
+		if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
+			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
+		}
+	}
+
+	if err := c.CodeToTestRatioConfigReady(); err == nil {
+		if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
+			cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
+		}
+	}
+
+	if r.CountMeasured() == 0 {
+		return errors.New("nothing could be measured")
+	}
+
+	cmd.Println("")
+	if err := r.Out(os.Stdout); err != nil {
+		return err
+	}
+	cmd.Println("")
+
+	return nil
 }
 
 func init() {
