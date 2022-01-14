@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -459,23 +460,33 @@ func challengeParseReport(path string) (*coverage.Coverage, string, error) {
 	// gocover
 	if cov, rp, err := coverage.NewGocover().ParseReport(path); err == nil {
 		return cov, rp, nil
+	} else {
+		log.Printf("parse as Go coverage: %s", err)
 	}
 	// lcov
 	if cov, rp, err := coverage.NewLcov().ParseReport(path); err == nil {
 		return cov, rp, nil
+	} else {
+		log.Printf("parse as LCOV: %s", err)
 	}
 	// simplecov
 	if cov, rp, err := coverage.NewSimplecov().ParseReport(path); err == nil {
 		return cov, rp, nil
+	} else {
+		log.Printf("parse as SimpleCov: %s", err)
 	}
 	// clover
 	if cov, rp, err := coverage.NewClover().ParseReport(path); err == nil {
 		return cov, rp, nil
+	} else {
+		log.Printf("parse as Clover: %s", err)
 	}
 	// cobertura
 	if cov, rp, err := coverage.NewCobertura().ParseReport(path); err == nil {
 		return cov, rp, nil
+	} else {
+		log.Printf("parse as Cobertura: %s", err)
 	}
 
-	return nil, "", fmt.Errorf("coverage report not found: %s", path)
+	return nil, "", fmt.Errorf("parsable coverage report not found: %s", path)
 }
