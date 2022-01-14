@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -513,7 +512,7 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	if p == "" {
 		return i, fmt.Errorf("env %s is not set.", "GITHUB_EVENT_PATH")
 	}
-	b, err := ioutil.ReadFile(filepath.Clean(p))
+	b, err := os.ReadFile(filepath.Clean(p))
 	if err != nil {
 		return i, err
 	}
