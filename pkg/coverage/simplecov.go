@@ -2,7 +2,6 @@ package coverage
 
 import (
 	"errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -38,7 +37,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	if err != nil {
 		return nil, "", err
 	}
-	b, err := ioutil.ReadFile(filepath.Clean(rp))
+	b, err := os.ReadFile(filepath.Clean(rp))
 	if err != nil {
 		return nil, "", err
 	}

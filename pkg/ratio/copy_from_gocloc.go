@@ -4,7 +4,6 @@ package ratio
 import (
 	"bufio"
 	"bytes"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -56,7 +55,7 @@ func getFileType(path string) (ext string, ok bool) {
 
 	switch ext {
 	case ".m", ".v", ".fs", ".r", ".ts":
-		content, err := ioutil.ReadFile(filepath.Clean(path))
+		content, err := os.ReadFile(filepath.Clean(path))
 		if err != nil {
 			return "", false
 		}
