@@ -48,6 +48,11 @@ var lsFilesCmd = &cobra.Command{
 			return err
 		}
 		c.Build()
+		if reportPath != "" {
+			c.Coverage.Paths = []string{reportPath}
+			c.CodeToTestRatio = nil
+			c.TestExecutionTime = nil
+		}
 		if err := c.CoverageConfigReady(); err != nil {
 			return err
 		}
@@ -55,11 +60,7 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		paths := c.Coverage.Paths
-		if reportPath != "" {
-			paths = append(paths, reportPath)
-		}
-		if err := r.MeasureCoverage(paths); err != nil {
+		if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
 			return err
 		}
 		t := 0

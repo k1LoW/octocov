@@ -45,6 +45,11 @@ var dumpCmd = &cobra.Command{
 			return err
 		}
 		c.Build()
+		if reportPath != "" {
+			c.Coverage.Paths = []string{reportPath}
+			c.CodeToTestRatio = nil
+			c.TestExecutionTime = nil
+		}
 
 		r, err := report.New(c.Repository)
 		if err != nil {
@@ -54,11 +59,7 @@ var dumpCmd = &cobra.Command{
 		if err := c.CoverageConfigReady(); err != nil {
 			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 		} else {
-			paths := c.Coverage.Paths
-			if reportPath != "" {
-				paths = append(paths, reportPath)
-			}
-			if err := r.MeasureCoverage(paths); err != nil {
+			if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
 				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 			}
 		}
