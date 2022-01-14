@@ -46,6 +46,7 @@ import (
 
 var (
 	configPath  string
+	reportPath  string
 	createTable bool
 )
 
@@ -73,6 +74,12 @@ var rootCmd = &cobra.Command{
 
 		if !c.Loaded() {
 			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
+		}
+
+		if reportPath != "" {
+			c.Coverage.Paths = []string{reportPath}
+			c.CodeToTestRatio = nil
+			c.TestExecutionTime = nil
 		}
 
 		if c.Central != nil && internal.IsEnable(c.Central.Enable) {
@@ -422,7 +429,11 @@ func printMetrics(cmd *cobra.Command) error {
 		return err
 	}
 	c.Build()
-
+	if reportPath != "" {
+		c.Coverage.Paths = []string{reportPath}
+		c.CodeToTestRatio = nil
+		c.TestExecutionTime = nil
+	}
 	r, err := report.New(c.Repository)
 	if err != nil {
 		return err
@@ -455,6 +466,7 @@ func printMetrics(cmd *cobra.Command) error {
 
 func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
+	rootCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
 }
 

@@ -31,8 +31,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var reportPath string
-
 // viewCmd represents the view command
 var viewCmd = &cobra.Command{
 	Use:     "view [FILE ...]",
@@ -46,6 +44,11 @@ var viewCmd = &cobra.Command{
 			return err
 		}
 		c.Build()
+		if reportPath != "" {
+			c.Coverage.Paths = []string{reportPath}
+			c.CodeToTestRatio = nil
+			c.TestExecutionTime = nil
+		}
 		if err := c.CoverageConfigReady(); err != nil {
 			return err
 		}
@@ -53,11 +56,7 @@ var viewCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		paths := c.Coverage.Paths
-		if reportPath != "" {
-			paths = append(paths, reportPath)
-		}
-		if err := r.MeasureCoverage(paths); err != nil {
+		if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
 			return err
 		}
 		for _, f := range args {
