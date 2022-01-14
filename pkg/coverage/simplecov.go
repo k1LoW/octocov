@@ -17,11 +17,11 @@ type Simplecov struct{}
 type SimplecovReport map[string]SimplecovCoverage
 
 type SimplecovCoverage struct {
-	Coverage map[string]SimplecovFileCoverage
+	Coverage map[string]SimplecovFileCoverage `json:"coverage"`
 }
 
 type SimplecovFileCoverage struct {
-	Lines []interface{}
+	Lines []interface{} `json:"lines"`
 }
 
 func NewSimplecov() *Simplecov {
