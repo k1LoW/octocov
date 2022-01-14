@@ -3,6 +3,8 @@ package report
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -39,6 +41,8 @@ func TestNew(t *testing.T) {
 }
 
 func TestMeasureCoverage(t *testing.T) {
+	log.SetOutput(io.Discard) // off log in challengeParseReport()
+
 	tests := []struct {
 		paths   []string
 		want    int
