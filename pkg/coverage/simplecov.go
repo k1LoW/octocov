@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -94,4 +95,30 @@ func (s *Simplecov) detectReportPath(path string) (string, error) {
 		path = np
 	}
 	return path, nil
+}
+
+func (c *SimplecovCoverage) UnmarshalJSON(data []byte) error {
+	s := struct {
+		Coverage map[string]interface{} `json:"coverage"`
+	}{}
+	err := json.Unmarshal(data, &s)
+	if err != nil {
+		return err
+	}
+	c.Coverage = map[string]SimplecovFileCoverage{}
+	for k, l := range s.Coverage {
+		switch v := l.(type) {
+		case map[string]interface{}:
+			c.Coverage[k] = SimplecovFileCoverage{
+				Lines: v["lines"].([]interface{}),
+			}
+		case []interface{}:
+			c.Coverage[k] = SimplecovFileCoverage{
+				Lines: v,
+			}
+		default:
+			return errors.New("unsupported SimpleCov report format")
+		}
+	}
+	return nil
 }
