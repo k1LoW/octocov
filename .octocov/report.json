@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "fcde22e1f6aafeb2be10a2a766fed4ffc0601c50",
+  "commit": "8b035128ab6985306843150b7d05ec144c24fde7",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 15
+            "count": 18
           },
           {
             "type": "statement",
@@ -6784,7 +6784,7 @@
             "end_line": 177,
             "end_col": 4,
             "num_stmt": 1,
-            "count": 6
+            "count": 7
           },
           {
             "type": "statement",
@@ -12502,7 +12502,7 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 5363,
+    "code": 5375,
     "test": 2191,
     "code_files": [
       {
@@ -12555,7 +12555,7 @@
         "language": "Go"
       },
       {
-        "code": 401,
+        "code": 413,
         "comment": 27,
         "blank": 45,
         "path": "cmd/root.go",
@@ -12564,7 +12564,7 @@
       {
         "code": 66,
         "comment": 19,
-        "blank": 8,
+        "blank": 7,
         "path": "cmd/view.go",
         "language": "Go"
       },
@@ -12943,6 +12943,6 @@
       }
     ]
   },
-  "test_execution_time": 50000000000,
-  "timestamp": "2022-01-14T15:29:36.065074863Z"
+  "test_execution_time": 44000000000,
+  "timestamp": "2022-01-14T16:07:35.174737542Z"
 }
