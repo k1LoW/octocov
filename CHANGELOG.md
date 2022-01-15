@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.33.0](https://github.com/k1LoW/octocov/compare/v0.32.0...v0.33.0) (2022-01-15)
+
+* Replace io/ioutil [#129](https://github.com/k1LoW/octocov/pull/129) ([k1LoW](https://github.com/k1LoW))
+* Additional commits to #127 [#128](https://github.com/k1LoW/octocov/pull/128) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Add `--report` to `octocov` command. If `--report` is specified, only that report file is loaded. [#127](https://github.com/k1LoW/octocov/pull/127) ([k1LoW](https://github.com/k1LoW))
+* Update pkgs [#126](https://github.com/k1LoW/octocov/pull/126) ([k1LoW](https://github.com/k1LoW))
+* Support another SimpleCov format [#125](https://github.com/k1LoW/octocov/pull/125) ([k1LoW](https://github.com/k1LoW))
+* Add log for debug [#124](https://github.com/k1LoW/octocov/pull/124) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.32.0](https://github.com/k1LoW/octocov/compare/v0.31.0...v0.32.0) (2022-01-12)
 
 * [BREAKING] If env CI is not set, `octocov` command only displays metrics [#123](https://github.com/k1LoW/octocov/pull/123) ([k1LoW](https://github.com/k1LoW))

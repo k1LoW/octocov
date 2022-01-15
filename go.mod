@@ -45,9 +45,6 @@ require (
 	cloud.google.com/go/iam v0.1.0 // indirect
 	github.com/acomagu/bufpipe v1.0.3 // indirect
 	github.com/antchfx/xpath v1.2.0 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/cncf/udpa/go v0.0.0-20220112060539-c52dc94e7fbe // indirect
-	github.com/cncf/xds/go v0.0.0-20220112060520-0fa49ea1db0c // indirect
 	github.com/emirpasic/gods v1.12.0 // indirect
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
@@ -84,9 +81,6 @@ require (
 require (
 	github.com/Microsoft/go-winio v0.5.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20220113124808-70ae35bab23f // indirect
-	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
-	github.com/envoyproxy/go-control-plane v0.10.1 // indirect
-	github.com/envoyproxy/protoc-gen-validate v0.6.3 // indirect
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/kevinburke/ssh_config v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
