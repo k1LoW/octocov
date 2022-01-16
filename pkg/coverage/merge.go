@@ -12,7 +12,7 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 				deleted = false
 			}
 		}
-		if deleted {
+		if len(c.Files) > 0 && deleted {
 			return errors.New("can not merge: BlockCoverages are already deleted.")
 		}
 	}
@@ -29,7 +29,7 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 				c.Files = append(c.Files, f)
 			}
 		}
-		if deleted {
+		if len(c2.Files) > 0 && deleted {
 			return errors.New("can not merge: BlockCoverages are already deleted.")
 		}
 	}
