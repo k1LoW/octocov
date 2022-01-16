@@ -85,5 +85,6 @@ var migrateBqTableCmd = &cobra.Command{
 }
 
 func init() {
+	migrateBqTableCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	rootCmd.AddCommand(migrateBqTableCmd)
 }

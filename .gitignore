@@ -1,6 +1,7 @@
 octocov
 /dist/
 /coverage.out
+/coverage*.out
 /octocov.yml
 /*.json
 .envrc

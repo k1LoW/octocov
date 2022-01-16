@@ -1,7 +1,13 @@
 coverage:
-  path: coverage.out
+  acceptable: current >= 60%
+  paths:
+    - coverage_coverage.out
+    - coverage_ratio.out
+    - coverage_badge.out
+    - coverage_other.out
 testExecutionTime:
   steps:
-    - Run tests 0
-    - Run tests 1
-    - Run tests 2
+    - Run tests pkg/coverage
+    - Run tests pkg/ratio
+    - Run tests pkg/badge
+    - Run tests other

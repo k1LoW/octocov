@@ -88,5 +88,6 @@ var viewCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(viewCmd)
+	viewCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	viewCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 }

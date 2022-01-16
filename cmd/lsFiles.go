@@ -158,5 +158,6 @@ func detectTermColor(cl string) (*color.Color, error) {
 
 func init() {
 	rootCmd.AddCommand(lsFilesCmd)
+	lsFilesCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	lsFilesCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 }

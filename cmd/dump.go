@@ -98,5 +98,6 @@ var dumpCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(dumpCmd)
+	dumpCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	dumpCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 }

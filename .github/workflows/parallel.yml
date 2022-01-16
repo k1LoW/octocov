@@ -1,15 +1,82 @@
 name: parallel
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  job-parallel:
-    name: parallel tests
+  test-pkgs:
+    name: test pkgs
     runs-on: ubuntu-latest
     strategy:
       matrix:
         go_version: [1.17]
-        parallel: [0,1,2]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Check out source code
+        uses: actions/checkout@v2
+
+      - name: Run tests pkg/coverage
+        run: go test ./pkg/coverage/... -coverprofile=coverage_coverage.out -covermode=count
+
+      - name: Run tests pkg/ratio
+        run: go test ./pkg/ratio/... -coverprofile=coverage_ratio.out -covermode=count
+
+      - name: Run tests pkg/badge
+        run: go test ./pkg/badge/... -coverprofile=coverage_badge.out -covermode=count
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report-files
+          path: |
+            coverage_coverage.out
+            coverage_ratio.out
+            coverage_badge.out
+
+  test-other:
+    name: test other
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version: [1.17]
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Check out source code
+        uses: actions/checkout@v2
+
+      - name: Run tests other
+        run: go test $(go list ./... | grep -v pkg) -coverprofile=coverage_other.out -covermode=count
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: coverage-report-files
+          path: |
+            coverage_other.out
+
+  collect-metrics:
+    name: collect metrics
+    needs:
+      - test-pkgs
+      - test-other
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version: [1.17]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DEBUG: 1
@@ -22,10 +89,11 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v2
 
-      - name: Run tests ${{ matrix.parallel }}
-        run: make ci
+      - uses: actions/download-artifact@v2
+        with:
+          name: coverage-report-files
 
       - name: Run build octocov
         run: |
           make build
-          ./octocov --dump --config testdata/octocov_parallel_tests.yml
+          ./octocov --config testdata/octocov_parallel_tests.yml
