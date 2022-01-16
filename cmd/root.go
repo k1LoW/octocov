@@ -424,6 +424,7 @@ var rootCmd = &cobra.Command{
 }
 
 func printMetrics(cmd *cobra.Command) error {
+	ctx := context.Background()
 	c := config.New()
 	if err := c.Load(configPath); err != nil {
 		return err
@@ -448,6 +449,16 @@ func printMetrics(cmd *cobra.Command) error {
 	if err := c.CodeToTestRatioConfigReady(); err == nil {
 		if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 			cmd.PrintErrf("Skip measuring code to test ratio: %v\n", err)
+		}
+	}
+
+	if err := c.TestExecutionTimeConfigReady(); r.Repository != "" && err == nil {
+		stepNames := []string{}
+		if len(c.TestExecutionTime.Steps) > 0 {
+			stepNames = c.TestExecutionTime.Steps
+		}
+		if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
+			cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
 		}
 	}
 
