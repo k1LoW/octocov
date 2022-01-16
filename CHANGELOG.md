@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.33.1](https://github.com/k1LoW/octocov/compare/v0.33.0...v0.33.1) (2022-01-16)
+
+* Fix parallel test [#130](https://github.com/k1LoW/octocov/pull/130) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.33.0](https://github.com/k1LoW/octocov/compare/v0.32.0...v0.33.0) (2022-01-15)
 
 * Replace io/ioutil [#129](https://github.com/k1LoW/octocov/pull/129) ([k1LoW](https://github.com/k1LoW))
