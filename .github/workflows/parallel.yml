@@ -67,6 +67,9 @@ jobs:
 
   collect-metrics:
     name: collect metrics
+    needs:
+      - test-pkgs
+      - test-other
     runs-on: ubuntu-latest
     strategy:
       matrix:
