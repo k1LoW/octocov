@@ -40,7 +40,7 @@ jobs:
             coverage_badge.out
 
   test-other:
-    name: test
+    name: test other
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -89,9 +89,6 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: coverage-report-files
-
-      - name: debug
-        run: ls -la
 
       - name: Run build octocov
         run: |
