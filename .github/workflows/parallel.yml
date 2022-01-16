@@ -93,4 +93,4 @@ jobs:
       - name: Run build octocov
         run: |
           make build
-          ./octocov ls-files --config testdata/octocov_parallel_tests.yml
+          ./octocov --config testdata/octocov_parallel_tests.yml
