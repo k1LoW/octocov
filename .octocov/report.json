@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "602bde0aa438ef05ef81edf4d7986feff601b48b",
+  "commit": "db5790dc5a99a7b707b7b00c4f3fad325e143ffc",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 17
+            "count": 20
           },
           {
             "type": "statement",
@@ -8214,14 +8214,14 @@
             "start_line": 15,
             "start_col": 3,
             "end_line": 15,
-            "end_col": 14,
+            "end_col": 34,
             "num_stmt": 1,
             "count": 2
           },
           {
             "type": "statement",
             "start_line": 15,
-            "start_col": 14,
+            "start_col": 34,
             "end_line": 17,
             "end_col": 4,
             "num_stmt": 1,
@@ -8286,14 +8286,14 @@
             "start_line": 32,
             "start_col": 3,
             "end_line": 32,
-            "end_col": 14,
+            "end_col": 35,
             "num_stmt": 1,
             "count": 2
           },
           {
             "type": "statement",
             "start_line": 32,
-            "start_col": 14,
+            "start_col": 35,
             "end_line": 34,
             "end_col": 4,
             "num_stmt": 1,
@@ -12502,7 +12502,7 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 5373,
+    "code": 5387,
     "test": 2191,
     "code_files": [
       {
@@ -12534,35 +12534,35 @@
         "language": "Go"
       },
       {
-        "code": 70,
+        "code": 71,
         "comment": 19,
         "blank": 13,
         "path": "cmd/dump.go",
         "language": "Go"
       },
       {
-        "code": 132,
+        "code": 133,
         "comment": 19,
         "blank": 11,
         "path": "cmd/lsFiles.go",
         "language": "Go"
       },
       {
-        "code": 59,
+        "code": 60,
         "comment": 19,
         "blank": 11,
         "path": "cmd/migrateBqTable.go",
         "language": "Go"
       },
       {
-        "code": 413,
+        "code": 423,
         "comment": 27,
-        "blank": 45,
+        "blank": 46,
         "path": "cmd/root.go",
         "language": "Go"
       },
       {
-        "code": 66,
+        "code": 67,
         "comment": 19,
         "blank": 7,
         "path": "cmd/view.go",
@@ -12943,6 +12943,6 @@
       }
     ]
   },
-  "test_execution_time": 54000000000,
-  "timestamp": "2022-01-15T09:08:55.18420782Z"
+  "test_execution_time": 52000000000,
+  "timestamp": "2022-01-16T06:00:07.927479057Z"
 }
