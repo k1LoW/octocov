@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.33.3](https://github.com/k1LoW/octocov/compare/v0.33.2...v0.33.3) (2022-01-21)
+
+* Fix the counting non codes [#133](https://github.com/k1LoW/octocov/pull/133) ([k1LoW](https://github.com/k1LoW))
+* Fix the counting of metrics when merging. [#132](https://github.com/k1LoW/octocov/pull/132) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.33.2](https://github.com/k1LoW/octocov/compare/v0.33.1...v0.33.2) (2022-01-21)
 
 * Fix SimpleCov parser [#131](https://github.com/k1LoW/octocov/pull/131) ([k1LoW](https://github.com/k1LoW))
