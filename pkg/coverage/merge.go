@@ -41,12 +41,10 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 	covered := 0
 	for _, f := range c.Files {
 		lcs := f.Blocks.ToLineCoverages()
-		for _, lc := range lcs {
-			total += 1
-			if lc.Count > 0 {
-				covered += 1
-			}
-		}
+		f.Total = lcs.Total()
+		f.Covered = lcs.Covered()
+		total += f.Total
+		covered += f.Covered
 	}
 	c.Total = total
 	c.Covered = covered
