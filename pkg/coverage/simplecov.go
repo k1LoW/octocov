@@ -50,16 +50,17 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = s.Name()
 	for _, c := range r {
 		for fn, fc := range c.Coverage {
-			fcov := NewFileCoverage(fn)
+			var fcov *FileCoverage
+			fcov, err = cov.Files.FindByFile(fn)
+			if err != nil {
+				fcov = NewFileCoverage(fn)
+				cov.Files = append(cov.Files, fcov)
+			}
 			for l, c := range fc.Lines {
 				ll := l + 1
 				switch v := c.(type) {
 				case float64:
-					fcov.Total += 1
 					count := int(v)
-					if count > 0 {
-						fcov.Covered += 1
-					}
 					fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 						Type:      TypeLOC,
 						StartLine: &ll,
@@ -68,11 +69,19 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 					})
 				}
 			}
-			cov.Total += fcov.Total
-			cov.Covered += fcov.Covered
-			cov.Files = append(cov.Files, fcov)
+			lcs := fcov.Blocks.ToLineCoverages()
+			fcov.Total = lcs.Total()
+			fcov.Covered = lcs.Covered()
 		}
 	}
+
+	cov.Total = 0
+	cov.Covered = 0
+	for _, fcov := range cov.Files {
+		cov.Total += fcov.Total
+		cov.Covered += fcov.Covered
+	}
+
 	return cov, rp, nil
 }
 

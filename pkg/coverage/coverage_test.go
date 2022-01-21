@@ -275,7 +275,6 @@ func TestToLineCoverages(t *testing.T) {
 			2,
 			2,
 		},
-
 		{
 			BlockCoverages{
 				newBlockCoverage(TypeStmt, 6, 1, 7, 1, 1, 7),
