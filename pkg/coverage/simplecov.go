@@ -32,6 +32,27 @@ func (s *Simplecov) Name() string {
 	return "SimpleCov"
 }
 
+type skipLine map[int]struct{}
+
+type skipLines map[string]skipLine
+
+func (sls skipLines) add(path string, line int) {
+	if _, ok := sls[path]; !ok {
+		sls[path] = skipLine{}
+	}
+	sls[path][line] = struct{}{}
+}
+
+func (sls skipLines) exists(path string, line int) bool {
+	if _, ok := sls[path]; !ok {
+		return false
+	}
+	if _, ok := sls[path][line]; !ok {
+		return false
+	}
+	return true
+}
+
 func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	rp, err := s.detectReportPath(path)
 	if err != nil {
@@ -48,12 +69,14 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	cov := New()
 	cov.Type = TypeLOC
 	cov.Format = s.Name()
+	fcovs := map[string]*FileCoverage{}
+	sls := skipLines{}
 	for _, c := range r {
 		for fn, fc := range c.Coverage {
-			var fcov *FileCoverage
-			fcov, err = cov.Files.FindByFile(fn)
-			if err != nil {
+			fcov, ok := fcovs[fn]
+			if !ok {
 				fcov = NewFileCoverage(fn)
+				fcovs[fn] = fcov
 				cov.Files = append(cov.Files, fcov)
 			}
 			for l, c := range fc.Lines {
@@ -67,17 +90,28 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 						EndLine:   &ll,
 						Count:     &count,
 					})
+				case nil:
+					sls.add(fn, ll)
 				}
 			}
-			lcs := fcov.Blocks.ToLineCoverages()
-			fcov.Total = lcs.Total()
-			fcov.Covered = lcs.Covered()
 		}
 	}
 
 	cov.Total = 0
 	cov.Covered = 0
 	for _, fcov := range cov.Files {
+		blocks := fcov.Blocks
+		fcov.Blocks = BlockCoverages{}
+		for _, b := range blocks {
+			if *b.Count == 0 && sls.exists(fcov.File, *b.StartLine) {
+				continue
+			}
+			fcov.Blocks = append(fcov.Blocks, b)
+		}
+
+		lcs := fcov.Blocks.ToLineCoverages()
+		fcov.Total = lcs.Total()
+		fcov.Covered = lcs.Covered()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 	}
