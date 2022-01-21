@@ -42,7 +42,9 @@ func TestRender(t *testing.T) {
 
 func TestAddIconFile(t *testing.T) {
 	b := New("with", "icon")
-	b.AddIconFile(filepath.Join(testdataDir(t), "icon.svg"))
+	if err := b.AddIconFile(filepath.Join(testdataDir(t), "icon.svg")); err != nil {
+		t.Fatal(err)
+	}
 	got := new(bytes.Buffer)
 	if err := b.Render(got); err != nil {
 		t.Fatal(err)
