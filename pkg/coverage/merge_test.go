@@ -54,7 +54,9 @@ func TestMerge(t *testing.T) {
 				Covered: 6,
 				Files: FileCoverages{
 					&FileCoverage{
-						File: "file_a.go",
+						File:    "file_a.go",
+						Total:   3,
+						Covered: 2,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
@@ -62,7 +64,9 @@ func TestMerge(t *testing.T) {
 						},
 					},
 					&FileCoverage{
-						File: "file_b.go",
+						File:    "file_b.go",
+						Total:   3,
+						Covered: 2,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 0),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 1),
@@ -70,7 +74,9 @@ func TestMerge(t *testing.T) {
 						},
 					},
 					&FileCoverage{
-						File: "file_c.go",
+						File:    "file_c.go",
+						Total:   3,
+						Covered: 2,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 1),
@@ -121,7 +127,9 @@ func TestMerge(t *testing.T) {
 				Covered: 5,
 				Files: FileCoverages{
 					&FileCoverage{
-						File: "file_a.go",
+						File:    "file_a.go",
+						Total:   3,
+						Covered: 2,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
@@ -129,7 +137,9 @@ func TestMerge(t *testing.T) {
 						},
 					},
 					&FileCoverage{
-						File: "file_b.go",
+						File:    "file_b.go",
+						Total:   3,
+						Covered: 3,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 0),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 1),
@@ -175,7 +185,9 @@ func TestMerge(t *testing.T) {
 				Covered: 2,
 				Files: FileCoverages{
 					&FileCoverage{
-						File: "file_a.go",
+						File:    "file_a.go",
+						Total:   3,
+						Covered: 2,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
