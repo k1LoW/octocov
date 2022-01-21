@@ -461,6 +461,19 @@ It is also possible to omit the expression as follows
 | `1min` | `current <= 1min` |
 | `< 1min` | `current < 1min` |
 
+### `testExecutionTime.steps`
+
+The name of the step to measure the execution time.
+
+``` yaml
+testExecutionTime:
+  steps:
+    - Run test
+    - Run slow test
+```
+
+If not specified, the step where the coverage report file is generated is used as the measurement target.
+
 ### `testExecutionTime.badge`
 
 Set this if want to generate the badge self.
