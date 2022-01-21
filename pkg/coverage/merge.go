@@ -24,7 +24,14 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			}
 			fc, err := c.Files.FindByFile(f.File)
 			if err == nil {
-				fc.Blocks = append(fc.Blocks, f.Blocks...)
+				switch {
+				case fc.Covered > 0 && f.Covered == 0:
+					// nothing to do
+				case f.Covered > 0 && fc.Covered == 0:
+					fc.Blocks = f.Blocks
+				default:
+					fc.Blocks = append(fc.Blocks, f.Blocks...)
+				}
 			} else {
 				c.Files = append(c.Files, f)
 			}
