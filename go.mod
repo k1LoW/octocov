@@ -32,6 +32,7 @@ require (
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/spf13/cobra v1.3.0
 	github.com/spiegel-im-spiegel/gnkf v0.6.4
+	github.com/tenntenn/golden v0.2.0
 	github.com/zhangyunhao116/skipmap v0.7.0
 	golang.org/x/exp v0.0.0-20220104160115-025e73f80486
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
@@ -60,6 +61,8 @@ require (
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
+	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect

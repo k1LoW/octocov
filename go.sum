@@ -399,6 +399,10 @@ github.com/jmespath/go-jmespath v0.4.0 h1:BEgLn5cpjn8UN1mAw4NjwDrS35OdebyEtFe+9Y
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1 h1:shLQSRRSCCPj3f2gpwzGwWFoC7ycTf1rcQZHOlsJ6N8=
 github.com/jmespath/go-jmespath/internal/testify v1.5.1/go.mod h1:L3OGu8Wl2/fWfCI6z80xFu9LTZmf1ZRjMHUOPmWr69U=
+github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 h1:c+ctPFdISggaSNCfU1IueNBAsqetJSvMcpQlT+0OVdY=
+github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6/go.mod h1:Rv/momJI8DgrWnBZip+SgagpcgORIZQE5SERlxNb8LY=
+github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca h1:a8xeK4GsWLE4LYo5VI4u1Cn7ZvT1NtXouXR3DdKLB8Q=
+github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca/go.mod h1:UbC32ft9G/jG+sZI8wLbIBNIrYr7vp/yqMDa9SxVBNA=
 github.com/jpillora/backoff v1.0.0/go.mod h1:J/6gKK9jxlEcS3zixgDgUAsiuZ7yrSoa/FX5e0EB2j4=
 github.com/json-iterator/go v1.1.6/go.mod h1:+SdeFBvtyEkXs7REEP0seUULqWtbJapLOCVDaaPEHmU=
 github.com/json-iterator/go v1.1.9/go.mod h1:KdQUCv79m/52Kvf8AW2vK1V8akMuk1QjK/uOdHXbAo4=
@@ -637,6 +641,8 @@ github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5CcY=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
+github.com/tenntenn/golden v0.2.0 h1:ENbHNS5P2Bcnh2QWQcwtNPDYnIvFGuK4lKVDkCq4AHs=
+github.com/tenntenn/golden v0.2.0/go.mod h1:OB8A7xwUZ9xE19KXoOMPl223hhcH4uD8oeQS9fLTiEE=
 github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926/go.mod h1:9ESjWnEqriFuLhtthL60Sar/7RFoluCcXsuvEwTV5KM=
 github.com/xanzy/ssh-agent v0.3.0/go.mod h1:3s9xbODqPuuhK9JV1R321M/FlMZSBvE5aY6eAcqrDh0=
 github.com/xanzy/ssh-agent v0.3.1 h1:AmzO1SSWxw73zxFZPRwaMN1MohDw8UyHnmuxyceTEGo=
