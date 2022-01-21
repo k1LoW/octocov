@@ -487,6 +487,8 @@ func challengeParseReport(path string) (*coverage.Coverage, string, error) {
 	} else {
 		log.Printf("parse as Cobertura: %s", err)
 	}
+	msg := fmt.Sprintf("parsable coverage report not found: %s", path)
+	log.Println(msg)
 
-	return nil, "", fmt.Errorf("parsable coverage report not found: %s", path)
+	return nil, "", errors.New(msg)
 }
