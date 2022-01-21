@@ -241,6 +241,20 @@ func (lcs LineCoverages) FindByLine(l int) (*LineCoverage, error) {
 	return nil, fmt.Errorf("no line coverage: %d", l)
 }
 
+func (lcs LineCoverages) Total() int {
+	return len(lcs)
+}
+
+func (lcs LineCoverages) Covered() int {
+	covered := 0
+	for _, lc := range lcs {
+		if lc.Count > 0 {
+			covered += 1
+		}
+	}
+	return covered
+}
+
 func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 	m := skipmap.NewInt()
 

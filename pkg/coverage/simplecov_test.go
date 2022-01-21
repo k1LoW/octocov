@@ -29,23 +29,44 @@ func TestSimplecov(t *testing.T) {
 		if len(got.Files) == 0 {
 			t.Error("got 0 want > 0")
 		}
+	}
+}
 
-		for _, f := range got.Files {
-			total := 0
-			covered := 0
-			for _, b := range f.Blocks {
-				// LOC
-				total = total + 1
-				if *b.Count > 0 {
-					covered += 1
-				}
-			}
-			if got := f.Total; got != total {
-				t.Errorf("got %v\nwant %v", got, total)
-			}
-			if got := f.Covered; got != covered {
-				t.Errorf("got %v\nwant %v", got, covered)
-			}
+func TestTotalAndCovered(t *testing.T) {
+	tests := []struct {
+		pathA string
+		pathB string
+	}{
+		{
+			filepath.Join(testdataDir(t), "simplecov"),
+			filepath.Join(testdataDir(t), "simplecov", ".resultset.json"),
+		},
+		{
+			filepath.Join(testdataDir(t), "simplecov", ".resultset.json"),
+			filepath.Join(testdataDir(t), "simplecov", ".resultset.another.json"),
+		},
+		{
+			filepath.Join(testdataDir(t), "simplecov", ".resultset.json"),
+			filepath.Join(testdataDir(t), "simplecov", ".resultset.parallel.json"),
+		},
+	}
+	for _, tt := range tests {
+		gotA, _, err := NewSimplecov().ParseReport(tt.pathA)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		gotB, _, err := NewSimplecov().ParseReport(tt.pathB)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if gotA.Total != gotB.Total {
+			t.Errorf("gotA %v\ngotB %v", gotA.Total, gotB.Total)
+		}
+
+		if gotA.Covered != gotB.Covered {
+			t.Errorf("gotA %v\ngotB %v", gotA.Covered, gotB.Covered)
 		}
 	}
 }
