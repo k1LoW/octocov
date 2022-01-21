@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "750520e62615b8d86776c942cbf70a3661c94490",
+  "commit": "dbddbe46c56d2ef459d7bbf396e3d5485efa59a6",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 12
+            "count": 20
           },
           {
             "type": "statement",
@@ -6964,7 +6964,7 @@
             "end_line": 246,
             "end_col": 2,
             "num_stmt": 1,
-            "count": 3380
+            "count": 3386
           },
           {
             "type": "statement",
@@ -6973,7 +6973,7 @@
             "end_line": 250,
             "end_col": 25,
             "num_stmt": 2,
-            "count": 3380
+            "count": 3386
           },
           {
             "type": "statement",
@@ -6982,7 +6982,7 @@
             "end_line": 251,
             "end_col": 19,
             "num_stmt": 1,
-            "count": 61651
+            "count": 61669
           },
           {
             "type": "statement",
@@ -6991,7 +6991,7 @@
             "end_line": 253,
             "end_col": 4,
             "num_stmt": 1,
-            "count": 24635
+            "count": 24648
           },
           {
             "type": "statement",
@@ -7000,7 +7000,7 @@
             "end_line": 255,
             "end_col": 16,
             "num_stmt": 1,
-            "count": 3380
+            "count": 3386
           },
           {
             "type": "statement",
@@ -8375,34 +8375,16 @@
             "type": "statement",
             "start_line": 42,
             "start_col": 28,
-            "end_line": 44,
-            "end_col": 26,
-            "num_stmt": 2,
+            "end_line": 48,
+            "end_col": 3,
+            "num_stmt": 5,
             "count": 6
           },
           {
             "type": "statement",
-            "start_line": 44,
-            "start_col": 26,
-            "end_line": 46,
-            "end_col": 20,
-            "num_stmt": 2,
-            "count": 18
-          },
-          {
-            "type": "statement",
-            "start_line": 46,
-            "start_col": 20,
-            "end_line": 48,
-            "end_col": 5,
-            "num_stmt": 1,
-            "count": 13
-          },
-          {
-            "type": "statement",
-            "start_line": 51,
+            "start_line": 49,
             "start_col": 2,
-            "end_line": 54,
+            "end_line": 52,
             "end_col": 12,
             "num_stmt": 3,
             "count": 3
@@ -12565,8 +12547,8 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 5408,
-    "test": 2294,
+    "code": 5406,
+    "test": 2306,
     "code_files": [
       {
         "code": 241,
@@ -12786,7 +12768,7 @@
         "language": "Go"
       },
       {
-        "code": 51,
+        "code": 49,
         "comment": 0,
         "blank": 4,
         "path": "pkg/coverage/merge.go",
@@ -12949,7 +12931,7 @@
         "language": "Go"
       },
       {
-        "code": 201,
+        "code": 213,
         "comment": 0,
         "blank": 5,
         "path": "pkg/coverage/merge_test.go",
@@ -13006,6 +12988,6 @@
       }
     ]
   },
-  "test_execution_time": 47000000000,
-  "timestamp": "2022-01-21T06:18:51.579308357Z"
+  "test_execution_time": 49000000000,
+  "timestamp": "2022-01-21T08:11:03.958273427Z"
 }
