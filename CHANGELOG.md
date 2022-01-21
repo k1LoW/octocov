@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.33.2](https://github.com/k1LoW/octocov/compare/v0.33.1...v0.33.2) (2022-01-21)
+
+* Fix SimpleCov parser [#131](https://github.com/k1LoW/octocov/pull/131) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.33.1](https://github.com/k1LoW/octocov/compare/v0.33.0...v0.33.1) (2022-01-16)
 
 * Fix parallel test [#130](https://github.com/k1LoW/octocov/pull/130) ([k1LoW](https://github.com/k1LoW))
