@@ -175,8 +175,10 @@ func TestMaxCount(t *testing.T) {
 
 func TestToLineCoverages(t *testing.T) {
 	tests := []struct {
-		blocks BlockCoverages
-		want   LineCoverages
+		blocks      BlockCoverages
+		want        LineCoverages
+		wantTotal   int
+		wantCovered int
 	}{
 		{
 			BlockCoverages{
@@ -185,6 +187,8 @@ func TestToLineCoverages(t *testing.T) {
 			LineCoverages{
 				&LineCoverage{Line: 6, Count: 10, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 10}, &PosCoverage{Pos: endPos, Count: 10}}},
 			},
+			1,
+			1,
 		},
 		{
 			BlockCoverages{
@@ -195,6 +199,8 @@ func TestToLineCoverages(t *testing.T) {
 				&LineCoverage{Line: 6, Count: 10, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 10}, &PosCoverage{Pos: endPos, Count: 10}}},
 				&LineCoverage{Line: 8, Count: 11, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 11}, &PosCoverage{Pos: endPos, Count: 11}}},
 			},
+			2,
+			2,
 		},
 		{
 			BlockCoverages{
@@ -204,6 +210,8 @@ func TestToLineCoverages(t *testing.T) {
 			LineCoverages{
 				&LineCoverage{Line: 6, Count: 10, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 10}, &PosCoverage{Pos: endPos, Count: 10}}},
 			},
+			1,
+			1,
 		},
 		{
 			BlockCoverages{
@@ -214,6 +222,8 @@ func TestToLineCoverages(t *testing.T) {
 				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
 				&LineCoverage{Line: 8, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 10, Count: 7}}},
 			},
+			3,
+			3,
 		},
 		{
 			BlockCoverages{
@@ -222,6 +232,8 @@ func TestToLineCoverages(t *testing.T) {
 			LineCoverages{
 				&LineCoverage{Line: 6, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: 0, Count: 7}, &PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 2, Count: 7}, &PosCoverage{Pos: 3, Count: 7}}},
 			},
+			1,
+			1,
 		},
 		{
 			BlockCoverages{
@@ -233,6 +245,8 @@ func TestToLineCoverages(t *testing.T) {
 				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
 				&LineCoverage{Line: 8, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 10, Count: 7}}},
 			},
+			3,
+			3,
 		},
 		{
 			BlockCoverages{
@@ -245,6 +259,8 @@ func TestToLineCoverages(t *testing.T) {
 				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 3, Count: 7}, &PosCoverage{Pos: 5, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
 				&LineCoverage{Line: 8, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 3, Count: 7}}},
 			},
+			3,
+			3,
 		},
 		{
 			BlockCoverages{
@@ -256,6 +272,23 @@ func TestToLineCoverages(t *testing.T) {
 				&LineCoverage{Line: 6, Count: 21, PosCoverages: PosCoverages{&PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 2, Count: 7}, &PosCoverage{Pos: 3, Count: 21}, &PosCoverage{Pos: 4, Count: 14}, &PosCoverage{Pos: 5, Count: 14}, &PosCoverage{Pos: endPos, Count: 7}}},
 				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 1, Count: 7}}},
 			},
+			2,
+			2,
+		},
+
+		{
+			BlockCoverages{
+				newBlockCoverage(TypeStmt, 6, 1, 7, 1, 1, 7),
+				newBlockCoverage(TypeStmt, 7, 3, 7, 3, 1, 7),
+				newBlockCoverage(TypeStmt, 7, 5, 8, 3, 1, 0),
+			},
+			LineCoverages{
+				&LineCoverage{Line: 6, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: endPos, Count: 7}}},
+				&LineCoverage{Line: 7, Count: 7, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 7}, &PosCoverage{Pos: 1, Count: 7}, &PosCoverage{Pos: 3, Count: 7}, &PosCoverage{Pos: 5, Count: 0}, &PosCoverage{Pos: endPos, Count: 0}}},
+				&LineCoverage{Line: 8, Count: 0, PosCoverages: PosCoverages{&PosCoverage{Pos: startPos, Count: 0}, &PosCoverage{Pos: 3, Count: 0}}},
+			},
+			3,
+			2,
 		},
 	}
 
@@ -263,6 +296,14 @@ func TestToLineCoverages(t *testing.T) {
 		got := tt.blocks.ToLineCoverages()
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Errorf("%s", diff)
+		}
+
+		if got.Total() != tt.wantTotal {
+			t.Errorf("got %v\nwant %v", got.Total(), tt.wantTotal)
+		}
+
+		if got.Covered() != tt.wantCovered {
+			t.Errorf("got %v\nwant %v", got.Covered(), tt.wantCovered)
 		}
 	}
 }
