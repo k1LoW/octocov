@@ -1,7 +1,7 @@
 {
   "repository": "k1LoW/octocov",
   "ref": "refs/heads/main",
-  "commit": "7537afb61d6ac2de468c2e1fcc223e758cefc7db",
+  "commit": "e262a3900552845a6c5a038f52810a8b3d81b11c",
   "coverage": {
     "type": "statement",
     "format": "Go coverage",
@@ -335,7 +335,7 @@
             "end_line": 128,
             "end_col": 104,
             "num_stmt": 1,
-            "count": 20
+            "count": 12
           },
           {
             "type": "statement",
@@ -2113,7 +2113,7 @@
             "end_line": 423,
             "end_col": 33,
             "num_stmt": 1,
-            "count": 612
+            "count": 618
           },
           {
             "type": "statement",
@@ -2131,7 +2131,7 @@
             "end_line": 428,
             "end_col": 21,
             "num_stmt": 3,
-            "count": 612
+            "count": 618
           },
           {
             "type": "statement",
@@ -2149,7 +2149,7 @@
             "end_line": 432,
             "end_col": 18,
             "num_stmt": 1,
-            "count": 612
+            "count": 618
           },
           {
             "type": "statement",
@@ -12905,7 +12905,7 @@
     ]
   },
   "code_to_test_ratio": {
-    "code": 5441,
+    "code": 5425,
     "test": 2371,
     "code_files": [
       {
@@ -12958,9 +12958,9 @@
         "language": "Go"
       },
       {
-        "code": 423,
+        "code": 407,
         "comment": 27,
-        "blank": 46,
+        "blank": 47,
         "path": "cmd/root.go",
         "language": "Go"
       },
@@ -13353,6 +13353,6 @@
       }
     ]
   },
-  "test_execution_time": 44000000000,
-  "timestamp": "2022-01-21T14:25:02.877115128Z"
+  "test_execution_time": 68000000000,
+  "timestamp": "2022-01-30T09:32:11.798179321Z"
 }
