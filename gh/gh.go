@@ -17,8 +17,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/go-github/v39/github"
-	"github.com/k1LoW/go-github-client/v39/factory"
+	"github.com/google/go-github/v41/github"
+	"github.com/k1LoW/go-github-client/v41/factory"
 	"github.com/lestrrat-go/backoff/v2"
 )
 
