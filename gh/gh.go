@@ -455,7 +455,7 @@ func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n
 		if strings.Contains(*c.Body, commentSig) {
 			var m minimizeCommentMutation
 			input := githubv4.MinimizeCommentInput{
-				SubjectID:        githubv4.ID(c.GetID),
+				SubjectID:        githubv4.ID(c.GetNodeID()),
 				Classifier:       githubv4.ReportedContentClassifiers("OUTDATED"),
 				ClientMutationID: nil,
 			}
