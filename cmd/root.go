@@ -279,12 +279,14 @@ var rootCmd = &cobra.Command{
 		// Get previous report for comparing reports
 		var rPrev *report.Report
 		if err := c.DiffConfigReady(); err == nil {
+			log.Println("Get previous report for comparing reports")
 			repo, err := gh.Parse(c.Repository)
 			if err != nil {
 				return err
 			}
 			path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
 			for _, s := range c.Diff.Datastores {
+				log.Printf("Get previous report from %s", s)
 				d, err := datastore.New(ctx, s, c.Root())
 				if err != nil {
 					return err
@@ -295,15 +297,18 @@ var rootCmd = &cobra.Command{
 				}
 				f, err := fsys.Open(path)
 				if err != nil {
+					log.Printf("%s: %v", s, err)
 					continue
 				}
 				defer f.Close()
 				b, err := io.ReadAll(f)
 				if err != nil {
+					log.Printf("%s: %v", s, err)
 					continue
 				}
 				rt := &report.Report{}
 				if err := json.Unmarshal(b, rt); err != nil {
+					log.Printf("%s: %v %s", s, err, string(b))
 					continue
 				}
 				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
@@ -329,7 +334,10 @@ var rootCmd = &cobra.Command{
 		} else {
 			if err := func() error {
 				cmd.PrintErrln("Commenting report...")
-				if err := c.DiffConfigReady(); rPrev == nil || err != nil {
+				if rPrev == nil {
+					cmd.PrintErrln("Skip comparing reports: previous report not found")
+				}
+				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
 				if err := commentReport(ctx, c, r, rPrev); err != nil {
@@ -362,15 +370,12 @@ var rootCmd = &cobra.Command{
 			if r.CodeToTestRatio != nil {
 				r.CodeToTestRatio.DeleteFiles()
 			}
-			datastores := []datastore.Datastore{}
 			for _, s := range c.Report.Datastores {
 				d, err := datastore.New(ctx, s, c.Root())
 				if err != nil {
 					return err
 				}
-				datastores = append(datastores, d)
-			}
-			for _, d := range datastores {
+				log.Printf("Storing report to %s", s)
 				if err := d.StoreReport(ctx, r); err != nil {
 					return err
 				}
