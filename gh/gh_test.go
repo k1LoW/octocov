@@ -1,9 +1,14 @@
 package gh
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-github/v39/github"
+	"github.com/k1LoW/go-github-client/v39/factory"
+	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
 
 func TestParse(t *testing.T) {
@@ -35,4 +40,67 @@ func TestParse(t *testing.T) {
 			t.Errorf("%s", diff)
 		}
 	}
+}
+
+func TestGetDefaultBranch(t *testing.T) {
+	mg := mockedGh(t)
+	want := "main"
+	got, err := mg.GetDefaultBranch(context.TODO(), "owner", "repo")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestGetRawRootURL(t *testing.T) {
+	ctx := context.TODO()
+	token, _, _, _ := factory.GetTokenAndEndpoints()
+	if token == "" {
+		t.Skip("no token")
+		return
+	}
+	tests := []struct {
+		owner string
+		repo  string
+		want  string
+	}{
+		{"k1LoW", "octocov", "https://raw.githubusercontent.com/k1LoW/octocov/main"},
+	}
+	for _, tt := range tests {
+		g, err := New()
+		if err != nil {
+			t.Fatal(err)
+		}
+		got, err := g.GetRawRootURL(ctx, tt.owner, tt.repo)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func mockedGh(t *testing.T) *Gh {
+	mockedHTTPClient := mock.NewMockedHTTPClient(
+		mock.WithRequestMatch(
+			mock.GetReposByOwnerByRepo,
+			github.Repository{
+				DefaultBranch: github.String("main"),
+			},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+	return g
 }

@@ -530,6 +530,15 @@ comment:
   hideFooterLink: true
 ```
 
+### `comment.deletePrevious:`
+
+Delete previous code metrics report comments instead of hiding them
+
+``` yaml
+comment:
+  deletePrevious: true
+```
+
 ### `comment.if:`
 
 Conditions for commenting report.
