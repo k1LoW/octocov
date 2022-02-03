@@ -8,6 +8,7 @@
 
 Key features of `octocov` are:
 
+- **Useful both [as a CI tool](#on-github-actions) and [as a CLI tool](#on-terminal)**
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
 - **[Support multiple code metrics](#supported-code-metrics).**
 - **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
