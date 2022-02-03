@@ -23,7 +23,7 @@ func (c *Config) Build() {
 		c.Coverage.Paths = []string{}
 	}
 	if c.Coverage.Path != "" {
-		_, _ = fmt.Fprintln(os.Stderr, "Deprecated error: coverage.path: has been deprecated. please use coverage.paths: instead.")
+		_, _ = fmt.Fprintln(os.Stderr, "Deprecated: coverage.path: has been deprecated. please use coverage.paths: instead.")
 		c.Coverage.Paths = append(c.Coverage.Paths, c.Coverage.Path)
 	}
 	if len(c.Coverage.Paths) == 0 {
