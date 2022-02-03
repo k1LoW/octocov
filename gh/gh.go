@@ -426,6 +426,17 @@ func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment 
 	return nil
 }
 
+func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n int, comment string) error {
+	if err := g.deletePreviousComments(ctx, owner, repo, n); err != nil {
+		return err
+	}
+	c := strings.Join([]string{comment, commentSig}, "\n")
+	if _, _, err := g.client.Issues.CreateComment(ctx, owner, repo, n, &github.IssueComment{Body: &c}); err != nil {
+		return err
+	}
+	return nil
+}
+
 type minimizeCommentMutation struct {
 	MinimizeComment struct {
 		MinimizedComment struct {

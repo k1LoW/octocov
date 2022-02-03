@@ -109,6 +109,7 @@ type ConfigPush struct {
 type ConfigComment struct {
 	Enable         *bool  `yaml:"enable,omitempty"`
 	HideFooterLink bool   `yaml:"hideFooterLink"`
+	DeletePrevious bool   `yaml:"deletePrevious"`
 	If             string `yaml:"if,omitempty"`
 }
 

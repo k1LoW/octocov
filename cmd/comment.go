@@ -65,9 +65,16 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 		footer,
 	)
 
-	if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n")); err != nil {
-		return err
+	if c.Comment.DeletePrevious {
+		if err := g.PutCommentWithDeletion(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n")); err != nil {
+			return err
+		}
+	} else {
+		if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n")); err != nil {
+			return err
+		}
 	}
+
 	return nil
 }
 
