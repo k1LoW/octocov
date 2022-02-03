@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.34.0](https://github.com/k1LoW/octocov/compare/v0.33.3...v0.34.0) (2022-02-03)
+
+* [BREAKING] Minimize previous coverage report comments instead of deleting them [#135](https://github.com/k1LoW/octocov/pull/135) ([k1LoW](https://github.com/k1LoW))
+* Add test for pkg/badge [#134](https://github.com/k1LoW/octocov/pull/134) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.33.3](https://github.com/k1LoW/octocov/compare/v0.33.2...v0.33.3) (2022-01-21)
 
 * Fix the counting non codes [#133](https://github.com/k1LoW/octocov/pull/133) ([k1LoW](https://github.com/k1LoW))
