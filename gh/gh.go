@@ -17,9 +17,11 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/go-github/v41/github"
-	"github.com/k1LoW/go-github-client/v41/factory"
+	"github.com/google/go-github/v39/github"
+	"github.com/k1LoW/go-github-client/v39/factory"
 	"github.com/lestrrat-go/backoff/v2"
+	"github.com/shurcooL/githubv4"
+	"golang.org/x/oauth2"
 )
 
 const DefaultGithubServerURL = "https://github.com"
@@ -27,7 +29,8 @@ const DefaultGithubServerURL = "https://github.com"
 var octocovNameRe = regexp.MustCompile(`(?i)(octocov|coverage)`)
 
 type Gh struct {
-	client *github.Client
+	client   *github.Client
+	v4Client *githubv4.Client
 }
 
 func New() (*Gh, error) {
@@ -35,8 +38,17 @@ func New() (*Gh, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	token, _, _, v4ep := factory.GetTokenAndEndpoints()
+	v4c := githubv4.NewEnterpriseClient(v4ep, oauth2.NewClient(
+		context.Background(),
+		oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)))
+
 	return &Gh{
-		client: client,
+		client:   client,
+		v4Client: v4c,
 	}, nil
 }
 
@@ -404,7 +416,7 @@ L:
 const commentSig = "<!-- octocov -->"
 
 func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment string) error {
-	if err := g.deleteCurrentIssueComment(ctx, owner, repo, n); err != nil {
+	if err := g.minimizePreviousComments(ctx, owner, repo, n); err != nil {
 		return err
 	}
 	c := strings.Join([]string{comment, commentSig}, "\n")
@@ -414,7 +426,37 @@ func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment 
 	return nil
 }
 
-func (g *Gh) deleteCurrentIssueComment(ctx context.Context, owner, repo string, n int) error {
+type minimizeCommentMutation struct {
+	MinimizeComment struct {
+		MinimizedComment struct {
+			IsMinimized bool
+		}
+	} `graphql:"minimizeComment(input: $input)"`
+}
+
+func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n int) error {
+	opts := &github.IssueListCommentsOptions{}
+	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
+	if err != nil {
+		return err
+	}
+	for _, c := range comments {
+		if strings.Contains(*c.Body, commentSig) {
+			var m minimizeCommentMutation
+			input := githubv4.MinimizeCommentInput{
+				SubjectID:        githubv4.ID(c.GetID),
+				Classifier:       githubv4.ReportedContentClassifiers("OUTDATED"),
+				ClientMutationID: nil,
+			}
+			if err := g.v4Client.Mutate(ctx, &m, input, nil); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (g *Gh) deletePreviousComments(ctx context.Context, owner, repo string, n int) error {
 	opts := &github.IssueListCommentsOptions{}
 	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
 	if err != nil {

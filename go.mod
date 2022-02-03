@@ -17,7 +17,6 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.5.6
 	github.com/google/go-github/v39 v39.2.0
-	github.com/google/go-github/v41 v41.0.0
 	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hhatto/gocloc v0.4.2
 	github.com/jszwec/s3fs v0.3.1
@@ -25,13 +24,13 @@ require (
 	github.com/k1LoW/expand v0.1.0
 	github.com/k1LoW/ghfs v0.6.0
 	github.com/k1LoW/go-github-client/v39 v39.2.3
-	github.com/k1LoW/go-github-client/v41 v41.0.3
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mauri870/gcsfs v0.0.0-20211224180018-a5e6d1f180ef
 	github.com/migueleliasweb/go-github-mock v0.0.6
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/shurcooL/githubv4 v0.0.0-20220115235240-a14260e6f8a2
 	github.com/spf13/cobra v1.3.0
 	github.com/spiegel-im-spiegel/gnkf v0.6.4
 	github.com/tenntenn/golden v0.2.0
@@ -54,6 +53,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-github/v41 v41.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
@@ -69,6 +69,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/saintfish/chardet v0.0.0-20120816061221-3af4cd4741ca // indirect
+	github.com/shurcooL/graphql v0.0.0-20200928012149-18c5c3165e3a // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spiegel-im-spiegel/errs v1.0.5 // indirect
 	github.com/zhangyunhao116/fastrand v0.1.0 // indirect
@@ -93,7 +94,7 @@ require (
 	github.com/xanzy/ssh-agent v0.3.1 // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/net v0.0.0-20220114011407-0dd24b26b47d // indirect
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
+	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
 	google.golang.org/genproto v0.0.0-20220112215332-a9c7c0acf9f2 // indirect
 	google.golang.org/grpc v1.43.0 // indirect
