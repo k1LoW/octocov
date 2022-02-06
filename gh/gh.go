@@ -1,11 +1,15 @@
 package gh
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -18,6 +22,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/google/go-github/v39/github"
+	"github.com/k1LoW/go-github-actions/artifact"
 	"github.com/k1LoW/go-github-client/v39/factory"
 	"github.com/lestrrat-go/backoff/v2"
 	"github.com/shurcooL/githubv4"
@@ -435,6 +440,71 @@ func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n i
 		return err
 	}
 	return nil
+}
+
+func (g *Gh) PutArtifact(ctx context.Context, name, fp string, content []byte) error {
+	return artifact.Upload(ctx, name, fp, bytes.NewReader(content))
+}
+
+type ArtifactFile struct {
+	Name      string
+	Content   []byte
+	CreatedAt time.Time
+}
+
+func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
+	for {
+		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{})
+		if err != nil {
+			return nil, err
+		}
+		for _, a := range l.Artifacts {
+			if a.GetName() != name {
+				continue
+			}
+			u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), true)
+			if err != nil {
+				return nil, err
+			}
+			resp, err := http.Get(u.String())
+			if err != nil {
+				return nil, err
+			}
+			buf := new(bytes.Buffer)
+			if _, err := io.Copy(buf, resp.Body); err != nil {
+				return nil, err
+			}
+			reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range reader.File {
+				if file.Name != filepath.Join(name, fp) {
+					continue
+				}
+				in, err := file.Open()
+				if err != nil {
+					return nil, err
+				}
+				out := new(bytes.Buffer)
+				if _, err := io.Copy(out, in); err != nil {
+					_ = in.Close()
+					return nil, err
+				}
+				if err := in.Close(); err != nil {
+					return nil, err
+				}
+				return &ArtifactFile{
+					Name:      file.Name,
+					Content:   out.Bytes(),
+					CreatedAt: a.CreatedAt.Time,
+				}, nil
+			}
+		}
+		if res.NextPage == 0 {
+			return nil, err
+		}
+	}
 }
 
 type minimizeCommentMutation struct {
