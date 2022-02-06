@@ -30,6 +30,7 @@ import (
 )
 
 const DefaultGithubServerURL = "https://github.com"
+const maxCopySize = 1073741824 //1GB
 
 var octocovNameRe = regexp.MustCompile(`(?i)(octocov|coverage)`)
 
@@ -471,8 +472,12 @@ func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string
 				return nil, err
 			}
 			buf := new(bytes.Buffer)
-			if _, err := io.Copy(buf, resp.Body); err != nil {
+			size, err := io.CopyN(buf, resp.Body, maxCopySize)
+			if !errors.Is(err, io.EOF) {
 				return nil, err
+			}
+			if size >= maxCopySize {
+				return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
 			}
 			reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
 			if err != nil {
@@ -487,9 +492,14 @@ func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string
 					return nil, err
 				}
 				out := new(bytes.Buffer)
-				if _, err := io.Copy(out, in); err != nil {
+				size, err := io.CopyN(out, in, maxCopySize)
+				if !errors.Is(err, io.EOF) {
 					_ = in.Close()
 					return nil, err
+				}
+				if size >= maxCopySize {
+					_ = in.Close()
+					return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
 				}
 				if err := in.Close(); err != nil {
 					return nil, err
