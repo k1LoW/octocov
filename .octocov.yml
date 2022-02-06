@@ -15,12 +15,14 @@ testExecutionTime:
   badge:
     path: docs/time.svg
 diff:
-  if: github.event_name == 'pull_request'
-  path: .octocov/report.json
+  if: is_pull_request
+  datastores:
+    - artifact://k1LoW/octocov
 push:
   if: is_default_branch
 comment:
-  if: github.event_name == 'pull_request'
+  if: is_pull_request
 report:
-  if: is_default_branch
-  path: .octocov/report.json
+#  if: is_default_branch
+  datastores:
+    - artifact://k1LoW/octocov
