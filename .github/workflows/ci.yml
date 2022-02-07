@@ -17,6 +17,9 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DEBUG: 1
     steps:
+      - name: Show rate limit
+        run: |
+          curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v2
         with:
@@ -44,3 +47,7 @@ jobs:
 
       - name: Run build octocov
         uses: ./testdata/coverage_action/
+
+      - name: Show rate limit
+        run: |
+          curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
