@@ -186,3 +186,7 @@ func parse(u, configRoot string) (datastore string, args []string, err error) {
 		return "local", []string{root}, nil
 	}
 }
+
+func NeedToShrink(u string) bool {
+	return strings.HasPrefix(u, "bq://")
+}
