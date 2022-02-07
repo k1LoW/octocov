@@ -489,7 +489,7 @@ func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string
 				return nil, err
 			}
 			for _, file := range reader.File {
-				if file.Name != filepath.Join(name, fp) {
+				if file.Name != fp {
 					continue
 				}
 				in, err := file.Open()

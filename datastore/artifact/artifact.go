@@ -55,7 +55,7 @@ func (a *Artifact) FS() (fs.FS, error) {
 	fsys := fstest.MapFS{}
 
 	path := fmt.Sprintf("%s/%s/%s", r.Owner, r.Repo, reportFilename)
-	af, err := a.gh.GetLatestArtifact(ctx, r.Owner, r.Repo, a.name, path)
+	af, err := a.gh.GetLatestArtifact(ctx, r.Owner, r.Repo, a.name, reportFilename)
 	if err == nil {
 		fsys[path] = &fstest.MapFile{
 			Data:    af.Content,
