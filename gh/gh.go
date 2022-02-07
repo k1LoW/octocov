@@ -517,9 +517,10 @@ func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string
 			}
 		}
 		if res.NextPage == 0 {
-			return nil, err
+			break
 		}
 	}
+	return nil, errors.New("artifact not found")
 }
 
 type minimizeCommentMutation struct {
