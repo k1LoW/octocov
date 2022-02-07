@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.35.0](https://github.com/k1LoW/octocov/compare/v0.34.0...v0.35.0) (2022-02-07)
+
+* Support datastore.artifact [#137](https://github.com/k1LoW/octocov/pull/137) ([k1LoW](https://github.com/k1LoW))
+* Add log [#136](https://github.com/k1LoW/octocov/pull/136) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.34.0](https://github.com/k1LoW/octocov/compare/v0.33.3...v0.34.0) (2022-02-03)
 
 * [BREAKING] Minimize previous coverage report comments instead of deleting them [#135](https://github.com/k1LoW/octocov/pull/135) ([k1LoW](https://github.com/k1LoW))
