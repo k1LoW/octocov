@@ -377,6 +377,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 			}
+			log.Println("Shrink report data")
 			if r.Coverage != nil {
 				r.Coverage.DeleteBlockCoverages()
 			}
