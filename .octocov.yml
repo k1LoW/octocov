@@ -1,5 +1,5 @@
 coverage:
-  acceptable: current >= 60% && diff >= 0.0%
+  acceptable: current >= 60%
   badge:
     path: docs/coverage.svg
 codeToTestRatio:
