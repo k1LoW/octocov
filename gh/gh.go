@@ -454,11 +454,16 @@ type ArtifactFile struct {
 }
 
 func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
+	page := 1
 	for {
-		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{})
+		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{
+			Page:    page,
+			PerPage: 100,
+		})
 		if err != nil {
 			return nil, err
 		}
+		page += 1
 		for _, a := range l.Artifacts {
 			if a.GetName() != name {
 				continue

@@ -2,6 +2,8 @@ name: build
 
 on:
   push:
+    branchs:
+      - main
   pull_request:
 
 jobs:
@@ -41,4 +43,4 @@ jobs:
           scan-type: 'fs'
 
       - name: Run build octocov
-        uses: ./testdata/coverage_action.yml
+        uses: ./testdata/coverage_action/
