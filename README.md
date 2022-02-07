@@ -253,6 +253,7 @@ report:
 #### Supported datastores
 
 - GitHub repository
+- GitHub Actions artifact
 - S3
 - GCS
 - BigQuery
@@ -277,6 +278,7 @@ central:
 #### Supported datastores
 
 - GitHub repository
+- GitHub Actions artifact
 - S3
 - GCS
 - BigQuery
@@ -621,6 +623,26 @@ Use `github://` scheme.
 ```
 github://[owner]/[repo]@[branch]/[prefix]
 ```
+
+**Required environment variables:**
+
+- `GITHUB_TOKEN` or `OCTOCOV_GITHUB_TOKEN`
+- `GITHUB_REPOSITORY` or `OCTOCOV_GITHUB_REPOSITORY`
+- `GITHUB_API_URL` or `OCTOCOV_GITHUB_API_URL` (optional)
+
+#### GitHub Actions artifact
+
+Use `artifact://` scheme.
+
+```
+artifact://[owner]/[repo]/[artifactName]
+```
+
+- `artifact://[owner]/[repo]/[artifactName]`
+- `artifact://[owner]/[repo]` ( default artifactName: `octocov-report` )
+
+
+**Notice:** reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
 **Required environment variables:**
 
