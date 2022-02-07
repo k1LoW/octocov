@@ -127,10 +127,10 @@ comment:
   enable: true
 report:
   datastores:
-    - artifact://k1LoW/octocov
+    - artifact://${GITHUB_REPOSITORY}
 diff:
   datastores:
-    - artifact://k1LoW/octocov
+    - artifact://${GITHUB_REPOSITORY}
 ```
 
 ![img](docs/comment_with_diff.png)
