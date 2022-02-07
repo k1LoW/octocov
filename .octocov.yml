@@ -1,5 +1,5 @@
 coverage:
-  acceptable: current >= 60% && diff >= 0.0%
+  acceptable: current >= 60%
   badge:
     path: docs/coverage.svg
 codeToTestRatio:
@@ -15,12 +15,14 @@ testExecutionTime:
   badge:
     path: docs/time.svg
 diff:
-  if: github.event_name == 'pull_request'
-  path: .octocov/report.json
+  if: is_pull_request
+  datastores:
+    - artifact://k1LoW/octocov
 push:
   if: is_default_branch
 comment:
-  if: github.event_name == 'pull_request'
+  if: is_pull_request
 report:
   if: is_default_branch
-  path: .octocov/report.json
+  datastores:
+    - artifact://k1LoW/octocov

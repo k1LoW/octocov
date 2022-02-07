@@ -23,6 +23,7 @@ require (
 	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/expand v0.1.0
 	github.com/k1LoW/ghfs v0.6.0
+	github.com/k1LoW/go-github-actions v0.0.2
 	github.com/k1LoW/go-github-client/v39 v39.2.3
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0

@@ -120,14 +120,17 @@ codeToTestRatio:
     - '**/*_test.go'
 ```
 
-By setting `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
+By setting `report:` ( `report.path:`  or `report.datastores` ) and `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
 
 ``` yaml
 comment:
   enable: true
+report:
+  datastores:
+    - artifact://k1LoW/octocov
 diff:
   datastores:
-    - s3://bucket/reports
+    - artifact://k1LoW/octocov
 ```
 
 ![img](docs/comment_with_diff.png)
@@ -253,6 +256,7 @@ report:
 #### Supported datastores
 
 - GitHub repository
+- GitHub Actions artifact
 - S3
 - GCS
 - BigQuery
@@ -277,6 +281,7 @@ central:
 #### Supported datastores
 
 - GitHub repository
+- GitHub Actions artifact
 - S3
 - GCS
 - BigQuery
@@ -621,6 +626,26 @@ Use `github://` scheme.
 ```
 github://[owner]/[repo]@[branch]/[prefix]
 ```
+
+**Required environment variables:**
+
+- `GITHUB_TOKEN` or `OCTOCOV_GITHUB_TOKEN`
+- `GITHUB_REPOSITORY` or `OCTOCOV_GITHUB_REPOSITORY`
+- `GITHUB_API_URL` or `OCTOCOV_GITHUB_API_URL` (optional)
+
+#### GitHub Actions artifact
+
+Use `artifact://` scheme.
+
+```
+artifact://[owner]/[repo]/[artifactName]
+```
+
+- `artifact://[owner]/[repo]/[artifactName]`
+- `artifact://[owner]/[repo]` ( default artifactName: `octocov-report` )
+
+
+**Notice:** reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
 **Required environment variables:**
 

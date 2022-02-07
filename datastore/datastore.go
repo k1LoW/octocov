@@ -12,6 +12,7 @@ import (
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/k1LoW/octocov/datastore/artifact"
 	"github.com/k1LoW/octocov/datastore/bq"
 	"github.com/k1LoW/octocov/datastore/gcs"
 	"github.com/k1LoW/octocov/datastore/github"
@@ -26,6 +27,7 @@ type DatastoreType int
 
 var (
 	_ Datastore = (*github.Github)(nil)
+	_ Datastore = (*artifact.Artifact)(nil)
 	_ Datastore = (*s3d.S3)(nil)
 	_ Datastore = (*gcs.GCS)(nil)
 	_ Datastore = (*bq.BQ)(nil)
@@ -63,6 +65,14 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 			}
 		}
 		return github.New(g, ownerrepo, branch, prefix)
+	case "artifact":
+		ownerrepo := args[0]
+		name := args[1]
+		g, err := gh.New()
+		if err != nil {
+			return nil, err
+		}
+		return artifact.New(g, ownerrepo, name)
 	case "s3":
 		bucket := args[0]
 		prefix := args[1]
@@ -124,6 +134,19 @@ func parse(u, configRoot string) (datastore string, args []string, err error) {
 		ownerrepo := fmt.Sprintf("%s/%s", owner, repo)
 		prefix := strings.Join(splitted[2:], "/")
 		return "github", []string{ownerrepo, branch, prefix}, nil
+	case strings.HasPrefix(u, "artifact://"):
+		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "artifact://"), "/"), "/")
+		if len(splitted) < 2 || len(splitted) > 3 {
+			return "", nil, fmt.Errorf("invalid datastore: %s", u)
+		}
+		owner := splitted[0]
+		repo := splitted[1]
+		ownerrepo := fmt.Sprintf("%s/%s", owner, repo)
+		name := ""
+		if len(splitted) == 3 {
+			name = splitted[2]
+		}
+		return "artifact", []string{ownerrepo, name}, nil
 	case strings.HasPrefix(u, "s3://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "s3://"), "/"), "/")
 		if splitted[0] == "" {

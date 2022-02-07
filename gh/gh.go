@@ -1,11 +1,15 @@
 package gh
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -18,6 +22,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/google/go-github/v39/github"
+	"github.com/k1LoW/go-github-actions/artifact"
 	"github.com/k1LoW/go-github-client/v39/factory"
 	"github.com/lestrrat-go/backoff/v2"
 	"github.com/shurcooL/githubv4"
@@ -25,6 +30,7 @@ import (
 )
 
 const DefaultGithubServerURL = "https://github.com"
+const maxCopySize = 1073741824 //1GB
 
 var octocovNameRe = regexp.MustCompile(`(?i)(octocov|coverage)`)
 
@@ -435,6 +441,86 @@ func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n i
 		return err
 	}
 	return nil
+}
+
+func (g *Gh) PutArtifact(ctx context.Context, name, fp string, content []byte) error {
+	return artifact.Upload(ctx, name, fp, bytes.NewReader(content))
+}
+
+type ArtifactFile struct {
+	Name      string
+	Content   []byte
+	CreatedAt time.Time
+}
+
+func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
+	page := 1
+	for {
+		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{
+			Page:    page,
+			PerPage: 100,
+		})
+		if err != nil {
+			return nil, err
+		}
+		page += 1
+		for _, a := range l.Artifacts {
+			if a.GetName() != name {
+				continue
+			}
+			u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), true)
+			if err != nil {
+				return nil, err
+			}
+			resp, err := http.Get(u.String())
+			if err != nil {
+				return nil, err
+			}
+			buf := new(bytes.Buffer)
+			size, err := io.CopyN(buf, resp.Body, maxCopySize)
+			if !errors.Is(err, io.EOF) {
+				return nil, err
+			}
+			if size >= maxCopySize {
+				return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
+			}
+			reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+			if err != nil {
+				return nil, err
+			}
+			for _, file := range reader.File {
+				if file.Name != fp {
+					continue
+				}
+				in, err := file.Open()
+				if err != nil {
+					return nil, err
+				}
+				out := new(bytes.Buffer)
+				size, err := io.CopyN(out, in, maxCopySize)
+				if !errors.Is(err, io.EOF) {
+					_ = in.Close()
+					return nil, err
+				}
+				if size >= maxCopySize {
+					_ = in.Close()
+					return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
+				}
+				if err := in.Close(); err != nil {
+					return nil, err
+				}
+				return &ArtifactFile{
+					Name:      file.Name,
+					Content:   out.Bytes(),
+					CreatedAt: a.CreatedAt.Time,
+				}, nil
+			}
+		}
+		if res.NextPage == 0 {
+			break
+		}
+	}
+	return nil, errors.New("artifact not found")
 }
 
 type minimizeCommentMutation struct {
