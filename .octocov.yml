@@ -16,11 +16,13 @@ testExecutionTime:
     path: docs/time.svg
 diff:
   if: github.event_name == 'pull_request'
-  path: .octocov/report.json
+  datastores:
+    - artifact://k1LoW/octocov
 push:
   if: is_default_branch
 comment:
   if: github.event_name == 'pull_request'
 report:
-  if: is_default_branch
-  path: .octocov/report.json
+#  if: is_default_branch
+  datastores:
+    - artifact://k1LoW/octocov

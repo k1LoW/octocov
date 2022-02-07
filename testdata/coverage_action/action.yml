@@ -1,0 +1,5 @@
+name: Action for testing coverage
+description: Run coverage
+runs:
+  using: docker
+  image: Dockerfile
