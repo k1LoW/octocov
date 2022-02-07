@@ -45,7 +45,7 @@ jobs:
         with:
           scan-type: 'fs'
 
-      - name: Run build octocov
+      - name: Build octocov and run as a action
         uses: ./testdata/coverage_action/
 
       - name: Show rate limit
