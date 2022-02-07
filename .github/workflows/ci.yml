@@ -2,7 +2,7 @@ name: build
 
 on:
   push:
-    branchs:
+    branches:
       - main
   pull_request:
 
