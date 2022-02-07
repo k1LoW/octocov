@@ -364,6 +364,20 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, rp)
 			}
+			for _, s := range c.Report.Datastores {
+				if datastore.NeedToShrink(s) {
+					continue
+				}
+				d, err := datastore.New(ctx, s, c.Root())
+				if err != nil {
+					return err
+				}
+				log.Printf("Storing report to %s", s)
+				if err := d.StoreReport(ctx, r); err != nil {
+					return err
+				}
+			}
+			log.Println("Shrink report data")
 			if r.Coverage != nil {
 				r.Coverage.DeleteBlockCoverages()
 			}
@@ -371,6 +385,9 @@ var rootCmd = &cobra.Command{
 				r.CodeToTestRatio.DeleteFiles()
 			}
 			for _, s := range c.Report.Datastores {
+				if !datastore.NeedToShrink(s) {
+					continue
+				}
 				d, err := datastore.New(ctx, s, c.Root())
 				if err != nil {
 					return err
