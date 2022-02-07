@@ -120,14 +120,17 @@ codeToTestRatio:
     - '**/*_test.go'
 ```
 
-By setting `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
+By setting `report:` ( `report.path:`  or `report.datastores` ) and `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
 
 ``` yaml
 comment:
   enable: true
+report:
+  datastores:
+    - artifact://k1LoW/octocov
 diff:
   datastores:
-    - s3://bucket/reports
+    - artifact://k1LoW/octocov
 ```
 
 ![img](docs/comment_with_diff.png)
