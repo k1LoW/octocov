@@ -146,7 +146,7 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 
 func TestPushConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(rootTestdataDir(t), "config", "event_pull_request_opened.json"))
 	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
 	mg := mockedGh(t)
 	tests := []struct {
@@ -225,7 +225,7 @@ func TestPushConfigReady(t *testing.T) {
 func TestCommentConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_REF", "refs/pull/123/merge")
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(rootTestdataDir(t), "config", "event_pull_request_opened.json"))
 	mg := mockedGh(t)
 	tests := []struct {
 		c    *Config
@@ -617,7 +617,7 @@ func TestCentralPushConfigReady(t *testing.T) {
 
 func TestDiffConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(rootTestdataDir(t), "config", "event_pull_request_opened.json"))
 	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
 	mg := mockedGh(t)
 	tests := []struct {
@@ -681,7 +681,7 @@ func TestDiffConfigReady(t *testing.T) {
 
 func TestReportConfigReady(t *testing.T) {
 	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(testdataDir(t), "config", "event_pull_request_opened.json"))
+	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(rootTestdataDir(t), "config", "event_pull_request_opened.json"))
 	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
 	mg := mockedGh(t)
 	tests := []struct {

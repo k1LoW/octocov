@@ -1,0 +1,14 @@
+coverage:
+  if: true
+testExecutionTime:
+  if: true
+diff:
+  if: is_pull_request
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+comment:
+  if: is_pull_request
+report:
+  if: is_default_branch
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}  
