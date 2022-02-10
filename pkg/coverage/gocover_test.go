@@ -23,20 +23,12 @@ func TestGocover(t *testing.T) {
 		t.Error("got 0 want > 0")
 	}
 	for _, f := range got.Files {
-		total := 0
-		covered := 0
-		for _, b := range f.Blocks {
-			// Statement
-			total = total + *b.NumStmt
-			if *b.Count > 0 {
-				covered += *b.NumStmt
-			}
+		lc := f.Blocks.ToLineCoverages()
+		if got := f.Total; got != lc.Total() {
+			t.Errorf("got %v\nwant %v", got, lc.Total())
 		}
-		if got := f.Total; got != total {
-			t.Errorf("got %v\nwant %v", got, total)
-		}
-		if got := f.Covered; got != covered {
-			t.Errorf("got %v\nwant %v", got, covered)
+		if got := f.Covered; got != lc.Covered() {
+			t.Errorf("got %v\nwant %v", got, lc.Covered())
 		}
 	}
 }
