@@ -24,6 +24,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -54,7 +55,7 @@ var initCmd = &cobra.Command{
 		}
 		lang, err := pplang.Detect(wd)
 		if err != nil {
-			cmd.PrintErrln(err)
+			log.Println(err)
 		}
 		if err := config.Generate(ctx, lang, f); err != nil {
 			return err
