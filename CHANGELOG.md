@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.36.0](https://github.com/k1LoW/octocov/compare/v0.35.0...v0.36.0) (2022-02-10)
+
+* Add `octocov init` for generating .octocov.yml [#139](https://github.com/k1LoW/octocov/pull/139) ([k1LoW](https://github.com/k1LoW))
+* Not shrinking report data in some datastores [#138](https://github.com/k1LoW/octocov/pull/138) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.35.0](https://github.com/k1LoW/octocov/compare/v0.34.0...v0.35.0) (2022-02-07)
 
 * Support datastore.artifact [#137](https://github.com/k1LoW/octocov/pull/137) ([k1LoW](https://github.com/k1LoW))
