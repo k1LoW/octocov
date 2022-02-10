@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.37.0](https://github.com/k1LoW/octocov/compare/v0.36.0...v0.37.0) (2022-02-11)
+
+* [BREAKING] coverage.Gocover return LOC coverage (not statement count) [#140](https://github.com/k1LoW/octocov/pull/140) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.36.0](https://github.com/k1LoW/octocov/compare/v0.35.0...v0.36.0) (2022-02-10)
 
 * Add `octocov init` for generating .octocov.yml [#139](https://github.com/k1LoW/octocov/pull/139) ([k1LoW](https://github.com/k1LoW))
