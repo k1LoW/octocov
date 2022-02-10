@@ -4,13 +4,13 @@ import (
 	"context"
 	"errors"
 	"io/fs"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/google/go-github/v41/github"
 	"github.com/k1LoW/go-github-client/v41/factory"
+	giturls "github.com/whilp/git-urls"
 	"gopkg.in/ini.v1"
 )
 
@@ -77,15 +77,17 @@ func getOwnerRepo(fsys fs.FS) (string, string, error) {
 			if !strings.Contains(s.Name(), "remote") || s.Key("url").String() == "" {
 				continue
 			}
-			u, err := url.Parse(s.Key("url").String())
+			u, err := giturls.Parse(s.Key("url").String())
 			if err != nil {
 				continue
 			}
 			splitted := strings.Split(u.Path, "/")
-			if len(splitted) != 3 {
-				continue
+			switch len(splitted) {
+			case 3:
+				return splitted[1], strings.TrimSuffix(splitted[2], filepath.Ext(splitted[2])), nil
+			case 2:
+				return splitted[0], strings.TrimSuffix(splitted[1], filepath.Ext(splitted[1])), nil
 			}
-			return splitted[1], strings.TrimSuffix(splitted[2], filepath.Ext(splitted[2])), nil
 		}
 	}
 

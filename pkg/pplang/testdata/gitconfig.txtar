@@ -1,0 +1,18 @@
+-- .git/config --
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+	ignorecase = true
+	precomposeunicode = true
+[remote "origin"]
+	url = git@github.com:k1LoW/octocov.git
+	fetch = +refs/heads/*:refs/remotes/origin/*
+[remote "cli"]
+	url = git@github.com:cli/cli.git
+	fetch = +refs/heads/*:refs/remotes/cli/*
+[branch "main"]
+	remote = origin
+	merge = refs/heads/main
+	pushRemote = origin

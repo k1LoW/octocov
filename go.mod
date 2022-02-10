@@ -20,6 +20,7 @@ require (
 	github.com/google/go-github/v41 v41.0.0
 	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hhatto/gocloc v0.4.2
+	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca
 	github.com/jszwec/s3fs v0.3.1
 	github.com/k1LoW/duration v1.1.0
 	github.com/k1LoW/expand v0.1.0
@@ -37,6 +38,7 @@ require (
 	github.com/spf13/cobra v1.3.0
 	github.com/spiegel-im-spiegel/gnkf v0.6.4
 	github.com/tenntenn/golden v0.2.0
+	github.com/whilp/git-urls v1.0.0
 	github.com/zhangyunhao116/skipmap v0.7.0
 	golang.org/x/exp v0.0.0-20220104160115-025e73f80486
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410
@@ -66,7 +68,6 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
-	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
