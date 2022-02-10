@@ -26,10 +26,10 @@ func TestLoad(t *testing.T) {
 		path    string
 		wantErr bool
 	}{
-		{testdataDir(t), "", false},
-		{filepath.Join(testdataDir(t), "config"), "", false},
-		{filepath.Join(testdataDir(t), "config"), ".octocov.yml", false},
-		{filepath.Join(testdataDir(t), "config"), "no.yml", true},
+		{rootTestdataDir(t), "", false},
+		{filepath.Join(rootTestdataDir(t), "config"), "", false},
+		{filepath.Join(rootTestdataDir(t), "config"), ".octocov.yml", false},
+		{filepath.Join(rootTestdataDir(t), "config"), "no.yml", true},
 	}
 	for _, tt := range tests {
 		c := New()
@@ -47,7 +47,7 @@ func TestLoad(t *testing.T) {
 }
 
 func TestLoadConfigAndOmitEnableFlag(t *testing.T) {
-	wd := filepath.Join(testdataDir(t), "config")
+	wd := filepath.Join(rootTestdataDir(t), "config")
 	p := ".octocov.yml"
 	c := New()
 	c.wd = wd
@@ -201,7 +201,7 @@ func clearEnv() error {
 	return nil
 }
 
-func testdataDir(t *testing.T) string {
+func rootTestdataDir(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()
 	if err != nil {

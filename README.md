@@ -27,21 +27,12 @@ For example, in case of Go language, add `-coverprofile=coverage.out` option as 
 ``` console
 $ go test ./... -coverprofile=coverage.out
 ```
-Add `.octocov.yml` ( or `octocov.yml` ) file to your repository.
 
-``` yaml
-# .octocov.yml
-coverage:
-  paths:
-    - coverage.out
-codeToTestRatio:
-  code:
-    - '**/*.go'
-    - '!**/*_test.go'
-  test:
-    - '**/*_test.go'
-comment:
-  enable: true
+And generete `.octocov.yml` to your repository.
+
+``` console
+$ octocov init
+.octocov.yml is generated
 ```
 
 And set up a workflow file as follows and run octocov on GitHub Actions.
@@ -72,7 +63,7 @@ jobs:
 
 Then, octocov comment the report of the code metrics to the pull request.
 
-![comment](docs/comment.png)
+![comment](docs/comment_with_diff.png)
 
 **Notice:** Note that only pull requests from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
 
