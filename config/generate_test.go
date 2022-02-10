@@ -14,13 +14,15 @@ func TestGenerate(t *testing.T) {
 	ctx := context.TODO()
 	tests := []struct {
 		filename string
+		lang     string
 	}{
-		{"base_octocov.yml"},
+		{"base_octocov.yml", ""},
+		{"go_octocov.yml", "Go"},
+		{"base_octocov.yml", "Unknown"},
 	}
 	for _, tt := range tests {
-		c := New()
 		got := new(bytes.Buffer)
-		if err := c.Generate(ctx, got); err != nil {
+		if err := Generate(ctx, tt.lang, got); err != nil {
 			t.Error(err)
 		}
 
