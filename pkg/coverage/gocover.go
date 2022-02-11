@@ -34,7 +34,10 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 	cov.Type = TypeStmt
 	cov.Format = g.Name()
 	for _, p := range profiles {
+		total, covered := g.countProfile(p)
 		fcov := NewFileCoverage(p.FileName)
+		fcov.Total = total
+		fcov.Covered = covered
 		for _, b := range p.Blocks {
 			sl := b.StartLine
 			sc := b.StartCol
@@ -52,11 +55,8 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 				Count:     &c,
 			})
 		}
-		lc := fcov.Blocks.ToLineCoverages()
-		fcov.Total = lc.Total()
-		fcov.Covered = lc.Covered()
-		cov.Total += fcov.Total
-		cov.Covered += fcov.Covered
+		cov.Total += total
+		cov.Covered += covered
 		cov.Files = append(cov.Files, fcov)
 	}
 	return cov, rp, nil
@@ -74,4 +74,18 @@ func (g *Gocover) detectReportPath(path string) (string, error) {
 		return "", err
 	}
 	return path, nil
+}
+
+func (g *Gocover) countProfile(p *cover.Profile) (int, int) {
+	var total, covered int
+	for _, b := range p.Blocks {
+		total += b.NumStmt
+		if b.Count > 0 {
+			covered += b.NumStmt
+		}
+	}
+	if total == 0 {
+		return 0, 0
+	}
+	return total, covered
 }
