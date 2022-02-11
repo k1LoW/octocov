@@ -40,7 +40,7 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			return errors.New("can not merge: BlockCoverages are already deleted.")
 		}
 	}
-	if c.Type != c2.Type {
+	if c.Type != TypeLOC || c2.Type != TypeLOC {
 		c.Type = TypeMerged
 	}
 
