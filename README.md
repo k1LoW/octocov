@@ -92,7 +92,6 @@ By setting `comment:`, [comment the reports to pull request](https://github.com/
 ``` yaml
 # .octocov.yml
 comment:
-  enable: true
   hideFooterLink: false # hide octocov link
 ```
 
@@ -102,7 +101,6 @@ If you want to measure **"Code to Test Ratio"**, set `codeToTestRatio:`.
 
 ``` yaml
 comment:
-  enable: true
 codeToTestRatio:
   code:
     - '**/*.go'
@@ -115,7 +113,6 @@ By setting `report:` ( `report.path:`  or `report.datastores` ) and `diff:` ( `d
 
 ``` yaml
 comment:
-  enable: true
 report:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
@@ -223,7 +220,6 @@ coverage:
   badge:
     path: docs/coverage.svg
 push:
-  enable: true
 ```
 
 ### Store report to datastores
@@ -260,7 +256,6 @@ By enabling `central:`, `octocov` acts as a central repository for collecting re
 ``` yaml
 # .octocov.yml for central mode
 central:
-  enable: true
   root: .                                  # root directory or index file path of collected coverage reports pages. default: .
   reports:
     datastores:
@@ -268,8 +263,7 @@ central:
   badges:
     datastores:
       - local://badges                     # directory where badges are generated.
-  push:
-    enable: true                           # enable self git push
+  push:                                    # enable self git push
 ```
 
 #### Supported datastores
@@ -490,36 +484,21 @@ testExecutionTime:
 
 ### `push:`
 
-Configuration for `git push` badges self.
+Configuration for `git push` files self.
 
-### `push.enable:`
+### `push.if:`
 
-Enable / disable `git push`
+Conditions for pushing files.
 
 ``` yaml
+# .octocov.yml
 push:
-  enable: false
+  if: is_default_branch
 ```
 
 ### `comment:`
 
 Set this if want to comment report to pull request
-
-### `comment.enable:`
-
-Enable / disable comment.
-
-``` yaml
-comment:
-  enable: true
-```
-
-`enable: true` can be omitted if any other parameters are set as follows.
-
-``` yaml
-comment:
-  hideFooterLink: true
-```
 
 ### `comment.hideFooterLink:`
 
@@ -756,27 +735,7 @@ The variables available in the `if` section are as follows
 
 ### `central:`
 
-### `central.enable:`
-
-Enable / disable central mode.
-
-``` yaml
-central:
-  enable: false
-```
-
-`enable: true` can be omitted if any other parameters are set as follows.
-
-``` yaml
-central:
-  reports:
-    datastores:
-      - local://reports
-      - gs://my-gcs-bucket/reports
-```
-
 :NOTICE: When central mode is enabled, other functions are automatically turned off.
-
 
 ### `central.root:`
 
@@ -821,7 +780,6 @@ central:
     datastores:
       - github://owner/central-repo/reports
   push:
-    enable: true
 ```
 
 or
@@ -833,7 +791,6 @@ central:
     datastores:
       - local://reports
   push:
-    enable: true
 ```
 
 #### Use S3 bucket as datastore
@@ -856,7 +813,6 @@ central:
     datastores:
       - s3://my-s3-bucket/reports
   push:
-    enable: true
 ```
 
 **Required permission (Central Repo):**
@@ -890,7 +846,6 @@ central:
     datastores:
       - gs://my-gcs-bucket/reports
   push:
-    enable: true
 ```
 
 **Required permission (Central Repo):**
@@ -923,7 +878,6 @@ central:
     datastores:
       - bq://my-project/my-dataset/reports
   push:
-    enable: true
 ```
 
 **Required permission (Central Repo):**
@@ -952,15 +906,6 @@ central:
 ### `central.push:`
 
 Configuration for `git push` index file and badges self.
-
-### `central.push.enable:`
-
-Enable / disable `git push`
-
-``` yaml
-push:
-  enable: true
-```
 
 ### `central.if:`
 

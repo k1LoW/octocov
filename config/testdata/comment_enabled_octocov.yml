@@ -1,0 +1,3 @@
+push:
+  if: is_default_branch
+comment:

@@ -85,11 +85,10 @@ type ConfigTestExecutionTimeBadge struct {
 }
 
 type ConfigCentral struct {
-	Enable  *bool                `yaml:"enable,omitempty"`
 	Root    string               `yaml:"root"`
 	Reports ConfigCentralReports `yaml:"reports"`
 	Badges  ConfigCentralBadges  `yaml:"badges"`
-	Push    *ConfigPush          `yaml:"push"`
+	Push    *ConfigPush          `yaml:"push,omitempty"`
 	If      string               `yaml:"if,omitempty"`
 }
 
@@ -102,12 +101,10 @@ type ConfigCentralBadges struct {
 }
 
 type ConfigPush struct {
-	Enable *bool  `yaml:"enable,omitempty"`
-	If     string `yaml:"if,omitempty"`
+	If string `yaml:"if,omitempty"`
 }
 
 type ConfigComment struct {
-	Enable         *bool  `yaml:"enable,omitempty"`
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	DeletePrevious bool   `yaml:"deletePrevious"`
 	If             string `yaml:"if,omitempty"`
@@ -148,7 +145,11 @@ func (c *Config) Load(path string) error {
 	if path == "" {
 		return nil
 	}
-	c.path = filepath.Join(c.wd, path)
+	if strings.HasPrefix(path, "/") {
+		c.path = path
+	} else {
+		c.path = filepath.Join(c.wd, path)
+	}
 	buf, err := os.ReadFile(filepath.Clean(c.path))
 	if err != nil {
 		return err

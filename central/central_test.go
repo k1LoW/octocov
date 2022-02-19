@@ -9,7 +9,6 @@ import (
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/local"
-	"github.com/k1LoW/octocov/internal"
 )
 
 func TestCollectReports(t *testing.T) {
@@ -104,7 +103,6 @@ func TestRenderIndex(t *testing.T) {
 	c.Setwd(filepath.Dir(wd))
 	c.Repository = "k1LoW/octocov"
 	c.Central = &config.ConfigCentral{
-		Enable: internal.Bool(true),
 		Reports: config.ConfigCentralReports{
 			Datastores: []string{"reports"},
 		},

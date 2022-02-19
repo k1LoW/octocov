@@ -3,4 +3,3 @@ coverage:
   badge:
     path: docs/coverage.svg
 comment:
-  hideFooterLink: false

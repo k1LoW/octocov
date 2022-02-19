@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/internal"
 )
 
 func (c *Config) CoverageConfigReady() error {
@@ -43,9 +42,6 @@ func (c *Config) PushConfigReady() error {
 	if c.Push == nil {
 		return errors.New("push: is not set")
 	}
-	if !internal.IsEnable(c.Push.Enable) {
-		return errors.New("push.enable: is false")
-	}
 	if c.GitRoot == "" {
 		return errors.New("failed to traverse the Git root path")
 	}
@@ -62,9 +58,6 @@ func (c *Config) PushConfigReady() error {
 func (c *Config) CommentConfigReady() error {
 	if c.Comment == nil {
 		return errors.New("comment: is not set")
-	}
-	if !internal.IsEnable(c.Comment.Enable) {
-		return errors.New("comment.enable: is false")
 	}
 	if c.Repository == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
@@ -128,9 +121,6 @@ func (c *Config) CentralConfigReady() error {
 	if c.Central == nil {
 		return errors.New("central: is not set")
 	}
-	if !internal.IsEnable(c.Central.Enable) {
-		return errors.New("central.enable: is false")
-	}
 	if c.Repository == "" {
 		return errors.New("repository: not set (or env GITHUB_REPOSITORY is not set)")
 	}
@@ -153,9 +143,6 @@ func (c *Config) CentralPushConfigReady() error {
 	}
 	if c.Central.Push == nil {
 		return errors.New("central.push: is not set")
-	}
-	if !internal.IsEnable(c.Central.Push.Enable) {
-		return errors.New("central.puth.enable: is false")
 	}
 	if c.GitRoot == "" {
 		return errors.New("failed to traverse the Git root path")
