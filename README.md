@@ -261,12 +261,15 @@ By enabling `central:`, `octocov` acts as a central repository for collecting re
 # .octocov.yml for central mode
 central:
   enable: true
-  root:                    .             # root directory or index file path of collected coverage reports pages. default: .
+  root: .                                  # root directory or index file path of collected coverage reports pages. default: .
   reports:
-    - bq://my-project/my-dataset/reports # datastore paths (URLs) where reports are stored. default: local://reports
-  badges: badges                         # directory where badges are generated. default: badges
+    datastores:
+      - bq://my-project/my-dataset/reports # datastore paths (URLs) where reports are stored. default: local://reports
+  badges:
+    datastores:
+      - local://badges                     # directory where badges are generated.
   push:
-    enable: true                         # enable self git push
+    enable: true                           # enable self git push
 ```
 
 #### Supported datastores
