@@ -52,6 +52,7 @@ func TestLoadConfigComment(t *testing.T) {
 		want *ConfigComment
 	}{
 		{"comment_enabled_octocov.yml", &ConfigComment{}},
+		{"comment_enabled_octocov2.yml", &ConfigComment{If: "is_pull_request"}},
 		{"comment_disabled_octocov.yml", nil},
 	}
 	for _, tt := range tests {
@@ -73,6 +74,7 @@ func TestLoadConfigCentralPush(t *testing.T) {
 		want *ConfigPush
 	}{
 		{"central_push_enabled_octocov.yml", &ConfigPush{}},
+		{"central_push_enabled_octocov2.yml", &ConfigPush{If: "is_default_branch"}},
 		{"central_push_disabled_octocov.yml", nil},
 	}
 	for _, tt := range tests {

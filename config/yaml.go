@@ -39,6 +39,16 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		if commentRe.Match(data) {
 			c.Comment = &ConfigComment{}
 		}
+	case map[string]interface{}:
+		tmp, err := yaml.Marshal(v)
+		if err != nil {
+			return err
+		}
+		cc := &ConfigComment{}
+		if err := yaml.Unmarshal(tmp, cc); err != nil {
+			return err
+		}
+		c.Comment = cc
 	case *ConfigComment:
 		c.Comment = v
 	}
@@ -48,6 +58,16 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		if pushRe.Match(data) {
 			c.Push = &ConfigPush{}
 		}
+	case map[string]interface{}:
+		tmp, err := yaml.Marshal(v)
+		if err != nil {
+			return err
+		}
+		cp := &ConfigPush{}
+		if err := yaml.Unmarshal(tmp, cp); err != nil {
+			return err
+		}
+		c.Push = cp
 	case *ConfigPush:
 		c.Push = v
 	}
@@ -77,6 +97,16 @@ func (c *ConfigCentral) UnmarshalYAML(data []byte) error {
 		if centralPushRe.Match(data) {
 			c.Push = &ConfigPush{}
 		}
+	case map[string]interface{}:
+		tmp, err := yaml.Marshal(v)
+		if err != nil {
+			return err
+		}
+		cp := &ConfigPush{}
+		if err := yaml.Unmarshal(tmp, cp); err != nil {
+			return err
+		}
+		c.Push = cp
 	case *ConfigPush:
 		c.Push = v
 	}

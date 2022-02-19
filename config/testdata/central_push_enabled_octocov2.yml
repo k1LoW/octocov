@@ -1,0 +1,6 @@
+central:
+  reports:
+    datastores:
+      - local://reports
+  push:
+    if: is_default_branch
