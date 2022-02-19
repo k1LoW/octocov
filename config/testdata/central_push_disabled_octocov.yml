@@ -1,0 +1,5 @@
+central:
+  reports:
+    datastores:
+      - local://reports
+

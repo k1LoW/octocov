@@ -82,7 +82,7 @@ var rootCmd = &cobra.Command{
 			c.TestExecutionTime = nil
 		}
 
-		if c.Central != nil && internal.IsEnable(c.Central.Enable) {
+		if c.Central != nil {
 			cmd.PrintErrln("Central mode enabled")
 			if err := c.CentralConfigReady(); err != nil {
 				return err
