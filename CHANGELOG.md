@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.38.0](https://github.com/k1LoW/octocov/compare/v0.37.1...v0.38.0) (2022-02-19)
+
+* [BREAKING] Remove all `enable:` section [#143](https://github.com/k1LoW/octocov/pull/143) ([k1LoW](https://github.com/k1LoW))
+* When merging coverage reports, if any one of them is not a TypeLOC, it should be TypeMerged. [#142](https://github.com/k1LoW/octocov/pull/142) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.37.1](https://github.com/k1LoW/octocov/compare/v0.37.0...v0.37.1) (2022-02-11)
 
 * [BREAKING] Revert "coverage.Gocover return LOC coverage (not statement count)" [#141](https://github.com/k1LoW/octocov/pull/141) ([k1LoW](https://github.com/k1LoW))
