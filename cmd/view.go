@@ -64,10 +64,15 @@ var viewCmd = &cobra.Command{
 				if _, err := os.Stat(f); err != nil {
 					return err
 				}
-				fc, _ := r.Coverage.Files.FuzzyFindByFile(f)
 				fp, err := os.Open(filepath.Clean(f))
 				if err != nil {
 					return err
+				}
+				fc, err := r.Coverage.Files.FuzzyFindByFile(f)
+				if err != nil {
+					fc = &coverage.FileCoverage{
+						File: f,
+					}
 				}
 				if err := coverage.NewPrinter(fc).Print(fp, os.Stdout); err != nil {
 					_ = fp.Close()
