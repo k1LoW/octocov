@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.38.1](https://github.com/k1LoW/octocov/compare/v0.38.0...v0.38.1) (2022-03-13)
+
+* When detecting prefix, only files under the working directory are targeted. [#145](https://github.com/k1LoW/octocov/pull/145) ([k1LoW](https://github.com/k1LoW))
+* Fix: panic when targeting a file with no coverage data. [#144](https://github.com/k1LoW/octocov/pull/144) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.38.0](https://github.com/k1LoW/octocov/compare/v0.37.1...v0.38.0) (2022-02-19)
 
 * [BREAKING] Remove all `enable:` section [#143](https://github.com/k1LoW/octocov/pull/143) ([k1LoW](https://github.com/k1LoW))
