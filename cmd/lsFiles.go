@@ -87,7 +87,7 @@ var lsFilesCmd = &cobra.Command{
 			cfiles = append(cfiles, f.File)
 		}
 		files := []string{}
-		if err := filepath.Walk(gitRoot, func(path string, info os.FileInfo, err error) error {
+		if err := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
