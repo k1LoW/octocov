@@ -1,27 +1,11 @@
 coverage:
   acceptable: current >= 60%
-  badge:
-    path: docs/coverage.svg
 codeToTestRatio:
-  badge:
-    path: docs/ratio.svg
   code:
     - '**/*.go'
     - '!**/*_test.go'
   test:
     - '**/*_test.go'
-testExecutionTime:
-  acceptable: 1min30sec
-  badge:
-    path: docs/time.svg
-diff:
-  datastores:
-    - artifact://k1LoW/octocov
-push:
-  if: is_default_branch
-comment:
-  if: is_pull_request
 report:
-  if: is_default_branch
   datastores:
-    - artifact://k1LoW/octocov
+    - 'gs://octocov-reports-test/reports'
