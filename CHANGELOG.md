@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.38.2](https://github.com/k1LoW/octocov/compare/v0.38.1...v0.38.2) (2022-03-16)
+
+* Revert build environment [#147](https://github.com/k1LoW/octocov/pull/147) ([k1LoW](https://github.com/k1LoW))
+
+## [v0.38.2](https://github.com/k1LoW/octocov/compare/v0.38.1...v0.38.2) (2022-03-16)
+
+* Revert build environment [#147](https://github.com/k1LoW/octocov/pull/147) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.38.1](https://github.com/k1LoW/octocov/compare/v0.38.0...v0.38.1) (2022-03-13)
 
 * When detecting prefix, only files under the working directory are targeted. [#145](https://github.com/k1LoW/octocov/pull/145) ([k1LoW](https://github.com/k1LoW))
