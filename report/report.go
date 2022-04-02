@@ -487,6 +487,13 @@ func challengeParseReport(path string) (*coverage.Coverage, string, error) {
 	} else {
 		log.Printf("parse as Cobertura: %s", err)
 	}
+	// jacoco
+	if cov, rp, err := coverage.NewJacoco().ParseReport(path); err == nil {
+		return cov, rp, nil
+	} else {
+		log.Printf("parse as JaCoCo: %s", err)
+	}
+
 	msg := fmt.Sprintf("parsable coverage report not found: %s", path)
 	log.Println(msg)
 
