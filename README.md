@@ -956,6 +956,10 @@ Support `SF` `DA` only
 
 **Default path:** `coverage.xml`
 
+### JaCoCo
+
+**Default path:** `build/reports/jacoco/test/jacocoTestReport.xml`
+
 ## Supported code metrics
 
 - **Code Coverage**
