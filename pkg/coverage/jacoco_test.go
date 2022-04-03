@@ -5,17 +5,17 @@ import (
 	"testing"
 )
 
-func TestCobertura(t *testing.T) {
-	path := filepath.Join(testdataDir(t), "cobertura")
-	cobertura := NewCobertura()
-	got, _, err := cobertura.ParseReport(path)
+func TestJacoco(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "jacoco")
+	Jacoco := NewJacoco()
+	got, _, err := Jacoco.ParseReport(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := 7712; got.Total != want {
+	if want := 11219; got.Total != want {
 		t.Errorf("got %v\nwant %v", got.Total, want)
 	}
-	if want := 7706; got.Covered != want {
+	if want := 10351; got.Covered != want {
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
 	if len(got.Files) == 0 {
@@ -41,7 +41,7 @@ func TestCobertura(t *testing.T) {
 	}
 }
 
-func TestCoberturaParseAllFormat(t *testing.T) {
+func TestJacocoParseAllFormat(t *testing.T) {
 	tests := []struct {
 		path    string
 		wantErr bool
@@ -50,11 +50,11 @@ func TestCoberturaParseAllFormat(t *testing.T) {
 		{filepath.Join(testdataDir(t), "lcov", "lcov.info"), true},
 		{filepath.Join(testdataDir(t), "simplecov", ".resultset.json"), true},
 		{filepath.Join(testdataDir(t), "clover", "coverage.xml"), true},
-		{filepath.Join(testdataDir(t), "cobertura", "coverage.xml"), false},
-		{filepath.Join(testdataDir(t), "jacoco", "jacocoTestReport.xml"), true},
+		{filepath.Join(testdataDir(t), "cobertura", "coverage.xml"), true},
+		{filepath.Join(testdataDir(t), "jacoco", "jacocoTestReport.xml"), false},
 	}
 	for _, tt := range tests {
-		_, _, err := NewCobertura().ParseReport(tt.path)
+		_, _, err := NewJacoco().ParseReport(tt.path)
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 		}

@@ -54,6 +54,7 @@ func TestLcovParseAllFormat(t *testing.T) {
 		{filepath.Join(testdataDir(t), "simplecov", ".resultset.json"), true},
 		{filepath.Join(testdataDir(t), "clover", "coverage.xml"), true},
 		{filepath.Join(testdataDir(t), "cobertura", "coverage.xml"), true},
+		{filepath.Join(testdataDir(t), "jacoco", "jacocoTestReport.xml"), true},
 	}
 	for _, tt := range tests {
 		_, _, err := NewLcov().ParseReport(tt.path)
