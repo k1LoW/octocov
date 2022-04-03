@@ -307,6 +307,41 @@ func TestToLineCoverages(t *testing.T) {
 	}
 }
 
+func TestFuzzyFindByFile(t *testing.T) {
+	tests := []struct {
+		coverageFile string
+		file         string
+		wantErr      bool
+	}{
+		{"/path/to/owner/repo/target.go", "./owner/repo/target.go", false},
+		{"org/101000lab/owner/repo/target.go", "./owner/repo/target.go", false},
+		{"org/101000lab/owner/repo/target.go", "path/to/src/org/101000lab/owner/repo/target.go", false},
+	}
+	for _, tt := range tests {
+		fcs := FileCoverages{&FileCoverage{File: tt.coverageFile}}
+		if _, err := fcs.FuzzyFindByFile(tt.file); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got err: %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+
+		dfcs := DiffFileCoverages{&DiffFileCoverage{File: tt.coverageFile}}
+		if _, err := dfcs.FuzzyFindByFile(tt.file); err != nil {
+			if !tt.wantErr {
+				t.Errorf("got err: %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+	}
+}
+
 func newBlockCoverage(t Type, sl, sc, el, ec, ns, c int) *BlockCoverage {
 	bc := &BlockCoverage{
 		Type:      t,

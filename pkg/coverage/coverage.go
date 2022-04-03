@@ -85,7 +85,12 @@ func (fcs FileCoverages) FindByFile(file string) (*FileCoverage, error) {
 
 func (fcs FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) {
 	for _, fc := range fcs {
-		if strings.Contains(strings.TrimLeft(fc.File, "./"), strings.TrimLeft(file, "./")) {
+		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
+		if strings.HasSuffix(strings.TrimLeft(fc.File, "./"), strings.TrimLeft(file, "./")) {
+			return fc, nil
+		}
+		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
+		if !strings.HasPrefix(fc.File, "/") && strings.HasSuffix(file, fc.File) {
 			return fc, nil
 		}
 	}
@@ -150,7 +155,12 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 
 func (dfcs DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, error) {
 	for _, dfc := range dfcs {
-		if strings.Contains(strings.TrimLeft(dfc.File, "./"), strings.TrimLeft(file, "./")) {
+		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
+		if strings.HasSuffix(strings.TrimLeft(dfc.File, "./"), strings.TrimLeft(file, "./")) {
+			return dfc, nil
+		}
+		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
+		if !strings.HasPrefix(dfc.File, "/") && strings.HasSuffix(file, dfc.File) {
 			return dfc, nil
 		}
 	}
