@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.39.2](https://github.com/k1LoW/octocov/compare/v0.39.1...v0.39.2) (2022-04-11)
+
+* Fix handling of branch with slash in name [#151](https://github.com/k1LoW/octocov/pull/151) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.39.1](https://github.com/k1LoW/octocov/compare/v0.39.0...v0.39.1) (2022-04-03)
 
 * Fix FuzzyFindByFile [#150](https://github.com/k1LoW/octocov/pull/150) ([k1LoW](https://github.com/k1LoW))
