@@ -84,12 +84,53 @@ func TestGetRawRootURL(t *testing.T) {
 	}
 }
 
+func TestDetectCurrentPullRequestNumber(t *testing.T) {
+	tests := []struct {
+		GITHUB_REF string
+		want       int
+		wantErr    bool
+	}{
+		{"refs/pull/8/head", 8, false},
+		{"refs/heads/branch/branch/name", 13, false},
+	}
+	ctx := context.TODO()
+	mg := mockedGh(t)
+	for _, tt := range tests {
+		t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+		got, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
+		if err != nil {
+			if !tt.wantErr {
+				t.Errorf("got err: %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want err")
+		}
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+
+	}
+}
+
 func mockedGh(t *testing.T) *Gh {
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mock.WithRequestMatch(
 			mock.GetReposByOwnerByRepo,
 			github.Repository{
 				DefaultBranch: github.String("main"),
+			},
+		),
+		mock.WithRequestMatch(
+			mock.GetReposPullsByOwnerByRepo,
+			[]*github.PullRequest{
+				&github.PullRequest{
+					Head: &github.PullRequestBranch{
+						Ref: github.String("branch/branch/name"),
+					},
+					Number: github.Int(13),
+				},
 			},
 		),
 	)
