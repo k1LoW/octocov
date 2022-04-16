@@ -14,3 +14,6 @@ testExecutionTime:
     - Run tests other
 comment:
   if: is_pull_request
+report:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
