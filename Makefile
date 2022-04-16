@@ -25,6 +25,9 @@ test_central: build
 test_no_coverage: build
 	./octocov --config testdata/octocov_no_coverage.yml
 
+test_collect_metrics: build
+	./octocov --config testdata/octocov_parallel_tests.yml
+
 sec:
 	gosec ./...
 

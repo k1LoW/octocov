@@ -93,7 +93,5 @@ jobs:
         with:
           name: coverage-report-files
 
-      - name: Run build octocov
-        run: |
-          make build
-          ./octocov --config testdata/octocov_parallel_tests.yml
+      - name: Build octocov and run as a action
+        uses: ./testdata/actions/collect

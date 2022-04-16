@@ -90,7 +90,7 @@ var rootCmd = &cobra.Command{
 
 			badges := []datastore.Datastore{}
 			for _, s := range c.Central.Badges.Datastores {
-				d, err := datastore.New(ctx, s, c.Root())
+				d, err := datastore.New(ctx, s, datastore.Root(c.Root()))
 				if err != nil {
 					return err
 				}
@@ -99,7 +99,7 @@ var rootCmd = &cobra.Command{
 
 			reports := []datastore.Datastore{}
 			for _, s := range c.Central.Reports.Datastores {
-				d, err := datastore.New(ctx, s, c.Root())
+				d, err := datastore.New(ctx, s, datastore.Root(c.Root()))
 				if err != nil {
 					return err
 				}
@@ -287,7 +287,7 @@ var rootCmd = &cobra.Command{
 			path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
 			for _, s := range c.Diff.Datastores {
 				log.Printf("Get previous report from %s", s)
-				d, err := datastore.New(ctx, s, c.Root())
+				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
 				if err != nil {
 					return err
 				}
@@ -368,7 +368,7 @@ var rootCmd = &cobra.Command{
 				if datastore.NeedToShrink(s) {
 					continue
 				}
-				d, err := datastore.New(ctx, s, c.Root())
+				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
 				if err != nil {
 					return err
 				}
@@ -388,7 +388,7 @@ var rootCmd = &cobra.Command{
 				if !datastore.NeedToShrink(s) {
 					continue
 				}
-				d, err := datastore.New(ctx, s, c.Root())
+				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
 				if err != nil {
 					return err
 				}

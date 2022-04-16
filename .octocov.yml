@@ -16,7 +16,7 @@ testExecutionTime:
     path: docs/time.svg
 diff:
   datastores:
-    - artifact://k1LoW/octocov
+    - artifact://${GITHUB_REPOSITORY}
 push:
   if: is_default_branch
 comment:
@@ -24,4 +24,4 @@ comment:
 report:
   if: is_default_branch
   datastores:
-    - artifact://k1LoW/octocov
+    - artifact://${GITHUB_REPOSITORY}

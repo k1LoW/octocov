@@ -40,8 +40,14 @@ type Datastore interface {
 	FS() (fs.FS, error)
 }
 
-func New(ctx context.Context, u, configRoot string) (Datastore, error) {
-	d, args, err := parse(u, configRoot)
+func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
+	h := &hint{}
+	for _, hf := range hints {
+		if err := hf(h); err != nil {
+			return nil, err
+		}
+	}
+	d, args, err := parse(u, h.root)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +78,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 		if err != nil {
 			return nil, err
 		}
-		return artifact.New(g, ownerrepo, name)
+		return artifact.New(g, ownerrepo, name, h.report)
 	case "s3":
 		bucket := args[0]
 		prefix := args[1]
@@ -116,7 +122,7 @@ func New(ctx context.Context, u, configRoot string) (Datastore, error) {
 	return nil, fmt.Errorf("invalid datastore: %s", u)
 }
 
-func parse(u, configRoot string) (datastore string, args []string, err error) {
+func parse(u, root string) (datastore string, args []string, err error) {
 	switch {
 	case strings.HasPrefix(u, "github://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "github://"), "/"), "/")
@@ -176,7 +182,6 @@ func parse(u, configRoot string) (datastore string, args []string, err error) {
 		table := splitted[2]
 		return "bq", []string{project, dataset, table}, nil
 	default:
-		root := configRoot
 		p := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(u, "file://"), "local://"), "/")
 		if strings.HasPrefix(p, "/") {
 			root = p
