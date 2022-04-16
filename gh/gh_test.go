@@ -114,6 +114,21 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	}
 }
 
+func TestGenerateSig(t *testing.T) {
+	tests := []struct {
+		key  string
+		want string
+	}{
+		{"", "<!-- octocov -->"},
+		{"foo", "<!-- octocov:foo -->"},
+	}
+	for _, tt := range tests {
+		got := generateSig(tt.key)
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
 func mockedGh(t *testing.T) *Gh {
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mock.WithRequestMatch(
