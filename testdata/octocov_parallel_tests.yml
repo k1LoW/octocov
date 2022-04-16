@@ -1,3 +1,4 @@
+repository: k1LoW/octocov/parallel
 coverage:
   acceptable: current >= 60%
   paths:
@@ -11,3 +12,5 @@ testExecutionTime:
     - Run tests pkg/ratio
     - Run tests pkg/badge
     - Run tests other
+comment:
+  if: is_pull_request

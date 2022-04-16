@@ -42,7 +42,8 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 		fileTable = r.FileCoveagesTable(files)
 	}
 
-	comment := []string{"## Code Metrics Report"}
+	title := r.Title()
+	comment := []string{fmt.Sprintf("## %s", title)}
 
 	if err := c.Acceptable(r, rPrev); err != nil {
 		merr := err.(*multierror.Error)
@@ -66,11 +67,11 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 	)
 
 	if c.Comment.DeletePrevious {
-		if err := g.PutCommentWithDeletion(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n")); err != nil {
+		if err := g.PutCommentWithDeletion(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n"), r.Key()); err != nil {
 			return err
 		}
 	} else {
-		if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n")); err != nil {
+		if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n"), r.Key()); err != nil {
 			return err
 		}
 	}

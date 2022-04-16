@@ -68,6 +68,25 @@ func New(ownerrepo string) (*Report, error) {
 	}, nil
 }
 
+func (r *Report) Title() string {
+	key := r.Key()
+	if key == "" {
+		return "Code Metrics Report"
+	}
+	return fmt.Sprintf("Code Metrics Report (%s)", key)
+}
+
+func (r *Report) Key() string {
+	repo := os.Getenv("GITHUB_REPOSITORY")
+	if repo == "" {
+		return ""
+	}
+	if r.Repository == repo {
+		return ""
+	}
+	return strings.TrimPrefix(fmt.Sprintf("%s/", r.Repository), repo)
+}
+
 func (r *Report) String() string {
 	return string(r.Bytes())
 }

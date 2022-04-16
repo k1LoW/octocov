@@ -419,24 +419,24 @@ L:
 	return steps, nil
 }
 
-const commentSig = "<!-- octocov -->"
-
-func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment string) error {
-	if err := g.minimizePreviousComments(ctx, owner, repo, n); err != nil {
+func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment, key string) error {
+	sig := generateSig(key)
+	if err := g.minimizePreviousComments(ctx, owner, repo, n, sig); err != nil {
 		return err
 	}
-	c := strings.Join([]string{comment, commentSig}, "\n")
+	c := strings.Join([]string{comment, sig}, "\n")
 	if _, _, err := g.client.Issues.CreateComment(ctx, owner, repo, n, &github.IssueComment{Body: &c}); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n int, comment string) error {
-	if err := g.deletePreviousComments(ctx, owner, repo, n); err != nil {
+func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n int, comment, key string) error {
+	sig := generateSig(key)
+	if err := g.deletePreviousComments(ctx, owner, repo, n, sig); err != nil {
 		return err
 	}
-	c := strings.Join([]string{comment, commentSig}, "\n")
+	c := strings.Join([]string{comment, sig}, "\n")
 	if _, _, err := g.client.Issues.CreateComment(ctx, owner, repo, n, &github.IssueComment{Body: &c}); err != nil {
 		return err
 	}
@@ -531,14 +531,14 @@ type minimizeCommentMutation struct {
 	} `graphql:"minimizeComment(input: $input)"`
 }
 
-func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n int) error {
+func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n int, sig string) error {
 	opts := &github.IssueListCommentsOptions{}
 	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
 	if err != nil {
 		return err
 	}
 	for _, c := range comments {
-		if strings.Contains(*c.Body, commentSig) {
+		if strings.Contains(*c.Body, sig) {
 			var m minimizeCommentMutation
 			input := githubv4.MinimizeCommentInput{
 				SubjectID:        githubv4.ID(c.GetNodeID()),
@@ -553,14 +553,14 @@ func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n
 	return nil
 }
 
-func (g *Gh) deletePreviousComments(ctx context.Context, owner, repo string, n int) error {
+func (g *Gh) deletePreviousComments(ctx context.Context, owner, repo string, n int, sig string) error {
 	opts := &github.IssueListCommentsOptions{}
 	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
 	if err != nil {
 		return err
 	}
 	for _, c := range comments {
-		if strings.Contains(*c.Body, commentSig) {
+		if strings.Contains(*c.Body, sig) {
 			_, err = g.client.Issues.DeleteComment(ctx, owner, repo, *c.ID)
 			if err != nil {
 				return err
@@ -724,4 +724,11 @@ func Parse(raw string) (*Repository, error) {
 	}
 
 	return r, nil
+}
+
+func generateSig(key string) string {
+	if key == "" {
+		return "<!-- octocov -->"
+	}
+	return fmt.Sprintf("<!-- octocov:%s -->", key)
 }
