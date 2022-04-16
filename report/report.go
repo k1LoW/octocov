@@ -84,7 +84,7 @@ func (r *Report) Key() string {
 	if r.Repository == repo {
 		return ""
 	}
-	return strings.TrimPrefix(fmt.Sprintf("%s/", r.Repository), repo)
+	return strings.TrimPrefix(r.Repository, fmt.Sprintf("%s/", repo))
 }
 
 func (r *Report) String() string {
