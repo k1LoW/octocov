@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.40.0](https://github.com/k1LoW/octocov/compare/v0.39.2...v0.40.0) (2022-04-17)
+
+* Fix the name of storing report data in the Artifact in the case of changing the `repository:` section. [#154](https://github.com/k1LoW/octocov/pull/154) ([k1LoW](https://github.com/k1LoW))
+* Separate comment for each repository name [#153](https://github.com/k1LoW/octocov/pull/153) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.39.2](https://github.com/k1LoW/octocov/compare/v0.39.1...v0.39.2) (2022-04-11)
 
 * Fix handling of branch with slash in name [#151](https://github.com/k1LoW/octocov/pull/151) ([k1LoW](https://github.com/k1LoW))
