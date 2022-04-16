@@ -60,7 +60,7 @@ var migrateBqTableCmd = &cobra.Command{
 			if !strings.HasPrefix(u, "bq://") {
 				continue
 			}
-			d, err := datastore.New(ctx, u, c.Root())
+			d, err := datastore.New(ctx, u, datastore.Root(c.Root()))
 			if err != nil {
 				return err
 			}

@@ -76,8 +76,6 @@ func (r *Report) Title() string {
 	return fmt.Sprintf("Code Metrics Report (%s)", key)
 }
 
-var keyRep = strings.NewReplacer(`"`, "_", ":", "_", "<", "_", ">", "_", "|", "_", "*", "_", "?", "_", "\r", "_", "\n", "_", "\\", "_", "/", "_")
-
 func (r *Report) Key() string {
 	repo := os.Getenv("GITHUB_REPOSITORY")
 	if repo == "" {
@@ -86,7 +84,7 @@ func (r *Report) Key() string {
 	if r.Repository == repo {
 		return ""
 	}
-	return keyRep.Replace(strings.TrimPrefix(r.Repository, fmt.Sprintf("%s/", repo)))
+	return strings.TrimPrefix(r.Repository, fmt.Sprintf("%s/", repo))
 }
 
 func (r *Report) String() string {
