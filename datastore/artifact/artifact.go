@@ -37,7 +37,7 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	case a.repository == r.Repository:
 		return a.Put(ctx, reportFilename, r.Bytes())
 	case strings.HasPrefix(r.Repository, fmt.Sprintf("%s/", a.repository)):
-		a.name = fmt.Sprintf("%s/%s", a.name, r.Key())
+		a.name = fmt.Sprintf("%s-%s", a.name, r.Key())
 		return a.Put(ctx, reportFilename, r.Bytes())
 	default:
 		return errors.New("reporting to the artifact can only be sent from the GitHub Actions of the same repository")
