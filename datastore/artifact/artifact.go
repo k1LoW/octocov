@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"os"
+	"strings"
 	"testing/fstest"
 
 	"github.com/k1LoW/octocov/gh"
@@ -33,16 +33,18 @@ func New(gh *gh.Gh, r, name string) (*Artifact, error) {
 }
 
 func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
-	if a.repository != r.Repository {
+	switch {
+	case a.repository == r.Repository:
+		return a.Put(ctx, reportFilename, r.Bytes())
+	case strings.HasPrefix(r.Repository, fmt.Sprintf("%s/", a.repository)):
+		a.name = fmt.Sprintf("%s/%s", a.name, r.Key())
+		return a.Put(ctx, reportFilename, r.Bytes())
+	default:
 		return errors.New("reporting to the artifact can only be sent from the GitHub Actions of the same repository")
 	}
-	return a.Put(ctx, reportFilename, r.Bytes())
 }
 
 func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
-	if a.repository != os.Getenv("GITHUB_REPOSITORY") {
-		return errors.New("reporting to the artifact can only be sent from the GitHub Actions of the same repository")
-	}
 	return a.gh.PutArtifact(ctx, a.name, path, content)
 }
 
