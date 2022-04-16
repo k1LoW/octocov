@@ -13,7 +13,7 @@ testExecutionTime:
     - Run tests pkg/badge
     - Run tests other
 comment:
-  if: is_pull_request
+  if: false
 report:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
