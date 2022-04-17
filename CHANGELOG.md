@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.40.1](https://github.com/k1LoW/octocov/compare/v0.40.0...v0.40.1) (2022-04-18)
+
+* Fix artifact name [#155](https://github.com/k1LoW/octocov/pull/155) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.40.0](https://github.com/k1LoW/octocov/compare/v0.39.2...v0.40.0) (2022-04-17)
 
 * Fix the name of storing report data in the Artifact in the case of changing the `repository:` section. [#154](https://github.com/k1LoW/octocov/pull/154) ([k1LoW](https://github.com/k1LoW))
