@@ -73,7 +73,12 @@ func (a *Artifact) FS() (fs.FS, error) {
 			return nil, err
 		}
 		path = fmt.Sprintf("%s/%s/%s", r.Owner, r.Reponame(), reportFilename)
-		name = fmt.Sprintf("%s-%s", a.name, keyRep.Replace(a.r.Key()))
+		key := keyRep.Replace(a.r.Key())
+		if key == "" {
+			name = a.name
+		} else {
+			name = fmt.Sprintf("%s-%s", a.name, keyRep.Replace(a.r.Key()))
+		}
 	}
 	log.Printf("artifact name: %s", name)
 	af, err := a.gh.GetLatestArtifact(ctx, r.Owner, r.Repo, name, reportFilename)
