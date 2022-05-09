@@ -970,11 +970,10 @@ Support `SF` `DA` only
 
 **deb:**
 
-Use [dpkg-i-from-url](https://github.com/k1LoW/dpkg-i-from-url)
-
 ``` console
 $ export OCTOCOV_VERSION=X.X.X
-$ curl -L https://git.io/dpkg-i-from-url | bash -s -- https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.deb
+$ curl -o octocov.deb -L https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.deb
+$ dpkg -i octocov.deb
 ```
 
 **RPM:**
@@ -986,11 +985,10 @@ $ yum install https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSI
 
 **apk:**
 
-Use [apk-add-from-url](https://github.com/k1LoW/apk-add-from-url)
-
 ``` console
 $ export OCTOCOV_VERSION=X.X.X
-$ curl -L https://git.io/apk-add-from-url | sh -s -- https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.apk
+$ curl -o octocov.apk -L https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.apk
+$ apk add octocov.apk
 ```
 
 **homebrew tap:**
