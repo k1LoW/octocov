@@ -43,6 +43,7 @@ func TestParse(t *testing.T) {
 		{"file:///reports", "local", []string{"/reports"}, false},
 		{"/reports", "local", []string{"/reports"}, false},
 		{"local://reports", "local", []string{filepath.Join(testdataDir(t), "reports")}, false},
+		{"local://./reports", "local", []string{filepath.Join(testdataDir(t), "reports")}, false},
 		{"local:///reports", "local", []string{"/reports"}, false},
 	}
 	for _, tt := range tests {
