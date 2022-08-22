@@ -11,19 +11,16 @@ jobs:
   test-pkgs:
     name: test pkgs
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go_version: [1.17]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go_version }}
-
       - name: Check out source code
         uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
 
       - name: Run tests pkg/coverage
         run: go test ./pkg/coverage/... -coverprofile=coverage_coverage.out -covermode=count
@@ -45,19 +42,16 @@ jobs:
   test-other:
     name: test other
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go_version: [1.17]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go_version }}
-
       - name: Check out source code
         uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
 
       - name: Run tests other
         run: go test $(go list ./... | grep -v pkg) -coverprofile=coverage_other.out -covermode=count
@@ -74,20 +68,17 @@ jobs:
       - test-pkgs
       - test-other
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go_version: [1.17]
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DEBUG: 1
     steps:
-      - name: Set up Go ${{ matrix.go_version }}
-        uses: actions/setup-go@v2
-        with:
-          go-version: ${{ matrix.go_version }}
-
       - name: Check out source code
         uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
 
       - uses: actions/download-artifact@v2
         with:
