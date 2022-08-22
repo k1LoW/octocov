@@ -15,9 +15,8 @@ require (
 	github.com/goccy/go-json v0.9.3
 	github.com/goccy/go-yaml v1.9.5
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
-	github.com/google/go-cmp v0.5.6
-	github.com/google/go-github/v39 v39.2.0
-	github.com/google/go-github/v41 v41.0.0
+	github.com/google/go-cmp v0.5.8
+	github.com/google/go-github/v45 v45.2.0
 	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hhatto/gocloc v0.4.2
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca
@@ -26,12 +25,11 @@ require (
 	github.com/k1LoW/expand v0.1.0
 	github.com/k1LoW/ghfs v0.6.0
 	github.com/k1LoW/go-github-actions v0.0.2
-	github.com/k1LoW/go-github-client/v39 v39.2.3
-	github.com/k1LoW/go-github-client/v41 v41.0.3
+	github.com/k1LoW/go-github-client/v45 v45.2.3
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mauri870/gcsfs v0.0.0-20211224180018-a5e6d1f180ef
-	github.com/migueleliasweb/go-github-mock v0.0.6
+	github.com/migueleliasweb/go-github-mock v0.0.8
 	github.com/oklog/ulid/v2 v2.0.2
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/shurcooL/githubv4 v0.0.0-20220115235240-a14260e6f8a2
@@ -59,6 +57,8 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/google/go-github/v39 v39.2.0 // indirect
+	github.com/google/go-github/v41 v41.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
@@ -68,6 +68,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
+	github.com/k1LoW/go-github-client/v39 v39.2.3 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
