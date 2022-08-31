@@ -793,7 +793,7 @@ central:
   push:
 ```
 
-#### Use S3 bucket as datastore
+#### Use Amazon S3 bucket as datastore
 
 When using the S3 bucket as a datastore, perform badge generation via on.schedule.
 
