@@ -244,8 +244,8 @@ report:
 
 - GitHub repository
 - GitHub Actions artifact
-- S3
-- GCS
+- Amazon S3
+- Google Cloud Storage (GCS)
 - BigQuery
 - Local
 
@@ -270,8 +270,8 @@ central:
 
 - GitHub repository
 - GitHub Actions artifact
-- S3
-- GCS
+- Amazon S3
+- Google Cloud Storage (GCS)
 - BigQuery
 - Local
 
@@ -626,7 +626,7 @@ artifact://[owner]/[repo]/[artifactName]
 - `GITHUB_REPOSITORY` or `OCTOCOV_GITHUB_REPOSITORY`
 - `GITHUB_API_URL` or `OCTOCOV_GITHUB_API_URL` (optional)
 
-#### S3
+#### Amazon S3
 
 Use `s3://` scheme.
 
@@ -644,7 +644,7 @@ s3://[bucket]/[prefix]
 - `AWS_SECRET_ACCESS_KEY` or `OCTOCOV_AWS_SECRET_ACCESS_KEY`
 - `AWS_SESSION_TOKEN` or `OCTOCOV_AWS_SESSION_TOKEN` (optional)
 
-#### GCS
+#### Google Cloud Storage
 
 Use `gs://` scheme.
 
@@ -793,7 +793,7 @@ central:
   push:
 ```
 
-#### Use S3 bucket as datastore
+#### Use Amazon S3 bucket as datastore
 
 When using the S3 bucket as a datastore, perform badge generation via on.schedule.
 
