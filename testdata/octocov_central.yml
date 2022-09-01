@@ -3,6 +3,7 @@ central:
   reports:
     datastores:
       - local://reports
+      - artifact://k1LoW/runn
   badges:
     datastores:
       - local://../example/central/badges
