@@ -4,17 +4,6 @@ before:
     - go mod tidy
 builds:
   -
-    id: octocov-darwin
-    ldflags:
-      - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
-    env:
-      - CGO_ENABLED=1
-    goos:
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-  -
     id: octocov-linux
     ldflags:
       - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
@@ -22,7 +11,6 @@ builds:
       - -extldflags '-static'
     env:
       - CGO_ENABLED=1
-      - CC=x86_64-linux-musl-cc # brew install FiloSottile/musl-cross/musl-cross
     goos:
       - linux
     goarch:
@@ -31,15 +19,12 @@ archives:
   -
     id: octocov-archive
     name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    format_overrides:
-      - goos: darwin
-        format: zip
     files:
       - CREDITS
       - README.md
       - CHANGELOG.md
 checksum:
-  name_template: 'checksums.txt'
+  name_template: 'checksums-linux.txt'
 snapshot:
   name_template: "{{ .Version }}-next"
 changelog:
