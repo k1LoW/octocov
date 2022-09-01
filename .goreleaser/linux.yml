@@ -5,6 +5,12 @@ before:
 builds:
   -
     id: octocov-linux
+    flags:
+      - -a
+      - -tags
+      - netgo
+      - -installsuffix
+      - netgo
     ldflags:
       - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
       - -linkmode external
