@@ -205,10 +205,10 @@ You can display the coverage badge without external communication by setting a l
 ``` markdown
 # mytool
 
-![coverage](docs/coverage.svg)
+![coverage](docs/coverage.svg) ![coverage](docs/ratio.svg) ![coverage](docs/time.svg)
 ```
 
-![coverage](docs/coverage.svg)
+![coverage](docs/coverage.svg) ![coverage](docs/ratio.svg) ![coverage](docs/time.svg)
 
 ### Push report badges self.
 
