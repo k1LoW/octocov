@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.41.0](https://github.com/k1LoW/octocov/compare/v0.40.1...v0.41.0) (2022-09-01)
+
+* Fix build pipeline [#163](https://github.com/k1LoW/octocov/pull/163) ([k1LoW](https://github.com/k1LoW))
+* Support collect artifacts on central mode [#162](https://github.com/k1LoW/octocov/pull/162) ([k1LoW](https://github.com/k1LoW))
+* [BREAKING] Update pkgs [#160](https://github.com/k1LoW/octocov/pull/160) ([k1LoW](https://github.com/k1LoW))
+* Bump up github.com/google/go-github version [#159](https://github.com/k1LoW/octocov/pull/159) ([k1LoW](https://github.com/k1LoW))
+* Bump up go version [#158](https://github.com/k1LoW/octocov/pull/158) ([k1LoW](https://github.com/k1LoW))
+* Git.io deprecation [#156](https://github.com/k1LoW/octocov/pull/156) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.40.1](https://github.com/k1LoW/octocov/compare/v0.40.0...v0.40.1) (2022-04-18)
 
 * Fix artifact name [#155](https://github.com/k1LoW/octocov/pull/155) ([k1LoW](https://github.com/k1LoW))
