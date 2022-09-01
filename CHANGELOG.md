@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.41.1](https://github.com/k1LoW/octocov/compare/v0.41.0...v0.41.1) (2022-09-01)
+
+* Fix build flags in build for linux [#165](https://github.com/k1LoW/octocov/pull/165) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.41.0](https://github.com/k1LoW/octocov/compare/v0.40.1...v0.41.0) (2022-09-01)
 
 * Fix build pipeline [#163](https://github.com/k1LoW/octocov/pull/163) ([k1LoW](https://github.com/k1LoW))
