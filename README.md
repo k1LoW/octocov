@@ -2,7 +2,7 @@
 <img src="https://github.com/k1LoW/octocov/raw/main/docs/logo.png" width="200" alt="octocov">
 </p>
 
-[![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions) ![coverage](docs/coverage.svg) ![ratio](docs/ratio.svg) ![time](docs/time.svg)
+![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/time.svg)
 
 `octocov` is a toolkit for collecting code metrics (code coverage, code to test ratio and test execution time).
 

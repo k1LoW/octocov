@@ -1,10 +1,6 @@
 coverage:
   acceptable: current >= 60%
-  badge:
-    path: docs/coverage.svg
 codeToTestRatio:
-  badge:
-    path: docs/ratio.svg
   code:
     - '**/*.go'
     - '!**/*_test.go'
@@ -12,8 +8,6 @@ codeToTestRatio:
     - '**/*_test.go'
 testExecutionTime:
   acceptable: 1min30sec
-  badge:
-    path: docs/time.svg
 diff:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
