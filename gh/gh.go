@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -173,7 +174,7 @@ func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, err
 		if err != nil {
 			return "", err
 		}
-		return strings.TrimSuffix(strings.TrimSuffix(fc.GetDownloadURL(), path), "/"), nil
+		return trimContentURL(fc.GetDownloadURL(), path), nil
 	}
 	return "", fmt.Errorf("not found files. please commit file to root directory and push: %s/%s", owner, repo)
 }
@@ -724,6 +725,12 @@ func Parse(raw string) (*Repository, error) {
 	}
 
 	return r, nil
+}
+
+// trimContentURL trim suffix path and private token
+func trimContentURL(u, p string) string {
+	parsed, _ := url.Parse(u)
+	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimSuffix(parsed.String(), fmt.Sprintf("?%s", parsed.RawQuery)), p), "/")
 }
 
 func generateSig(key string) string {
