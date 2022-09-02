@@ -243,7 +243,7 @@ report:
 #### Supported datastores
 
 - GitHub repository
-- GitHub Actions artifact
+- GitHub Actions Artifacts
 - Amazon S3
 - Google Cloud Storage (GCS)
 - BigQuery
@@ -269,7 +269,7 @@ central:
 #### Supported datastores
 
 - GitHub repository
-- GitHub Actions artifact
+- GitHub Actions Artifacts
 - Amazon S3
 - Google Cloud Storage (GCS)
 - BigQuery
@@ -606,7 +606,7 @@ github://[owner]/[repo]@[branch]/[prefix]
 - `GITHUB_REPOSITORY` or `OCTOCOV_GITHUB_REPOSITORY`
 - `GITHUB_API_URL` or `OCTOCOV_GITHUB_API_URL` (optional)
 
-#### GitHub Actions artifact
+#### GitHub Actions Artifacts
 
 Use `artifact://` scheme.
 
@@ -759,6 +759,33 @@ central:
       - local://reports
       - gs://my-gcs-bucket/reports
 ```
+
+#### Use GitHub Actions Artifacts as datastore
+
+When using [GitHub Actions Artifacts](https://docs.github.com/en/rest/actions/artifacts) as a datastore, perform badge generation via on.schedule.
+
+![github](docs/artifacts.svg)
+
+``` yaml
+# .octocov.yml
+report:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+```
+
+``` yaml
+# .octocov.yml for central repo
+central:
+  reports:
+    datastores:
+      - artifact://owner/repo
+      - artifact://owner/other-repo
+      - artifact://owner/another-repo
+      [...]
+  push:
+```
+
+[Code metrics and badges of my open source projects using octocov central mode is here](https://github.com/k1LoW/octocovs).
 
 #### Use GitHub repository as datastore
 
