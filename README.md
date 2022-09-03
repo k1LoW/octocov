@@ -787,6 +787,8 @@ central:
 
 [Code metrics and badges of my open source projects using octocov central mode is here](https://github.com/k1LoW/octocovs).
 
+[Template repositoty is here](https://github.com/k1LoW/octocovs-template).
+
 #### Use GitHub repository as datastore
 
 When using the central repository as a datastore, perform badge generation via on.push.
