@@ -140,8 +140,8 @@ func parse(u, root string) (datastore string, args []string, err error) {
 		ownerrepo := fmt.Sprintf("%s/%s", owner, repo)
 		prefix := strings.Join(splitted[2:], "/")
 		return "github", []string{ownerrepo, branch, prefix}, nil
-	case strings.HasPrefix(u, "artifact://"):
-		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "artifact://"), "/"), "/")
+	case strings.HasPrefix(u, "artifact://") || strings.HasPrefix(u, "artifacts://"):
+		splitted := strings.Split(strings.Trim(strings.TrimPrefix(strings.TrimPrefix(u, "artifact://"), "artifacts://"), "/"), "/")
 		if len(splitted) < 2 || len(splitted) > 3 {
 			return "", nil, fmt.Errorf("invalid datastore: %s", u)
 		}
