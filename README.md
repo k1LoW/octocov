@@ -608,7 +608,7 @@ github://[owner]/[repo]@[branch]/[prefix]
 
 #### GitHub Actions Artifacts
 
-Use `artifact://` scheme.
+Use `artifact://` or `artifacts://` scheme.
 
 ```
 artifact://[owner]/[repo]/[artifactName]
