@@ -25,6 +25,17 @@ import (
 
 type DatastoreType int
 
+const (
+	GitHub DatastoreType = iota + 1
+	Artifact
+	S3
+	GCS
+	BigQuery
+	Local
+
+	UnknownType DatastoreType = 0
+)
+
 var (
 	_ Datastore = (*github.Github)(nil)
 	_ Datastore = (*artifact.Artifact)(nil)
@@ -52,7 +63,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		return nil, err
 	}
 	switch d {
-	case "github":
+	case GitHub:
 		ownerrepo := args[0]
 		branch := args[1]
 		prefix := args[2]
@@ -71,7 +82,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 			}
 		}
 		return github.New(g, ownerrepo, branch, prefix)
-	case "artifact":
+	case Artifact:
 		ownerrepo := args[0]
 		name := args[1]
 		g, err := gh.New()
@@ -79,7 +90,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 			return nil, err
 		}
 		return artifact.New(g, ownerrepo, name, h.report)
-	case "s3":
+	case S3:
 		bucket := args[0]
 		prefix := args[1]
 		sess, err := session.NewSession()
@@ -88,7 +99,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		}
 		sc := s3.New(sess)
 		return s3d.New(sc, bucket, prefix)
-	case "gs":
+	case GCS:
 		bucket := args[0]
 		prefix := args[1]
 		var client *storage.Client
@@ -101,7 +112,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 			return nil, err
 		}
 		return gcs.New(client, bucket, prefix)
-	case "bq":
+	case BigQuery:
 		project := args[0]
 		dataset := args[1]
 		table := args[2]
@@ -115,19 +126,19 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 			return nil, err
 		}
 		return bq.New(client, dataset, table)
-	case "local":
+	case Local:
 		root := args[0]
 		return local.New(root)
 	}
 	return nil, fmt.Errorf("invalid datastore: %s", u)
 }
 
-func parse(u, root string) (datastore string, args []string, err error) {
+func parse(u, root string) (DatastoreType, []string, error) {
 	switch {
 	case strings.HasPrefix(u, "github://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "github://"), "/"), "/")
 		if len(splitted) < 2 {
-			return "", nil, fmt.Errorf("invalid datastore: %s", u)
+			return UnknownType, nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		branch := ""
 		owner := splitted[0]
@@ -139,11 +150,11 @@ func parse(u, root string) (datastore string, args []string, err error) {
 		}
 		ownerrepo := fmt.Sprintf("%s/%s", owner, repo)
 		prefix := strings.Join(splitted[2:], "/")
-		return "github", []string{ownerrepo, branch, prefix}, nil
+		return GitHub, []string{ownerrepo, branch, prefix}, nil
 	case strings.HasPrefix(u, "artifact://") || strings.HasPrefix(u, "artifacts://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(strings.TrimPrefix(u, "artifact://"), "artifacts://"), "/"), "/")
 		if len(splitted) < 2 || len(splitted) > 3 {
-			return "", nil, fmt.Errorf("invalid datastore: %s", u)
+			return UnknownType, nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		owner := splitted[0]
 		repo := splitted[1]
@@ -152,35 +163,35 @@ func parse(u, root string) (datastore string, args []string, err error) {
 		if len(splitted) == 3 {
 			name = splitted[2]
 		}
-		return "artifact", []string{ownerrepo, name}, nil
+		return Artifact, []string{ownerrepo, name}, nil
 	case strings.HasPrefix(u, "s3://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "s3://"), "/"), "/")
 		if splitted[0] == "" {
-			return "", nil, fmt.Errorf("invalid datastore: %s", u)
+			return UnknownType, nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		bucket := splitted[0]
 		prefix := strings.Join(splitted[1:], "/")
-		return "s3", []string{bucket, prefix}, nil
+		return S3, []string{bucket, prefix}, nil
 	case strings.HasPrefix(u, "gs://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "gs://"), "/"), "/")
 		if splitted[0] == "" {
-			return "", nil, fmt.Errorf("invalid datastore: %s", u)
+			return UnknownType, nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		bucket := splitted[0]
 		prefix := ""
 		if len(splitted) > 1 {
 			prefix = strings.Join(splitted[1:], "/")
 		}
-		return "gs", []string{bucket, prefix}, nil
+		return GCS, []string{bucket, prefix}, nil
 	case strings.HasPrefix(u, "bq://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "bq://"), "/"), "/")
 		if len(splitted) != 3 {
-			return "", nil, fmt.Errorf("invalid datastore: %s", u)
+			return UnknownType, nil, fmt.Errorf("invalid datastore: %s", u)
 		}
 		project := splitted[0]
 		dataset := splitted[1]
 		table := splitted[2]
-		return "bq", []string{project, dataset, table}, nil
+		return BigQuery, []string{project, dataset, table}, nil
 	default:
 		p := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(u, "file://"), "local://"), "/")
 		if strings.HasPrefix(p, "/") {
@@ -188,7 +199,7 @@ func parse(u, root string) (datastore string, args []string, err error) {
 		} else {
 			root = filepath.Join(root, p)
 		}
-		return "local", []string{root}, nil
+		return Local, []string{root}, nil
 	}
 }
 
