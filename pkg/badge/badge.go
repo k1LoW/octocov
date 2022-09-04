@@ -43,6 +43,7 @@ var badgeTmpl []byte
 //go:embed NotoSans-Medium.ttf
 var noto []byte
 
+// New returns *Badge.
 func New(l, m string) *Badge {
 	ttf, err := truetype.Parse(noto)
 	if err != nil {
@@ -64,11 +65,13 @@ func New(l, m string) *Badge {
 	}
 }
 
+// AddIcon add icon image to badge.
 func (b *Badge) AddIcon(imgf []byte) error {
 	b.Icon = imgf
 	return nil
 }
 
+// AddIconFile add icon image file to badge.
 func (b *Badge) AddIconFile(f string) error {
 	imgf, err := os.ReadFile(filepath.Clean(f))
 	if err != nil {
@@ -78,6 +81,7 @@ func (b *Badge) AddIconFile(f string) error {
 	return nil
 }
 
+// Render badge
 func (b *Badge) Render(wr io.Writer) error {
 	tmpl := template.Must(template.New("badge").Parse(string(badgeTmpl)))
 
@@ -138,6 +142,7 @@ func (b *Badge) stringWidth(s string) float64 {
 	return float64(w)/64 + 10 // 10 is heuristic
 }
 
+// ColorToHexRGB return Hex RGB from color.Color
 func ColorToHexRGB(c color.Color) string {
 	rgba := color.NRGBAModel.Convert(c).(color.NRGBA)
 	return fmt.Sprintf("#%.2x%.2x%.2x", rgba.R, rgba.G, rgba.B)
