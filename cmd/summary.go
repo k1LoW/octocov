@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 func addReportContentToSummary(content string) error {
@@ -10,11 +11,13 @@ func addReportContentToSummary(content string) error {
 	if _, err := os.Stat(p); err != nil {
 		return err
 	}
-	f, err := os.OpenFile(p, os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	f, err := os.OpenFile(filepath.Clean(p), os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 	if _, err := fmt.Fprintln(f, content); err != nil {
 		return err
 	}
