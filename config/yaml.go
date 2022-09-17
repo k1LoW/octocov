@@ -20,6 +20,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		Central           *ConfigCentral           `yaml:"central,omitempty"`
 		Push              interface{}              `yaml:"push,omitempty"`
 		Comment           interface{}              `yaml:"comment,omitempty"`
+		Summary           *ConfigSummary           `yaml:"summary,omitempty"`
 		Diff              *ConfigDiff              `yaml:"diff,omitempty"`
 	}{}
 	err := yaml.Unmarshal(data, &s)
@@ -32,6 +33,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 	c.TestExecutionTime = s.TestExecutionTime
 	c.Report = s.Report
 	c.Central = s.Central
+	c.Summary = s.Summary
 	c.Diff = s.Diff
 
 	switch v := s.Comment.(type) {

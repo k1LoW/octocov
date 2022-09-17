@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/k1LoW/octocov/gh"
 )
@@ -83,6 +84,41 @@ func (c *Config) CommentConfigReady() error {
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Comment.If)
+	}
+	return nil
+}
+
+func (c *Config) SummaryConfigReady() error {
+	if c.Summary == nil {
+		return errors.New("summary: is not set")
+	}
+	if c.Repository == "" {
+		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+	}
+	if os.Getenv("GITHUB_STEP_SUMMARY") == "" {
+		return fmt.Errorf("env %s is not set", "GITHUB_STEP_SUMMARY")
+	}
+	ctx := context.Background()
+	repo, err := gh.Parse(c.Repository)
+	if err != nil {
+		return err
+	}
+	if c.gh == nil {
+		g, err := gh.New()
+		if err != nil {
+			return err
+		}
+		c.gh = g
+	}
+	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err != nil {
+		return err
+	}
+	ok, err := c.CheckIf(c.Summary.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Summary.If)
 	}
 	return nil
 }

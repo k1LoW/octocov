@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
@@ -194,18 +195,20 @@ func TestOut(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		r := &Report{}
-		if err := r.Load(tt.path); err != nil {
-			t.Fatal(err)
-		}
-		buf := new(bytes.Buffer)
-		if err := r.Out(buf); err != nil {
-			t.Fatal(err)
-		}
-		got := buf.String()
-		if got != tt.want {
-			t.Errorf("got\n%v\n%#v\nwant\n%v\n%#v", got, got, tt.want, tt.want)
-		}
+		t.Run(tt.path, func(t *testing.T) {
+			r := &Report{}
+			if err := r.Load(tt.path); err != nil {
+				t.Fatal(err)
+			}
+			buf := new(bytes.Buffer)
+			if err := r.Out(buf); err != nil {
+				t.Fatal(err)
+			}
+			got := buf.String()
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }
 

@@ -340,7 +340,36 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				if err := commentReport(ctx, c, r, rPrev); err != nil {
+				content, err := createReportContent(ctx, c, r, rPrev)
+				if err != nil {
+					return err
+				}
+				if err := commentReport(ctx, c, content, r.Key()); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
+			}
+		}
+
+		// Add report to job summaries
+		if err := c.SummaryConfigReady(); err != nil {
+			cmd.PrintErrf("Skip adding report to job summaries: %v\n", err)
+		} else {
+			if err := func() error {
+				cmd.PrintErrln("Adding report...")
+				if rPrev == nil {
+					cmd.PrintErrln("Skip comparing reports: previous report not found")
+				}
+				if err := c.DiffConfigReady(); err != nil {
+					cmd.PrintErrf("Skip comparing reports: %v\n", err)
+				}
+				content, err := createReportContent(ctx, c, r, rPrev)
+				if err != nil {
+					return err
+				}
+				if err := addReportContentToSummary(content); err != nil {
 					return err
 				}
 				return nil

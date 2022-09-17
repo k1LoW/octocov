@@ -14,7 +14,7 @@ BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
 default: test
 
-ci: depsdev test test_no_coverage sec
+ci: depsdev test test_no_coverage
 
 test:
 	go test ./... -coverprofile=coverage.out -covermode=count
@@ -27,9 +27,6 @@ test_no_coverage: build
 
 test_collect_metrics: build
 	./octocov --config testdata/octocov_parallel_tests.yml
-
-sec:
-	gosec ./...
 
 lint:
 	golangci-lint run ./...

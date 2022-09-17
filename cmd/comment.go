@@ -11,7 +11,7 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Report) error {
+func commentReport(ctx context.Context, c *config.Config, content, key string) error {
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return err
@@ -24,9 +24,34 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 	if err != nil {
 		return err
 	}
+	if c.Comment.DeletePrevious {
+		if err := g.PutCommentWithDeletion(ctx, repo.Owner, repo.Repo, n, content, key); err != nil {
+			return err
+		}
+	} else {
+		if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, content, key); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report) (string, error) {
+	repo, err := gh.Parse(c.Repository)
+	if err != nil {
+		return "", err
+	}
+	g, err := gh.New()
+	if err != nil {
+		return "", err
+	}
+	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
+	if err != nil {
+		return "", err
+	}
 	files, err := g.GetPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
 	if err != nil {
-		return err
+		return "", err
 	}
 	footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
 	if c.Comment.HideFooterLink {
@@ -66,17 +91,7 @@ func commentReport(ctx context.Context, c *config.Config, r, rPrev *report.Repor
 		footer,
 	)
 
-	if c.Comment.DeletePrevious {
-		if err := g.PutCommentWithDeletion(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n"), r.Key()); err != nil {
-			return err
-		}
-	} else {
-		if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, strings.Join(comment, "\n"), r.Key()); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return strings.Join(comment, "\n"), nil
 }
 
 func capitalize(w string) string {

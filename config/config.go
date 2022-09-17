@@ -43,6 +43,7 @@ type Config struct {
 	Central           *ConfigCentral           `yaml:"central,omitempty"`
 	Push              *ConfigPush              `yaml:"push,omitempty"`
 	Comment           *ConfigComment           `yaml:"comment,omitempty"`
+	Summary           *ConfigSummary           `yaml:"summary,omitempty"`
 	Diff              *ConfigDiff              `yaml:"diff,omitempty"`
 	GitRoot           string                   `yaml:"-"`
 	// working directory
@@ -108,6 +109,10 @@ type ConfigComment struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	DeletePrevious bool   `yaml:"deletePrevious"`
 	If             string `yaml:"if,omitempty"`
+}
+
+type ConfigSummary struct {
+	If string `yaml:"if,omitempty"`
 }
 
 type ConfigDiff struct {

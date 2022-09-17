@@ -448,6 +448,31 @@ func makeHeadTitle(ref, commit string, covPaths []string) string {
 	return fmt.Sprintf("%s (%s)", ref, commit)
 }
 
+func makeHeadTitleWithLink(ref, commit string, covPaths []string) string {
+	var (
+		refLink    string
+		commitLink string
+	)
+	repoURL := fmt.Sprintf("%s/%s", os.Getenv("GITHUB_SERVER_URL"), os.Getenv("GITHUB_REPOSITORY"))
+	switch {
+	case strings.HasPrefix(ref, "refs/heads/"):
+		branch := strings.TrimPrefix(ref, "refs/heads/")
+		refLink = fmt.Sprintf("[%s](%s/tree/%s)", branch, repoURL, branch)
+	case strings.HasPrefix(ref, "refs/pull/"):
+		n := strings.TrimPrefix(strings.TrimSuffix(strings.TrimSuffix(ref, "/head"), "/merge"), "refs/pull/")
+		refLink = fmt.Sprintf("[#%s](%s/pull/%s)", n, repoURL, n)
+	}
+	if len(commit) > 7 {
+		commitLink = fmt.Sprintf("[%s](%s/commit/%s)", commit[:7], repoURL, commit)
+	} else {
+		commitLink = "-"
+	}
+	if ref == "" {
+		return strings.Join(covPaths, ", ")
+	}
+	return fmt.Sprintf("%s (%s)", refLink, commitLink)
+}
+
 type timePoint struct {
 	t time.Time
 	c int
