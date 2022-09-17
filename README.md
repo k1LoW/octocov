@@ -500,6 +500,8 @@ push:
   if: is_default_branch
 ```
 
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
+
 ### `comment:`
 
 Set this if want to comment report to pull request
@@ -532,6 +534,8 @@ comment:
   if: is_pull_request
 ```
 
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
+
 ### `summary:`
 
 Set this if want to add report to [job summary page](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary).
@@ -545,6 +549,8 @@ Conditions for adding report to job summary page.
 summary:
   if: is_pull_request
 ```
+
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
 
 ### `diff:`
 
@@ -585,6 +591,8 @@ report:
   if: is_pull_request
   path: path/to/report.json
 ```
+
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
 
 ### `report:`
 
@@ -735,6 +743,8 @@ report:
   datastores:
     - github://owner/coverages/reports
 ```
+
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
 
 ### `*.if:`
 
@@ -968,6 +978,8 @@ central:
     datastores:
       - s3://my-s3-bucket/reports
 ```
+
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
 
 ## Supported coverage report formats
 
