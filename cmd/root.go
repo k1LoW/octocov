@@ -349,13 +349,13 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
-				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
+				cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
 			}
 		}
 
-		// Add report to job summaries
+		// Add report to job summary page
 		if err := c.SummaryConfigReady(); err != nil {
-			cmd.PrintErrf("Skip adding report to job summaries: %v\n", err)
+			cmd.PrintErrf("Skip adding report to job summary page: %v\n", err)
 		} else {
 			if err := func() error {
 				cmd.PrintErrln("Adding report...")
@@ -374,13 +374,13 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
-				cmd.PrintErrf("Skip commenting the report to pull request: %v\n", err)
+				cmd.PrintErrf("Skip adding report to job summary page: %v\n", err)
 			}
 		}
 
 		// Store report
 		if err := c.ReportConfigReady(); err != nil {
-			cmd.PrintErrf("Skip storing the report: %v\n", err)
+			cmd.PrintErrf("Skip storing report: %v\n", err)
 		} else {
 			cmd.PrintErrln("Storing report...")
 			if c.Report.Path != "" {
