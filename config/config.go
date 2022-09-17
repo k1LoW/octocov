@@ -399,8 +399,14 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 	}
 
 	isPullRequest := false
-	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
+	isDraft := false
+	if n, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
 		isPullRequest = true
+		pr, err := c.gh.GetPullRequest(ctx, repo.Owner, repo.Repo, n)
+		if err != nil {
+			return false, err
+		}
+		isDraft = pr.IsDraft
 	}
 	now := time.Now()
 	variables := map[string]interface{}{
@@ -416,6 +422,7 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		"env":               envMap(),
 		"is_default_branch": isDefaultBranch,
 		"is_pull_request":   isPullRequest,
+		"is_draft":          isDraft,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {

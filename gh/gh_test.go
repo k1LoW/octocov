@@ -96,21 +96,22 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	ctx := context.TODO()
 	mg := mockedGh(t)
 	for _, tt := range tests {
-		t.Setenv("GITHUB_REF", tt.GITHUB_REF)
-		got, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
-		if err != nil {
-			if !tt.wantErr {
-				t.Errorf("got err: %v", err)
+		t.Run(tt.GITHUB_REF, func(t *testing.T) {
+			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			got, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got err: %v", err)
+				}
+				return
 			}
-			continue
-		}
-		if tt.wantErr {
-			t.Error("want err")
-		}
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
-
+			if tt.wantErr {
+				t.Error("want err")
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 
