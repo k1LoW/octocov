@@ -736,6 +736,8 @@ report:
     - github://owner/coverages/reports
 ```
 
+### `*.if:`
+
 The variables available in the `if` section are as follows
 
 | Variable name | Type | Description |
