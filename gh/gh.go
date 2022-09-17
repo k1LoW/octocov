@@ -265,6 +265,22 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 	return 0, errors.New("could not detect number of pull request")
 }
 
+type PullRequest struct {
+	Number  int
+	IsDraft bool
+}
+
+func (g *Gh) GetPullRequest(ctx context.Context, owner, repo string, number int) (*PullRequest, error) {
+	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return nil, err
+	}
+	return &PullRequest{
+		Number:  pr.GetNumber(),
+		IsDraft: pr.GetDraft(),
+	}, nil
+}
+
 type PullRequestFile struct {
 	Filename string
 	BlobURL  string

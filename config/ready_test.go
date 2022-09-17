@@ -716,6 +716,13 @@ func mockedGh(t *testing.T) *gh.Gh {
 				DefaultBranch: github.String("main"),
 			},
 		),
+		mock.WithRequestMatch(
+			mock.GetReposPullsByOwnerByRepoByPullNumber,
+			github.PullRequest{
+				Number: github.Int(13),
+				Draft:  github.Bool(true),
+			},
+		),
 	)
 	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
 	if err != nil {
