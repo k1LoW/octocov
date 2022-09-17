@@ -65,6 +65,10 @@ Then, octocov comment the report of the code metrics to the pull request.
 
 ![comment](docs/comment_with_diff.png)
 
+It is also possible to add reports to [GitHub Actions Job Summaries](https://github.blog/2022-05-09-supercharging-github-actions-with-job-summaries/) by editing .octocov.yml.
+
+![summary](docs/summary.png)
+
 **Notice:** Note that only pull requests from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
 
 ### On Terminal
@@ -525,7 +529,21 @@ Conditions for commenting report.
 ``` yaml
 # .octocov.yml
 comment:
-  if: github.event_name == 'pull_request'
+  if: is_pull_request
+```
+
+### `summary:`
+
+Set this if want to add report to [job summary page](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary).
+
+### `summary.if:`
+
+Conditions for adding report to job summary page.
+
+``` yaml
+# .octocov.yml
+summary:
+  if: is_pull_request
 ```
 
 ### `diff:`
@@ -564,7 +582,7 @@ Conditions for comparing reports
 ``` yaml
 # .octocov.yml
 report:
-  if: github.event_name == 'pull_request'
+  if: is_pull_request
   path: path/to/report.json
 ```
 
