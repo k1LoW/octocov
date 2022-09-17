@@ -340,7 +340,11 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				if err := commentReport(ctx, c, r, rPrev); err != nil {
+				content, err := createReportContent(ctx, c, r, rPrev)
+				if err != nil {
+					return err
+				}
+				if err := commentReport(ctx, c, content, r.Key()); err != nil {
 					return err
 				}
 				return nil
