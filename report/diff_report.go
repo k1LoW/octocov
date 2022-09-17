@@ -52,7 +52,7 @@ func (d *DiffReport) Out(w io.Writer) {
 	r := tablewriter.Colors{tablewriter.Bold, tablewriter.FgRedColor}
 	b := tablewriter.Colors{tablewriter.Bold}
 
-	d.renderTable(table, g, r, b, true)
+	d.renderTable(table, g, r, b, true, false)
 
 	table.Render()
 }
@@ -69,7 +69,7 @@ func (d *DiffReport) Table() string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false)
+	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false, true)
 	table.Render()
 
 	out = append(out, strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1))
@@ -80,7 +80,7 @@ func (d *DiffReport) Table() string {
 	table2.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table2.SetCenterSeparator("|")
 	table2.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true)
+	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true, false)
 	table2.Render()
 
 	t2 := leftSepRe.ReplaceAllString(buf2.String(), "  |")
@@ -125,8 +125,12 @@ func (d *DiffReport) Table() string {
 	return strings.Join(out, "\n")
 }
 
-func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool) {
-	table.SetHeader([]string{"", makeHeadTitle(d.RefA, d.CommitA, d.ReportA.covPaths), makeHeadTitle(d.RefB, d.CommitB, d.ReportB.covPaths), "+/-"})
+func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool) {
+	if withLink {
+		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), "+/-"})
+	} else {
+		table.SetHeader([]string{"", makeHeadTitle(d.RefA, d.CommitA, d.ReportA.covPaths), makeHeadTitle(d.RefB, d.CommitB, d.ReportB.covPaths), "+/-"})
+	}
 	if d.Coverage != nil {
 		{
 			dd := d.Coverage.Diff
