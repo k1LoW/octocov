@@ -268,6 +268,7 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 type PullRequest struct {
 	Number  int
 	IsDraft bool
+	Labels  []string
 }
 
 func (g *Gh) GetPullRequest(ctx context.Context, owner, repo string, number int) (*PullRequest, error) {
@@ -275,9 +276,14 @@ func (g *Gh) GetPullRequest(ctx context.Context, owner, repo string, number int)
 	if err != nil {
 		return nil, err
 	}
+	labels := []string{}
+	for _, l := range pr.Labels {
+		labels = append(labels, l.GetName())
+	}
 	return &PullRequest{
 		Number:  pr.GetNumber(),
 		IsDraft: pr.GetDraft(),
+		Labels:  labels,
 	}, nil
 }
 

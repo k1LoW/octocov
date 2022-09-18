@@ -762,6 +762,7 @@ The variables available in the `if` section are as follows
 | `env.<env_name>` | `string` | The value of a specific environment variable |
 | `is_pull_request` | `boolean` | Whether the job is related to an pull request (ex. a job fired by `on.push` will be true if it is related to a pull request) |
 | `is_draft` | `boolean` | Whether the job is related to a draft pull request |
+| `labels` | `array` | Labels that are set for the pull request |
 | `is_default_branch` | `boolean` | Whether the job is related to default branch of repository |
 
 ### `central:`
