@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.42.0](https://github.com/k1LoW/octocov/compare/v0.41.1...v0.42.0) (2022-09-18)
+
+* Add variable `labels` [#170](https://github.com/k1LoW/octocov/pull/170) ([k1LoW](https://github.com/k1LoW))
+* Add variable `is_draft` [#169](https://github.com/k1LoW/octocov/pull/169) ([k1LoW](https://github.com/k1LoW))
+* Support for adding code metrics report to GitHub Actions Job Summaries [#168](https://github.com/k1LoW/octocov/pull/168) ([k1LoW](https://github.com/k1LoW))
+* Allow `artifacts://` scheme [#167](https://github.com/k1LoW/octocov/pull/167) ([k1LoW](https://github.com/k1LoW))
+* Use badges of https://github.com/k1LoW/octocovs [#166](https://github.com/k1LoW/octocov/pull/166) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.41.1](https://github.com/k1LoW/octocov/compare/v0.41.0...v0.41.1) (2022-09-01)
 
 * Fix build flags in build for linux [#165](https://github.com/k1LoW/octocov/pull/165) ([k1LoW](https://github.com/k1LoW))
