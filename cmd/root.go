@@ -358,7 +358,7 @@ var rootCmd = &cobra.Command{
 			cmd.PrintErrf("Skip adding report to job summary page: %v\n", err)
 		} else {
 			if err := func() error {
-				cmd.PrintErrln("Adding report...")
+				cmd.PrintErrln("Adding report to job summary page...")
 				if rPrev == nil {
 					cmd.PrintErrln("Skip comparing reports: previous report not found")
 				}
