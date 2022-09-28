@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.42.1](https://github.com/k1LoW/octocov/compare/v0.42.0...v0.42.1) (2022-09-28)
+
+* When only summary is used, the comment setting is nil [#171](https://github.com/k1LoW/octocov/pull/171) ([k1LoW](https://github.com/k1LoW))
+
 ## [v0.42.0](https://github.com/k1LoW/octocov/compare/v0.41.1...v0.42.0) (2022-09-18)
 
 * Add variable `labels` [#170](https://github.com/k1LoW/octocov/pull/170) ([k1LoW](https://github.com/k1LoW))
