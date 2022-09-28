@@ -36,7 +36,7 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 	return nil
 }
 
-func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report) (string, error) {
+func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report, hideFooterLink bool) (string, error) {
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return "", err
@@ -54,7 +54,7 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		return "", err
 	}
 	footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
-	if c.Comment.HideFooterLink {
+	if hideFooterLink {
 		footer = "Reported by octocov"
 	}
 	var table, fileTable string
