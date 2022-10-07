@@ -267,17 +267,18 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 }
 
 func (g *Gh) ReplaceInsertToBody(ctx context.Context, owner, repo string, number int, content, key string) error {
+	sig := generateSig(key)
 	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
 	if err != nil {
 		return err
 	}
 	current := pr.GetBody()
 	var rep string
-	if strings.Count(current, key) < 2 {
-		rep = fmt.Sprintf("%s\n%s\n%s\n%s", current, key, content, key)
+	if strings.Count(current, sig) < 2 {
+		rep = fmt.Sprintf("%s\n%s\n%s\n%s", current, sig, content, sig)
 	} else {
 		buf := new(bytes.Buffer)
-		if _, err := repin.Replace(strings.NewReader(current), strings.NewReader(content), key, key, false, buf); err != nil {
+		if _, err := repin.Replace(strings.NewReader(current), strings.NewReader(content), sig, sig, false, buf); err != nil {
 			return err
 		}
 		rep = buf.String()
