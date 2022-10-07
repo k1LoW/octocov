@@ -396,6 +396,8 @@ github.com/k1LoW/go-github-actions v0.0.2 h1:rcoqhkNSihfuNdMzEC0m66OR8nxd7V6OEHe
 github.com/k1LoW/go-github-actions v0.0.2/go.mod h1:qDfnEZDByCWZ4geyn4jDDnbWiZIKcGbc2+cgdip04UA=
 github.com/k1LoW/go-github-client/v45 v45.2.3 h1:VgL8bLfDfppHJTrCZQ826R+P4Np9+kOJXP0i0NQAqao=
 github.com/k1LoW/go-github-client/v45 v45.2.3/go.mod h1:c6rHQhBuUN+Ljzi9e2tvv3EPlijIRnOEFyQiD+H0rkE=
+github.com/k1LoW/repin v0.3.2 h1:rX4F0ktNmxcUd3iG2sFrxJ21Hp+BjzFDoVAurCiVJYI=
+github.com/k1LoW/repin v0.3.2/go.mod h1:GQqmitWePjIJEpQ0aOJYgn4rKF6LF6iHu4RXO2v1Qk4=
 github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/kevinburke/ssh_config v1.2.0 h1:x584FjTGwHzMwvHx18PXxbBVzfnxogHaAReU4gf13a4=
 github.com/kevinburke/ssh_config v1.2.0/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=

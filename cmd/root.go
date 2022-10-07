@@ -378,6 +378,31 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Insert report to body of pull request
+		if err := c.BodyConfigReady(); err != nil {
+			cmd.PrintErrf("Skip inserting report to body of pull request: %v\n", err)
+		} else {
+			if err := func() error {
+				cmd.PrintErrln("Commenting report...")
+				if rPrev == nil {
+					cmd.PrintErrln("Skip comparing reports: previous report not found")
+				}
+				if err := c.DiffConfigReady(); err != nil {
+					cmd.PrintErrf("Skip comparing reports: %v\n", err)
+				}
+				content, err := createReportContent(ctx, c, r, rPrev, false)
+				if err != nil {
+					return err
+				}
+				if err := replaceInsertReportToBody(ctx, c, content, r.Key()); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				cmd.PrintErrf("Skip inserting report to body of pull request: %v\n", err)
+			}
+		}
+
 		// Store report
 		if err := c.ReportConfigReady(); err != nil {
 			cmd.PrintErrf("Skip storing report: %v\n", err)
