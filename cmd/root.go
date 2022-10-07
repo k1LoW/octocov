@@ -383,7 +383,7 @@ var rootCmd = &cobra.Command{
 			cmd.PrintErrf("Skip inserting report to body of pull request: %v\n", err)
 		} else {
 			if err := func() error {
-				cmd.PrintErrln("Commenting report...")
+				cmd.PrintErrln("Inserting report...")
 				if rPrev == nil {
 					cmd.PrintErrln("Skip comparing reports: previous report not found")
 				}

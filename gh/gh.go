@@ -275,9 +275,12 @@ func (g *Gh) ReplaceInsertToBody(ctx context.Context, owner, repo string, number
 	current := pr.GetBody()
 	var rep string
 	if strings.Count(current, sig) < 2 {
-		rep = fmt.Sprintf("%s\n%s\n%s\n%s", current, sig, content, sig)
+		rep = fmt.Sprintf("%s\n%s\n%s\n%s\n", current, sig, content, sig)
 	} else {
 		buf := new(bytes.Buffer)
+		if !strings.HasSuffix(current, "\n") {
+			current += "\n"
+		}
 		if _, err := repin.Replace(strings.NewReader(current), strings.NewReader(content), sig, sig, false, buf); err != nil {
 			return err
 		}
