@@ -283,8 +283,9 @@ func (g *Gh) ReplaceInsertToBody(ctx context.Context, owner, repo string, number
 		}
 		rep = buf.String()
 	}
-	pr.Body = &rep
-	if _, _, err := g.client.PullRequests.Edit(ctx, owner, repo, number, pr); err != nil {
+	if _, _, err := g.client.PullRequests.Edit(ctx, owner, repo, number, &github.PullRequest{
+		Body: &rep,
+	}); err != nil {
 		return err
 	}
 	return nil
