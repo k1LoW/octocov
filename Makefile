@@ -55,8 +55,9 @@ prerelease:
 	git commit -m'Bump up version number'
 	git tag ${VER}
 
-release:
-	git push origin main --tag
-	goreleaser --config .goreleaser/darwin.yml --rm-dist
+prerelease_for_tagpr:
+	gocredits -skip-missing -w
+	cat _EXTRA_CREDITS >> CREDITS
+	git add CHANGELOG.md CREDITS go.mod go.sum
 
 .PHONY: default test
