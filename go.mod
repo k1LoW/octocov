@@ -26,6 +26,7 @@ require (
 	github.com/k1LoW/ghfs v0.7.0
 	github.com/k1LoW/go-github-actions v0.0.2
 	github.com/k1LoW/go-github-client/v45 v45.2.3
+	github.com/k1LoW/repin v0.3.2
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mauri870/gcsfs v0.0.0-20220203135357-0da01ba4e96d
