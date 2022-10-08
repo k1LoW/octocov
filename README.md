@@ -552,6 +552,22 @@ summary:
 
 The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
 
+### `body:`
+
+Set this if want to insert report to body of pull request.
+
+### `body.if:`
+
+Conditions for inserting report body of pull request.
+
+``` yaml
+# .octocov.yml
+body:
+  if: is_pull_request
+```
+
+The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
+
 ### `diff:`
 
 Configuration for comparing reports.

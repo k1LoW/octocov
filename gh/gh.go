@@ -25,6 +25,7 @@ import (
 	"github.com/google/go-github/v45/github"
 	"github.com/k1LoW/go-github-actions/artifact"
 	"github.com/k1LoW/go-github-client/v45/factory"
+	"github.com/k1LoW/repin"
 	"github.com/lestrrat-go/backoff/v2"
 	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
@@ -263,6 +264,34 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 		return d.GetNumber(), nil
 	}
 	return 0, errors.New("could not detect number of pull request")
+}
+
+func (g *Gh) ReplaceInsertToBody(ctx context.Context, owner, repo string, number int, content, key string) error {
+	sig := generateSig(key)
+	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return err
+	}
+	current := pr.GetBody()
+	var rep string
+	if strings.Count(current, sig) < 2 {
+		rep = fmt.Sprintf("%s\n%s\n%s\n%s\n", current, sig, content, sig)
+	} else {
+		buf := new(bytes.Buffer)
+		if !strings.HasSuffix(current, "\n") {
+			current += "\n"
+		}
+		if _, err := repin.Replace(strings.NewReader(current), strings.NewReader(content), sig, sig, false, buf); err != nil {
+			return err
+		}
+		rep = buf.String()
+	}
+	if _, _, err := g.client.PullRequests.Edit(ctx, owner, repo, number, &github.PullRequest{
+		Body: &rep,
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type PullRequest struct {

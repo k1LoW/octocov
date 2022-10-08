@@ -123,6 +123,38 @@ func (c *Config) SummaryConfigReady() error {
 	return nil
 }
 
+func (c *Config) BodyConfigReady() error {
+	if c.Body == nil {
+		return errors.New("body: is not set")
+	}
+	if c.Repository == "" {
+		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+	}
+	ctx := context.Background()
+	repo, err := gh.Parse(c.Repository)
+	if err != nil {
+		return err
+	}
+	if c.gh == nil {
+		g, err := gh.New()
+		if err != nil {
+			return err
+		}
+		c.gh = g
+	}
+	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err != nil {
+		return err
+	}
+	ok, err := c.CheckIf(c.Body.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Body.If)
+	}
+	return nil
+}
+
 func (c *Config) CoverageBadgeConfigReady() error {
 	if err := c.CoverageConfigReady(); err != nil {
 		return err

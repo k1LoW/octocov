@@ -44,6 +44,7 @@ type Config struct {
 	Push              *ConfigPush              `yaml:"push,omitempty"`
 	Comment           *ConfigComment           `yaml:"comment,omitempty"`
 	Summary           *ConfigSummary           `yaml:"summary,omitempty"`
+	Body              *ConfigBody              `yaml:"body,omitempty"`
 	Diff              *ConfigDiff              `yaml:"diff,omitempty"`
 	GitRoot           string                   `yaml:"-"`
 	// working directory
@@ -112,6 +113,10 @@ type ConfigComment struct {
 }
 
 type ConfigSummary struct {
+	If string `yaml:"if,omitempty"`
+}
+
+type ConfigBody struct {
 	If string `yaml:"if,omitempty"`
 }
 
