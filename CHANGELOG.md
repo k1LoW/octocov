@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.42.2](https://github.com/k1LoW/octocov/compare/v0.42.1...v0.42.2) - 2022-10-08
+## [v0.43.0](https://github.com/k1LoW/octocov/compare/v0.42.1...v0.43.0) - 2022-10-08
 - Use tagpr by @k1LoW in https://github.com/k1LoW/octocov/pull/173
 - Support for inserting code metrics report to body of pull request by @k1LoW in https://github.com/k1LoW/octocov/pull/172
 
