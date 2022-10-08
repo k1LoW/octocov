@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.42.2](https://github.com/k1LoW/octocov/compare/v0.42.1...v0.42.2) - 2022-10-08
+- Use tagpr by @k1LoW in https://github.com/k1LoW/octocov/pull/173
+
 ## [v0.42.1](https://github.com/k1LoW/octocov/compare/v0.42.0...v0.42.1) (2022-09-28)
 
 * When only summary is used, the comment setting is nil [#171](https://github.com/k1LoW/octocov/pull/171) ([k1LoW](https://github.com/k1LoW))
@@ -397,4 +400,3 @@
 * Fix `octocov completion` interface [#1](https://github.com/k1LoW/octocov/pull/1) ([k1LoW](https://github.com/k1LoW))
 
 ## [v0.1.0](https://github.com/k1LoW/octocov/compare/88314da64080...v0.1.0) (2021-05-04)
-
