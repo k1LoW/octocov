@@ -16,7 +16,7 @@ push:
 comment:
   if: is_pull_request
 summary:
-  if: is_pull_request
+  if: true
 # body:
 #   if: is_pull_request
 report:
