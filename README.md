@@ -69,7 +69,11 @@ It is also possible to add reports to [GitHub Actions Job Summaries](https://git
 
 ![summary](docs/summary.png)
 
-**Notice:** Note that only pull requests from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
+It can also be inserted into the body of a pull request.
+
+![body](docs/body.png)
+
+> **Note** that only pull requests from the same repository can be commented on. This is because the workflow token of a forked pull request does not have write permission.
 
 ### On Terminal
 
