@@ -544,6 +544,15 @@ The variables available in the `if` section are [here](https://github.com/k1LoW/
 
 Set this if want to add report to [job summary page](https://docs.github.com/en/actions/using-workflows/workflow-commands-for-github-actions#adding-a-job-summary).
 
+### `summary.hideFooterLink:`
+
+Hide footer [octocov](https://github.com/k1LoW/octocov) link.
+
+``` yaml
+summary:
+  hideFooterLink: true
+```
+
 ### `summary.if:`
 
 Conditions for adding report to job summary page.
@@ -559,6 +568,15 @@ The variables available in the `if` section are [here](https://github.com/k1LoW/
 ### `body:`
 
 Set this if want to insert report to body of pull request.
+
+### `body.hideFooterLink:`
+
+Hide footer [octocov](https://github.com/k1LoW/octocov) link.
+
+``` yaml
+body:
+  hideFooterLink: true
+```
 
 ### `body.if:`
 
