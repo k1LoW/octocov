@@ -113,11 +113,13 @@ type ConfigComment struct {
 }
 
 type ConfigSummary struct {
-	If string `yaml:"if,omitempty"`
+	HideFooterLink bool   `yaml:"hideFooterLink"`
+	If             string `yaml:"if,omitempty"`
 }
 
 type ConfigBody struct {
-	If string `yaml:"if,omitempty"`
+	HideFooterLink bool   `yaml:"hideFooterLink"`
+	If             string `yaml:"if,omitempty"`
 }
 
 type ConfigDiff struct {
