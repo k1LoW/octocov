@@ -551,7 +551,7 @@ Conditions for adding report to job summary page.
 ``` yaml
 # .octocov.yml
 summary:
-  if: is_pull_request
+  if: true
 ```
 
 The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
