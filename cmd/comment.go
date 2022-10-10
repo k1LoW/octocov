@@ -45,13 +45,18 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if err != nil {
 		return "", err
 	}
+	var files []*gh.PullRequestFile
 	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
-	if err != nil {
-		return "", err
-	}
-	files, err := g.GetPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
-	if err != nil {
-		return "", err
+	if err == nil {
+		files, err = g.GetPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		files, err = g.GetChangedFiles(ctx, repo.Owner, repo.Repo)
+		if err != nil {
+			return "", err
+		}
 	}
 	footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
 	if hideFooterLink {

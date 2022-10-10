@@ -346,6 +346,29 @@ func (g *Gh) GetPullRequestFiles(ctx context.Context, owner, repo string, number
 	return files, nil
 }
 
+func (g *Gh) GetChangedFiles(ctx context.Context, owner, repo string) ([]*PullRequestFile, error) {
+	base, err := g.GetDefaultBranch(ctx, owner, repo)
+	if err != nil {
+		return nil, err
+	}
+	head, err := g.DetectCurrentBranch(ctx)
+	if err != nil {
+		return nil, err
+	}
+	compare, _, err := g.client.Repositories.CompareCommits(ctx, owner, repo, base, head, &github.ListOptions{})
+	if err != nil {
+		return nil, err
+	}
+	files := []*PullRequestFile{}
+	for _, f := range compare.Files {
+		files = append(files, &PullRequestFile{
+			Filename: f.GetFilename(),
+			BlobURL:  f.GetBlobURL(),
+		})
+	}
+	return files, nil
+}
+
 func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
 	p := backoff.Exponential(
 		backoff.WithMinInterval(time.Second),

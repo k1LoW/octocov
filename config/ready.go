@@ -98,21 +98,6 @@ func (c *Config) SummaryConfigReady() error {
 	if os.Getenv("GITHUB_STEP_SUMMARY") == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_STEP_SUMMARY")
 	}
-	ctx := context.Background()
-	repo, err := gh.Parse(c.Repository)
-	if err != nil {
-		return err
-	}
-	if c.gh == nil {
-		g, err := gh.New()
-		if err != nil {
-			return err
-		}
-		c.gh = g
-	}
-	if _, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err != nil {
-		return err
-	}
 	ok, err := c.CheckIf(c.Summary.If)
 	if err != nil {
 		return err
