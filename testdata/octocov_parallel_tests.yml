@@ -2,10 +2,10 @@ repository: k1LoW/octocov/parallel
 coverage:
   acceptable: current >= 60%
   paths:
-    - coverage_coverage.out
-    - coverage_ratio.out
-    - coverage_badge.out
-    - coverage_other.out
+    - ../coverage_coverage.out
+    - ../coverage_ratio.out
+    - ../coverage_badge.out
+    - ../coverage_other.out
 testExecutionTime:
   steps:
     - Run tests pkg/coverage
