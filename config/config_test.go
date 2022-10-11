@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -87,6 +88,32 @@ func TestLoadConfigCentralPush(t *testing.T) {
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Errorf("%s", diff)
 		}
+	}
+}
+
+func TestCoveragePaths(t *testing.T) {
+	tests := []struct {
+		paths      []string
+		configPath string
+		want       []string
+	}{
+		{[]string{"a/b/coverage.out"}, "path/to/.octocov.yml", []string{"path/to/a/b/coverage.out"}},
+		{[]string{}, "path/to/.octocov.yml", []string{"path/to"}},
+		{[]string{"a/b/coverage.out"}, ".octocov.yml", []string{"a/b/coverage.out"}},
+	}
+	for _, tt := range tests {
+		t.Run(fmt.Sprintf("%v", tt.paths), func(t *testing.T) {
+			c := New()
+			c.path = tt.configPath
+			c.Coverage = &ConfigCoverage{
+				Paths: tt.paths,
+			}
+			c.Build()
+			got := c.Coverage.Paths
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Errorf("%s", diff)
+			}
+		})
 	}
 }
 

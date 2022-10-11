@@ -28,6 +28,12 @@ func (c *Config) Build() {
 	}
 	if len(c.Coverage.Paths) == 0 {
 		c.Coverage.Paths = append(c.Coverage.Paths, filepath.Dir(c.path))
+	} else {
+		paths := []string{}
+		for _, p := range c.Coverage.Paths {
+			paths = append(paths, filepath.Join(filepath.Dir(c.path), p))
+		}
+		c.Coverage.Paths = paths
 	}
 
 	// CodeToTestRatio
