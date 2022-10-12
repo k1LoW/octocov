@@ -4,6 +4,10 @@
 - Add `*.hideFooterLink` by @k1LoW in https://github.com/k1LoW/octocov/pull/178
 - [BREAKING] Fix building Config.Coverage.Paths by @k1LoW in https://github.com/k1LoW/octocov/pull/180
 
+## [v0.43.2](https://github.com/k1LoW/octocov/compare/v0.43.1...v0.43.2) - 2022-10-12
+- Add `*.hideFooterLink` by @k1LoW in https://github.com/k1LoW/octocov/pull/178
+- [BREAKING] Fix building Config.Coverage.Paths by @k1LoW in https://github.com/k1LoW/octocov/pull/180
+
 ## [v0.43.1](https://github.com/k1LoW/octocov/compare/v0.43.0...v0.43.1) - 2022-10-10
 - Fix changelog by @k1LoW in https://github.com/k1LoW/octocov/pull/175
 - Should always be able to report to GitHub Actions Job Summaries by @k1LoW in https://github.com/k1LoW/octocov/pull/177
