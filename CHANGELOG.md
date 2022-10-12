@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.43.1](https://github.com/k1LoW/octocov/compare/v0.43.2...v0.43.1) - 2022-10-12
+
 ## [v0.43.2](https://github.com/k1LoW/octocov/compare/v0.43.1...v0.43.2) - 2022-10-11
 - Add `*.hideFooterLink` by @k1LoW in https://github.com/k1LoW/octocov/pull/178
 - [BREAKING] Fix building Config.Coverage.Paths by @k1LoW in https://github.com/k1LoW/octocov/pull/180
