@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.43.1](https://github.com/k1LoW/octocov/compare/v0.44.0...v0.43.1) - 2022-10-12
+
 ## [v0.44.0](https://github.com/k1LoW/octocov/compare/v0.43.2...v0.44.0) (2022-10-12)
 
 * Update pkgs [#189](https://github.com/k1LoW/octocov/pull/189) ([k1LoW](https://github.com/k1LoW))
