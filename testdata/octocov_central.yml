@@ -7,5 +7,3 @@ central:
   badges:
     datastores:
       - local://../example/central/badges
-  push:
-    enable: true
