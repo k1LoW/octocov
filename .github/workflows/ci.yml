@@ -34,9 +34,9 @@ jobs:
       - name: Run tests
         run: make ci
 
-      - name: Run test_central
-        if: ${{ github.event_name == 'pull_request' }}
-        run: make test_central
+      # - name: Run test_central
+      #   if: ${{ github.event_name == 'pull_request' }}
+      #   run: make test_central
 
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@master
