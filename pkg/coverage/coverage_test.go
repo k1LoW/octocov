@@ -309,17 +309,57 @@ func TestToLineCoverages(t *testing.T) {
 
 func TestFuzzyFindByFile(t *testing.T) {
 	tests := []struct {
-		coverageFile string
-		file         string
-		wantErr      bool
+		coverageFiles []string
+		file          string
+		want          string
+		wantErr       bool
 	}{
-		{"/path/to/owner/repo/target.go", "./owner/repo/target.go", false},
-		{"org/101000lab/owner/repo/target.go", "./owner/repo/target.go", false},
-		{"org/101000lab/owner/repo/target.go", "path/to/src/org/101000lab/owner/repo/target.go", false},
+		{
+			[]string{
+				"/path/to/owner/repo/other.go",
+				"/path/to/owner/repo/target.go",
+			},
+			"./owner/repo/target.go",
+			"/path/to/owner/repo/target.go",
+			false,
+		},
+		{[]string{"org/101000lab/owner/repo/target.go"}, "./owner/repo/target.go", "org/101000lab/owner/repo/target.go", false},
+		{[]string{"org/101000lab/owner/repo/target.go"}, "path/to/src/org/101000lab/owner/repo/target.go", "org/101000lab/owner/repo/target.go", false},
+		{
+			[]string{
+				"/path/to/owner/repo/target.go",
+				"/path/to/owner/repo/a/target.go",
+			},
+			"target.go",
+			"/path/to/owner/repo/target.go",
+			false,
+		},
+		{
+			[]string{
+				"/path/to/owner/repo/target.go",
+				"/path/to/owner/repo/a/target.go",
+			},
+			"a/target.go",
+			"/path/to/owner/repo/a/target.go",
+			false,
+		},
+		{
+			[]string{
+				"/path/to/owner/repo/a/target.go",
+				"/path/to/owner/repo/target.go",
+			},
+			"target.go",
+			"/path/to/owner/repo/target.go",
+			false,
+		},
 	}
 	for _, tt := range tests {
-		fcs := FileCoverages{&FileCoverage{File: tt.coverageFile}}
-		if _, err := fcs.FuzzyFindByFile(tt.file); err != nil {
+		fcs := FileCoverages{}
+		for _, f := range tt.coverageFiles {
+			fcs = append(fcs, &FileCoverage{File: f})
+		}
+		fc, err := fcs.FuzzyFindByFile(tt.file)
+		if err != nil {
 			if !tt.wantErr {
 				t.Errorf("got err: %v", err)
 			}
@@ -328,8 +368,15 @@ func TestFuzzyFindByFile(t *testing.T) {
 		if tt.wantErr {
 			t.Error("want error")
 		}
+		got := fc.File
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
 
-		dfcs := DiffFileCoverages{&DiffFileCoverage{File: tt.coverageFile}}
+		dfcs := DiffFileCoverages{}
+		for _, f := range tt.coverageFiles {
+			dfcs = append(dfcs, &DiffFileCoverage{File: f})
+		}
 		if _, err := dfcs.FuzzyFindByFile(tt.file); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got err: %v", err)
@@ -338,6 +385,74 @@ func TestFuzzyFindByFile(t *testing.T) {
 		}
 		if tt.wantErr {
 			t.Error("want error")
+		}
+	}
+}
+
+func TestDiffFileCoveragesFuzzyFindByFile(t *testing.T) {
+	tests := []struct {
+		coverageFiles []string
+		file          string
+		want          string
+		wantErr       bool
+	}{
+		{
+			[]string{
+				"/path/to/owner/repo/other.go",
+				"/path/to/owner/repo/target.go",
+			},
+			"./owner/repo/target.go",
+			"/path/to/owner/repo/target.go",
+			false,
+		},
+		{[]string{"org/101000lab/owner/repo/target.go"}, "./owner/repo/target.go", "org/101000lab/owner/repo/target.go", false},
+		{[]string{"org/101000lab/owner/repo/target.go"}, "path/to/src/org/101000lab/owner/repo/target.go", "org/101000lab/owner/repo/target.go", false},
+		{
+			[]string{
+				"/path/to/owner/repo/target.go",
+				"/path/to/owner/repo/a/target.go",
+			},
+			"target.go",
+			"/path/to/owner/repo/target.go",
+			false,
+		},
+		{
+			[]string{
+				"/path/to/owner/repo/target.go",
+				"/path/to/owner/repo/a/target.go",
+			},
+			"a/target.go",
+			"/path/to/owner/repo/a/target.go",
+			false,
+		},
+		{
+			[]string{
+				"/path/to/owner/repo/a/target.go",
+				"/path/to/owner/repo/target.go",
+			},
+			"target.go",
+			"/path/to/owner/repo/target.go",
+			false,
+		},
+	}
+	for _, tt := range tests {
+		dfcs := DiffFileCoverages{}
+		for _, f := range tt.coverageFiles {
+			dfcs = append(dfcs, &DiffFileCoverage{File: f})
+		}
+		dfc, err := dfcs.FuzzyFindByFile(tt.file)
+		if err != nil {
+			if !tt.wantErr {
+				t.Errorf("got err: %v", err)
+			}
+			continue
+		}
+		if tt.wantErr {
+			t.Error("want error")
+		}
+		got := dfc.File
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
 	}
 }
