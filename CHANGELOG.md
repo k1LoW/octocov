@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.44.1](https://github.com/k1LoW/octocov/compare/v0.44.0...v0.44.1) - 2022-10-19
+- Update README about `summary:` by @k1LoW in https://github.com/k1LoW/octocov/pull/194
+- Fix FuzzyFindByFile by @k1LoW in https://github.com/k1LoW/octocov/pull/198
+
 ## [v0.44.0](https://github.com/k1LoW/octocov/compare/v0.43.2...v0.44.0) (2022-10-12)
 
 * Update pkgs [#189](https://github.com/k1LoW/octocov/pull/189) ([k1LoW](https://github.com/k1LoW))
