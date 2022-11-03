@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.45.0](https://github.com/k1LoW/octocov/compare/v0.44.1...v0.45.0) - 2022-11-03
+- Support `mackerel://` datastore by @k1LoW in https://github.com/k1LoW/octocov/pull/199
+- Add `central.reReport:` for re-reporting code metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/201
+- Fix time unit of test execution time for Mackerel by @k1LoW in https://github.com/k1LoW/octocov/pull/202
+- Add doc about `central.reReport:` by @k1LoW in https://github.com/k1LoW/octocov/pull/203
+
 ## [v0.44.1](https://github.com/k1LoW/octocov/compare/v0.44.0...v0.44.1) - 2022-10-19
 - Update README about `summary:` by @k1LoW in https://github.com/k1LoW/octocov/pull/194
 - Fix FuzzyFindByFile by @k1LoW in https://github.com/k1LoW/octocov/pull/198
