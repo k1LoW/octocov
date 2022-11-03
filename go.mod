@@ -29,6 +29,7 @@ require (
 	github.com/k1LoW/repin v0.3.3
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
+	github.com/mackerelio/mackerel-client-go v0.22.0
 	github.com/mauri870/gcsfs v0.0.0-20220203135357-0da01ba4e96d
 	github.com/migueleliasweb/go-github-mock v0.0.8
 	github.com/oklog/ulid/v2 v2.1.0
@@ -82,6 +83,7 @@ require (
 	github.com/spiegel-im-spiegel/errs v1.0.5 // indirect
 	github.com/zhangyunhao116/fastrand v0.3.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
+	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4 // indirect
 	golang.org/x/text v0.3.8 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect

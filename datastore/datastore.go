@@ -17,9 +17,11 @@ import (
 	"github.com/k1LoW/octocov/datastore/gcs"
 	"github.com/k1LoW/octocov/datastore/github"
 	"github.com/k1LoW/octocov/datastore/local"
+	"github.com/k1LoW/octocov/datastore/mackerel"
 	s3d "github.com/k1LoW/octocov/datastore/s3"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
+	mkr "github.com/mackerelio/mackerel-client-go"
 	"google.golang.org/api/option"
 )
 
@@ -31,6 +33,7 @@ const (
 	S3
 	GCS
 	BigQuery
+	Mackerel
 	Local
 
 	UnknownType DatastoreType = 0
@@ -42,6 +45,7 @@ var (
 	_ Datastore = (*s3d.S3)(nil)
 	_ Datastore = (*gcs.GCS)(nil)
 	_ Datastore = (*bq.BQ)(nil)
+	_ Datastore = (*mackerel.Mackerel)(nil)
 	_ Datastore = (*local.Local)(nil)
 )
 
@@ -126,6 +130,10 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 			return nil, err
 		}
 		return bq.New(client, dataset, table)
+	case Mackerel:
+		service := args[0]
+		client := mkr.NewClient(os.Getenv("MACKEREL_API_KEY"))
+		return mackerel.New(client, service)
 	case Local:
 		root := args[0]
 		return local.New(root)
@@ -192,6 +200,13 @@ func parse(u, root string) (DatastoreType, []string, error) {
 		dataset := splitted[1]
 		table := splitted[2]
 		return BigQuery, []string{project, dataset, table}, nil
+	case strings.HasPrefix(u, "mackerel://") || strings.HasPrefix(u, "mkr://"):
+		splitted := strings.Split(strings.Trim(strings.TrimPrefix(strings.TrimPrefix(u, "mackerel://"), "mkr://"), "/"), "/")
+		if len(splitted) != 1 {
+			return UnknownType, nil, fmt.Errorf("invalid datastore: %s", u)
+		}
+		service := splitted[0]
+		return Mackerel, []string{service}, nil
 	default:
 		p := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(u, "file://"), "local://"), "/")
 		if strings.HasPrefix(p, "/") {
