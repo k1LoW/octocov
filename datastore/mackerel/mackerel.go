@@ -64,7 +64,7 @@ func (m *Mackerel) StoreReport(ctx context.Context, r *report.Report) error {
 		v := &mkr.MetricValue{
 			Name:  name,
 			Time:  t,
-			Value: r.TestExecutionTimeNano() / float64(time.Millisecond), // milliseconds
+			Value: r.TestExecutionTimeNano() / float64(time.Second), // seconds
 		}
 		values = append(values, v)
 	}
