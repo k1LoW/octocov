@@ -49,7 +49,7 @@ var badgeCmd = &cobra.Command{
 	Use:       "badge",
 	Short:     "generate badge",
 	Long:      `generate badge.`,
-	Args:      cobra.ExactValidArgs(1),
+	Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
 	ValidArgs: []string{badgeCoverage, badgeRatio, badgeTime},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
