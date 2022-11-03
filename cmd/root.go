@@ -126,6 +126,7 @@ var rootCmd = &cobra.Command{
 			if err := c.CentralReReportReady(); err != nil {
 				cmd.PrintErrf("Skip re storing report: %v\n", err)
 			} else {
+				cmd.PrintErrln("Storing re-report...")
 				for _, r := range ctr.CollectedReports() {
 					if err := reportToDatastores(ctx, c, c.Central.ReReport.Datastores, r); err != nil {
 						return err
