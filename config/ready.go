@@ -214,6 +214,9 @@ func (c *Config) CentralReReportReady() error {
 	if err := c.CentralConfigReady(); err != nil {
 		return err
 	}
+	if c.Central.ReReport == nil {
+		return errors.New("central.reReport: is not set")
+	}
 	ok, err := c.CheckIf(c.Central.ReReport.If)
 	if err != nil {
 		return err
