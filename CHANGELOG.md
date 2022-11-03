@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.45.1](https://github.com/k1LoW/octocov/compare/v0.45.0...v0.45.1) - 2022-11-03
+- Fix config central.reReport: by @k1LoW in https://github.com/k1LoW/octocov/pull/204
+
 ## [v0.45.0](https://github.com/k1LoW/octocov/compare/v0.44.1...v0.45.0) - 2022-11-03
 - Support `mackerel://` datastore by @k1LoW in https://github.com/k1LoW/octocov/pull/199
 - Add `central.reReport:` for re-reporting code metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/201
