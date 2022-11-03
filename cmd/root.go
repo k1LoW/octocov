@@ -116,10 +116,24 @@ var rootCmd = &cobra.Command{
 				CodeToTestRatioColor:   c.CodeToTestRatioColor,
 				TestExecutionTimeColor: c.TestExecutionTimeColor,
 			})
+
 			paths, err := ctr.Generate(ctx)
 			if err != nil {
 				return err
 			}
+
+			// re report
+			if err := c.CentralReReportReady(); err != nil {
+				cmd.PrintErrf("Skip re storing report: %v\n", err)
+			} else {
+				for _, r := range ctr.CollectedReports() {
+					if err := reportToDatastores(ctx, c, c.Central.ReReport.Datastores, r); err != nil {
+						return err
+					}
+				}
+				// TODO: Get the path to the report stored in local:// and target it for git push
+			}
+
 			// git push
 			if err := c.CentralPushConfigReady(); err != nil {
 				cmd.PrintErrf("Skip commit and push central report: %v\n", err)
@@ -418,38 +432,8 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, rp)
 			}
-			for _, s := range c.Report.Datastores {
-				if datastore.NeedToShrink(s) {
-					continue
-				}
-				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
-				if err != nil {
-					return err
-				}
-				log.Printf("Storing report to %s", s)
-				if err := d.StoreReport(ctx, r); err != nil {
-					return err
-				}
-			}
-			log.Println("Shrink report data")
-			if r.Coverage != nil {
-				r.Coverage.DeleteBlockCoverages()
-			}
-			if r.CodeToTestRatio != nil {
-				r.CodeToTestRatio.DeleteFiles()
-			}
-			for _, s := range c.Report.Datastores {
-				if !datastore.NeedToShrink(s) {
-					continue
-				}
-				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
-				if err != nil {
-					return err
-				}
-				log.Printf("Storing report to %s", s)
-				if err := d.StoreReport(ctx, r); err != nil {
-					return err
-				}
+			if err := reportToDatastores(ctx, c, c.Report.Datastores, r); err != nil {
+				return err
 			}
 		}
 
@@ -528,6 +512,43 @@ func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	rootCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
+}
+
+func reportToDatastores(ctx context.Context, c *config.Config, datastores []string, r *report.Report) error {
+	for _, s := range datastores {
+		if datastore.NeedToShrink(s) {
+			continue
+		}
+		d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
+		if err != nil {
+			return err
+		}
+		log.Printf("Storing report to %s", s)
+		if err := d.StoreReport(ctx, r); err != nil {
+			return err
+		}
+	}
+	log.Println("Shrink report data")
+	if r.Coverage != nil {
+		r.Coverage.DeleteBlockCoverages()
+	}
+	if r.CodeToTestRatio != nil {
+		r.CodeToTestRatio.DeleteFiles()
+	}
+	for _, s := range datastores {
+		if !datastore.NeedToShrink(s) {
+			continue
+		}
+		d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
+		if err != nil {
+			return err
+		}
+		log.Printf("Storing report to %s", s)
+		if err := d.StoreReport(ctx, r); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func badgeFile(path string) (*os.File, error) {
