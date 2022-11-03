@@ -647,7 +647,7 @@ report:
 
 ### `report.datastores:`
 
-Datastores where the reports are saved.
+Datastores where the reports are stored.
 
 ``` yaml
 report:
@@ -755,7 +755,7 @@ $ octocov migrate-bq-table
 
 #### Mackerel
 
-> **Note**: Only works with `report.datastores`
+> **Note**: Only works with `report.datastores` or `central.reReport.datastores`
 
 Use `mackerel://` or `mkr://` scheme.
 
@@ -791,7 +791,7 @@ If the absolute path of `.octocov.yml` is `/path/to/.octocov.yml`
 
 ### `report.if:`
 
-Conditions for saving a report.
+Conditions for storing a report.
 
 ``` yaml
 # .octocov.yml
@@ -1039,6 +1039,18 @@ central:
 ```
 
 The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
+
+### `central.reReport:`
+
+Store collected reports in yet another datastores.
+
+### `central.reReport.if:`
+
+Conditions for re storing reports.
+
+### `central.reReport.datastores:`
+
+Datastores where the reports are re-stored.
 
 ## Supported coverage report formats
 
