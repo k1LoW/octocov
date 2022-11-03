@@ -87,11 +87,12 @@ type ConfigTestExecutionTimeBadge struct {
 }
 
 type ConfigCentral struct {
-	Root    string               `yaml:"root"`
-	Reports ConfigCentralReports `yaml:"reports"`
-	Badges  ConfigCentralBadges  `yaml:"badges"`
-	Push    *ConfigPush          `yaml:"push,omitempty"`
-	If      string               `yaml:"if,omitempty"`
+	Root     string               `yaml:"root"`
+	Reports  ConfigCentralReports `yaml:"reports"`
+	Badges   ConfigCentralBadges  `yaml:"badges"`
+	Push     *ConfigPush          `yaml:"push,omitempty"`
+	ReReport *ConfigReport        `yaml:"reReport,omitempty"`
+	If       string               `yaml:"if,omitempty"`
 }
 
 type ConfigCentralReports struct {

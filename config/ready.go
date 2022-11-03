@@ -210,6 +210,20 @@ func (c *Config) CentralPushConfigReady() error {
 	return nil
 }
 
+func (c *Config) CentralReReportReady() error {
+	if err := c.CentralConfigReady(); err != nil {
+		return err
+	}
+	ok, err := c.CheckIf(c.Central.ReReport.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Central.ReReport.If)
+	}
+	return nil
+}
+
 func (c *Config) DiffConfigReady() error {
 	if c.Diff == nil {
 		return errors.New("diff: is not set")

@@ -122,6 +122,18 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 
+			// re report
+			if err := c.CentralReReportReady(); err != nil {
+				cmd.PrintErrf("Skip re storing report: %v\n", err)
+			} else {
+				for _, r := range ctr.CollectedReports() {
+					if err := reportToDatastores(ctx, c, c.Central.ReReport.Datastores, r); err != nil {
+						return err
+					}
+				}
+				// TODO: Get the path to the report stored in local:// and target it for git push
+			}
+
 			// git push
 			if err := c.CentralPushConfigReady(); err != nil {
 				cmd.PrintErrf("Skip commit and push central report: %v\n", err)

@@ -78,6 +78,10 @@ func (c *Central) Generate(ctx context.Context) ([]string, error) {
 	return paths, nil
 }
 
+func (c *Central) CollectedReports() []*report.Report {
+	return c.reports
+}
+
 func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
 
