@@ -45,6 +45,8 @@ jobs:
 
       - name: Build octocov and run as a action
         uses: ./testdata/actions/coverage
+        env:
+          MACKEREL_API_KEY: ${{ secrets.MACKEREL_API_KEY }}
 
       - name: Show rate limit
         run: |
