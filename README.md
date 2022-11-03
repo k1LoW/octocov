@@ -682,7 +682,7 @@ artifact://[owner]/[repo]/[artifactName]
 - `artifact://[owner]/[repo]` ( default artifactName: `octocov-report` )
 
 
-**Notice:** reporting to the artifact can only be sent from the GitHub Actions of the same repository.
+> **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
 **Required environment variables:**
 
@@ -753,6 +753,25 @@ If you want to create a table, execute the following command ( require `bigquery
 $ octocov migrate-bq-table
 ```
 
+#### Mackerel
+
+> **Note**: Only works with `report.datastores`
+
+Use `mackerel://` or `mkr://` scheme.
+
+```
+mackerel://[Service Name]
+```
+
+**Required permission:**
+
+- `read`
+- `write`
+
+**Required environment variables:**
+
+- `MACKEREL_API_KEY` or `OCTOCOV_MACKEREL_API_KEY`
+
 #### Local
 
 Use `local://` or `file://` scheme.
@@ -805,7 +824,7 @@ The variables available in the `if` section are as follows
 
 ### `central:`
 
-:NOTICE: When central mode is enabled, other functions are automatically turned off.
+> **Note**: When central mode is enabled, other functions are automatically turned off.
 
 ### `central.root:`
 
