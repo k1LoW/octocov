@@ -81,11 +81,12 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 
 func (c *ConfigCentral) UnmarshalYAML(data []byte) error {
 	s := struct {
-		Root    string               `yaml:"root"`
-		Reports ConfigCentralReports `yaml:"reports"`
-		Badges  ConfigCentralBadges  `yaml:"badges"`
-		Push    interface{}          `yaml:"push,omitempty"`
-		If      string               `yaml:"if,omitempty"`
+		Root     string               `yaml:"root"`
+		Reports  ConfigCentralReports `yaml:"reports"`
+		Badges   ConfigCentralBadges  `yaml:"badges"`
+		Push     interface{}          `yaml:"push,omitempty"`
+		ReReport *ConfigReport        `yaml:"reReport,omitempty"`
+		If       string               `yaml:"if,omitempty"`
 	}{}
 	err := yaml.Unmarshal(data, &s)
 	if err != nil {
@@ -94,6 +95,7 @@ func (c *ConfigCentral) UnmarshalYAML(data []byte) error {
 	c.Root = s.Root
 	c.Reports = s.Reports
 	c.Badges = s.Badges
+	c.ReReport = s.ReReport
 	c.If = s.If
 
 	switch v := s.Push.(type) {
