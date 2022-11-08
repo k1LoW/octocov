@@ -689,6 +689,19 @@ func TestReportConfigReady(t *testing.T) {
 			},
 			"the condition in the `if` section is not met (false)",
 		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Report: &ConfigReport{
+					Datastores: []string{
+						"s3://bucket/reports",
+					},
+					If: "env.GITHUB_EVENT_NAME startsWith \"pull\"",
+				},
+				gh: mg,
+			},
+			"the condition in the `if` supports ",
+		},
 	}
 	for _, tt := range tests {
 		err := tt.c.ReportConfigReady()
