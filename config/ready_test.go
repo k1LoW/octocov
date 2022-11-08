@@ -700,7 +700,7 @@ func TestReportConfigReady(t *testing.T) {
 				},
 				gh: mg,
 			},
-			"the condition in the `if` supports https://github.com/antonmedv/expr  ",
+			"",
 		},
 	}
 	for _, tt := range tests {
