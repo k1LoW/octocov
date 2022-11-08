@@ -696,11 +696,11 @@ func TestReportConfigReady(t *testing.T) {
 					Datastores: []string{
 						"s3://bucket/reports",
 					},
-					If: "env.GITHUB_EVENT_NAME startsWith \"pull\"",
+					If: "\"pull_requests\" startsWith \"pull\"",
 				},
 				gh: mg,
 			},
-			"the condition in the `if` supports ",
+			"the condition in the `if` supports https://github.com/antonmedv/expr  ",
 		},
 	}
 	for _, tt := range tests {
