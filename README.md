@@ -805,6 +805,8 @@ The variables available in the `if` section are [here](https://github.com/k1LoW/
 
 ### `*.if:`
 
+> **Note**: It supports [antonmedv/expr](https://github.com/antonmedv/expr) expressions.
+
 The variables available in the `if` section are as follows
 
 | Variable name | Type | Description |
