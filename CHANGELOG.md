@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.45.3](https://github.com/k1LoW/octocov/compare/v0.45.2...v0.45.3) - 2022-11-09
+- Fix build pipeline of docker image by @k1LoW in https://github.com/k1LoW/octocov/pull/212
+
 ## [v0.45.2](https://github.com/k1LoW/octocov/compare/v0.45.1...v0.45.2) - 2022-11-09
 - Fix SA1019 by @k1LoW in https://github.com/k1LoW/octocov/pull/206
 - Add `badgen` command for generating SVG badge by @k1LoW in https://github.com/k1LoW/octocov/pull/210
