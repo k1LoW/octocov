@@ -61,6 +61,52 @@ func TestAddIconFile(t *testing.T) {
 	}
 }
 
+func TestSetColor(t *testing.T) {
+	tests := []struct {
+		in      string
+		want    string
+		wantErr bool
+	}{
+		{"", "", true},
+		{"123456", "#123456", false},
+		{"1234567", "", true},
+		{"ababab", "#ABABAB", false},
+		{"ababax", "", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.in, func(t *testing.T) {
+			b := New("l", "m")
+			{
+				if err := b.SetLabelColor(tt.in); err != nil {
+					if !tt.wantErr {
+						t.Errorf("got err %v", err)
+					}
+					return
+				}
+				got := b.LabelColor
+				if got != tt.want {
+					t.Errorf("got %v\nwant %v", got, tt.want)
+				}
+			}
+			{
+				if err := b.SetMessageColor(tt.in); err != nil {
+					if !tt.wantErr {
+						t.Errorf("got err %v", err)
+					}
+					return
+				}
+				got := b.MessageColor
+				if got != tt.want {
+					t.Errorf("got %v\nwant %v", got, tt.want)
+				}
+			}
+			if tt.wantErr {
+				t.Error("want err")
+			}
+		})
+	}
+}
+
 func testdataDir(t *testing.T) string {
 	t.Helper()
 	wd, err := os.Getwd()

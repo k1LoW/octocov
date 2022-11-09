@@ -1,4 +1,5 @@
-octocov
+/octocov
+/badgen
 /dist/
 /coverage.out
 /coverage*.out
