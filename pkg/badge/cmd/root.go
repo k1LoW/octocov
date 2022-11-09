@@ -43,12 +43,12 @@ var rootCmd = &cobra.Command{
 	Long:  `Generate SVG badge.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		b := badge.New(label, message)
-		if labelColor == "" {
+		if labelColor != "" {
 			if err := b.SetLabelColor(labelColor); err != nil {
 				return err
 			}
 		}
-		if messageColor == "" {
+		if messageColor != "" {
 			if err := b.SetMessageColor(messageColor); err != nil {
 				return err
 			}
@@ -75,7 +75,7 @@ func Execute() {
 func init() {
 	rootCmd.Flags().StringVarP(&label, "label", "l", "label is here", "label of badge")
 	rootCmd.Flags().StringVarP(&message, "message", "m", "message is here", "message of badge")
-	rootCmd.Flags().StringVarP(&labelColor, "label-color", "lc", "", "color of label background")
-	rootCmd.Flags().StringVarP(&messageColor, "label-message", "mc", "", "color of message background")
+	rootCmd.Flags().StringVarP(&labelColor, "label-color", "L", "", "color of label background")
+	rootCmd.Flags().StringVarP(&messageColor, "label-message", "M", "", "color of message background")
 	rootCmd.Flags().StringVarP(&icon, "icon", "i", "", "icon of badge")
 }
