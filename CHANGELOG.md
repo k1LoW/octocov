@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.45.2](https://github.com/k1LoW/octocov/compare/v0.45.1...v0.45.2) - 2022-11-09
+- Fix SA1019 by @k1LoW in https://github.com/k1LoW/octocov/pull/206
+- Add `badgen` command for generating SVG badge by @k1LoW in https://github.com/k1LoW/octocov/pull/210
+- Fix `badgen` by @k1LoW in https://github.com/k1LoW/octocov/pull/211
+
 ## [v0.45.1](https://github.com/k1LoW/octocov/compare/v0.45.0...v0.45.1) - 2022-11-03
 - Fix config central.reReport: by @k1LoW in https://github.com/k1LoW/octocov/pull/204
 
