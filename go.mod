@@ -35,7 +35,7 @@ require (
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/shurcooL/githubv4 v0.0.0-20220922232305-70b4d362a8cb
-	github.com/spf13/cobra v1.6.0
+	github.com/spf13/cobra v1.6.1
 	github.com/spiegel-im-spiegel/gnkf v0.6.4
 	github.com/tenntenn/golden v0.2.0
 	github.com/whilp/git-urls v1.0.0

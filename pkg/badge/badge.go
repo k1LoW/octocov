@@ -13,6 +13,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"text/template"
 
 	"github.com/antchfx/xmlquery"
@@ -26,6 +28,8 @@ const defaultLabelColor = "#24292E"
 const defaultMessageColor = "#007EC6"
 const fontSize = 11
 const dpi = 72
+
+var rgbRe = regexp.MustCompile(`^[0-9A-F]{6}$`)
 
 type Badge struct {
 	Label        string
@@ -77,8 +81,38 @@ func (b *Badge) AddIconFile(f string) error {
 	if err != nil {
 		return err
 	}
-	b.Icon = imgf
+	return b.AddIcon(imgf)
+}
+
+func (b *Badge) SetLabelColor(c interface{}) error {
+	rgb, err := castColor(c)
+	if err != nil {
+		return err
+	}
+	b.LabelColor = rgb
 	return nil
+}
+
+func (b *Badge) SetMessageColor(c interface{}) error {
+	rgb, err := castColor(c)
+	if err != nil {
+		return err
+	}
+	b.MessageColor = rgb
+	return nil
+}
+
+func castColor(c interface{}) (string, error) {
+	switch v := c.(type) {
+	case string:
+		rgb := strings.ToUpper(strings.TrimPrefix(v, "#"))
+		if !rgbRe.MatchString(rgb) {
+			return "", fmt.Errorf("invalid color: %s", v)
+		}
+		return fmt.Sprintf("#%s", rgb), nil
+	default:
+		return "", fmt.Errorf("invalid color: %v", v)
+	}
 }
 
 // Render badge
