@@ -641,10 +641,11 @@ func TestDiffConfigReady(t *testing.T) {
 }
 
 func TestReportConfigReady(t *testing.T) {
-	os.Setenv("GITHUB_EVENT_NAME", "pull_request")
-	os.Setenv("GITHUB_EVENT_PATH", filepath.Join(rootTestdataDir(t), "config", "event_pull_request_opened.json"))
-	os.Setenv("GITHUB_REF", "refs/pull/4/merge")
-	mg := mockedGh(t)
+	t.Setenv("GITHUB_EVENT_NAME", "pull_request")
+	t.Setenv("GITHUB_EVENT_PATH", filepath.Join(rootTestdataDir(t), "config", "event_pull_request_opened.json"))
+	t.Setenv("GITHUB_REF", "refs/pull/4/merge")
+	t.Setenv("GITHUB_TOKEN", "token")
+
 	tests := []struct {
 		c    *Config
 		want string
@@ -652,7 +653,7 @@ func TestReportConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				gh:         mg,
+				gh:         mockedGh(t),
 			},
 			"report: is not set",
 		},
@@ -660,7 +661,7 @@ func TestReportConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				Report:     &ConfigReport{},
-				gh:         mg,
+				gh:         mockedGh(t),
 			},
 			"report.datastores: and report.path: are not set",
 		},
@@ -672,7 +673,7 @@ func TestReportConfigReady(t *testing.T) {
 						"s3://bucket/reports",
 					},
 				},
-				gh: mg,
+				gh: mockedGh(t),
 			},
 			"",
 		},
@@ -685,9 +686,22 @@ func TestReportConfigReady(t *testing.T) {
 					},
 					If: "false",
 				},
-				gh: mg,
+				gh: mockedGh(t),
 			},
 			"the condition in the `if` section is not met (false)",
+		},
+		{
+			&Config{
+				Repository: "owner/repo",
+				Report: &ConfigReport{
+					Datastores: []string{
+						"s3://bucket/reports",
+					},
+					If: "\"pull_requests\" startsWith \"pull\"",
+				},
+				gh: mockedGh(t),
+			},
+			"",
 		},
 	}
 	for _, tt := range tests {
