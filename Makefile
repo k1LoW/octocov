@@ -34,6 +34,9 @@ lint:
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
+build_badgen:
+	go build -ldflags="$(BUILD_LDFLAGS)" -o badgen pkg/badge/cmd/badgen/main.go
+
 coverage: build
 	./octocov
 
