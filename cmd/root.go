@@ -44,6 +44,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const defaultCommitMessage = "Update by octocov"
+
 var (
 	configPath  string
 	reportPath  string
@@ -141,13 +143,17 @@ var rootCmd = &cobra.Command{
 			} else {
 				cmd.PrintErrln("Commit and push central report")
 
-				commitMessage := "Update by octocov"
+				m := defaultCommitMessage
 				if c.Central.Push.Message != "" {
-					commitMessage = c.Central.Push.Message
+					m = c.Central.Push.Message
 				}
 
-				if err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, commitMessage); err != nil {
+				c, err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, m)
+				if err != nil {
 					return err
+				}
+				if c == 0 {
+					cmd.PrintErrln("No files to be commit")
 				}
 			}
 			return nil
@@ -450,13 +456,17 @@ var rootCmd = &cobra.Command{
 		} else {
 			cmd.PrintErrln("Pushing generated files...")
 
-			commitMessage := "Update by octocov"
+			m := defaultCommitMessage
 			if c.Push.Message != "" {
-				commitMessage = c.Push.Message
+				m = c.Push.Message
 			}
 
-			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, commitMessage); err != nil {
+			c, err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, m)
+			if err != nil {
 				return err
+			}
+			if c == 0 {
+				cmd.PrintErrln("No files to be commit")
 			}
 		}
 
