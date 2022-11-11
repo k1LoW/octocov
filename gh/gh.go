@@ -645,37 +645,37 @@ func (g *Gh) deletePreviousComments(ctx context.Context, owner, repo string, n i
 	return nil
 }
 
-func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, message string) error {
+func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, message string) (int, error) {
 	r, err := git.PlainOpen(gitRoot)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	w, err := r.Worktree()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	status, err := w.Status()
 	if err != nil {
-		return err
+		return 0, err
 	}
-	push := false
+
+	c := 0
 	for _, p := range addPaths {
 		rel, err := filepath.Rel(gitRoot, p)
 		if err != nil {
-			return err
+			return 0, err
 		}
 		if _, ok := status[rel]; ok {
-			push = true
+			c += 1
 			_, err := w.Add(rel)
 			if err != nil {
-				return err
+				return 0, err
 			}
 		}
 	}
 
-	if !push {
-		fmt.Println("No files to be commit.")
-		return nil
+	if c == 0 {
+		return c, nil
 	}
 
 	opts := &git.CommitOptions{}
@@ -694,7 +694,7 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 		}
 	}
 	if _, err := w.Commit(message, opts); err != nil {
-		return err
+		return c, err
 	}
 
 	if err := r.PushContext(ctx, &git.PushOptions{
@@ -703,10 +703,10 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 			Password: os.Getenv("GITHUB_TOKEN"),
 		},
 	}); err != nil && err != git.NoErrAlreadyUpToDate {
-		return err
+		return c, err
 	}
 
-	return nil
+	return c, nil
 }
 
 type GitHubEvent struct {
