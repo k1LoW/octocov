@@ -513,7 +513,7 @@ message for commit.
 ``` yaml
 # .octocov.yml
 push:
-  message: Update by octocov [skip-ci]
+  message: Update by octocov [skip ci]
 ```
 
 ### `comment:`
