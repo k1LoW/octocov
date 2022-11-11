@@ -443,7 +443,13 @@ var rootCmd = &cobra.Command{
 			cmd.PrintErrf("Skip pushing generate files: %v\n", err)
 		} else {
 			cmd.PrintErrln("Pushing generated files...")
-			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
+
+			commitMessage := "Update by octocov"
+			if c.Push.Message != "" {
+				commitMessage = c.Push.Message
+			}
+
+			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, commitMessage); err != nil {
 				return err
 			}
 		}

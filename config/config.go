@@ -104,7 +104,8 @@ type ConfigCentralBadges struct {
 }
 
 type ConfigPush struct {
-	If string `yaml:"if,omitempty"`
+	If      string `yaml:"if,omitempty"`
+	Message string `yaml:"message,omitempty"`
 }
 
 type ConfigComment struct {
