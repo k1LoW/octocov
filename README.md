@@ -506,6 +506,16 @@ push:
 
 The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
 
+### `push.message:`
+
+message for commit.
+
+``` yaml
+# .octocov.yml
+push:
+  message: Update by octocov [skip-ci]
+```
+
 ### `comment:`
 
 Set this if want to comment report to pull request
