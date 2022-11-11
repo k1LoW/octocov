@@ -140,7 +140,13 @@ var rootCmd = &cobra.Command{
 				cmd.PrintErrf("Skip commit and push central report: %v\n", err)
 			} else {
 				cmd.PrintErrln("Commit and push central report")
-				if err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, "Update by octocov"); err != nil {
+
+				commitMessage := "Update by octocov"
+				if c.Central.Push.Message != "" {
+					commitMessage = c.Central.Push.Message
+				}
+
+				if err := gh.PushUsingLocalGit(ctx, c.GitRoot, paths, commitMessage); err != nil {
 					return err
 				}
 			}
@@ -443,7 +449,13 @@ var rootCmd = &cobra.Command{
 			cmd.PrintErrf("Skip pushing generate files: %v\n", err)
 		} else {
 			cmd.PrintErrln("Pushing generated files...")
-			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, "Update by octocov"); err != nil {
+
+			commitMessage := "Update by octocov"
+			if c.Push.Message != "" {
+				commitMessage = c.Push.Message
+			}
+
+			if err := gh.PushUsingLocalGit(ctx, c.GitRoot, addPaths, commitMessage); err != nil {
 				return err
 			}
 		}

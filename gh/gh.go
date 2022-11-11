@@ -674,6 +674,7 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 	}
 
 	if !push {
+		fmt.Println("No files to be commit.")
 		return nil
 	}
 
