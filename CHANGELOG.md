@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.46.0](https://github.com/k1LoW/octocov/compare/v0.45.3...v0.46.0) - 2022-11-11
+- test: add case for https://github.com/antonmedv/expr expression supports by @u-yas in https://github.com/k1LoW/octocov/pull/209
+- feat: customize commit message by octocov.yml by @u-yas in https://github.com/k1LoW/octocov/pull/215
+- bonsai by @k1LoW in https://github.com/k1LoW/octocov/pull/216
+
 ## [v0.45.3](https://github.com/k1LoW/octocov/compare/v0.45.2...v0.45.3) - 2022-11-09
 - Fix build pipeline of docker image by @k1LoW in https://github.com/k1LoW/octocov/pull/212
 
