@@ -11,8 +11,8 @@ Key features of `octocov` are:
 - **Useful both [as a CI tool](#on-github-actions) and [as a CLI tool](#on-terminal)**
 - **[Support multiple coverage report formats](#supported-coverage-report-formats).**
 - **[Support multiple code metrics](#supported-code-metrics).**
-- **[Support for even generating coverage report badge](#generate-coverage-report-badge-self).**
-- **[Have a mechanism to aggregate reports from multiple repositories](#store-report-to-central-datastore).**
+- **[Support for even generating coverage report badges](#generate-report-badges-self).**
+- **[Have a mechanism to aggregate reports from multiple repositories](#store-report-to-datastores).**
 
 ## Getting Started
 
