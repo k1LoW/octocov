@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/fatih/color"
-	"github.com/spiegel-im-spiegel/gnkf/enc"
-	"github.com/spiegel-im-spiegel/gnkf/guess"
+	"github.com/goark/gnkf/enc"
+	"github.com/goark/gnkf/guess"
 )
 
 const maxSrcSize = 1073741824 //1GB

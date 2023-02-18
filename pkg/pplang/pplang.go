@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/go-github/v45/github"
-	"github.com/k1LoW/go-github-client/v45/factory"
+	"github.com/google/go-github/v50/github"
+	"github.com/k1LoW/go-github-client/v50/factory"
 	giturls "github.com/whilp/git-urls"
 	"gopkg.in/ini.v1"
 )
