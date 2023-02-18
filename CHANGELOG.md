@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.47.0](https://github.com/k1LoW/octocov/compare/v0.46.0...v0.47.0) - 2023-02-18
+- Update go and pkgs version by @k1LoW in https://github.com/k1LoW/octocov/pull/219
+- Bump golang.org/x/net from 0.6.0 to 0.7.0 by @dependabot in https://github.com/k1LoW/octocov/pull/221
+
 ## [v0.46.0](https://github.com/k1LoW/octocov/compare/v0.45.3...v0.46.0) - 2022-11-11
 - test: add case for https://github.com/antonmedv/expr expression supports by @u-yas in https://github.com/k1LoW/octocov/pull/209
 - feat: customize commit message by octocov.yml by @u-yas in https://github.com/k1LoW/octocov/pull/215
