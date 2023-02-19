@@ -32,10 +32,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
       - name: Setup
         run: |
-          brew uninstall go@1.17
-          brew install go
           brew install goreleaser
 
       - name: Release
