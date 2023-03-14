@@ -222,7 +222,7 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 }
 
 func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
-	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch-name
+	splitted := strings.SplitN(os.Getenv("GITHUB_REF"), "/", 3) // refs/pull/8/head or refs/heads/branch/branch/name
 	if len(splitted) < 3 {
 		return "", fmt.Errorf("env %s is not set", "GITHUB_REF")
 	}
