@@ -84,6 +84,41 @@ func TestGetRawRootURL(t *testing.T) {
 	}
 }
 
+func TestDetectCurrentBranch(t *testing.T) {
+	tests := []struct {
+		GITHUB_REF      string
+		GITHUB_HEAD_REF string
+		want            string
+		wantErr         bool
+	}{
+		{"refs/pull/8/head", "", "", true},
+		{"refs/heads/name", "mybranch", "name", false},
+		{"refs/heads/branch/branch/name", "", "branch/branch/name", false},
+		{"refs/pull/8/head", "mybranch", "mybranch", false},
+	}
+	ctx := context.TODO()
+	mg := mockedGh(t)
+	for _, tt := range tests {
+		t.Run(tt.GITHUB_REF, func(t *testing.T) {
+			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			t.Setenv("GITHUB_HEAD_REF", tt.GITHUB_HEAD_REF)
+			got, err := mg.DetectCurrentBranch(ctx)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got err: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want err")
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	tests := []struct {
 		GITHUB_REF string
