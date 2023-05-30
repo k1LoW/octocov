@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.47.3](https://github.com/k1LoW/octocov/compare/v0.47.2...v0.47.3) - 2023-05-30
+- Bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 by @dependabot in https://github.com/k1LoW/octocov/pull/228
+
 ## [v0.47.2](https://github.com/k1LoW/octocov/compare/v0.47.1...v0.47.2) - 2023-03-14
 - Fix DetectCurrentBranch by @k1LoW in https://github.com/k1LoW/octocov/pull/225
 
