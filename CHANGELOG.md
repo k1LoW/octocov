@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.47.2](https://github.com/k1LoW/octocov/compare/v0.47.1...v0.47.2) - 2023-03-14
+- Fix DetectCurrentBranch by @k1LoW in https://github.com/k1LoW/octocov/pull/225
+
 ## [v0.47.1](https://github.com/k1LoW/octocov/compare/v0.47.0...v0.47.1) - 2023-02-19
 - Fix CI by @k1LoW in https://github.com/k1LoW/octocov/pull/222
 

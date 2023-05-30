@@ -63,7 +63,7 @@ require (
 	github.com/apache/thrift v0.16.0 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cli/go-gh v1.1.0 // indirect
-	github.com/cloudflare/circl v1.1.0 // indirect
+	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-enry/go-oniguruma v1.2.1 // indirect
 	github.com/go-git/gcfg v1.5.0 // indirect
