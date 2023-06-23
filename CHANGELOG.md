@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.47.4](https://github.com/k1LoW/octocov/compare/v0.47.3...v0.47.4) - 2023-06-23
+- Fix panic when adding codeToTestRatio for the first time by @rajyan in https://github.com/k1LoW/octocov/pull/231
+
 ## [v0.47.3](https://github.com/k1LoW/octocov/compare/v0.47.2...v0.47.3) - 2023-05-30
 - Bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 by @dependabot in https://github.com/k1LoW/octocov/pull/228
 
