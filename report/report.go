@@ -371,7 +371,7 @@ func (r *Report) CoveragePercent() float64 {
 }
 
 func (r *Report) CodeToTestRatioRatio() float64 {
-	if r.CodeToTestRatio.Code == 0 {
+	if r.CodeToTestRatio == nil || r.CodeToTestRatio.Code == 0 {
 		return 0.0
 	}
 	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
