@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.48.0](https://github.com/k1LoW/octocov/compare/v0.47.4...v0.48.0) - 2023-07-12
+- Support `GITHUB_PULL_REQUEST_NUMBER` for detecting pull request number by @k1LoW in https://github.com/k1LoW/octocov/pull/233
+
 ## [v0.47.4](https://github.com/k1LoW/octocov/compare/v0.47.3...v0.47.4) - 2023-06-23
 - Fix panic when adding codeToTestRatio for the first time by @rajyan in https://github.com/k1LoW/octocov/pull/231
 
