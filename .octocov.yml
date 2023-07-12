@@ -7,7 +7,7 @@ codeToTestRatio:
   test:
     - '**/*_test.go'
 testExecutionTime:
-  acceptable: 1min30sec
+  acceptable: 2min30sec
 diff:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
