@@ -15,6 +15,12 @@ jobs:
       - name: Check out source code
         uses: actions/checkout@v3
 
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+          cache: true
+
       - id: run-tagpr
         name: Run tagpr
         uses: Songmu/tagpr@v1
@@ -33,7 +39,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
           cache: true
@@ -53,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Login to ghcr.io
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -65,16 +71,17 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
+          cache: true
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
+        uses: goreleaser/goreleaser-action@v4
         with:
           distribution: goreleaser
           version: latest
-          args: --config .goreleaser/linux.yml --rm-dist
+          args: release --config .goreleaser/linux.yml --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
