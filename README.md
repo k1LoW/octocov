@@ -1110,6 +1110,15 @@ Support `SF` `DA` only
 - **Code to Test Ratio**
 - **Test Execution Time** (on GitHub Actions only)
 
+## Detecting pull request number
+
+octocov detect pull request number following order.
+
+1. Get pull request number from `GITHUB_PULL_REQUEST_NUMBER` or `OCTOCOV_GITHUB_PULL_REQUEST_NUMBER`.
+2. Get pull request number from [`GITHUB_REF`](https://docs.github.com/en/actions/learn-github-actions/variables) ( e.g. `refs/pull/1/merge` ).
+3. Get branch name from [`GITHUB_REF`](https://docs.github.com/en/actions/learn-github-actions/variables) ( e.g. `refs/heads/branch/branch/name` ) and detect pull request number using GitHub API.
+
+
 ## Install
 
 **deb:**

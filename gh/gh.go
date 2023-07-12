@@ -236,6 +236,9 @@ func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
 }
 
 func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo string) (int, error) {
+	if os.Getenv("GITHUB_PULL_REQUEST_NUMBER") != "" {
+		return strconv.Atoi(os.Getenv("GITHUB_PULL_REQUEST_NUMBER"))
+	}
 	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch/branch/name
 	if len(splitted) < 3 {
 		return 0, fmt.Errorf("env %s is not set", "GITHUB_REF")
