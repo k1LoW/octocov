@@ -121,17 +121,22 @@ func TestDetectCurrentBranch(t *testing.T) {
 
 func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	tests := []struct {
-		GITHUB_REF string
-		want       int
-		wantErr    bool
+		GITHUB_PULL_REQUEST_NUMBER string
+		GITHUB_REF                 string
+		want                       int
+		wantErr                    bool
 	}{
-		{"refs/pull/8/head", 8, false},
-		{"refs/heads/branch/branch/name", 13, false},
+		{"", "refs/pull/8/head", 8, false},
+		{"", "refs/heads/branch/branch/name", 13, false},
+		{"", "refs/8", 0, true},
+		{"8", "", 8, false},
+		{"str", "", 0, true},
 	}
 	ctx := context.TODO()
 	mg := mockedGh(t)
 	for _, tt := range tests {
 		t.Run(tt.GITHUB_REF, func(t *testing.T) {
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.GITHUB_PULL_REQUEST_NUMBER)
 			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
 			got, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
 			if err != nil {
@@ -166,6 +171,7 @@ func TestGenerateSig(t *testing.T) {
 	}
 }
 func mockedGh(t *testing.T) *Gh {
+	t.Setenv("GITHUB_TOKEN", "dummy")
 	mockedHTTPClient := mock.NewMockedHTTPClient(
 		mock.WithRequestMatch(
 			mock.GetReposByOwnerByRepo,
