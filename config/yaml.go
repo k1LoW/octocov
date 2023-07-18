@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/duration"
 )
 
 var commentRe = regexp.MustCompile(`(?m)^comment:`)
@@ -23,6 +24,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		Summary           *ConfigSummary           `yaml:"summary,omitempty"`
 		Body              *ConfigBody              `yaml:"body,omitempty"`
 		Diff              *ConfigDiff              `yaml:"diff,omitempty"`
+		Timeout           string                   `yaml:"timeout,omitempty"`
 	}{}
 	err := yaml.Unmarshal(data, &s)
 	if err != nil {
@@ -37,6 +39,13 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 	c.Summary = s.Summary
 	c.Body = s.Body
 	c.Diff = s.Diff
+	if s.Timeout == "" {
+		s.Timeout = defaultTimeout
+	}
+	c.Timeout, err = duration.Parse(s.Timeout)
+	if err != nil {
+		return err
+	}
 
 	switch v := s.Comment.(type) {
 	case nil:
