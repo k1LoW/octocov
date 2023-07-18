@@ -21,6 +21,7 @@ import (
 
 const defaultBadgesDatastore = "local://reports"
 const defaultReportsDatastore = "local://reports"
+const defaultTimeout = "30sec"
 const largeEnoughTime = float64(99 * time.Hour)
 
 const (
@@ -46,6 +47,7 @@ type Config struct {
 	Summary           *ConfigSummary           `yaml:"summary,omitempty"`
 	Body              *ConfigBody              `yaml:"body,omitempty"`
 	Diff              *ConfigDiff              `yaml:"diff,omitempty"`
+	Timeout           time.Duration            `yaml:"timeout,omitempty"`
 	GitRoot           string                   `yaml:"-"`
 	// working directory
 	wd string

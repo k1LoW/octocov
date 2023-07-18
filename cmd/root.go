@@ -64,7 +64,6 @@ var rootCmd = &cobra.Command{
 			return printMetrics(cmd)
 		}
 
-		ctx := context.Background()
 		addPaths := []string{}
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
 
@@ -77,6 +76,9 @@ var rootCmd = &cobra.Command{
 		if !c.Loaded() {
 			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
 		}
+
+		ctx, cancel := context.WithTimeout(context.Background(), c.Timeout)
+		defer cancel()
 
 		if reportPath != "" {
 			c.Coverage.Paths = []string{reportPath}
