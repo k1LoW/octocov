@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.49.0](https://github.com/k1LoW/octocov/compare/v0.48.0...v0.49.0) - 2023-07-19
+- Support `timeout:` and set default timeout by @k1LoW in https://github.com/k1LoW/octocov/pull/237
+- Update lint setting by @k1LoW in https://github.com/k1LoW/octocov/pull/238
+
 ## [v0.48.0](https://github.com/k1LoW/octocov/compare/v0.47.4...v0.48.0) - 2023-07-12
 - Support `GITHUB_PULL_REQUEST_NUMBER` for detecting pull request number by @k1LoW in https://github.com/k1LoW/octocov/pull/233
 
