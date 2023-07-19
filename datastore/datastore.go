@@ -25,10 +25,10 @@ import (
 	"google.golang.org/api/option"
 )
 
-type DatastoreType int
+type Type int
 
 const (
-	GitHub DatastoreType = iota + 1
+	GitHub Type = iota + 1
 	Artifact
 	S3
 	GCS
@@ -36,7 +36,7 @@ const (
 	Mackerel
 	Local
 
-	UnknownType DatastoreType = 0
+	UnknownType Type = 0
 )
 
 var (
@@ -141,7 +141,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 	return nil, fmt.Errorf("invalid datastore: %s", u)
 }
 
-func parse(u, root string) (DatastoreType, []string, error) {
+func parse(u, root string) (Type, []string, error) {
 	switch {
 	case strings.HasPrefix(u, "github://"):
 		splitted := strings.Split(strings.Trim(strings.TrimPrefix(u, "github://"), "/"), "/")

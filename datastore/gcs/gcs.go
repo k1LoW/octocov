@@ -42,17 +42,17 @@ func (g *GCS) Put(ctx context.Context, path string, content []byte) error {
 	return nil
 }
 
-type GCSFS struct {
+type FS struct {
 	prefix string
 	gscfs  *gcsfs.FS
 }
 
-func (fsys *GCSFS) Open(name string) (fs.File, error) {
+func (fsys *FS) Open(name string) (fs.File, error) {
 	return fsys.gscfs.Open(filepath.Join(fsys.prefix, name))
 }
 
 func (g *GCS) FS() (fs.FS, error) {
-	return &GCSFS{
+	return &FS{
 		prefix: g.prefix,
 		gscfs:  gcsfs.NewWithClient(g.client, g.bucket),
 	}, nil

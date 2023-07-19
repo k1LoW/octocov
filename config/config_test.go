@@ -47,13 +47,13 @@ func TestLoad(t *testing.T) {
 	}
 }
 
-func TestLoadConfigComment(t *testing.T) {
+func TestLoadComment(t *testing.T) {
 	tests := []struct {
 		path string
-		want *ConfigComment
+		want *Comment
 	}{
-		{"comment_enabled_octocov.yml", &ConfigComment{}},
-		{"comment_enabled_octocov2.yml", &ConfigComment{If: "is_pull_request"}},
+		{"comment_enabled_octocov.yml", &Comment{}},
+		{"comment_enabled_octocov2.yml", &Comment{If: "is_pull_request"}},
 		{"comment_disabled_octocov.yml", nil},
 	}
 	for _, tt := range tests {
@@ -69,13 +69,13 @@ func TestLoadConfigComment(t *testing.T) {
 	}
 }
 
-func TestLoadConfigCentralPush(t *testing.T) {
+func TestLoadCentralPush(t *testing.T) {
 	tests := []struct {
 		path string
-		want *ConfigPush
+		want *Push
 	}{
-		{"central_push_enabled_octocov.yml", &ConfigPush{}},
-		{"central_push_enabled_octocov2.yml", &ConfigPush{If: "is_default_branch"}},
+		{"central_push_enabled_octocov.yml", &Push{}},
+		{"central_push_enabled_octocov2.yml", &Push{If: "is_default_branch"}},
 		{"central_push_disabled_octocov.yml", nil},
 	}
 	for _, tt := range tests {
@@ -105,7 +105,7 @@ func TestCoveragePaths(t *testing.T) {
 		t.Run(fmt.Sprintf("%v", tt.paths), func(t *testing.T) {
 			c := New()
 			c.path = tt.configPath
-			c.Coverage = &ConfigCoverage{
+			c.Coverage = &Coverage{
 				Paths: tt.paths,
 			}
 			c.Build()

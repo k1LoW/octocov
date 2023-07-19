@@ -44,7 +44,7 @@ const (
 
 var outPath string
 
-// badgeCmd represents the badge command
+// badgeCmd represents the badge command.
 var badgeCmd = &cobra.Command{
 	Use:       "badge",
 	Short:     "generate badge",

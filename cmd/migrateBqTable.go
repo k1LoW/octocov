@@ -35,7 +35,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// migrateBqTableCmd represents the migrateBqTable command
+// migrateBqTableCmd represents the migrateBqTable command.
 var migrateBqTableCmd = &cobra.Command{
 	Use:   "migrate-bq-table",
 	Short: "migrate table of BigQuery dataset for code metrics datastore",
@@ -73,7 +73,10 @@ var migrateBqTableCmd = &cobra.Command{
 
 		var merr *multierror.Error
 		for u, d := range datastores {
-			b := d.(*bq.BQ)
+			b, ok := d.(*bq.BQ)
+			if !ok {
+				continue
+			}
 			if err := b.CreateTable(ctx); err != nil {
 				merr = multierror.Append(merr, err)
 			} else {

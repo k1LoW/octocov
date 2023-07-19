@@ -13,18 +13,18 @@ var centralPushRe = regexp.MustCompile(`(?m)^\s+push:`)
 
 func (c *Config) UnmarshalYAML(data []byte) error {
 	s := struct {
-		Repository        string                   `yaml:"repository"`
-		Coverage          *ConfigCoverage          `yaml:"coverage"`
-		CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
-		TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
-		Report            *ConfigReport            `yaml:"report,omitempty"`
-		Central           *ConfigCentral           `yaml:"central,omitempty"`
-		Push              interface{}              `yaml:"push,omitempty"`
-		Comment           interface{}              `yaml:"comment,omitempty"`
-		Summary           *ConfigSummary           `yaml:"summary,omitempty"`
-		Body              *ConfigBody              `yaml:"body,omitempty"`
-		Diff              *ConfigDiff              `yaml:"diff,omitempty"`
-		Timeout           string                   `yaml:"timeout,omitempty"`
+		Repository        string             `yaml:"repository"`
+		Coverage          *Coverage          `yaml:"coverage"`
+		CodeToTestRatio   *CodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
+		TestExecutionTime *TestExecutionTime `yaml:"testExecutionTime,omitempty"`
+		Report            *Report            `yaml:"report,omitempty"`
+		Central           *Central           `yaml:"central,omitempty"`
+		Push              interface{}        `yaml:"push,omitempty"`
+		Comment           interface{}        `yaml:"comment,omitempty"`
+		Summary           *Summary           `yaml:"summary,omitempty"`
+		Body              *Body              `yaml:"body,omitempty"`
+		Diff              *Diff              `yaml:"diff,omitempty"`
+		Timeout           string             `yaml:"timeout,omitempty"`
 	}{}
 	err := yaml.Unmarshal(data, &s)
 	if err != nil {
@@ -50,52 +50,52 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 	switch v := s.Comment.(type) {
 	case nil:
 		if commentRe.Match(data) {
-			c.Comment = &ConfigComment{}
+			c.Comment = &Comment{}
 		}
 	case map[string]interface{}:
 		tmp, err := yaml.Marshal(v)
 		if err != nil {
 			return err
 		}
-		cc := &ConfigComment{}
+		cc := &Comment{}
 		if err := yaml.Unmarshal(tmp, cc); err != nil {
 			return err
 		}
 		c.Comment = cc
-	case *ConfigComment:
+	case *Comment:
 		c.Comment = v
 	}
 
 	switch v := s.Push.(type) {
 	case nil:
 		if pushRe.Match(data) {
-			c.Push = &ConfigPush{}
+			c.Push = &Push{}
 		}
 	case map[string]interface{}:
 		tmp, err := yaml.Marshal(v)
 		if err != nil {
 			return err
 		}
-		cp := &ConfigPush{}
+		cp := &Push{}
 		if err := yaml.Unmarshal(tmp, cp); err != nil {
 			return err
 		}
 		c.Push = cp
-	case *ConfigPush:
+	case *Push:
 		c.Push = v
 	}
 
 	return nil
 }
 
-func (c *ConfigCentral) UnmarshalYAML(data []byte) error {
+func (c *Central) UnmarshalYAML(data []byte) error {
 	s := struct {
-		Root     string               `yaml:"root"`
-		Reports  ConfigCentralReports `yaml:"reports"`
-		Badges   ConfigCentralBadges  `yaml:"badges"`
-		Push     interface{}          `yaml:"push,omitempty"`
-		ReReport *ConfigReport        `yaml:"reReport,omitempty"`
-		If       string               `yaml:"if,omitempty"`
+		Root     string         `yaml:"root"`
+		Reports  CentralReports `yaml:"reports"`
+		Badges   CentralBadges  `yaml:"badges"`
+		Push     interface{}    `yaml:"push,omitempty"`
+		ReReport *Report        `yaml:"reReport,omitempty"`
+		If       string         `yaml:"if,omitempty"`
 	}{}
 	err := yaml.Unmarshal(data, &s)
 	if err != nil {
@@ -110,19 +110,19 @@ func (c *ConfigCentral) UnmarshalYAML(data []byte) error {
 	switch v := s.Push.(type) {
 	case nil:
 		if centralPushRe.Match(data) {
-			c.Push = &ConfigPush{}
+			c.Push = &Push{}
 		}
 	case map[string]interface{}:
 		tmp, err := yaml.Marshal(v)
 		if err != nil {
 			return err
 		}
-		cp := &ConfigPush{}
+		cp := &Push{}
 		if err := yaml.Unmarshal(tmp, cp); err != nil {
 			return err
 		}
 		c.Push = cp
-	case *ConfigPush:
+	case *Push:
 		c.Push = v
 	}
 

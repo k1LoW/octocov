@@ -32,7 +32,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// dumpCmd represents the dump command
+// dumpCmd represents the dump command.
 var dumpCmd = &cobra.Command{
 	Use:   "dump",
 	Short: "dump report",

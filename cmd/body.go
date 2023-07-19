@@ -7,7 +7,6 @@ import (
 	"github.com/k1LoW/octocov/gh"
 )
 
-// replaceInsertReportToBody
 func replaceInsertReportToBody(ctx context.Context, c *config.Config, content, key string) error {
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {

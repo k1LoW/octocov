@@ -295,7 +295,10 @@ func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 			var mm *skipmap.IntMap
 			v, ok := m.Load(i)
 			if ok {
-				mm = v.(*skipmap.IntMap)
+				mm, ok = v.(*skipmap.IntMap)
+				if !ok {
+					panic("invalid type")
+				}
 			} else {
 				mm = skipmap.NewInt()
 			}
@@ -387,14 +390,20 @@ func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 
 	lcs := LineCoverages{}
 	m.Range(func(line int, mmi interface{}) bool {
-		mm := mmi.(*skipmap.IntMap)
+		mm, ok := mmi.(*skipmap.IntMap)
+		if !ok {
+			return false
+		}
 		lc := &LineCoverage{
 			Line:         line,
 			Count:        0,
 			PosCoverages: PosCoverages{},
 		}
 		mm.Range(func(pos int, ci interface{}) bool {
-			c := ci.(int)
+			c, ok := ci.(int)
+			if !ok {
+				return false
+			}
 			lc.PosCoverages = append(lc.PosCoverages, &PosCoverage{
 				Pos:   pos,
 				Count: c,

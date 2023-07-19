@@ -28,7 +28,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// diffCmd represents the diff command
+// diffCmd represents the diff command.
 var diffCmd = &cobra.Command{
 	Use:     "diff [REPORT_A] [REPORT_B]",
 	Short:   "compare reports (code coverage report or octocov report.json)",

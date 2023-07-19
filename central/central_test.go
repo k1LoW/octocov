@@ -21,7 +21,7 @@ func TestCollectReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctr := New(&CentralConfig{
+	ctr := New(&Config{
 		Repository:             "owner/repo",
 		Index:                  ".",
 		Wd:                     c.Getwd(),
@@ -53,7 +53,7 @@ func TestGenerateBadges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctr := New(&CentralConfig{
+	ctr := New(&Config{
 		Repository:             "owner/repo",
 		Index:                  ".",
 		Wd:                     c.Getwd(),
@@ -102,11 +102,11 @@ func TestRenderIndex(t *testing.T) {
 	c := config.New()
 	c.Setwd(filepath.Dir(wd))
 	c.Repository = "k1LoW/octocov"
-	c.Central = &config.ConfigCentral{
-		Reports: config.ConfigCentralReports{
+	c.Central = &config.Central{
+		Reports: config.CentralReports{
 			Datastores: []string{"reports"},
 		},
-		Badges: config.ConfigCentralBadges{
+		Badges: config.CentralBadges{
 			Datastores: []string{"badges"},
 		},
 	}
@@ -119,7 +119,7 @@ func TestRenderIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	ctr := New(&CentralConfig{
+	ctr := New(&Config{
 		Repository:             c.Repository,
 		Index:                  c.Central.Root,
 		Wd:                     c.Getwd(),

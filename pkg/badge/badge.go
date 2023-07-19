@@ -115,7 +115,7 @@ func castColor(c interface{}) (string, error) {
 	}
 }
 
-// Render badge
+// Render badge.
 func (b *Badge) Render(wr io.Writer) error {
 	tmpl := template.Must(template.New("badge").Parse(string(badgeTmpl)))
 
@@ -176,8 +176,11 @@ func (b *Badge) stringWidth(s string) float64 {
 	return float64(w)/64 + 10 // 10 is heuristic
 }
 
-// ColorToHexRGB return Hex RGB from color.Color
+// ColorToHexRGB return Hex RGB from color.Color.
 func ColorToHexRGB(c color.Color) string {
-	rgba := color.NRGBAModel.Convert(c).(color.NRGBA)
+	rgba, ok := color.NRGBAModel.Convert(c).(color.NRGBA)
+	if !ok {
+		return "#000000"
+	}
 	return fmt.Sprintf("#%.2x%.2x%.2x", rgba.R, rgba.G, rgba.B)
 }
