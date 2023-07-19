@@ -36,19 +36,19 @@ const (
 var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
-	Repository        string                   `yaml:"repository"`
-	Coverage          *ConfigCoverage          `yaml:"coverage"`
-	CodeToTestRatio   *ConfigCodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
-	TestExecutionTime *ConfigTestExecutionTime `yaml:"testExecutionTime,omitempty"`
-	Report            *ConfigReport            `yaml:"report,omitempty"`
-	Central           *ConfigCentral           `yaml:"central,omitempty"`
-	Push              *ConfigPush              `yaml:"push,omitempty"`
-	Comment           *ConfigComment           `yaml:"comment,omitempty"`
-	Summary           *ConfigSummary           `yaml:"summary,omitempty"`
-	Body              *ConfigBody              `yaml:"body,omitempty"`
-	Diff              *ConfigDiff              `yaml:"diff,omitempty"`
-	Timeout           time.Duration            `yaml:"timeout,omitempty"`
-	GitRoot           string                   `yaml:"-"`
+	Repository        string             `yaml:"repository"`
+	Coverage          *Coverage          `yaml:"coverage"`
+	CodeToTestRatio   *CodeToTestRatio   `yaml:"codeToTestRatio,omitempty"`
+	TestExecutionTime *TestExecutionTime `yaml:"testExecutionTime,omitempty"`
+	Report            *Report            `yaml:"report,omitempty"`
+	Central           *Central           `yaml:"central,omitempty"`
+	Push              *Push              `yaml:"push,omitempty"`
+	Comment           *Comment           `yaml:"comment,omitempty"`
+	Summary           *Summary           `yaml:"summary,omitempty"`
+	Body              *Body              `yaml:"body,omitempty"`
+	Diff              *Diff              `yaml:"diff,omitempty"`
+	Timeout           time.Duration      `yaml:"timeout,omitempty"`
+	GitRoot           string             `yaml:"-"`
 	// working directory
 	wd string
 	// config file path
@@ -56,77 +56,77 @@ type Config struct {
 	gh   *gh.Gh
 }
 
-type ConfigCoverage struct {
-	Path       string              `yaml:"path,omitempty"`
-	Paths      []string            `yaml:"paths,omitempty"`
-	Badge      ConfigCoverageBadge `yaml:"badge,omitempty"`
-	Acceptable string              `yaml:"acceptable,omitempty"`
+type Coverage struct {
+	Path       string        `yaml:"path,omitempty"`
+	Paths      []string      `yaml:"paths,omitempty"`
+	Badge      CoverageBadge `yaml:"badge,omitempty"`
+	Acceptable string        `yaml:"acceptable,omitempty"`
 }
 
-type ConfigCoverageBadge struct {
+type CoverageBadge struct {
 	Path string `yaml:"path,omitempty"`
 }
 
-type ConfigCodeToTestRatio struct {
-	Code       []string                   `yaml:"code"`
-	Test       []string                   `yaml:"test"`
-	Badge      ConfigCodeToTestRatioBadge `yaml:"badge,omitempty"`
-	Acceptable string                     `yaml:"acceptable,omitempty"`
+type CodeToTestRatio struct {
+	Code       []string             `yaml:"code"`
+	Test       []string             `yaml:"test"`
+	Badge      CodeToTestRatioBadge `yaml:"badge,omitempty"`
+	Acceptable string               `yaml:"acceptable,omitempty"`
 }
 
-type ConfigCodeToTestRatioBadge struct {
+type CodeToTestRatioBadge struct {
 	Path string `yaml:"path,omitempty"`
 }
 
-type ConfigTestExecutionTime struct {
-	Badge      ConfigTestExecutionTimeBadge `yaml:"badge,omitempty"`
-	Acceptable string                       `yaml:"acceptable,omitempty"`
-	Steps      []string                     `yaml:"steps,omitempty"`
+type TestExecutionTime struct {
+	Badge      TestExecutionTimeBadge `yaml:"badge,omitempty"`
+	Acceptable string                 `yaml:"acceptable,omitempty"`
+	Steps      []string               `yaml:"steps,omitempty"`
 }
 
-type ConfigTestExecutionTimeBadge struct {
+type TestExecutionTimeBadge struct {
 	Path string `yaml:"path,omitempty"`
 }
 
-type ConfigCentral struct {
-	Root     string               `yaml:"root"`
-	Reports  ConfigCentralReports `yaml:"reports"`
-	Badges   ConfigCentralBadges  `yaml:"badges"`
-	Push     *ConfigPush          `yaml:"push,omitempty"`
-	ReReport *ConfigReport        `yaml:"reReport,omitempty"`
-	If       string               `yaml:"if,omitempty"`
+type Central struct {
+	Root     string         `yaml:"root"`
+	Reports  CentralReports `yaml:"reports"`
+	Badges   CentralBadges  `yaml:"badges"`
+	Push     *Push          `yaml:"push,omitempty"`
+	ReReport *Report        `yaml:"reReport,omitempty"`
+	If       string         `yaml:"if,omitempty"`
 }
 
-type ConfigCentralReports struct {
+type CentralReports struct {
 	Datastores []string `yaml:"datastores"`
 }
 
-type ConfigCentralBadges struct {
+type CentralBadges struct {
 	Datastores []string `yaml:"datastores"`
 }
 
-type ConfigPush struct {
+type Push struct {
 	If      string `yaml:"if,omitempty"`
 	Message string `yaml:"message,omitempty"`
 }
 
-type ConfigComment struct {
+type Comment struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	DeletePrevious bool   `yaml:"deletePrevious"`
 	If             string `yaml:"if,omitempty"`
 }
 
-type ConfigSummary struct {
+type Summary struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	If             string `yaml:"if,omitempty"`
 }
 
-type ConfigBody struct {
+type Body struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	If             string `yaml:"if,omitempty"`
 }
 
-type ConfigDiff struct {
+type Diff struct {
 	Path       string   `yaml:"path,omitempty"`
 	Datastores []string `yaml:"datastores,omitempty"`
 	If         string   `yaml:"if,omitempty"`

@@ -37,7 +37,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// lsFilesCmd represents the lsFiles command
+// lsFilesCmd represents the lsFiles command.
 var lsFilesCmd = &cobra.Command{
 	Use:   "ls-files",
 	Short: "list files logged in code coverage report",

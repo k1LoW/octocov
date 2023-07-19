@@ -110,7 +110,7 @@ var rootCmd = &cobra.Command{
 				reports = append(reports, d)
 			}
 
-			ctr := central.New(&central.CentralConfig{
+			ctr := central.New(&central.Config{
 				Repository:             c.Repository,
 				Index:                  c.Central.Root,
 				Wd:                     c.Getwd(),

@@ -17,7 +17,7 @@ func (c *Config) Build() {
 
 	// Coverage
 	if c.Coverage == nil {
-		c.Coverage = &ConfigCoverage{}
+		c.Coverage = &Coverage{}
 	}
 	if c.Coverage.Paths == nil {
 		c.Coverage.Paths = []string{}
@@ -48,7 +48,7 @@ func (c *Config) Build() {
 
 	// TestExecutionTime
 	if c.TestExecutionTime == nil {
-		c.TestExecutionTime = &ConfigTestExecutionTime{}
+		c.TestExecutionTime = &TestExecutionTime{}
 	}
 
 	// Report

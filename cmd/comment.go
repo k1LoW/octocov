@@ -76,7 +76,10 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	comment := []string{fmt.Sprintf("## %s", title)}
 
 	if err := c.Acceptable(r, rPrev); err != nil {
-		merr := err.(*multierror.Error)
+		merr, ok := err.(*multierror.Error)
+		if !ok {
+			return "", fmt.Errorf("failed to convert error to multierror: %w", err)
+		}
 		merr.ErrorFormat = func(errors []error) string {
 			var out string
 			for _, err := range errors {

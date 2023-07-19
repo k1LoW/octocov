@@ -27,11 +27,11 @@ import (
 var indexTmpl []byte
 
 type Central struct {
-	config  *CentralConfig
+	config  *Config
 	reports []*report.Report
 }
 
-type CentralConfig struct {
+type Config struct {
 	Repository             string
 	Wd                     string
 	Index                  string
@@ -42,7 +42,7 @@ type CentralConfig struct {
 	TestExecutionTimeColor func(d time.Duration) string
 }
 
-func New(c *CentralConfig) *Central {
+func New(c *Config) *Central {
 	return &Central{
 		config: c,
 	}

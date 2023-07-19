@@ -11,7 +11,7 @@ import (
 func TestParse(t *testing.T) {
 	var tests = []struct {
 		in        string
-		wantType  DatastoreType
+		wantType  Type
 		wantArgs  []string
 		wantError bool
 	}{

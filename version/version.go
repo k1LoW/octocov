@@ -1,7 +1,7 @@
 package version
 
-// Name for this
+// Name for this.
 const Name string = "octocov"
 
-// Version for this
+// Version for this.
 var Version = "0.48.0"

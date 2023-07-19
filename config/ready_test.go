@@ -24,13 +24,13 @@ func TestCoverageConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				Coverage: &ConfigCoverage{},
+				Coverage: &Coverage{},
 			},
 			"coverage.paths: is not set",
 		},
 		{
 			&Config{
-				Coverage: &ConfigCoverage{
+				Coverage: &Coverage{
 					Paths: []string{"path/to/coverage.out"},
 				},
 			},
@@ -66,13 +66,13 @@ func TestCodeToTestRatioConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				CodeToTestRatio: &ConfigCodeToTestRatio{},
+				CodeToTestRatio: &CodeToTestRatio{},
 			},
 			"codeToTestRatio.test: is not set",
 		},
 		{
 			&Config{
-				CodeToTestRatio: &ConfigCodeToTestRatio{
+				CodeToTestRatio: &CodeToTestRatio{
 					Test: []string{"path/to/test/**"},
 				},
 			},
@@ -108,7 +108,7 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				TestExecutionTime: &ConfigTestExecutionTime{
+				TestExecutionTime: &TestExecutionTime{
 					Steps: []string{},
 				},
 			},
@@ -116,7 +116,7 @@ func TestTestExecutionTimeConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				TestExecutionTime: &ConfigTestExecutionTime{
+				TestExecutionTime: &TestExecutionTime{
 					Steps: []string{
 						"Run tests",
 					},
@@ -162,7 +162,7 @@ func TestPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Push:       &ConfigPush{},
+				Push:       &Push{},
 				gh:         mg,
 			},
 			"failed to traverse the Git root path",
@@ -170,7 +170,7 @@ func TestPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Push:       &ConfigPush{},
+				Push:       &Push{},
 				gh:         mg,
 			},
 			"failed to traverse the Git root path",
@@ -179,7 +179,7 @@ func TestPushConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				GitRoot:    "/path/to",
-				Push:       &ConfigPush{},
+				Push:       &Push{},
 				gh:         mg,
 			},
 			"",
@@ -188,7 +188,7 @@ func TestPushConfigReady(t *testing.T) {
 			&Config{
 				Repository: "owner/repo",
 				GitRoot:    "/path/to",
-				Push: &ConfigPush{
+				Push: &Push{
 					If: "false",
 				},
 				gh: mg,
@@ -235,7 +235,7 @@ func TestCommentConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Comment:    &ConfigComment{},
+				Comment:    &Comment{},
 				gh:         mg,
 			},
 			"",
@@ -243,7 +243,7 @@ func TestCommentConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Comment:    &ConfigComment{},
+				Comment:    &Comment{},
 				gh:         mg,
 			},
 			"",
@@ -251,7 +251,7 @@ func TestCommentConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Comment: &ConfigComment{
+				Comment: &Comment{
 					If: "false",
 				},
 				gh: mg,
@@ -284,7 +284,7 @@ func TestCoverageBadgeConfigReady(t *testing.T) {
 	}{
 		{
 			&Config{
-				Coverage: &ConfigCoverage{
+				Coverage: &Coverage{
 					Paths: []string{"path/to/coverage.xml"},
 				},
 			},
@@ -292,9 +292,9 @@ func TestCoverageBadgeConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				Coverage: &ConfigCoverage{
+				Coverage: &Coverage{
 					Paths: []string{"path/to/coverage.xml"},
-					Badge: ConfigCoverageBadge{
+					Badge: CoverageBadge{
 						Path: "path/to/coverage.svg",
 					},
 				},
@@ -327,7 +327,7 @@ func TestCodeToTestRatioBadgeConfigReady(t *testing.T) {
 	}{
 		{
 			&Config{
-				CodeToTestRatio: &ConfigCodeToTestRatio{
+				CodeToTestRatio: &CodeToTestRatio{
 					Test: []string{
 						"**_test.go",
 					},
@@ -337,11 +337,11 @@ func TestCodeToTestRatioBadgeConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				CodeToTestRatio: &ConfigCodeToTestRatio{
+				CodeToTestRatio: &CodeToTestRatio{
 					Test: []string{
 						"**_test.go",
 					},
-					Badge: ConfigCodeToTestRatioBadge{
+					Badge: CodeToTestRatioBadge{
 						Path: "path/to/ratio.svg",
 					},
 				},
@@ -374,7 +374,7 @@ func TestTestExecutionTimeBadgeConfigReady(t *testing.T) {
 	}{
 		{
 			&Config{
-				TestExecutionTime: &ConfigTestExecutionTime{
+				TestExecutionTime: &TestExecutionTime{
 					Steps: []string{
 						"Run tests",
 					},
@@ -384,11 +384,11 @@ func TestTestExecutionTimeBadgeConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				TestExecutionTime: &ConfigTestExecutionTime{
+				TestExecutionTime: &TestExecutionTime{
 					Steps: []string{
 						"Run tests",
 					},
-					Badge: ConfigTestExecutionTimeBadge{
+					Badge: TestExecutionTimeBadge{
 						Path: "path/to/time.svg",
 					},
 				},
@@ -427,7 +427,7 @@ func TestCentralConfigReady(t *testing.T) {
 		},
 		{
 			&Config{
-				Central: &ConfigCentral{},
+				Central: &Central{},
 				gh:      mg,
 			},
 			"repository: not set (or env GITHUB_REPOSITORY is not set)",
@@ -435,7 +435,7 @@ func TestCentralConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central:    &ConfigCentral{},
+				Central:    &Central{},
 				gh:         mg,
 			},
 			"central.reports.datastores is not set",
@@ -443,8 +443,8 @@ func TestCentralConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central: &ConfigCentral{
-					Reports: ConfigCentralReports{
+				Central: &Central{
+					Reports: CentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
@@ -457,8 +457,8 @@ func TestCentralConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central: &ConfigCentral{
-					Reports: ConfigCentralReports{
+				Central: &Central{
+					Reports: CentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
@@ -497,8 +497,8 @@ func TestCentralPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central: &ConfigCentral{
-					Reports: ConfigCentralReports{
+				Central: &Central{
+					Reports: CentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
@@ -511,13 +511,13 @@ func TestCentralPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central: &ConfigCentral{
-					Reports: ConfigCentralReports{
+				Central: &Central{
+					Reports: CentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
 					},
-					Push: &ConfigPush{},
+					Push: &Push{},
 				},
 				gh: mg,
 			},
@@ -526,13 +526,13 @@ func TestCentralPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central: &ConfigCentral{
-					Reports: ConfigCentralReports{
+				Central: &Central{
+					Reports: CentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
 					},
-					Push: &ConfigPush{},
+					Push: &Push{},
 				},
 				GitRoot: "/path/to",
 				gh:      mg,
@@ -542,13 +542,13 @@ func TestCentralPushConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Central: &ConfigCentral{
-					Reports: ConfigCentralReports{
+				Central: &Central{
+					Reports: CentralReports{
 						Datastores: []string{
 							"s3://bucket/reports",
 						},
 					},
-					Push: &ConfigPush{
+					Push: &Push{
 						If: "false",
 					},
 				},
@@ -595,7 +595,7 @@ func TestDiffConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Diff:       &ConfigDiff{},
+				Diff:       &Diff{},
 				gh:         mg,
 			},
 			"diff.path: and diff.datastores: are not set",
@@ -603,7 +603,7 @@ func TestDiffConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Diff: &ConfigDiff{
+				Diff: &Diff{
 					Path: "path/to/report.json",
 				},
 				gh: mg,
@@ -613,7 +613,7 @@ func TestDiffConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Diff: &ConfigDiff{
+				Diff: &Diff{
 					Path: "path/to/report.json",
 					If:   "false",
 				},
@@ -660,7 +660,7 @@ func TestReportConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Report:     &ConfigReport{},
+				Report:     &Report{},
 				gh:         mockedGh(t),
 			},
 			"report.datastores: and report.path: are not set",
@@ -668,7 +668,7 @@ func TestReportConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Report: &ConfigReport{
+				Report: &Report{
 					Datastores: []string{
 						"s3://bucket/reports",
 					},
@@ -680,7 +680,7 @@ func TestReportConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Report: &ConfigReport{
+				Report: &Report{
 					Datastores: []string{
 						"s3://bucket/reports",
 					},
@@ -693,7 +693,7 @@ func TestReportConfigReady(t *testing.T) {
 		{
 			&Config{
 				Repository: "owner/repo",
-				Report: &ConfigReport{
+				Report: &Report{
 					Datastores: []string{
 						"s3://bucket/reports",
 					},

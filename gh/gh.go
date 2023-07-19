@@ -805,7 +805,7 @@ func Parse(raw string) (*Repository, error) {
 	return r, nil
 }
 
-// trimContentURL trim suffix path and private token
+// trimContentURL trim suffix path and private token.
 func trimContentURL(u, p string) string {
 	parsed, _ := url.Parse(u)
 	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimSuffix(parsed.String(), fmt.Sprintf("?%s", parsed.RawQuery)), p), "/")

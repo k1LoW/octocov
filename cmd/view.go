@@ -31,7 +31,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// viewCmd represents the view command
+// viewCmd represents the view command.
 var viewCmd = &cobra.Command{
 	Use:     "view [FILE ...]",
 	Short:   "view code coverage of file",

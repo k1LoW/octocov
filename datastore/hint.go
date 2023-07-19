@@ -9,7 +9,7 @@ type hint struct {
 
 type HintFunc func(*hint) error
 
-// Root hint for local datastore
+// Root hint for local datastore.
 func Root(p string) HintFunc {
 	return func(h *hint) error {
 		h.root = p
@@ -17,7 +17,7 @@ func Root(p string) HintFunc {
 	}
 }
 
-// Report hint for artifact datastore
+// Report hint for artifact datastore.
 func Report(r *report.Report) HintFunc {
 	return func(h *hint) error {
 		h.report = r
