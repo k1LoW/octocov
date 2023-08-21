@@ -213,9 +213,16 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	rawRootURL, err := g.GetRawRootURL(ctx, repo.Owner, repo.Repo)
+	isPrivate, err := g.IsPrivate(ctx, repo.Owner, repo.Repo)
 	if err != nil {
 		return err
+	}
+	var rawRootURL string
+	if !isPrivate {
+		rawRootURL, err = g.GetRawRootURL(ctx, repo.Owner, repo.Repo)
+		if err != nil {
+			return err
+		}
 	}
 
 	// Get project root dir
@@ -250,6 +257,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		"BadgesLinkRel": badgesLinkRel,
 		"BadgesURLRel":  badgesURLRel,
 		"RawRootURL":    rawRootURL,
+		"IsPrivate":     isPrivate,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err

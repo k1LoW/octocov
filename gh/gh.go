@@ -601,6 +601,14 @@ func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string
 	return nil, errors.New("artifact not found")
 }
 
+func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
+	r, _, err := g.client.Repositories.Get(ctx, owner, repo)
+	if err != nil {
+		return false, err
+	}
+	return r.GetPrivate(), nil
+}
+
 type minimizeCommentMutation struct {
 	MinimizeComment struct {
 		MinimizedComment struct {
