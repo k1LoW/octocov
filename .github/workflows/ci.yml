@@ -24,12 +24,21 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Go
+        id: setup-go
         uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
+          check-latest: true
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
+
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
+           check-latest: true
+           go-package: ./...
 
       - name: Run tests
         run: make ci
