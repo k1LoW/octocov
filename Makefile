@@ -30,6 +30,7 @@ test_collect_metrics: build
 
 lint:
 	golangci-lint run ./...
+	govulncheck ./...
 
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
@@ -46,7 +47,7 @@ bqdoc:
 depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest
 	go install github.com/Songmu/gocredits/cmd/gocredits@latest
-	go install github.com/securego/gosec/v2/cmd/gosec@latest
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 prerelease:
 	git pull origin main --tag
