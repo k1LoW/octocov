@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.50.0](https://github.com/k1LoW/octocov/compare/v0.49.0...v0.50.0) - 2023-08-21
+### New Features 🎉
+- Only display badges if the central mode repository is private by @k1LoW in https://github.com/k1LoW/octocov/pull/241
+### Other Changes
+- Add govluncheck by @k1LoW in https://github.com/k1LoW/octocov/pull/239
+
 ## [v0.49.0](https://github.com/k1LoW/octocov/compare/v0.48.0...v0.49.0) - 2023-07-19
 - Support `timeout:` and set default timeout by @k1LoW in https://github.com/k1LoW/octocov/pull/237
 - Update lint setting by @k1LoW in https://github.com/k1LoW/octocov/pull/238
