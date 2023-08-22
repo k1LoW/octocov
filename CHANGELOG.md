@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.50.1](https://github.com/k1LoW/octocov/compare/v0.50.0...v0.50.1) - 2023-08-22
+### Fix bug 🐛
+- Fix private central ( Use `?raw=true` URL ) by @k1LoW in https://github.com/k1LoW/octocov/pull/242
+
 ## [v0.50.0](https://github.com/k1LoW/octocov/compare/v0.49.0...v0.50.0) - 2023-08-21
 ### New Features 🎉
 - Only display badges if the central mode repository is private by @k1LoW in https://github.com/k1LoW/octocov/pull/241
