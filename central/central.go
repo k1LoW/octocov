@@ -217,12 +217,22 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	if err != nil {
 		return err
 	}
-	var rawRootURL string
+	var (
+		rootURL string
+		query   string
+	)
 	if !isPrivate {
-		rawRootURL, err = g.GetRawRootURL(ctx, repo.Owner, repo.Repo)
+		rootURL, err = g.GetRawRootURL(ctx, repo.Owner, repo.Repo)
 		if err != nil {
 			return err
 		}
+	} else {
+		b, err := g.GetDefaultBranch(ctx, repo.Owner, repo.Repo)
+		if err != nil {
+			return err
+		}
+		rootURL = fmt.Sprintf("%s/%s/%s/blob/%s/", host, repo.Owner, repo.Repo, b)
+		query = "?raw=true"
 	}
 
 	// Get project root dir
@@ -256,8 +266,9 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		"Reports":       c.reports,
 		"BadgesLinkRel": badgesLinkRel,
 		"BadgesURLRel":  badgesURLRel,
-		"RawRootURL":    rawRootURL,
+		"RootURL":       rootURL,
 		"IsPrivate":     isPrivate,
+		"Query":         query,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {
 		return err
