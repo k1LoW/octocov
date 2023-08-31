@@ -20,6 +20,7 @@ import (
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
 	"github.com/olekukonko/tablewriter"
+	"github.com/samber/lo"
 )
 
 const filesHideMin = 30
@@ -33,6 +34,7 @@ type Report struct {
 	CodeToTestRatio   *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
 	TestExecutionTime *float64           `json:"test_execution_time,omitempty"`
 	Timestamp         time.Time          `json:"timestamp"`
+	CustomMetrics     []*CustomMetricSet `json:"custom_metrics,omitempty"`
 
 	// coverage report paths
 	covPaths []string
@@ -230,6 +232,7 @@ func (r *Report) CountMeasured() int {
 	if r.IsMeasuredTestExecutionTime() {
 		c += 1
 	}
+	c += len(r.CustomMetrics)
 	return c
 }
 
@@ -243,6 +246,10 @@ func (r *Report) IsMeasuredCodeToTestRatio() bool {
 
 func (r *Report) IsMeasuredTestExecutionTime() bool {
 	return r.TestExecutionTime != nil
+}
+
+func (r *Report) IsCollectedCustomMetrics() bool {
+	return len(r.CustomMetrics) > 0
 }
 
 func (r *Report) Load(path string) error {
@@ -360,6 +367,73 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 	d := mergeExecutionTimes(steps)
 	t := float64(d)
 	r.TestExecutionTime = &t
+	return nil
+}
+
+// CollectCustomMetrics collects custom metrics from env.
+func (r *Report) CollectCustomMetrics() error {
+	const envPrefix = "OCTOCOV_CUSTOM_METRICS_"
+	envs := [][]string{}
+	for _, e := range os.Environ() {
+		if !strings.HasPrefix(e, envPrefix) {
+			continue
+		}
+		kv := strings.SplitN(e, "=", 2)
+		if len(kv) != 2 {
+			continue
+		}
+		k := strings.TrimSpace(kv[0])
+		v := strings.TrimSpace(kv[1])
+		envs = append(envs, []string{k, v})
+	}
+	// Sort by key
+	sort.Slice(envs, func(i, j int) bool {
+		return envs[i][0] < envs[j][0]
+	})
+	for _, env := range envs {
+		v := env[1]
+		b, err := os.ReadFile(v)
+		if err != nil {
+			return err
+		}
+		set := &CustomMetricSet{}
+		if err := json.Unmarshal(b, set); err != nil {
+			return err
+		}
+		// Validate
+		if set.Key == "" {
+			return fmt.Errorf("key is required: %s", v)
+		}
+		if set.Name == "" {
+			set.Name = set.Key
+		}
+		for _, m := range set.Metrics {
+			if m.Key == "" {
+				return fmt.Errorf("key of metrics is required: %s", v)
+			}
+			if m.Name == "" {
+				m.Name = m.Key
+			}
+		}
+		if len(set.Metrics) != len(lo.UniqBy(set.Metrics, func(m *CustomMetric) string {
+			return m.Key
+		})) {
+			return fmt.Errorf("key of metrics must be unique: %s", lo.Map(set.Metrics, func(m *CustomMetric, _ int) string {
+				return m.Key
+			}))
+		}
+		r.CustomMetrics = append(r.CustomMetrics, set)
+	}
+
+	// Validate
+	if len(r.CustomMetrics) != len(lo.UniqBy(r.CustomMetrics, func(s *CustomMetricSet) string {
+		return s.Key
+	})) {
+		return fmt.Errorf("key of custom metrics must be unique: %s", lo.Map(r.CustomMetrics, func(s *CustomMetricSet, _ int) string {
+			return s.Key
+		}))
+	}
+
 	return nil
 }
 

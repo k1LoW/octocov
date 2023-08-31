@@ -36,6 +36,7 @@ require (
 	github.com/migueleliasweb/go-github-mock v0.0.16
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
+	github.com/samber/lo v1.38.1
 	github.com/shurcooL/githubv4 v0.0.0-20230215024106-420ad0987b9b
 	github.com/spf13/cobra v1.6.1
 	github.com/tenntenn/golden v0.4.0

@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
@@ -99,6 +100,89 @@ func TestMeasureCoverage(t *testing.T) {
 	}
 }
 
+func TestCollectCustomMetrics(t *testing.T) {
+	tests := []struct {
+		envs    map[string]string
+		want    []*CustomMetricSet
+		wantErr bool
+	}{
+		{
+			map[string]string{
+				"OCTOCOV_CUSTOM_METRICS_BENCHMARK_0": filepath.Join(testdataDir(t), "custom_metrics", "benchmark_0.json"),
+			},
+			[]*CustomMetricSet{
+				{
+					Key:  "benchmark_0",
+					Name: "Benchmark-0",
+					Metrics: []*CustomMetric{
+						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
+						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+					},
+				},
+			},
+			false,
+		},
+		{
+			map[string]string{
+				"OCTOCOV_CUSTOM_METRICS_BENCHMARK_1": filepath.Join(testdataDir(t), "custom_metrics", "benchmark_1.json"),
+				"OCTOCOV_CUSTOM_METRICS_BENCHMARK_0": filepath.Join(testdataDir(t), "custom_metrics", "benchmark_0.json"),
+			},
+			[]*CustomMetricSet{
+				{
+					Key:  "benchmark_0",
+					Name: "Benchmark-0",
+					Metrics: []*CustomMetric{
+						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
+						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+					},
+				},
+				{
+					Key:  "benchmark_1",
+					Name: "Benchmark-1",
+					Metrics: []*CustomMetric{
+						{Key: "count", Name: "Count", Value: 1500.0, Unit: ""},
+						{Key: "ns_per_op", Name: "ns/op", Value: 1340.0, Unit: "ns/op"},
+					},
+				},
+			},
+			false,
+		},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				for _, m := range tt.want {
+					b, err := json.MarshalIndent(m, "", "  ")
+					if err != nil {
+						t.Fatal(err)
+					}
+					if err := os.WriteFile(filepath.Join(testdataDir(t), "custom_metrics", fmt.Sprintf("%s.json", m.Key)), b, os.ModePerm); err != nil {
+						t.Fatal(err)
+					}
+				}
+			}
+			for k, v := range tt.envs {
+				t.Setenv(k, v)
+			}
+			r := &Report{}
+			if err := r.CollectCustomMetrics(); err != nil {
+				if !tt.wantErr {
+					t.Error(err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+				return
+			}
+			got := r.CustomMetrics
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
 func TestCountMeasured(t *testing.T) {
 	tet := 1000.0
 	tests := []struct {
@@ -109,6 +193,10 @@ func TestCountMeasured(t *testing.T) {
 		{&Report{Coverage: &coverage.Coverage{}}, 1},
 		{&Report{CodeToTestRatio: &ratio.Ratio{}}, 1},
 		{&Report{TestExecutionTime: &tet}, 1},
+		{&Report{CustomMetrics: []*CustomMetricSet{
+			{Key: "m0", Metrics: []*CustomMetric{{}}},
+			{Key: "m1", Metrics: []*CustomMetric{{}}},
+		}}, 2},
 	}
 	for _, tt := range tests {
 		got := tt.r.CountMeasured()

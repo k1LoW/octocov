@@ -1,0 +1,17 @@
+{
+  "key": "benchmark_1",
+  "name": "Benchmark-1",
+  "metrics": [
+    {
+      "key": "count",
+      "name": "Count",
+      "value": 1500
+    },
+    {
+      "key": "ns_per_op",
+      "name": "ns/op",
+      "value": 1340,
+      "unit": "ns/op"
+    }
+  ]
+}
