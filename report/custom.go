@@ -80,6 +80,7 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 	table.SetRowSeparator("-")
 	table.SetHeaderLine(true)
 	table.SetBorder(false)
+	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
 	for _, metric := range s.Metrics {
 		table.Rich([]string{metric.Name, fmt.Sprintf("%.1f%s", metric.Value, metric.Unit)}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
