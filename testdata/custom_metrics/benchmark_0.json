@@ -1,6 +1,6 @@
 {
   "key": "benchmark_0",
-  "name": "Benchmark-0 (this is test)",
+  "name": "Benchmark-0 (this is custom metrics test)",
   "metrics": [
     {
       "key": "count",
