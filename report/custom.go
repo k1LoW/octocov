@@ -97,7 +97,6 @@ func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 		A:       s,
 		B:       s2,
 		Metrics: []*DiffCustomMetric{},
-		reportA: s.report,
 	}
 	if s2 == nil {
 		for _, metric := range s.Metrics {
@@ -105,7 +104,6 @@ func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 		}
 		return d
 	}
-	d.reportB = s2.report
 	for _, metric := range s.Metrics {
 		metric2 := s2.findMetricByKey(metric.Key)
 		d.Metrics = append(d.Metrics, metric.Compare(metric2))
@@ -158,7 +156,7 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
 
-	table.SetHeader([]string{"", makeHeadTitleWithLink(d.reportB.Ref, d.reportB.Commit, nil), makeHeadTitleWithLink(d.reportA.Ref, d.reportA.Commit, nil), "+/-"})
+	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
 	for _, metric := range d.Metrics {
 		table.Append([]string{metric.Name, fmt.Sprintf("%.1f%s", *metric.B, metric.customMetricB.Unit), fmt.Sprintf("%.1f%s", *metric.A, metric.customMetricA.Unit), fmt.Sprintf("%.1f%s", metric.Diff, metric.customMetricA.Unit)})
 	}
