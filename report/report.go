@@ -506,7 +506,6 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 		d.TestExecutionTime = dt
 	}
 	if r.IsCollectedCustomMetrics() {
-		d.CustomMetrics = make([]*DiffCustomMetricSet, 0, len(r.CustomMetrics))
 		for _, set := range r.CustomMetrics {
 			set2 := r2.findCustomMetricSetByKey(set.Key)
 			d.CustomMetrics = append(d.CustomMetrics, set.Compare(set2))

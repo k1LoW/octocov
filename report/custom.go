@@ -26,6 +26,8 @@ type CustomMetric struct {
 type DiffCustomMetricSet struct {
 	Key     string              `json:"key"`
 	Name    string              `json:"name,omitempty"`
+	A       *CustomMetricSet    `json:"a"`
+	B       *CustomMetricSet    `json:"b"`
 	Metrics []*DiffCustomMetric `json:"metrics"`
 	reportA *Report
 	reportB *Report
@@ -88,16 +90,21 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 }
 
 func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
-	if s2 == nil {
-		s2 = &CustomMetricSet{}
-	}
 	d := &DiffCustomMetricSet{
 		Key:     s.Key,
 		Name:    s.Name,
+		A:       s,
+		B:       s2,
 		Metrics: []*DiffCustomMetric{},
 		reportA: s.report,
-		reportB: s2.report,
 	}
+	if s2 == nil {
+		for _, metric := range s.Metrics {
+			d.Metrics = append(d.Metrics, metric.Compare(nil))
+		}
+		return d
+	}
+	d.reportB = s2.report
 	for _, metric := range s.Metrics {
 		metric2 := s2.findMetricByKey(metric.Key)
 		d.Metrics = append(d.Metrics, metric.Compare(metric2))
@@ -137,6 +144,9 @@ func (m *CustomMetric) Compare(m2 *CustomMetric) *DiffCustomMetric {
 func (d *DiffCustomMetricSet) Table() string {
 	if len(d.Metrics) == 0 {
 		return ""
+	}
+	if d.B == nil {
+		return d.A.Table()
 	}
 	buf := new(bytes.Buffer)
 	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", d.Name))
