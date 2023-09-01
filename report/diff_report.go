@@ -92,9 +92,9 @@ func (d *DiffReport) Table() string {
 			t2 = strings.Replace(t2, "  | Coverage", "- | Coverage", 1)
 		}
 		if d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
-			if d.Coverage.CoverageA.Covered > d.Coverage.CoverageB.Covered {
+			if d.Coverage.CoverageA.Covered < d.Coverage.CoverageB.Covered {
 				t2 = strings.Replace(t2, "  |   Covered", "- |   Covered", 1)
-			} else if d.Coverage.CoverageA.Covered < d.Coverage.CoverageB.Covered {
+			} else if d.Coverage.CoverageA.Covered > d.Coverage.CoverageB.Covered {
 				t2 = strings.Replace(t2, "  |   Covered", "+ |   Covered", 1)
 			}
 		}
@@ -106,9 +106,9 @@ func (d *DiffReport) Table() string {
 			t2 = strings.Replace(t2, "  | Code to", "- | Code to", 1)
 		}
 		if d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
-			if d.CodeToTestRatio.RatioA.Test > d.CodeToTestRatio.RatioB.Test {
+			if d.CodeToTestRatio.RatioA.Test < d.CodeToTestRatio.RatioB.Test {
 				t2 = strings.Replace(t2, "  |   Test", "- |   Test", 1)
-			} else if d.CodeToTestRatio.RatioA.Test < d.CodeToTestRatio.RatioB.Test {
+			} else if d.CodeToTestRatio.RatioA.Test > d.CodeToTestRatio.RatioB.Test {
 				t2 = strings.Replace(t2, "  |   Test", "+ |   Test", 1)
 			}
 		}
