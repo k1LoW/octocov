@@ -96,3 +96,72 @@ func TestCustomMetricSetOut(t *testing.T) {
 		})
 	}
 }
+
+func TestDiffCustomMetricSetTable(t *testing.T) {
+	tests := []struct {
+		a *CustomMetricSet
+		b *CustomMetricSet
+	}{
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
+					{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+			nil,
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
+					{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "count", Name: "Count", Value: 9393.0, Unit: ""},
+					{Key: "ns_per_op", Name: "ns/op", Value: 456.0, Unit: "ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
+	}
+
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			d := tt.a.Compare(tt.b)
+			got := d.Table()
+			f := filepath.Join("custom_metrics", fmt.Sprintf("diff_custom_metric_set_table.%d", i))
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				golden.Update(t, testdataDir(t), f, got)
+				return
+			}
+			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}

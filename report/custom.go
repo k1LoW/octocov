@@ -48,10 +48,10 @@ func (s *CustomMetricSet) Table() string {
 		return ""
 	}
 	h := []string{}
-	m := []string{}
-	for _, metric := range s.Metrics {
-		h = append(h, metric.Name)
-		m = append(m, fmt.Sprintf("%.1f%s", metric.Value, metric.Unit))
+	d := []string{}
+	for _, m := range s.Metrics {
+		h = append(h, m.Name)
+		d = append(d, fmt.Sprintf("%.1f%s", m.Value, m.Unit))
 	}
 	buf := new(bytes.Buffer)
 	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name))
@@ -61,7 +61,7 @@ func (s *CustomMetricSet) Table() string {
 	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	table.Append(m)
+	table.Append(d)
 	table.Render()
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
@@ -82,8 +82,8 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 	table.SetBorder(false)
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
-	for _, metric := range s.Metrics {
-		table.Rich([]string{metric.Name, fmt.Sprintf("%.1f%s", metric.Value, metric.Unit)}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+	for _, m := range s.Metrics {
+		table.Rich([]string{m.Name, fmt.Sprintf("%.1f%s", m.Value, m.Unit)}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
 	table.Render()
@@ -99,23 +99,23 @@ func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 		Metrics: []*DiffCustomMetric{},
 	}
 	if s2 == nil {
-		for _, metric := range s.Metrics {
-			d.Metrics = append(d.Metrics, metric.Compare(nil))
+		for _, m := range s.Metrics {
+			d.Metrics = append(d.Metrics, m.Compare(nil))
 		}
 		return d
 	}
-	for _, metric := range s.Metrics {
-		metric2 := s2.findMetricByKey(metric.Key)
-		d.Metrics = append(d.Metrics, metric.Compare(metric2))
+	for _, m := range s.Metrics {
+		m2 := s2.findMetricByKey(m.Key)
+		d.Metrics = append(d.Metrics, m.Compare(m2))
 	}
 
 	return d
 }
 
 func (s *CustomMetricSet) findMetricByKey(key string) *CustomMetric {
-	for _, metric := range s.Metrics {
-		if metric.Key == key {
-			return metric
+	for _, m := range s.Metrics {
+		if m.Key == key {
+			return m
 		}
 	}
 	return nil
@@ -157,8 +157,8 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
 
 	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
-	for _, metric := range d.Metrics {
-		table.Append([]string{metric.Name, fmt.Sprintf("%.1f%s", *metric.B, metric.customMetricB.Unit), fmt.Sprintf("%.1f%s", *metric.A, metric.customMetricA.Unit), fmt.Sprintf("%.1f%s", metric.Diff, metric.customMetricA.Unit)})
+	for _, m := range d.Metrics {
+		table.Append([]string{fmt.Sprintf("**%s**", m.Name), fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit), fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit), fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)})
 	}
 	table.Render()
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
