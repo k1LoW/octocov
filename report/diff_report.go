@@ -24,6 +24,7 @@ type DiffReport struct {
 	Coverage          *coverage.DiffCoverage `json:"coverage,omitempty"`
 	CodeToTestRatio   *ratio.DiffRatio       `json:"code_to_test_ratio,omitempty"`
 	TestExecutionTime *DiffTestExecutionTime `json:"test_execution_time,omitempty"`
+	CustomMetrics     []*DiffCustomMetricSet `json:"custom_metrics,omitempty"`
 	TimestampA        time.Time              `json:"timestamp_a"`
 	TimestampB        time.Time              `json:"timestamp_b"`
 	ReportA           *Report                `json:"-"`
@@ -62,6 +63,7 @@ var leftSepRe = regexp.MustCompile(`(?m)^\|`)
 func (d *DiffReport) Table() string {
 	out := []string{}
 
+	// Markdown table
 	buf := new(bytes.Buffer)
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
@@ -71,9 +73,9 @@ func (d *DiffReport) Table() string {
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
 	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false, true)
 	table.Render()
-
 	out = append(out, strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1))
 
+	// Diff code block
 	buf2 := new(bytes.Buffer)
 	table2 := tablewriter.NewWriter(buf2)
 	table2.SetAutoFormatHeaders(false)
@@ -82,7 +84,6 @@ func (d *DiffReport) Table() string {
 	table2.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
 	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true, false)
 	table2.Render()
-
 	t2 := leftSepRe.ReplaceAllString(buf2.String(), "  |")
 	if d.Coverage != nil {
 		if d.Coverage.Diff > 0 {
@@ -119,7 +120,6 @@ func (d *DiffReport) Table() string {
 			t2 = strings.Replace(t2, "  | Test Execution", "+ | Test Execution", 1)
 		}
 	}
-
 	out = append(out, fmt.Sprintf("<details>\n\n<summary>Details</summary>\n\n``` diff\n%s```\n\n</details>\n", t2))
 
 	return strings.Join(out, "\n")
@@ -127,9 +127,9 @@ func (d *DiffReport) Table() string {
 
 func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool) {
 	if withLink {
-		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), "+/-"})
+		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
 	} else {
-		table.SetHeader([]string{"", makeHeadTitle(d.RefA, d.CommitA, d.ReportA.covPaths), makeHeadTitle(d.RefB, d.CommitB, d.ReportB.covPaths), "+/-"})
+		table.SetHeader([]string{"", makeHeadTitle(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitle(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
 	}
 	if d.Coverage != nil {
 		{
@@ -147,34 +147,34 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			if !detail {
 				t = "**Coverage**"
 			}
-			table.Rich([]string{t, fmt.Sprintf("%.1f%%", d.Coverage.A), fmt.Sprintf("%.1f%%", d.Coverage.B), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+			table.Rich([]string{t, fmt.Sprintf("%.1f%%", d.Coverage.B), fmt.Sprintf("%.1f%%", d.Coverage.A), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
-				dd := len(d.Coverage.CoverageB.Files) - len(d.Coverage.CoverageA.Files)
+				dd := len(d.Coverage.CoverageA.Files) - len(d.Coverage.CoverageB.Files)
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
 				}
-				table.Append([]string{"  Files", fmt.Sprintf("%d", len(d.Coverage.CoverageA.Files)), fmt.Sprintf("%d", len(d.Coverage.CoverageB.Files)), ds})
+				table.Append([]string{"  Files", fmt.Sprintf("%d", len(d.Coverage.CoverageB.Files)), fmt.Sprintf("%d", len(d.Coverage.CoverageA.Files)), ds})
 			}
 
 			{
-				dd := d.Coverage.CoverageB.Total - d.Coverage.CoverageA.Total
+				dd := d.Coverage.CoverageA.Total - d.Coverage.CoverageB.Total
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
 				}
-				table.Append([]string{"  Lines", fmt.Sprintf("%d", d.Coverage.CoverageA.Total), fmt.Sprintf("%d", d.Coverage.CoverageB.Total), ds})
+				table.Append([]string{"  Lines", fmt.Sprintf("%d", d.Coverage.CoverageB.Total), fmt.Sprintf("%d", d.Coverage.CoverageA.Total), ds})
 			}
 
 			{
-				dd := d.Coverage.CoverageB.Covered - d.Coverage.CoverageA.Covered
+				dd := d.Coverage.CoverageA.Covered - d.Coverage.CoverageB.Covered
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
 				}
-				table.Append([]string{"  Covered", fmt.Sprintf("%d", d.Coverage.CoverageA.Covered), fmt.Sprintf("%d", d.Coverage.CoverageB.Covered), ds})
+				table.Append([]string{"  Covered", fmt.Sprintf("%d", d.Coverage.CoverageB.Covered), fmt.Sprintf("%d", d.Coverage.CoverageA.Covered), ds})
 			}
 		}
 
@@ -202,24 +202,24 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		if !detail {
 			t = "**Code to Test Ratio**"
 		}
-		table.Rich([]string{t, ratioA, ratioB, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		table.Rich([]string{t, ratioB, ratioA, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 
 		if detail && d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
 			{
-				dd := d.CodeToTestRatio.RatioB.Code - d.CodeToTestRatio.RatioA.Code
+				dd := d.CodeToTestRatio.RatioA.Code - d.CodeToTestRatio.RatioB.Code
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
 				}
-				table.Append([]string{"  Code", fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Code), fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Code), ds})
+				table.Append([]string{"  Code", fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Code), fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Code), ds})
 			}
 			{
-				dd := d.CodeToTestRatio.RatioB.Test - d.CodeToTestRatio.RatioA.Test
+				dd := d.CodeToTestRatio.RatioA.Test - d.CodeToTestRatio.RatioB.Test
 				ds := fmt.Sprintf("%d", dd)
 				if dd > 0 {
 					ds = fmt.Sprintf("+%d", dd)
 				}
-				table.Append([]string{"  Test", fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Test), fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Test), ds})
+				table.Append([]string{"  Test", fmt.Sprintf("%d", d.CodeToTestRatio.RatioB.Test), fmt.Sprintf("%d", d.CodeToTestRatio.RatioA.Test), ds})
 			}
 		}
 	}
@@ -246,7 +246,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		if !detail {
 			t = "**Test Execution Time**"
 		}
-		table.Rich([]string{t, ta, tb, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		table.Rich([]string{t, tb, ta, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 	}
 }
 

@@ -62,14 +62,20 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if hideFooterLink {
 		footer = "Reported by octocov"
 	}
-	var table, fileTable string
+	var (
+		table, fileTable string
+		customTables     []string
+	)
 	if rPrev != nil {
-		d := rPrev.Compare(r)
+		d := r.Compare(rPrev)
 		table = d.Table()
 		fileTable = d.FileCoveagesTable(files)
 	} else {
 		table = r.Table()
 		fileTable = r.FileCoveagesTable(files)
+		for _, s := range r.CustomMetrics {
+			customTables = append(customTables, s.Table())
+		}
 	}
 
 	title := r.Title()
@@ -95,6 +101,13 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		table,
 		"",
 		fileTable,
+	)
+	comment = append(
+		comment,
+		customTables...,
+	)
+	comment = append(
+		comment,
 		"---",
 		footer,
 	)
