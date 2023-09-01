@@ -133,3 +133,24 @@ func (m *CustomMetric) Compare(m2 *CustomMetric) *DiffCustomMetric {
 
 	return d
 }
+
+func (d *DiffCustomMetricSet) Table() string {
+	if len(d.Metrics) == 0 {
+		return ""
+	}
+	buf := new(bytes.Buffer)
+	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", d.Name))
+	table := tablewriter.NewWriter(buf)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
+
+	table.SetHeader([]string{"", makeHeadTitleWithLink(d.reportB.Ref, d.reportB.Commit, nil), makeHeadTitleWithLink(d.reportA.Ref, d.reportA.Commit, nil), "+/-"})
+	for _, metric := range d.Metrics {
+		table.Append([]string{metric.Name, fmt.Sprintf("%.1f%s", *metric.B, metric.customMetricB.Unit), fmt.Sprintf("%.1f%s", *metric.A, metric.customMetricA.Unit), fmt.Sprintf("%.1f%s", metric.Diff, metric.customMetricA.Unit)})
+	}
+	table.Render()
+	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
+}
