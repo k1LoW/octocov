@@ -54,7 +54,7 @@ func (r *Ratio) Compare(r2 *Ratio) *DiffRatio {
 	}
 	d.A = ratioA
 	d.B = ratioB
-	d.Diff = ratioB - ratioA
+	d.Diff = ratioA - ratioB
 	return d
 }
 

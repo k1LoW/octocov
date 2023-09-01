@@ -12,6 +12,7 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/pkg/coverage"
 	"github.com/k1LoW/octocov/pkg/ratio"
@@ -43,7 +44,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestMeasureCoverage(t *testing.T) {
-	log.SetOutput(io.Discard) // off log in challengeParseReport()
+	log.SetOutput(io.Discard) // Disable log in challengeParseReport()
 
 	tests := []struct {
 		paths   []string
@@ -113,7 +114,7 @@ func TestCollectCustomMetrics(t *testing.T) {
 			[]*CustomMetricSet{
 				{
 					Key:  "benchmark_0",
-					Name: "Benchmark-0",
+					Name: "Benchmark-0 (this is test)",
 					Metrics: []*CustomMetric{
 						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
 						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
@@ -130,7 +131,7 @@ func TestCollectCustomMetrics(t *testing.T) {
 			[]*CustomMetricSet{
 				{
 					Key:  "benchmark_0",
-					Name: "Benchmark-0",
+					Name: "Benchmark-0 (this is test)",
 					Metrics: []*CustomMetric{
 						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
 						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
@@ -138,7 +139,7 @@ func TestCollectCustomMetrics(t *testing.T) {
 				},
 				{
 					Key:  "benchmark_1",
-					Name: "Benchmark-1",
+					Name: "Benchmark-1 (this is test)",
 					Metrics: []*CustomMetric{
 						{Key: "count", Name: "Count", Value: 1500.0, Unit: ""},
 						{Key: "ns_per_op", Name: "ns/op", Value: 1340.0, Unit: "ns/op"},
@@ -176,7 +177,10 @@ func TestCollectCustomMetrics(t *testing.T) {
 				return
 			}
 			got := r.CustomMetrics
-			if diff := cmp.Diff(got, tt.want); diff != "" {
+			opts := []cmp.Option{
+				cmpopts.IgnoreFields(CustomMetricSet{}, "report"),
+			}
+			if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
 				t.Error(diff)
 			}
 		})
@@ -432,10 +436,10 @@ func TestCompare(t *testing.T) {
 		if want := 0.0; got.Coverage.Diff != want {
 			t.Errorf("got %v\nwant %v", got.Coverage.Diff, want)
 		}
-		if want := -0.5143015828936407; got.CodeToTestRatio.Diff != want {
+		if want := 0.5143015828936407; got.CodeToTestRatio.Diff != want {
 			t.Errorf("got %v\nwant %v", got.CodeToTestRatio.Diff, want)
 		}
-		if want := -280000000000.000000; got.TestExecutionTime.Diff != want {
+		if want := 280000000000.000000; got.TestExecutionTime.Diff != want {
 			t.Errorf("got %v\nwant %v", got.TestExecutionTime.Diff, want)
 		}
 	}

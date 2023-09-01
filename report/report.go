@@ -104,15 +104,15 @@ func (r *Report) Bytes() []byte {
 func (r *Report) Table() string {
 	h := []string{}
 	m := []string{}
-	if r.Coverage != nil {
+	if r.IsMeasuredCoverage() {
 		h = append(h, "Coverage")
 		m = append(m, fmt.Sprintf("%.1f%%", r.CoveragePercent()))
 	}
-	if r.CodeToTestRatio != nil {
+	if r.IsMeasuredCodeToTestRatio() {
 		h = append(h, "Code to Test Ratio")
 		m = append(m, fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio()))
 	}
-	if r.TestExecutionTime != nil {
+	if r.IsMeasuredTestExecutionTime() {
 		h = append(h, "Test Execution Time")
 		d := time.Duration(r.TestExecutionTimeNano())
 		m = append(m, d.String())
@@ -141,15 +141,15 @@ func (r *Report) Out(w io.Writer) error {
 	table.SetBorder(false)
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
-	if r.Coverage != nil {
+	if r.IsMeasuredCoverage() {
 		table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", r.CoveragePercent())}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
-	if r.CodeToTestRatio != nil {
+	if r.IsMeasuredCodeToTestRatio() {
 		table.Rich([]string{"Code to Test Ratio", fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
-	if r.TestExecutionTime != nil {
+	if r.IsMeasuredTestExecutionTime() {
 		table.Rich([]string{"Test Execution Time", time.Duration(*r.TestExecutionTime).String()}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
@@ -396,7 +396,9 @@ func (r *Report) CollectCustomMetrics() error {
 		if err != nil {
 			return err
 		}
-		set := &CustomMetricSet{}
+		set := &CustomMetricSet{
+			report: r,
+		}
 		if err := json.Unmarshal(b, set); err != nil {
 			return err
 		}
@@ -482,13 +484,13 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 		ReportA:     r,
 		ReportB:     r2,
 	}
-	if r.Coverage != nil {
+	if r.IsMeasuredCoverage() {
 		d.Coverage = r.Coverage.Compare(r2.Coverage)
 	}
-	if r.CodeToTestRatio != nil {
+	if r.IsMeasuredCodeToTestRatio() {
 		d.CodeToTestRatio = r.CodeToTestRatio.Compare(r2.CodeToTestRatio)
 	}
-	if r.TestExecutionTime != nil {
+	if r.IsMeasuredTestExecutionTime() {
 		dt := &DiffTestExecutionTime{
 			A:                  r.TestExecutionTime,
 			B:                  r2.TestExecutionTime,
@@ -500,10 +502,25 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 		if r2.TestExecutionTime != nil {
 			t2 = r2.TestExecutionTimeNano()
 		}
-		dt.Diff = t2 - t1
+		dt.Diff = t1 - t2
 		d.TestExecutionTime = dt
 	}
+	if r.IsCollectedCustomMetrics() {
+		for _, set := range r.CustomMetrics {
+			set2 := r2.findCustomMetricSetByKey(set.Key)
+			d.CustomMetrics = append(d.CustomMetrics, set.Compare(set2))
+		}
+	}
 	return d
+}
+
+func (r *Report) findCustomMetricSetByKey(key string) *CustomMetricSet {
+	for _, set := range r.CustomMetrics {
+		if set.Key == key {
+			return set
+		}
+	}
+	return nil
 }
 
 func makeHeadTitle(ref, commit string, covPaths []string) string {
