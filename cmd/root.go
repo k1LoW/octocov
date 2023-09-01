@@ -524,6 +524,10 @@ func printMetrics(cmd *cobra.Command) error {
 		}
 	}
 
+	if err := r.CollectCustomMetrics(); err != nil {
+		cmd.PrintErrf("Skip collecting custom metrics: %v\n", err)
+	}
+
 	if r.CountMeasured() == 0 {
 		return errors.New("nothing could be measured")
 	}

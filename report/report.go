@@ -154,6 +154,16 @@ func (r *Report) Out(w io.Writer) error {
 	}
 
 	table.Render()
+
+	if r.IsCollectedCustomMetrics() {
+		for _, m := range r.CustomMetrics {
+			w.Write([]byte("\n"))
+			if err := m.Out(w); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
 }
 
