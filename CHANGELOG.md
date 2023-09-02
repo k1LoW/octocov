@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.51.0](https://github.com/k1LoW/octocov/compare/v0.50.1...v0.51.0) - 2023-09-02
+### Breaking Changes 🛠
+- Show custom metrics reports in pull requests and summaries by @k1LoW in https://github.com/k1LoW/octocov/pull/249
+### New Features 🎉
+- Collect custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/247
+- Show custom metrics reports in output of `octocov` by @k1LoW in https://github.com/k1LoW/octocov/pull/252
+- Add JSON Schema for custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/254
+### Other Changes
+- Add to README about custom metrics. by @k1LoW in https://github.com/k1LoW/octocov/pull/255
+
 ## [v0.50.1](https://github.com/k1LoW/octocov/compare/v0.50.0...v0.50.1) - 2023-08-22
 ### Fix bug 🐛
 - Fix private central ( Use `?raw=true` URL ) by @k1LoW in https://github.com/k1LoW/octocov/pull/242
