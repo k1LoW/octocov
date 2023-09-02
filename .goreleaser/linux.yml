@@ -17,12 +17,29 @@ builds:
       - -extldflags '-static'
     env:
       - CGO_ENABLED=1
+    goos:
+      - linux
+    goarch:
+      - amd64
+  -
+    id: octocov-linux-arm64
+    flags:
+      - -a
+      - -tags
+      - netgo
+      - -installsuffix
+      - netgo
+    ldflags:
+      - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
+      - -linkmode external
+      - -extldflags '-static'
+    env:
+      - CGO_ENABLED=1
       - CC=aarch64-linux-gnu-gcc
     goos:
       - linux
     goarch:
       - arm64
-      - amd64
 archives:
   -
     id: octocov-archive
