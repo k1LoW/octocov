@@ -97,6 +97,39 @@ func TestCustomMetricSetOut(t *testing.T) {
 	}
 }
 
+func TestCustomMetricsSetValidate(t *testing.T) {
+	tests := []struct {
+		in      *CustomMetricSet
+		wantErr bool
+	}{
+		{&CustomMetricSet{}, true},
+		{&CustomMetricSet{
+			Key: "key",
+			Metrics: []*CustomMetric{
+				{Key: "count", Value: 1000.0},
+				{Key: "ns_per_op", Value: 676.0, Unit: "ns/op"},
+			},
+		}, false},
+		{&CustomMetricSet{
+			Key:     "key",
+			Metrics: []*CustomMetric{},
+		}, true},
+	}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			if err := tt.in.Validate(); err != nil {
+				if !tt.wantErr {
+					t.Error(err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+		})
+	}
+}
+
 func TestDiffCustomMetricSetTable(t *testing.T) {
 	tests := []struct {
 		a *CustomMetricSet

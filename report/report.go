@@ -413,19 +413,8 @@ func (r *Report) CollectCustomMetrics() error {
 			return err
 		}
 		// Validate
-		if set.Key == "" {
-			return fmt.Errorf("key is required: %s", v)
-		}
-		if set.Name == "" {
-			set.Name = set.Key
-		}
-		for _, m := range set.Metrics {
-			if m.Key == "" {
-				return fmt.Errorf("key of metrics is required: %s", v)
-			}
-			if m.Name == "" {
-				m.Name = m.Key
-			}
+		if err := set.Validate(); err != nil {
+			return err
 		}
 		if len(set.Metrics) != len(lo.UniqBy(set.Metrics, func(m *CustomMetric) string {
 			return m.Key

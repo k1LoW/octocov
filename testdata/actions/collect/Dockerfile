@@ -1,3 +1,3 @@
-FROM golang:1.18
+FROM golang:latest
 
-ENTRYPOINT ["env", "GOPATH=/go", "GOROOT=", "make", "test_collect_metrics"]
+ENTRYPOINT ["env", "GOPATH=/go", "GOROOT=", "go", "run", "main.go", "--config", "testdata/octocov_parallel_tests.yml"]
