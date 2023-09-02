@@ -1110,6 +1110,14 @@ Support `SF` `DA` only
 - **Code to Test Ratio**
 - **Test Execution Time** (on GitHub Actions only)
 
+### Custom metrics
+
+octocov accepts custom metrics in addition to the three supporting metrics.
+
+Specify the path to the custom metrics JSON file in an environment variable prefixed with `OCTOCOV_CUSTOM_METRICS_` to collect the code metrics at the same time.
+
+If there are multiple custom metrics JSON files, specify each file path in a separate environment variable.
+
 ## Detecting pull request number
 
 octocov detect pull request number following order.
