@@ -2,12 +2,18 @@ package report
 
 import (
 	"bytes"
+	_ "embed"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/xeipuuv/gojsonschema"
 )
+
+//go:embed custom_metrics_schema.json
+var schema []byte
 
 type CustomMetricSet struct {
 	Key     string          `json:"key"`
@@ -138,6 +144,23 @@ func (m *CustomMetric) Compare(m2 *CustomMetric) *DiffCustomMetric {
 	d.Diff = v1 - v2
 
 	return d
+}
+
+func (s *CustomMetricSet) Validate() error {
+	cs := gojsonschema.NewBytesLoader(schema)
+	cd := gojsonschema.NewGoLoader(s)
+	result, err := gojsonschema.Validate(cs, cd)
+	if err != nil {
+		return err
+	}
+	if !result.Valid() {
+		var errs error
+		for _, err := range result.Errors() {
+			errs = errors.Join(errs, errors.New(err.String()))
+		}
+		return errs
+	}
+	return nil
 }
 
 func (d *DiffCustomMetricSet) Table() string {
