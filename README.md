@@ -4,7 +4,7 @@
 
 ![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/time.svg) [![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions/workflows/ci.yml)
 
-`octocov` is a toolkit for collecting code metrics (code coverage, code to test ratio and test execution time).
+`octocov` is a toolkit for collecting code metrics (code coverage, code to test ratio, test execution time and **[your own custom metrics](#custom-metrics)**).
 
 Key features of `octocov` are:
 
@@ -1109,6 +1109,18 @@ Support `SF` `DA` only
 - **Code Coverage**
 - **Code to Test Ratio**
 - **Test Execution Time** (on GitHub Actions only)
+
+### Custom metrics
+
+![custom_metrics](docs/custom_metrics.png)
+
+octocov accepts custom metrics in addition to the three supporting metrics.
+
+Specify the path to the custom metrics JSON file in an environment variable prefixed with `OCTOCOV_CUSTOM_METRICS_` to collect the code metrics at the same time.
+
+If there are multiple custom metrics JSON files, specify each file path in a separate environment variable (example [here](https://github.com/k1LoW/octocov/blob/68e007b4164ad6dab4ad978bce8e88c21280900a/.github/workflows/ci.yml#L59-L60)).
+
+The JSON schema for custom metrics can be found [here](report/custom_metrics_schema.json).
 
 ## Detecting pull request number
 
