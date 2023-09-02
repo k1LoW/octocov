@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  job-test:
+  test:
     name: Test
     runs-on: ubuntu-latest
     env:
@@ -62,3 +62,57 @@ jobs:
       - name: Show rate limit
         run: |
           curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
+
+  release-test-darwin:
+    name: Release assets test for maoOS
+    runs-on: macos-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Setup
+        run: |
+          brew install goreleaser
+
+      - name: Release
+        run: |
+          goreleaser --config .goreleaser/darwin.yml --clean --snapshot --skip-publish
+
+  release-test-linux:
+    name: Release assets test for Linux
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up gcc-aarch64-linux-gnu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-aarch64-linux-gnu
+
+      - name: Check out source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v4
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --config .goreleaser/linux.yml --clean --snapshot --skip-publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
