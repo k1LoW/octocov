@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.51.1](https://github.com/k1LoW/octocov/compare/v0.51.0...v0.51.1) - 2023-09-02
+### Other Changes
+- Add asset for linux arm64 by @k1LoW in https://github.com/k1LoW/octocov/pull/256
+
 ## [v0.51.0](https://github.com/k1LoW/octocov/compare/v0.50.1...v0.51.0) - 2023-09-02
 ### Breaking Changes 🛠
 - Show custom metrics reports in pull requests and summaries by @k1LoW in https://github.com/k1LoW/octocov/pull/249
