@@ -51,7 +51,7 @@ jobs:
       -
         uses: actions/checkout@v3
       -
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
       -
