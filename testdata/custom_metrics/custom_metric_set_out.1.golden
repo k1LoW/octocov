@@ -1,4 +1,4 @@
   [1mBenchmark-0[0m  main (1234567)  
 -------------------------------
-  [1mCount[0m                1000.0  
-  [1mns/op[0m            676.0ns/op  
+  [1mCount[0m                  1000  
+  [1mns/op[0m              676ns/op  
