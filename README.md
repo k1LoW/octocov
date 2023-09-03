@@ -1120,7 +1120,7 @@ Specify the path to the custom metrics JSON file in an environment variable pref
 
 The JSON schema for custom metrics can be found [here](report/custom_metrics_schema.json).
 
-If there are multiple custom metrics JSON files, specify each file path in a separate environment variable (example [here](https://github.com/k1LoW/octocov/blob/68e007b4164ad6dab4ad978bce8e88c21280900a/.github/workflows/ci.yml#L59-L60)) or combine the JSONs that satisfy the JSON schema into an array.
+If there are multiple custom metrics JSON files, specify each file path in a separate environment variable (example [here](https://github.com/k1LoW/octocov/blob/68e007b4164ad6dab4ad978bce8e88c21280900a/.github/workflows/ci.yml#L59-L60)) or [combine the JSONs that satisfy the JSON schema into an array](testdata/custom_metrics/benchmark_0_1.json).
 
 ## Detecting pull request number
 
