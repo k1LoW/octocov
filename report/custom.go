@@ -57,7 +57,13 @@ func (s *CustomMetricSet) Table() string {
 	d := []string{}
 	for _, m := range s.Metrics {
 		h = append(h, m.Name)
-		d = append(d, fmt.Sprintf("%.1f%s", m.Value, m.Unit))
+		var v string
+		if isInt(m.Value) {
+			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
+		} else {
+			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
+		}
+		d = append(d, v)
 	}
 	buf := new(bytes.Buffer)
 	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name))
@@ -89,7 +95,13 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
 	for _, m := range s.Metrics {
-		table.Rich([]string{m.Name, fmt.Sprintf("%.1f%s", m.Value, m.Unit)}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+		var v string
+		if isInt(m.Value) {
+			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
+		} else {
+			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
+		}
+		table.Rich([]string{m.Name, v}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
 	table.Render()
@@ -181,8 +193,22 @@ func (d *DiffCustomMetricSet) Table() string {
 
 	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
 	for _, m := range d.Metrics {
-		table.Append([]string{fmt.Sprintf("**%s**", m.Name), fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit), fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit), fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)})
+		var va, vb, diff string
+		if isInt(*m.A) && isInt(*m.B) {
+			va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
+			vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
+		} else {
+			va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
+			vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
+			diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
+		}
+		table.Append([]string{fmt.Sprintf("**%s**", m.Name), vb, va, diff})
 	}
 	table.Render()
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
+}
+
+func isInt(v float64) bool {
+	return v == float64(int64(v))
 }
