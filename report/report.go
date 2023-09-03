@@ -406,24 +406,29 @@ func (r *Report) CollectCustomMetrics() error {
 		if err != nil {
 			return err
 		}
-		set := &CustomMetricSet{
-			report: r,
+		var sets []*CustomMetricSet
+		if err := json.Unmarshal(b, &sets); err != nil {
+			set := &CustomMetricSet{}
+			if err := json.Unmarshal(b, set); err != nil {
+				return err
+			}
+			sets = append(sets, set)
 		}
-		if err := json.Unmarshal(b, set); err != nil {
-			return err
-		}
-		// Validate
-		if err := set.Validate(); err != nil {
-			return err
-		}
-		if len(set.Metrics) != len(lo.UniqBy(set.Metrics, func(m *CustomMetric) string {
-			return m.Key
-		})) {
-			return fmt.Errorf("key of metrics must be unique: %s", lo.Map(set.Metrics, func(m *CustomMetric, _ int) string {
+		for _, set := range sets {
+			set.report = r
+			// Validate
+			if err := set.Validate(); err != nil {
+				return err
+			}
+			if len(set.Metrics) != len(lo.UniqBy(set.Metrics, func(m *CustomMetric) string {
 				return m.Key
-			}))
+			})) {
+				return fmt.Errorf("key of metrics must be unique: %s", lo.Map(set.Metrics, func(m *CustomMetric, _ int) string {
+					return m.Key
+				}))
+			}
+			r.CustomMetrics = append(r.CustomMetrics, set)
 		}
-		r.CustomMetrics = append(r.CustomMetrics, set)
 	}
 
 	// Validate

@@ -1118,9 +1118,9 @@ octocov accepts custom metrics in addition to the three supporting metrics.
 
 Specify the path to the custom metrics JSON file in an environment variable prefixed with `OCTOCOV_CUSTOM_METRICS_` to collect the code metrics at the same time.
 
-If there are multiple custom metrics JSON files, specify each file path in a separate environment variable (example [here](https://github.com/k1LoW/octocov/blob/68e007b4164ad6dab4ad978bce8e88c21280900a/.github/workflows/ci.yml#L59-L60)).
-
 The JSON schema for custom metrics can be found [here](report/custom_metrics_schema.json).
+
+If there are multiple custom metrics JSON files, specify each file path in a separate environment variable (example [here](https://github.com/k1LoW/octocov/blob/68e007b4164ad6dab4ad978bce8e88c21280900a/.github/workflows/ci.yml#L59-L60)) or combine the JSONs that satisfy the JSON schema into an array.
 
 ## Detecting pull request number
 
