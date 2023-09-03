@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.51.2](https://github.com/k1LoW/octocov/compare/v0.51.1...v0.51.2) - 2023-09-03
+### New Features 🎉
+- Support for multiple custom metrics from one environment variable. by @k1LoW in https://github.com/k1LoW/octocov/pull/259
+### Other Changes
+- Update CREDITS by @k1LoW in https://github.com/k1LoW/octocov/pull/260
+
 ## [v0.51.1](https://github.com/k1LoW/octocov/compare/v0.51.0...v0.51.1) - 2023-09-02
 ### Other Changes
 - Add asset for linux arm64 by @k1LoW in https://github.com/k1LoW/octocov/pull/256
