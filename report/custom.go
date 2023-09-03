@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/olekukonko/tablewriter"
+	"github.com/samber/lo"
 	"github.com/xeipuuv/gojsonschema"
 )
 
@@ -172,6 +173,14 @@ func (s *CustomMetricSet) Validate() error {
 		}
 		return errs
 	}
+	if len(s.Metrics) != len(lo.UniqBy(s.Metrics, func(m *CustomMetric) string {
+		return m.Key
+	})) {
+		return fmt.Errorf("key of metrics must be unique: %s", lo.Map(s.Metrics, func(m *CustomMetric, _ int) string {
+			return m.Key
+		}))
+	}
+
 	return nil
 }
 

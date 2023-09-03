@@ -84,12 +84,16 @@ var dumpCmd = &cobra.Command{
 			}
 		}
 
+		if err := r.CollectCustomMetrics(); err != nil {
+			cmd.PrintErrf("Skip collecting custom metrics: %v\n", err)
+		}
+
 		if r.CountMeasured() == 0 {
 			return errors.New("nothing could be measured")
 		}
 
 		if err := r.Validate(); err != nil {
-			return fmt.Errorf("validation error: %w\n", err)
+			return fmt.Errorf("validation error: %w", err)
 		}
 		cmd.Println(r.String())
 		return nil

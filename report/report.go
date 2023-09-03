@@ -474,6 +474,14 @@ func (r *Report) Validate() error {
 	if r.Commit == "" {
 		return fmt.Errorf("coverage report '%s' (env %s) is not set", "commit", "GITHUB_SHA")
 	}
+
+	if len(r.CustomMetrics) != len(lo.UniqBy(r.CustomMetrics, func(s *CustomMetricSet) string {
+		return s.Key
+	})) {
+		return fmt.Errorf("key of custom metrics must be unique: %s", lo.Map(r.CustomMetrics, func(s *CustomMetricSet, _ int) string {
+			return s.Key
+		}))
+	}
 	return nil
 }
 
