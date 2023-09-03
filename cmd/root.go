@@ -202,6 +202,10 @@ var rootCmd = &cobra.Command{
 			return errors.New("nothing could be measured")
 		}
 
+		if err := r.Validate(); err != nil {
+			return fmt.Errorf("validation error: %w", err)
+		}
+
 		cmd.Println("")
 		if err := r.Out(os.Stdout); err != nil {
 			return err
