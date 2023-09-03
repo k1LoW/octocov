@@ -1166,6 +1166,12 @@ $ brew install k1LoW/tap/octocov
 
 Download binary from [releases page](https://github.com/k1LoW/octocov/releases)
 
+**go install:**
+
+```console
+$ go install github.com/k1LoW/octocov@latest
+```
+
 **docker:**
 
 ```console
