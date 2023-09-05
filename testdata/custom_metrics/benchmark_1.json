@@ -3,15 +3,15 @@
   "name": "Benchmark-1 (this is custom metrics test)",
   "metrics": [
     {
-      "key": "count",
-      "name": "Count",
+      "key": "N",
+      "name": "Number of iterations",
       "value": 1500
     },
     {
-      "key": "ns_per_op",
-      "name": "ns/op",
-      "value": 1340,
-      "unit": "ns/op"
+      "key": "NsPerOp",
+      "name": "Nanoseconds per iteration",
+      "value": 1345,
+      "unit": " ns/op"
     }
   ]
 }

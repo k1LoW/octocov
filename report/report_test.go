@@ -116,8 +116,8 @@ func TestCollectCustomMetrics(t *testing.T) {
 					Key:  "benchmark_0",
 					Name: "Benchmark-0 (this is custom metrics test)",
 					Metrics: []*CustomMetric{
-						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+						{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 					},
 				},
 			},
@@ -133,16 +133,16 @@ func TestCollectCustomMetrics(t *testing.T) {
 					Key:  "benchmark_0",
 					Name: "Benchmark-0 (this is custom metrics test)",
 					Metrics: []*CustomMetric{
-						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+						{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 					},
 				},
 				{
 					Key:  "benchmark_1",
 					Name: "Benchmark-1 (this is custom metrics test)",
 					Metrics: []*CustomMetric{
-						{Key: "count", Name: "Count", Value: 1500.0, Unit: ""},
-						{Key: "ns_per_op", Name: "ns/op", Value: 1340.0, Unit: "ns/op"},
+						{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1345.0, Unit: " ns/op"},
 					},
 				},
 			},
@@ -157,16 +157,16 @@ func TestCollectCustomMetrics(t *testing.T) {
 					Key:  "benchmark_0",
 					Name: "Benchmark-0 (this is custom metrics test)",
 					Metrics: []*CustomMetric{
-						{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-						{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+						{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 					},
 				},
 				{
 					Key:  "benchmark_1",
 					Name: "Benchmark-1 (this is custom metrics test)",
 					Metrics: []*CustomMetric{
-						{Key: "count", Name: "Count", Value: 1500.0, Unit: ""},
-						{Key: "ns_per_op", Name: "ns/op", Value: 1340.0, Unit: "ns/op"},
+						{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1345.0, Unit: " ns/op"},
 					},
 				},
 			},

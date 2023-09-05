@@ -19,16 +19,16 @@ func TestCustomMetricSetTable(t *testing.T) {
 			Key:  "benchmark_0",
 			Name: "Benchmark-0",
 			Metrics: []*CustomMetric{
-				{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-				{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+				{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 			},
 		}},
 		{&CustomMetricSet{
 			Key:  "benchmark_1",
 			Name: "Benchmark-1",
 			Metrics: []*CustomMetric{
-				{Key: "count", Name: "Count", Value: 1500.0, Unit: ""},
-				{Key: "ns_per_op", Name: "ns/op", Value: 1340.0, Unit: "ns/op"},
+				{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
 			},
 		}},
 	}
@@ -56,8 +56,8 @@ func TestCustomMetricSetOut(t *testing.T) {
 			Key:  "benchmark_0",
 			Name: "Benchmark-0",
 			Metrics: []*CustomMetric{
-				{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-				{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+				{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 			},
 			report: &Report{
 				Ref:      "main",
@@ -69,8 +69,8 @@ func TestCustomMetricSetOut(t *testing.T) {
 			Key:  "benchmark_1",
 			Name: "Benchmark-1",
 			Metrics: []*CustomMetric{
-				{Key: "count", Name: "Count", Value: 1500.0, Unit: ""},
-				{Key: "ns_per_op", Name: "ns/op", Value: 1340.0, Unit: "ns/op"},
+				{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
 			},
 			report: &Report{
 				Ref:      "main",
@@ -140,8 +140,8 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 				Key:  "benchmark_0",
 				Name: "Benchmark-0",
 				Metrics: []*CustomMetric{
-					{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-					{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 				},
 				report: &Report{
 					Ref:      "main",
@@ -156,8 +156,8 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 				Key:  "benchmark_0",
 				Name: "Benchmark-0",
 				Metrics: []*CustomMetric{
-					{Key: "count", Name: "Count", Value: 1000.0, Unit: ""},
-					{Key: "ns_per_op", Name: "ns/op", Value: 676.0, Unit: "ns/op"},
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 				},
 				report: &Report{
 					Ref:      "main",
@@ -169,8 +169,8 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 				Key:  "benchmark_0",
 				Name: "Benchmark-0",
 				Metrics: []*CustomMetric{
-					{Key: "count", Name: "Count", Value: 9393.0, Unit: ""},
-					{Key: "ns_per_op", Name: "ns/op", Value: 456.0, Unit: "ns/op"},
+					{Key: "N", Name: "Number of iterations", Value: 9393.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 456.0, Unit: " ns/op"},
 				},
 				report: &Report{
 					Ref:      "main",

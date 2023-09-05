@@ -1,4 +1,4 @@
-  [1mBenchmark-0[0m  main (1234567)  
--------------------------------
-  [1mCount[0m                  1000  
-  [1mns/op[0m              676ns/op  
+  [1m       Benchmark-0       [0m  main (1234567)  
+---------------------------------------------
+  [1mNumber of iterations[0m                 1000  
+  [1mNanoseconds per iteration[0m     676.5 ns/op  

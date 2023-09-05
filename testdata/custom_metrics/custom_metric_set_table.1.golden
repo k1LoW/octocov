@@ -1,5 +1,5 @@
 ## Benchmark-0
 
-| Count |  ns/op   |
-|------:|---------:|
-|  1000 | 676ns/op |
+| Number of iterations | Nanoseconds per iteration |
+|---------------------:|--------------------------:|
+|                 1000 | 676.5 ns/op               |
