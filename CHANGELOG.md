@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.51.4](https://github.com/k1LoW/octocov/compare/v0.51.3...v0.51.4) - 2023-09-03
+### Other Changes
+- Enhance validation related to custom metrics (e.g., key uniqueness) by @k1LoW in https://github.com/k1LoW/octocov/pull/264
+
 ## [v0.51.3](https://github.com/k1LoW/octocov/compare/v0.51.2...v0.51.3) - 2023-09-03
 ### Breaking Changes 🛠
 - If the value of custom metric is determined to be an integer, the metric is displayed as an integer by @k1LoW in https://github.com/k1LoW/octocov/pull/261
