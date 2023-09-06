@@ -203,11 +203,32 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
 	for _, m := range d.Metrics {
 		var va, vb, diff string
-		if isInt(*m.A) && isInt(*m.B) {
+		switch {
+		case m.A == nil && m.B == nil:
+			continue
+		case m.A != nil && m.B == nil:
+			vb = ""
+			if isInt(*m.A) {
+				va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
+				diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
+			} else {
+				va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
+				diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
+			}
+		case m.A == nil && m.B != nil:
+			va = ""
+			if isInt(*m.B) {
+				vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
+				diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricB.Unit)
+			} else {
+				vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
+				diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricB.Unit)
+			}
+		case isInt(*m.A) && isInt(*m.B):
 			va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
 			vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
 			diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
-		} else {
+		default:
 			va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
 			vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
 			diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
