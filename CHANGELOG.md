@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.51.5](https://github.com/k1LoW/octocov/compare/v0.51.4...v0.51.5) - 2023-09-06
+### Fix bug 🐛
+- Fix diff metrics table (panic: runtime error: invalid memory address or nil pointer dereference) by @k1LoW in https://github.com/k1LoW/octocov/pull/266
+
 ## [v0.51.4](https://github.com/k1LoW/octocov/compare/v0.51.3...v0.51.4) - 2023-09-03
 ### Other Changes
 - Enhance validation related to custom metrics (e.g., key uniqueness) by @k1LoW in https://github.com/k1LoW/octocov/pull/264
