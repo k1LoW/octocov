@@ -270,15 +270,15 @@ func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
 		if fc.Diff > 0 {
 			diff = fmt.Sprintf("+%.1f%%", fc.Diff)
 		}
-		if fc.FileCoverageB != nil {
-			c += fc.FileCoverageB.Covered
-			t += fc.FileCoverageB.Total
-		}
 		if fc.FileCoverageA != nil {
-			pc += fc.FileCoverageA.Covered
-			pt += fc.FileCoverageA.Total
+			c += fc.FileCoverageA.Covered
+			t += fc.FileCoverageA.Total
 		}
-		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", fc.B), diff})
+		if fc.FileCoverageB != nil {
+			pc += fc.FileCoverageB.Covered
+			pt += fc.FileCoverageB.Total
+		}
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", fc.A), diff})
 	}
 	if !exist {
 		return ""
