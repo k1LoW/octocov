@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.51.6](https://github.com/k1LoW/octocov/compare/v0.51.5...v0.51.6) - 2023-09-06
+### Fix bug 🐛
+- swap fileA and fileB results because it was reversed  by @rajyan in https://github.com/k1LoW/octocov/pull/268
+
 ## [v0.51.5](https://github.com/k1LoW/octocov/compare/v0.51.4...v0.51.5) - 2023-09-06
 ### Fix bug 🐛
 - Fix diff metrics table (panic: runtime error: invalid memory address or nil pointer dereference) by @k1LoW in https://github.com/k1LoW/octocov/pull/266
