@@ -3,19 +3,14 @@
   "name": "Benchmark-1 (this is custom metrics test)",
   "metadata": [
     {
-      "key": "os",
-      "name": "Operating System",
-      "value": "linux"
+      "key": "goos",
+      "name": "GOOS",
+      "value": "darwin"
     },
     {
-      "key": "arch",
-      "name": "Architecture",
+      "key": "goarch",
+      "name": "GOARCH",
       "value": "amd64"
-    },
-    {
-      "key": "cpu",
-      "name": "CPU",
-      "value": "Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz"
     }
   ],
   "metrics": [
