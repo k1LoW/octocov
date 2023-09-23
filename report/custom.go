@@ -101,7 +101,6 @@ func (s *CustomMetricSet) MetadataTable() string {
 	}
 	buf := new(bytes.Buffer)
 	buf.WriteString("<details><summary>Metadata</summary>\n\n")
-	_, _ = buf.WriteString(fmt.Sprintf("### Metadata of %s\n\n", s.Name))
 	table := tablewriter.NewWriter(buf)
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
@@ -289,7 +288,6 @@ func (d *DiffCustomMetricSet) MetadataTable() string {
 	}
 	buf := new(bytes.Buffer)
 	buf.WriteString("<details><summary>Metadata</summary>\n\n")
-	_, _ = buf.WriteString(fmt.Sprintf("### Metadata of %s\n\n", d.A.Name))
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
