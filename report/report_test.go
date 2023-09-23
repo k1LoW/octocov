@@ -115,6 +115,10 @@ func TestCollectCustomMetrics(t *testing.T) {
 				{
 					Key:  "benchmark_0",
 					Name: "Benchmark-0 (this is custom metrics test)",
+					Metadata: []*MetadataKV{
+						{Key: "goos", Name: "GOOS", Value: "darwin"},
+						{Key: "goarch", Name: "GOARCH", Value: "amd64"},
+					},
 					Metrics: []*CustomMetric{
 						{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
 						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
@@ -132,6 +136,10 @@ func TestCollectCustomMetrics(t *testing.T) {
 				{
 					Key:  "benchmark_0",
 					Name: "Benchmark-0 (this is custom metrics test)",
+					Metadata: []*MetadataKV{
+						{Key: "goos", Name: "GOOS", Value: "darwin"},
+						{Key: "goarch", Name: "GOARCH", Value: "amd64"},
+					},
 					Metrics: []*CustomMetric{
 						{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
 						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
@@ -140,6 +148,10 @@ func TestCollectCustomMetrics(t *testing.T) {
 				{
 					Key:  "benchmark_1",
 					Name: "Benchmark-1 (this is custom metrics test)",
+					Metadata: []*MetadataKV{
+						{Key: "goos", Name: "GOOS", Value: "darwin"},
+						{Key: "goarch", Name: "GOARCH", Value: "amd64"},
+					},
 					Metrics: []*CustomMetric{
 						{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
 						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1345.0, Unit: " ns/op"},
@@ -156,6 +168,10 @@ func TestCollectCustomMetrics(t *testing.T) {
 				{
 					Key:  "benchmark_0",
 					Name: "Benchmark-0 (this is custom metrics test)",
+					Metadata: []*MetadataKV{
+						{Key: "goos", Name: "GOOS", Value: "darwin"},
+						{Key: "goarch", Name: "GOARCH", Value: "amd64"},
+					},
 					Metrics: []*CustomMetric{
 						{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
 						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
@@ -164,6 +180,10 @@ func TestCollectCustomMetrics(t *testing.T) {
 				{
 					Key:  "benchmark_1",
 					Name: "Benchmark-1 (this is custom metrics test)",
+					Metadata: []*MetadataKV{
+						{Key: "goos", Name: "GOOS", Value: "darwin"},
+						{Key: "goarch", Name: "GOARCH", Value: "amd64"},
+					},
 					Metrics: []*CustomMetric{
 						{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
 						{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1345.0, Unit: " ns/op"},
@@ -185,6 +205,7 @@ func TestCollectCustomMetrics(t *testing.T) {
 						t.Fatal(err)
 					}
 				}
+				return
 			}
 			for k, v := range tt.envs {
 				t.Setenv(k, v)

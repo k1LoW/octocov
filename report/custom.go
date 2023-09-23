@@ -16,11 +16,18 @@ import (
 //go:embed custom_metrics_schema.json
 var schema []byte
 
+type MetadataKV struct {
+	Key   string `json:"key"`
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value"`
+}
+
 type CustomMetricSet struct {
-	Key     string          `json:"key"`
-	Name    string          `json:"name,omitempty"`
-	Metrics []*CustomMetric `json:"metrics"`
-	report  *Report
+	Key      string          `json:"key"`
+	Name     string          `json:"name,omitempty"`
+	Metadata []*MetadataKV   `json:"metadata,omitempty"`
+	Metrics  []*CustomMetric `json:"metrics"`
+	report   *Report
 }
 
 type CustomMetric struct {
@@ -76,6 +83,33 @@ func (s *CustomMetricSet) Table() string {
 	table.SetCenterSeparator("|")
 	table.Append(d)
 	table.Render()
+	return strings.Replace(buf.String(), "---|", "--:|", len(h))
+}
+
+func (s *CustomMetricSet) MetadataTable() string {
+	if len(s.Metadata) == 0 {
+		return ""
+	}
+	var h []string
+	var d []string
+	for _, m := range s.Metadata {
+		if m.Name == "" {
+			m.Name = m.Key
+		}
+		h = append(h, m.Name)
+		d = append(d, m.Value)
+	}
+	buf := new(bytes.Buffer)
+	buf.WriteString("<details><summary>Metadata</summary>\n\n")
+	table := tablewriter.NewWriter(buf)
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	table.Append(d)
+	table.Render()
+	buf.WriteString("\n</details>\n")
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
 
@@ -180,6 +214,13 @@ func (s *CustomMetricSet) Validate() error {
 			return m.Key
 		}))
 	}
+	if len(s.Metadata) != len(lo.UniqBy(s.Metadata, func(m *MetadataKV) string {
+		return m.Key
+	})) {
+		return fmt.Errorf("key of metadata must be unique: %s", lo.Map(s.Metadata, func(m *MetadataKV, _ int) string {
+			return m.Key
+		}))
+	}
 
 	return nil
 }
@@ -199,7 +240,6 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-
 	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
 	for _, m := range d.Metrics {
 		var va, vb, diff string
@@ -236,6 +276,36 @@ func (d *DiffCustomMetricSet) Table() string {
 		table.Append([]string{fmt.Sprintf("**%s**", m.Name), vb, va, diff})
 	}
 	table.Render()
+	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
+}
+
+func (d *DiffCustomMetricSet) MetadataTable() string {
+	if len(d.A.Metadata) == 0 {
+		return ""
+	}
+	if d.B == nil || len(d.B.Metadata) == 0 {
+		return d.A.MetadataTable()
+	}
+	buf := new(bytes.Buffer)
+	buf.WriteString("<details><summary>Metadata</summary>\n\n")
+	table := tablewriter.NewWriter(buf)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
+	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil)})
+	for _, ma := range d.A.Metadata {
+		mb, ok := lo.Find(d.B.Metadata, func(m *MetadataKV) bool {
+			return m.Key == ma.Key
+		})
+		if !ok {
+			mb = &MetadataKV{}
+		}
+		table.Append([]string{fmt.Sprintf("**%s**", ma.Key), mb.Value, ma.Value})
+	}
+	table.Render()
+	buf.WriteString("\n</details>\n")
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
 }
 
