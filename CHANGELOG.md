@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.52.0](https://github.com/k1LoW/octocov/compare/v0.51.6...v0.52.0) - 2023-09-23
+### New Features 🎉
+- Support metadata for custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/270
+
 ## [v0.51.6](https://github.com/k1LoW/octocov/compare/v0.51.5...v0.51.6) - 2023-09-06
 ### Fix bug 🐛
 - swap fileA and fileB results because it was reversed  by @rajyan in https://github.com/k1LoW/octocov/pull/268
