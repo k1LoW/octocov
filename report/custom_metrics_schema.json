@@ -10,6 +10,30 @@
             "type": "string",
             "minLength": 1
         },
+        "metadata": {
+            "type": "array",
+            "items":
+            {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1
+                    },
+                    "value": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "value"
+                ]
+            }
+        },
         "metrics": {
             "type": "array",
             "items":
