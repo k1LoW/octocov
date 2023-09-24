@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.52.1](https://github.com/k1LoW/octocov/compare/v0.52.0...v0.52.1) - 2023-09-24
+### Other Changes
+- Update JSON schema for custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/272
+
 ## [v0.52.0](https://github.com/k1LoW/octocov/compare/v0.51.6...v0.52.0) - 2023-09-23
 ### New Features 🎉
 - Support metadata for custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/270
