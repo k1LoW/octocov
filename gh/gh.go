@@ -713,7 +713,7 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 			Username: "octocov",
 			Password: os.Getenv("GITHUB_TOKEN"),
 		},
-	}); err != nil && err != git.NoErrAlreadyUpToDate {
+	}); err != nil && !errors.Is(err, git.NoErrAlreadyUpToDate) {
 		return c, err
 	}
 

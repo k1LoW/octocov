@@ -157,7 +157,9 @@ func (r *Report) Out(w io.Writer) error {
 
 	if r.IsCollectedCustomMetrics() {
 		for _, m := range r.CustomMetrics {
-			w.Write([]byte("\n"))
+			if _, err := w.Write([]byte("\n")); err != nil {
+				return err
+			}
 			if err := m.Out(w); err != nil {
 				return err
 			}

@@ -140,7 +140,7 @@ ORDER BY r.owner, r.repo`, t, t)) // #nosec
 	for {
 		var rr ReportRecord
 		err := it.Next(&rr)
-		if err == iterator.Done {
+		if errors.Is(err, iterator.Done) {
 			break
 		}
 		if err != nil {

@@ -43,8 +43,6 @@ type DiffCustomMetricSet struct {
 	A       *CustomMetricSet    `json:"a"`
 	B       *CustomMetricSet    `json:"b"`
 	Metrics []*DiffCustomMetric `json:"metrics"`
-	reportA *Report
-	reportB *Report
 }
 
 type DiffCustomMetric struct {
