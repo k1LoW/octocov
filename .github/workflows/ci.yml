@@ -38,9 +38,16 @@ jobs:
       - name: Run govulncheck
         uses: golang/govulncheck-action@v1
         with:
-           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
-           check-latest: true
-           go-package: ./...
+          go-version-input: '${{ steps.setup-go.outputs.go-version }}'
+          check-latest: true
+          go-package: ./...
+          fail-on-error: true
+
+      - name: Run gostyle
+        uses: k1LoW/gostyle-action@v1
+        with:
+          go-version-input: '${{ steps.setup-go.outputs.go-version }}'
+          fail-on-error: true
 
       - name: Run tests
         run: make ci
