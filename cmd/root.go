@@ -348,6 +348,7 @@ var rootCmd = &cobra.Command{
 					log.Printf("%s: %v %s", s, err, string(b))
 					continue
 				}
+				// Select latest report
 				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 					rPrev = rt
 				}
