@@ -6,8 +6,6 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 	}
 	// Type
 	switch {
-	case c.Type == "":
-		c.Type = c2.Type
 	case c2.Type == "":
 	case c.Type != TypeLOC || c2.Type != TypeLOC:
 		c.Type = TypeMerged
