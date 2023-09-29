@@ -1,49 +1,27 @@
 package coverage
 
-import (
-	"errors"
-)
-
 func (c *Coverage) Merge(c2 *Coverage) error {
-	{
-		deleted := true
-		for _, f := range c.Files {
-			if len(f.Blocks) > 0 {
-				deleted = false
-			}
-		}
-		if len(c.Files) > 0 && deleted {
-			return errors.New("can not merge: BlockCoverages are already deleted.")
-		}
+	if c2 == nil {
+		c2 = &Coverage{}
 	}
-	{
-		deleted := true
-		for _, f := range c2.Files {
-			if len(f.Blocks) > 0 {
-				deleted = false
-			}
-			fc, err := c.Files.FindByFile(f.File)
-			if err == nil {
-				switch {
-				case fc.Covered > 0 && f.Covered == 0:
-					// nothing to do
-				case f.Covered > 0 && fc.Covered == 0:
-					fc.Blocks = f.Blocks
-				default:
-					fc.Blocks = append(fc.Blocks, f.Blocks...)
-				}
-			} else {
-				c.Files = append(c.Files, f)
-			}
-		}
-		if len(c2.Files) > 0 && deleted {
-			return errors.New("can not merge: BlockCoverages are already deleted.")
-		}
-	}
-	if c.Type != TypeLOC || c2.Type != TypeLOC {
+	// Type
+	switch {
+	case c.Type == "":
+		c.Type = c2.Type
+	case c2.Type == "":
+	case c.Type != TypeLOC || c2.Type != TypeLOC:
 		c.Type = TypeMerged
 	}
-
+	// Files
+	for _, fc2 := range c2.Files {
+		fc, err := c.Files.FindByFile(fc2.File)
+		if err == nil {
+			fc.Blocks = append(fc.Blocks, fc2.Blocks...)
+		} else {
+			c.Files = append(c.Files, fc2)
+		}
+	}
+	// Recalculate
 	total := 0
 	covered := 0
 	for _, f := range c.Files {
