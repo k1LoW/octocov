@@ -19,8 +19,8 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		TestExecutionTime *TestExecutionTime `yaml:"testExecutionTime,omitempty"`
 		Report            *Report            `yaml:"report,omitempty"`
 		Central           *Central           `yaml:"central,omitempty"`
-		Push              interface{}        `yaml:"push,omitempty"`
-		Comment           interface{}        `yaml:"comment,omitempty"`
+		Push              any                `yaml:"push,omitempty"`
+		Comment           any                `yaml:"comment,omitempty"`
 		Summary           *Summary           `yaml:"summary,omitempty"`
 		Body              *Body              `yaml:"body,omitempty"`
 		Diff              *Diff              `yaml:"diff,omitempty"`
@@ -52,7 +52,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		if commentRe.Match(data) {
 			c.Comment = &Comment{}
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		tmp, err := yaml.Marshal(v)
 		if err != nil {
 			return err
@@ -71,7 +71,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		if pushRe.Match(data) {
 			c.Push = &Push{}
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		tmp, err := yaml.Marshal(v)
 		if err != nil {
 			return err
@@ -93,7 +93,7 @@ func (c *Central) UnmarshalYAML(data []byte) error {
 		Root     string         `yaml:"root"`
 		Reports  CentralReports `yaml:"reports"`
 		Badges   CentralBadges  `yaml:"badges"`
-		Push     interface{}    `yaml:"push,omitempty"`
+		Push     any            `yaml:"push,omitempty"`
 		ReReport *Report        `yaml:"reReport,omitempty"`
 		If       string         `yaml:"if,omitempty"`
 	}{}
@@ -112,7 +112,7 @@ func (c *Central) UnmarshalYAML(data []byte) error {
 		if centralPushRe.Match(data) {
 			c.Push = &Push{}
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		tmp, err := yaml.Marshal(v)
 		if err != nil {
 			return err

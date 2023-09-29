@@ -59,8 +59,10 @@ func (s *CustomMetricSet) Table() string {
 	if len(s.Metrics) == 0 {
 		return ""
 	}
-	h := []string{}
-	d := []string{}
+	var (
+		h []string
+		d []string
+	)
 	for _, m := range s.Metrics {
 		h = append(h, m.Name)
 		var v string
@@ -72,7 +74,7 @@ func (s *CustomMetricSet) Table() string {
 		d = append(d, v)
 	}
 	buf := new(bytes.Buffer)
-	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name))
+	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name)) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
@@ -143,11 +145,10 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 
 func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 	d := &DiffCustomMetricSet{
-		Key:     s.Key,
-		Name:    s.Name,
-		A:       s,
-		B:       s2,
-		Metrics: []*DiffCustomMetric{},
+		Key:  s.Key,
+		Name: s.Name,
+		A:    s,
+		B:    s2,
 	}
 	if s2 == nil {
 		for _, m := range s.Metrics {
@@ -231,7 +232,7 @@ func (d *DiffCustomMetricSet) Table() string {
 		return d.A.Table()
 	}
 	buf := new(bytes.Buffer)
-	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", d.Name))
+	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", d.Name)) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)

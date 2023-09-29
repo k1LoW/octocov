@@ -19,31 +19,18 @@ func (c *Config) Build() {
 	if c.Coverage == nil {
 		c.Coverage = &Coverage{}
 	}
-	if c.Coverage.Paths == nil {
-		c.Coverage.Paths = []string{}
-	}
 	if c.Coverage.Path != "" {
-		_, _ = fmt.Fprintln(os.Stderr, "Deprecated: coverage.path: has been deprecated. please use coverage.paths: instead.")
+		_, _ = fmt.Fprintln(os.Stderr, "Deprecated: coverage.path: has been deprecated. please use coverage.paths: instead.") //nostyle:handlerrors
 		c.Coverage.Paths = append(c.Coverage.Paths, c.Coverage.Path)
 	}
 	if len(c.Coverage.Paths) == 0 {
 		c.Coverage.Paths = append(c.Coverage.Paths, filepath.Dir(c.path))
 	} else {
-		paths := []string{}
+		var paths []string
 		for _, p := range c.Coverage.Paths {
 			paths = append(paths, filepath.Join(filepath.Dir(c.path), p))
 		}
 		c.Coverage.Paths = paths
-	}
-
-	// CodeToTestRatio
-	if c.CodeToTestRatio != nil {
-		if c.CodeToTestRatio.Code == nil {
-			c.CodeToTestRatio.Code = []string{}
-		}
-		if c.CodeToTestRatio.Test == nil {
-			c.CodeToTestRatio.Test = []string{}
-		}
 	}
 
 	// TestExecutionTime
@@ -76,6 +63,6 @@ func (c *Config) Build() {
 	// Diff
 
 	// GitRoot
-	gitRoot, _ := internal.GetRootPath(c.Root())
+	gitRoot, _ := internal.RootPath(c.Root()) //nostyle:handlerrors
 	c.GitRoot = gitRoot
 }

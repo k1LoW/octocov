@@ -47,7 +47,7 @@ var migrateBqTableCmd = &cobra.Command{
 			return err
 		}
 		if !c.Loaded() {
-			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
 		}
 
 		c.Build()
@@ -80,7 +80,9 @@ var migrateBqTableCmd = &cobra.Command{
 			if err := b.CreateTable(ctx); err != nil {
 				merr = multierror.Append(merr, err)
 			} else {
-				_, _ = fmt.Fprintf(os.Stderr, "%s has been created\n", u)
+				if _, err := fmt.Fprintf(os.Stderr, "%s has been created\n", u); err != nil {
+					merr = multierror.Append(merr, err)
+				}
 			}
 		}
 		return merr

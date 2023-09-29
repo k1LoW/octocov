@@ -99,7 +99,7 @@ var badgeCmd = &cobra.Command{
 			}
 		case badgeRatio:
 			if !c.Loaded() {
-				cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
+				cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
 			}
 			if err := c.CodeToTestRatioConfigReady(); err != nil {
 				return err
@@ -120,7 +120,7 @@ var badgeCmd = &cobra.Command{
 			if err := c.TestExecutionTimeConfigReady(); err != nil {
 				return err
 			}
-			stepNames := []string{}
+			var stepNames []string
 			if len(c.TestExecutionTime.Steps) > 0 {
 				stepNames = c.TestExecutionTime.Steps
 			}

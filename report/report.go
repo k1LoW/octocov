@@ -66,7 +66,6 @@ func New(ownerrepo string) (*Report, error) {
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
-		covPaths:   []string{},
 	}, nil
 }
 
@@ -96,14 +95,16 @@ func (r *Report) String() string {
 func (r *Report) Bytes() []byte {
 	b, err := json.MarshalIndent(r, "", "  ")
 	if err != nil {
-		panic(err)
+		panic(err) //nostyle:dontpanic
 	}
 	return b
 }
 
 func (r *Report) Table() string {
-	h := []string{}
-	m := []string{}
+	var (
+		h []string
+		m []string
+	)
 	if r.IsMeasuredCoverage() {
 		h = append(h, "Coverage")
 		m = append(m, fmt.Sprintf("%.1f%%", r.CoveragePercent()))
@@ -178,7 +179,7 @@ func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	}
 	var t, c int
 	exist := false
-	rows := [][]string{}
+	var rows [][]string
 	for _, f := range files {
 		fc, err := r.Coverage.Files.FuzzyFindByFile(f.Filename)
 		if err != nil {
@@ -341,9 +342,9 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		return err
 	}
 	if len(stepNames) > 0 {
-		steps := []gh.Step{}
+		var steps []gh.Step
 		for _, n := range stepNames {
-			s, err := g.GetStepsByName(ctx, repo.Owner, repo.Repo, n)
+			s, err := g.FetchStepsByName(ctx, repo.Owner, repo.Repo, n)
 			if err != nil {
 				return err
 			}
@@ -355,7 +356,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		return nil
 	}
 
-	steps := []gh.Step{}
+	var steps []gh.Step
 	for _, path := range r.covPaths {
 		fi, err := os.Stat(path)
 		if err != nil {
@@ -365,7 +366,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		if err != nil {
 			return err
 		}
-		s, err := g.GetStepByTime(ctx, repo.Owner, repo.Repo, jobID, fi.ModTime())
+		s, err := g.FetchStepByTime(ctx, repo.Owner, repo.Repo, jobID, fi.ModTime())
 		if err != nil {
 			return err
 		}
@@ -385,7 +386,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 // CollectCustomMetrics collects custom metrics from env.
 func (r *Report) CollectCustomMetrics() error {
 	const envPrefix = "OCTOCOV_CUSTOM_METRICS_"
-	envs := [][]string{}
+	var envs [][]string
 	for _, e := range os.Environ() {
 		if !strings.HasPrefix(e, envPrefix) {
 			continue
@@ -468,13 +469,13 @@ func (r *Report) TestExecutionTimeNano() float64 {
 
 func (r *Report) Validate() error {
 	if r.Repository == "" {
-		return fmt.Errorf("coverage report '%s' (env %s) is not set", "repository", "GITHUB_REPOSITORY")
+		return fmt.Errorf("coverage report %q (env %s) is not set", "repository", "GITHUB_REPOSITORY")
 	}
 	if r.Ref == "" {
-		return fmt.Errorf("coverage report '%s' (env %s) is not set", "ref", "GITHUB_REF")
+		return fmt.Errorf("coverage report %q (env %s) is not set", "ref", "GITHUB_REF")
 	}
 	if r.Commit == "" {
-		return fmt.Errorf("coverage report '%s' (env %s) is not set", "commit", "GITHUB_SHA")
+		return fmt.Errorf("coverage report %q (env %s) is not set", "commit", "GITHUB_SHA")
 	}
 
 	if len(r.CustomMetrics) != len(lo.UniqBy(r.CustomMetrics, func(s *CustomMetricSet) string {
@@ -584,7 +585,7 @@ type timePoint struct {
 }
 
 func mergeExecutionTimes(steps []gh.Step) time.Duration {
-	timePoints := []timePoint{}
+	var timePoints []timePoint
 	for _, s := range steps {
 		timePoints = append(timePoints, timePoint{s.StartedAt, 1}, timePoint{s.CompletedAt, -1})
 	}

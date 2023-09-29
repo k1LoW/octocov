@@ -376,7 +376,7 @@ func TestMerge(t *testing.T) {
 		}
 
 		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }

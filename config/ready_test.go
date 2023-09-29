@@ -723,14 +723,14 @@ func TestReportConfigReady(t *testing.T) {
 }
 
 func mockedGh(t *testing.T) *gh.Gh {
-	mockedHTTPClient := mock.NewMockedHTTPClient(
-		mock.WithRequestMatch(
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposByOwnerByRepo,
 			github.Repository{
 				DefaultBranch: github.String("main"),
 			},
 		),
-		mock.WithRequestMatch(
+		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposPullsByOwnerByRepoByPullNumber,
 			github.PullRequest{
 				Number: github.Int(13),

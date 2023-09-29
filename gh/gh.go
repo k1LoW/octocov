@@ -48,11 +48,7 @@ func New() (*Gh, error) {
 	}
 
 	token, _, _, v4ep := factory.GetTokenAndEndpoints()
-	v4c := githubv4.NewEnterpriseClient(v4ep, oauth2.NewClient(
-		context.Background(),
-		oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: token},
-		)))
+	v4c := githubv4.NewEnterpriseClient(v4ep, oauth2.NewClient(context.Background(), oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})))
 
 	return &Gh{
 		client:   client,
@@ -138,7 +134,7 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 	return nil
 }
 
-func (g *Gh) GetDefaultBranch(ctx context.Context, owner, repo string) (string, error) {
+func (g *Gh) FetchDefaultBranch(ctx context.Context, owner, repo string) (string, error) {
 	r, _, err := g.client.Repositories.Get(ctx, owner, repo)
 	if err != nil {
 		return "", err
@@ -146,8 +142,8 @@ func (g *Gh) GetDefaultBranch(ctx context.Context, owner, repo string) (string, 
 	return r.GetDefaultBranch(), nil
 }
 
-func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, error) {
-	b, err := g.GetDefaultBranch(ctx, owner, repo)
+func (g *Gh) FetchRawRootURL(ctx context.Context, owner, repo string) (string, error) {
+	b, err := g.FetchDefaultBranch(ctx, owner, repo)
 	if err != nil {
 		return "", err
 	}
@@ -175,7 +171,7 @@ func (g *Gh) GetRawRootURL(ctx context.Context, owner, repo string) (string, err
 		if err != nil {
 			return "", err
 		}
-		return trimContentURL(fc.GetDownloadURL(), path), nil
+		return trimContentURL(fc.GetDownloadURL(), path)
 	}
 	return "", fmt.Errorf("not found files. please commit file to root directory and push: %s/%s", owner, repo)
 }
@@ -191,7 +187,7 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 
 	// Although it would be nice if we could get the job_id from an environment variable,
 	// there is no way to get it at this time, so it uses a heuristic.
-	p := backoff.Exponential(
+	p := backoff.Exponential( //nostyle:funcfmt
 		backoff.WithMinInterval(time.Second),
 		backoff.WithMaxInterval(30*time.Second),
 		backoff.WithJitterFactor(0.05),
@@ -303,12 +299,12 @@ type PullRequest struct {
 	Labels  []string
 }
 
-func (g *Gh) GetPullRequest(ctx context.Context, owner, repo string, number int) (*PullRequest, error) {
+func (g *Gh) FetchPullRequest(ctx context.Context, owner, repo string, number int) (*PullRequest, error) {
 	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
 	if err != nil {
 		return nil, err
 	}
-	labels := []string{}
+	var labels []string
 	for _, l := range pr.Labels {
 		labels = append(labels, l.GetName())
 	}
@@ -324,8 +320,8 @@ type PullRequestFile struct {
 	BlobURL  string
 }
 
-func (g *Gh) GetPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]*PullRequestFile, error) {
-	files := []*PullRequestFile{}
+func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]*PullRequestFile, error) {
+	var files []*PullRequestFile
 	page := 1
 	for {
 		commitFiles, _, err := g.client.PullRequests.ListFiles(ctx, owner, repo, number, &github.ListOptions{
@@ -349,8 +345,8 @@ func (g *Gh) GetPullRequestFiles(ctx context.Context, owner, repo string, number
 	return files, nil
 }
 
-func (g *Gh) GetChangedFiles(ctx context.Context, owner, repo string) ([]*PullRequestFile, error) {
-	base, err := g.GetDefaultBranch(ctx, owner, repo)
+func (g *Gh) FetchChangedFiles(ctx context.Context, owner, repo string) ([]*PullRequestFile, error) {
+	base, err := g.FetchDefaultBranch(ctx, owner, repo)
 	if err != nil {
 		return nil, err
 	}
@@ -362,7 +358,7 @@ func (g *Gh) GetChangedFiles(ctx context.Context, owner, repo string) ([]*PullRe
 	if err != nil {
 		return nil, err
 	}
-	files := []*PullRequestFile{}
+	var files []*PullRequestFile
 	for _, f := range compare.Files {
 		files = append(files, &PullRequestFile{
 			Filename: f.GetFilename(),
@@ -372,8 +368,8 @@ func (g *Gh) GetChangedFiles(ctx context.Context, owner, repo string) ([]*PullRe
 	return files, nil
 }
 
-func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
-	p := backoff.Exponential(
+func (g *Gh) FetchStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {
+	p := backoff.Exponential( //nostyle:funcfmt
 		backoff.WithMinInterval(time.Second),
 		backoff.WithMaxInterval(30*time.Second),
 		backoff.WithJitterFactor(0.05),
@@ -399,11 +395,11 @@ func (g *Gh) GetStepExecutionTimeByTime(ctx context.Context, owner, repo string,
 			}
 		}
 	}
-	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
+	return 0, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d)", t, jobID)
 }
 
-func (g *Gh) GetStepByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (Step, error) {
-	p := backoff.Exponential(
+func (g *Gh) FetchStepByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (Step, error) {
+	p := backoff.Exponential( //nostyle:funcfmt
 		backoff.WithMinInterval(time.Second),
 		backoff.WithMaxInterval(30*time.Second),
 		backoff.WithJitterFactor(0.05),
@@ -433,7 +429,7 @@ func (g *Gh) GetStepByTime(ctx context.Context, owner, repo string, jobID int64,
 			}
 		}
 	}
-	return Step{}, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d).", t, jobID)
+	return Step{}, fmt.Errorf("the step that was executed at the relevant time (%v) does not exist in the job (%d)", t, jobID)
 }
 
 type Step struct {
@@ -442,7 +438,7 @@ type Step struct {
 	CompletedAt time.Time
 }
 
-func (g *Gh) GetStepsByName(ctx context.Context, owner, repo string, name string) ([]Step, error) {
+func (g *Gh) FetchStepsByName(ctx context.Context, owner, repo string, name string) ([]Step, error) {
 	if os.Getenv("GITHUB_RUN_ID") == "" {
 		return nil, fmt.Errorf("env %s is not set", "GITHUB_RUN_ID")
 	}
@@ -452,14 +448,14 @@ func (g *Gh) GetStepsByName(ctx context.Context, owner, repo string, name string
 	}
 	// Although it would be nice if we could get the job_id from an environment variable,
 	// there is no way to get it at this time, so it uses a heuristic.
-	p := backoff.Exponential(
+	p := backoff.Exponential( //nostyle:funcfmt
 		backoff.WithMinInterval(time.Second),
 		backoff.WithMaxInterval(30*time.Second),
 		backoff.WithJitterFactor(0.05),
 		backoff.WithMaxRetries(5),
 	)
 	b := p.Start(ctx)
-	steps := []Step{}
+	var steps []Step
 	max := 0
 L:
 	for backoff.Continue(b) {
@@ -531,7 +527,7 @@ type ArtifactFile struct {
 	CreatedAt time.Time
 }
 
-func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
+func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
 	page := 1
 	for {
 		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{
@@ -577,11 +573,11 @@ func (g *Gh) GetLatestArtifact(ctx context.Context, owner, repo, name, fp string
 				out := new(bytes.Buffer)
 				size, err := io.CopyN(out, in, maxCopySize)
 				if !errors.Is(err, io.EOF) {
-					_ = in.Close()
+					_ = in.Close() //nostyle:handlerrors
 					return nil, err
 				}
 				if size >= maxCopySize {
-					_ = in.Close()
+					_ = in.Close() //nostyle:handlerrors
 					return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
 				}
 				if err := in.Close(); err != nil {
@@ -724,19 +720,19 @@ type GitHubEvent struct {
 	Name    string
 	Number  int
 	State   string
-	Payload interface{}
+	Payload any
 }
 
 func DecodeGitHubEvent() (*GitHubEvent, error) {
 	i := &GitHubEvent{}
 	n := os.Getenv("GITHUB_EVENT_NAME")
 	if n == "" {
-		return i, fmt.Errorf("env %s is not set.", "GITHUB_EVENT_NAME")
+		return i, fmt.Errorf("env %s is not set", "GITHUB_EVENT_NAME")
 	}
 	i.Name = n
 	p := os.Getenv("GITHUB_EVENT_PATH")
 	if p == "" {
-		return i, fmt.Errorf("env %s is not set.", "GITHUB_EVENT_PATH")
+		return i, fmt.Errorf("env %s is not set", "GITHUB_EVENT_PATH")
 	}
 	b, err := os.ReadFile(filepath.Clean(p))
 	if err != nil {
@@ -764,7 +760,7 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 		i.State = s.Issue.State
 	}
 
-	var payload interface{}
+	var payload any
 
 	if err := json.Unmarshal(b, &payload); err != nil {
 		return i, err
@@ -814,9 +810,12 @@ func Parse(raw string) (*Repository, error) {
 }
 
 // trimContentURL trim suffix path and private token.
-func trimContentURL(u, p string) string {
-	parsed, _ := url.Parse(u)
-	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimSuffix(parsed.String(), fmt.Sprintf("?%s", parsed.RawQuery)), p), "/")
+func trimContentURL(u, p string) (string, error) {
+	parsed, err := url.Parse(u) //nostyle:handlerrors
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSuffix(strings.TrimSuffix(strings.TrimSuffix(parsed.String(), fmt.Sprintf("?%s", parsed.RawQuery)), p), "/"), nil
 }
 
 func generateSig(key string) string {

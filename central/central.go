@@ -113,7 +113,9 @@ func (c *Central) collectReports() error {
 			}
 			current, ok := rsMap[r.Repository]
 			if !ok {
-				_, _ = fmt.Fprintf(os.Stderr, "Collect report of %s\n", r.Repository)
+				if _, err := fmt.Fprintf(os.Stderr, "Collect report of %s\n", r.Repository); err != nil {
+					return err
+				}
 				rsMap[r.Repository] = r
 				return nil
 			}
@@ -182,7 +184,7 @@ func (c *Central) generateBadges() ([]string, error) {
 			badges[bp] = out.Bytes()
 		}
 	}
-	generatedPaths := []string{}
+	var generatedPaths []string
 	for _, d := range c.config.Badges {
 		for path, content := range badges {
 			if err := d.Put(ctx, path, content); err != nil {
@@ -222,12 +224,12 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		query   string
 	)
 	if !isPrivate {
-		rootURL, err = g.GetRawRootURL(ctx, repo.Owner, repo.Repo)
+		rootURL, err = g.FetchRawRootURL(ctx, repo.Owner, repo.Repo)
 		if err != nil {
 			return err
 		}
 	} else {
-		b, err := g.GetDefaultBranch(ctx, repo.Owner, repo.Repo)
+		b, err := g.FetchDefaultBranch(ctx, repo.Owner, repo.Repo)
 		if err != nil {
 			return err
 		}
@@ -261,7 +263,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		return err
 	}
 
-	d := map[string]interface{}{
+	d := map[string]any{
 		"Host":          host,
 		"Reports":       c.reports,
 		"BadgesLinkRel": badgesLinkRel,
@@ -277,7 +279,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	return nil
 }
 
-func funcs() map[string]interface{} {
+func funcs() map[string]any {
 	return template.FuncMap{
 		"coverage": func(r *report.Report) string {
 			return fmt.Sprintf("%.1f%%", r.CoveragePercent())

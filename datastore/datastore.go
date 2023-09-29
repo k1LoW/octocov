@@ -80,7 +80,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 			if err != nil {
 				return nil, err
 			}
-			branch, err = g.GetDefaultBranch(ctx, repo.Owner, repo.Repo)
+			branch, err = g.FetchDefaultBranch(ctx, repo.Owner, repo.Repo)
 			if err != nil {
 				return nil, err
 			}

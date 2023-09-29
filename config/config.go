@@ -33,7 +33,7 @@ const (
 	red         = "#E05D44"
 )
 
-var DefaultConfigFilePaths = []string{".octocov.yml", "octocov.yml"}
+var DefaultPaths = []string{".octocov.yml", "octocov.yml"}
 
 type Config struct {
 	Repository        string             `yaml:"repository"`
@@ -133,13 +133,13 @@ type Diff struct {
 }
 
 func New() *Config {
-	wd, _ := os.Getwd()
+	wd, _ := os.Getwd() //nostyle:handlerrors
 	return &Config{
 		wd: wd,
 	}
 }
 
-func (c *Config) Getwd() string {
+func (c *Config) Wd() string {
 	return c.wd
 }
 
@@ -149,7 +149,7 @@ func (c *Config) Setwd(path string) {
 
 func (c *Config) Load(path string) error {
 	if path == "" {
-		for _, p := range DefaultConfigFilePaths {
+		for _, p := range DefaultPaths {
 			if f, err := os.Stat(filepath.Join(c.wd, p)); err == nil && !f.IsDir() {
 				if path != "" {
 					return fmt.Errorf("duplicate config file [%s, %s]", path, p)
@@ -248,7 +248,7 @@ func coverageAcceptable(current, prev float64, cond string) error {
 		cond = fmt.Sprintf("current %s", cond)
 	}
 
-	variables := map[string]interface{}{
+	variables := map[string]any{
 		"current": current,
 		"prev":    prev,
 		"diff":    current - prev,
@@ -278,7 +278,7 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 		cond = fmt.Sprintf("current %s", cond)
 	}
 
-	variables := map[string]interface{}{
+	variables := map[string]any{
 		"current": current,
 		"prev":    prev,
 		"diff":    current - prev,
@@ -314,7 +314,7 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 		cond = fmt.Sprintf("current %s", cond)
 	}
 
-	variables := map[string]interface{}{
+	variables := map[string]any{
 		"current": current,
 		"prev":    prev,
 		"diff":    current - prev,
@@ -398,7 +398,7 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		}
 		c.gh = g
 	}
-	defaultBranch, err := c.gh.GetDefaultBranch(ctx, repo.Owner, repo.Repo)
+	defaultBranch, err := c.gh.FetchDefaultBranch(ctx, repo.Owner, repo.Repo)
 	if err != nil {
 		return false, err
 	}
@@ -411,10 +411,10 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 
 	isPullRequest := false
 	isDraft := false
-	labels := []string{}
+	var labels []string
 	if n, err := c.gh.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
 		isPullRequest = true
-		pr, err := c.gh.GetPullRequest(ctx, repo.Owner, repo.Repo, n)
+		pr, err := c.gh.FetchPullRequest(ctx, repo.Owner, repo.Repo, n)
 		if err != nil {
 			return false, err
 		}
@@ -422,13 +422,13 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		labels = pr.Labels
 	}
 	now := time.Now()
-	variables := map[string]interface{}{
+	variables := map[string]any{
 		"year":    now.UTC().Year(),
 		"month":   now.UTC().Month(),
 		"day":     now.UTC().Day(),
 		"hour":    now.UTC().Hour(),
 		"weekday": int(now.UTC().Weekday()),
-		"github": map[string]interface{}{
+		"github": map[string]any{
 			"event_name": e.Name,
 			"event":      e.Payload,
 		},

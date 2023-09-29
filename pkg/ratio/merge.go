@@ -4,10 +4,10 @@ import "errors"
 
 func (r *Ratio) Merge(r2 *Ratio) error {
 	if len(r.CodeFiles) == 0 && len(r.TestFiles) == 0 {
-		return errors.New("can not merge: CodeFiles and TestFiles are already deleted.")
+		return errors.New("can not merge: CodeFiles and TestFiles are already deleted")
 	}
 	if len(r2.CodeFiles) == 0 && len(r2.TestFiles) == 0 {
-		return errors.New("can not merge: CodeFiles and TestFiles are already deleted.")
+		return errors.New("can not merge: CodeFiles and TestFiles are already deleted")
 	}
 	r.CodeFiles = uniqueFiles(append(r.CodeFiles, r2.CodeFiles...))
 	r.TestFiles = uniqueFiles(append(r.TestFiles, r2.TestFiles...))

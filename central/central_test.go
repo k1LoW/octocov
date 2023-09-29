@@ -24,7 +24,7 @@ func TestCollectReports(t *testing.T) {
 	ctr := New(&Config{
 		Repository:             "owner/repo",
 		Index:                  ".",
-		Wd:                     c.Getwd(),
+		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []datastore.Datastore{rd},
 		CoverageColor:          c.CoverageColor,
@@ -56,7 +56,7 @@ func TestGenerateBadges(t *testing.T) {
 	ctr := New(&Config{
 		Repository:             "owner/repo",
 		Index:                  ".",
-		Wd:                     c.Getwd(),
+		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []datastore.Datastore{rd},
 		CoverageColor:          c.CoverageColor,
@@ -75,7 +75,7 @@ func TestGenerateBadges(t *testing.T) {
 		t.Errorf("got %v\nwant %v", len(paths), want)
 	}
 
-	got := []string{}
+	var got []string
 	if err := filepath.Walk(td, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -115,14 +115,14 @@ func TestRenderIndex(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bd, err := local.New(filepath.Join(c.Getwd(), "example/central/badges"))
+	bd, err := local.New(filepath.Join(c.Wd(), "example/central/badges"))
 	if err != nil {
 		t.Fatal(err)
 	}
 	ctr := New(&Config{
 		Repository:             c.Repository,
 		Index:                  c.Central.Root,
-		Wd:                     c.Getwd(),
+		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []datastore.Datastore{rd},
 		CoverageColor:          c.CoverageColor,

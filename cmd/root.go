@@ -64,7 +64,7 @@ var rootCmd = &cobra.Command{
 			return printMetrics(cmd)
 		}
 
-		addPaths := []string{}
+		var addPaths []string
 		cmd.PrintErrf("%s version %s\n", version.Name, version.Version)
 
 		c := config.New()
@@ -74,7 +74,7 @@ var rootCmd = &cobra.Command{
 		c.Build()
 
 		if !c.Loaded() {
-			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultConfigFilePaths, " and "))
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), c.Timeout)
@@ -92,7 +92,7 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 
-			badges := []datastore.Datastore{}
+			var badges []datastore.Datastore
 			for _, s := range c.Central.Badges.Datastores {
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()))
 				if err != nil {
@@ -101,7 +101,7 @@ var rootCmd = &cobra.Command{
 				badges = append(badges, d)
 			}
 
-			reports := []datastore.Datastore{}
+			var reports []datastore.Datastore
 			for _, s := range c.Central.Reports.Datastores {
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()))
 				if err != nil {
@@ -113,7 +113,7 @@ var rootCmd = &cobra.Command{
 			ctr := central.New(&central.Config{
 				Repository:             c.Repository,
 				Index:                  c.Central.Root,
-				Wd:                     c.Getwd(),
+				Wd:                     c.Wd(),
 				Badges:                 badges,
 				Reports:                reports,
 				CoverageColor:          c.CoverageColor,
@@ -185,7 +185,7 @@ var rootCmd = &cobra.Command{
 		if err := c.TestExecutionTimeConfigReady(); err != nil {
 			cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
 		} else {
-			stepNames := []string{}
+			var stepNames []string
 			if len(c.TestExecutionTime.Steps) > 0 {
 				stepNames = c.TestExecutionTime.Steps
 			}
@@ -520,7 +520,7 @@ func printMetrics(cmd *cobra.Command) error {
 	}
 
 	if err := c.TestExecutionTimeConfigReady(); r.Repository != "" && err == nil {
-		stepNames := []string{}
+		var stepNames []string
 		if len(c.TestExecutionTime.Steps) > 0 {
 			stepNames = c.TestExecutionTime.Steps
 		}

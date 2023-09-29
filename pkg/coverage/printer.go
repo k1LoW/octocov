@@ -57,9 +57,11 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	cl := color.New(color.FgYellow)
 	cl.EnableColor()
 	for scanner.Scan() {
-		lc, _ := lcs.FindByLine(n)
+		lc, _ := lcs.FindByLine(n) //nostyle:handlerrors
 		c, out := paintLine(n, w2, scanner.Text(), lc)
-		_, _ = fmt.Fprintf(dest, "%s %s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out)
+		if _, err := fmt.Fprintf(dest, "%s %s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out); err != nil {
+			return err
+		}
 		n += 1
 	}
 	if err := scanner.Err(); err != nil {

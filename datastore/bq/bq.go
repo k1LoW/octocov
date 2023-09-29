@@ -128,11 +128,12 @@ func (b *BQ) FS() (fs.FS, error) {
 	ctx := context.Background()
 	fsys := fstest.MapFS{}
 	t := fmt.Sprintf("`%s.%s`", b.dataset, b.table)
-	q := b.client.Query(fmt.Sprintf(`SELECT r.owner, r.repo, r.timestamp, r.raw FROM %s AS r
+	stmt := `SELECT r.owner, r.repo, r.timestamp, r.raw FROM %s AS r
 INNER JOIN (
     SELECT owner, repo, MAX(timestamp) AS timestamp FROM %s GROUP BY owner, repo
 ) AS l ON r.owner = l.owner AND r.repo = l.repo AND l.timestamp = r.timestamp
-ORDER BY r.owner, r.repo`, t, t)) // #nosec
+ORDER BY r.owner, r.repo`
+	q := b.client.Query(fmt.Sprintf(stmt, t, t)) //nolint:nosec
 	it, err := q.Read(ctx)
 	if err != nil {
 		return nil, err

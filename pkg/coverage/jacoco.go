@@ -87,7 +87,7 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	if err := xml.Unmarshal(b, &r); err != nil {
 		return nil, "", err
 	}
-	if r.Package == nil {
+	if len(r.Package) == 0 {
 		return nil, "", fmt.Errorf("%s is not Jacoco format", filepath.Clean(rp))
 	}
 
