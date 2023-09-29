@@ -5,6 +5,7 @@ linters:
     - gosec
     - godot
     - revive
+    - errorlint
 linters-settings:
   errcheck:
     check-type-assertions: true
@@ -17,9 +18,3 @@ linters-settings:
         disabled: true
       - name: exported
         disabled: false
-issues:
-  # include:
-  #   - EXC0012
-  #   - EXC0014
-  exclude:
-    - SA3000
