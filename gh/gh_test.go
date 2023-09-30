@@ -37,15 +37,15 @@ func TestParse(t *testing.T) {
 			continue
 		}
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
 
-func TestGetDefaultBranch(t *testing.T) {
+func TestFetchDefaultBranch(t *testing.T) {
 	mg := mockedGh(t)
 	want := "main"
-	got, err := mg.GetDefaultBranch(context.TODO(), "owner", "repo")
+	got, err := mg.FetchDefaultBranch(context.TODO(), "owner", "repo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestGetDefaultBranch(t *testing.T) {
 	}
 }
 
-func TestGetRawRootURL(t *testing.T) {
+func TestFetchRawRootURL(t *testing.T) {
 	ctx := context.TODO()
 	token, _, _, _ := factory.GetTokenAndEndpoints()
 	if token == "" {
@@ -74,7 +74,7 @@ func TestGetRawRootURL(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		got, err := g.GetRawRootURL(ctx, tt.owner, tt.repo)
+		got, err := g.FetchRawRootURL(ctx, tt.owner, tt.repo)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -172,14 +172,14 @@ func TestGenerateSig(t *testing.T) {
 }
 func mockedGh(t *testing.T) *Gh {
 	t.Setenv("GITHUB_TOKEN", "dummy")
-	mockedHTTPClient := mock.NewMockedHTTPClient(
-		mock.WithRequestMatch(
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposByOwnerByRepo,
 			github.Repository{
 				DefaultBranch: github.String("main"),
 			},
 		),
-		mock.WithRequestMatch(
+		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposPullsByOwnerByRepo,
 			[]*github.PullRequest{
 				&github.PullRequest{

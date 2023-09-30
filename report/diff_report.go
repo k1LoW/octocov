@@ -61,7 +61,7 @@ func (d *DiffReport) Out(w io.Writer) {
 var leftSepRe = regexp.MustCompile(`(?m)^\|`)
 
 func (d *DiffReport) Table() string {
-	out := []string{}
+	var out []string
 
 	// Markdown table
 	buf := new(bytes.Buffer)
@@ -259,7 +259,7 @@ func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
 	}
 	var t, c, pt, pc int
 	exist := false
-	rows := [][]string{}
+	var rows [][]string
 	for _, f := range files {
 		fc, err := d.Coverage.Files.FuzzyFindByFile(f.Filename)
 		if err != nil {

@@ -85,7 +85,7 @@ func TestCompare(t *testing.T) {
 		}
 
 		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -294,7 +294,7 @@ func TestToLineCoverages(t *testing.T) {
 	for _, tt := range tests {
 		got := tt.blocks.ToLineCoverages()
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 
 		if got.Total() != tt.wantTotal {

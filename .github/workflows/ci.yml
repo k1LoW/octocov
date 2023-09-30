@@ -19,7 +19,7 @@ jobs:
           curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
 
       - name: Check out source code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -32,13 +32,22 @@ jobs:
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
+        with:
+          fail_on_error: true
 
       - name: Run govulncheck
         uses: golang/govulncheck-action@v1
         with:
-           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
-           check-latest: true
-           go-package: ./...
+          go-version-input: '${{ steps.setup-go.outputs.go-version }}'
+          check-latest: true
+          go-package: ./...
+          fail-on-error: true
+
+      - name: Run gostyle
+        uses: k1LoW/gostyle-action@v1
+        with:
+          go-version-input: '${{ steps.setup-go.outputs.go-version }}'
+          fail-on-error: true
 
       - name: Run tests
         run: make ci

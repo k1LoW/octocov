@@ -16,7 +16,7 @@ func addReportContentToSummary(content string) error {
 		return err
 	}
 	defer func() {
-		_ = f.Close()
+		_ = f.Close() //nostyle:handlerrors
 	}()
 	if _, err := fmt.Fprintln(f, content); err != nil {
 		return err

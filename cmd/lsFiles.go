@@ -78,15 +78,15 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		gitRoot, err := internal.GetRootPath(wd)
+		gitRoot, err := internal.RootPath(wd)
 		if err != nil {
 			return err
 		}
-		cfiles := []string{}
+		var cfiles []string
 		for _, f := range r.Coverage.Files {
 			cfiles = append(cfiles, f.File)
 		}
-		files := []string{}
+		var files []string
 		if err := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -130,9 +130,18 @@ var lsFilesCmd = &cobra.Command{
 }
 
 func detectTermColor(cl string) (*color.Color, error) {
-	termGreen, _ := colorful.Hex("#4e9a06")
-	termYellow, _ := colorful.Hex("#c4a000")
-	termRed, _ := colorful.Hex("#cc0000")
+	termGreen, err := colorful.Hex("#4e9a06")
+	if err != nil {
+		return nil, err
+	}
+	termYellow, err := colorful.Hex("#c4a000")
+	if err != nil {
+		return nil, err
+	}
+	termRed, err := colorful.Hex("#cc0000")
+	if err != nil {
+		return nil, err
+	}
 	tc, err := colorful.Hex(cl)
 	if err != nil {
 		return nil, err

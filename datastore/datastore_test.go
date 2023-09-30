@@ -66,7 +66,7 @@ func TestParse(t *testing.T) {
 				t.Errorf("got %v\nwant %v", gotType, tt.wantType)
 			}
 			if diff := cmp.Diff(gotArgs, tt.wantArgs, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}

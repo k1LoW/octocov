@@ -75,7 +75,7 @@ var dumpCmd = &cobra.Command{
 		if err := c.TestExecutionTimeConfigReady(); err != nil {
 			cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
 		} else {
-			stepNames := []string{}
+			var stepNames []string
 			if len(c.TestExecutionTime.Steps) > 0 {
 				stepNames = c.TestExecutionTime.Steps
 			}

@@ -28,6 +28,7 @@ test_no_coverage: build
 lint:
 	golangci-lint run ./...
 	govulncheck ./...
+	go vet -vettool=`which gostyle` -gostyle.config=$(PWD)/.gostyle.yml ./...
 
 build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
@@ -45,6 +46,7 @@ depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest
 	go install github.com/Songmu/gocredits/cmd/gocredits@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
+	go install github.com/k1LoW/gostyle@latest
 
 prerelease:
 	git pull origin main --tag

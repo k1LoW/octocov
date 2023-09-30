@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func GetRootPath(base string) (string, error) {
+func RootPath(base string) (string, error) {
 	p, err := filepath.Abs(base)
 	if err != nil {
 		return "", err
@@ -34,14 +34,14 @@ func GetRootPath(base string) (string, error) {
 }
 
 func DetectPrefix(gitRoot, wd string, files, cfiles []string) string {
-	rcfiles := [][]string{}
+	var rcfiles [][]string
 	for _, f := range cfiles {
 		s := strings.Split(f, "/")
 		reverse(s)
 		rcfiles = append(rcfiles, s)
 	}
 
-	rfiles := [][]string{}
+	var rfiles [][]string
 	for _, f := range files {
 		s := strings.Split(f, "/")
 		// reverse slice

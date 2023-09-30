@@ -58,7 +58,7 @@ func New() *Coverage {
 	}
 }
 
-func NewFileCoverage(file string) *FileCoverage {
+func NewFileCoverage(file string) *FileCoverage { //nostyle:repetition
 	return &FileCoverage{
 		File:    file,
 		Total:   0,
@@ -74,29 +74,29 @@ func (c *Coverage) DeleteBlockCoverages() {
 	}
 }
 
-func (fcs FileCoverages) FindByFile(file string) (*FileCoverage, error) {
-	for _, fc := range fcs {
-		if fc.File == file {
-			return fc, nil
+func (fc FileCoverages) FindByFile(file string) (*FileCoverage, error) { //nostyle:recvtype
+	for _, c := range fc {
+		if c.File == file {
+			return c, nil
 		}
 	}
 	return nil, fmt.Errorf("file name not found: %s", file)
 }
 
-func (fcs FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) {
+func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //nostyle:recvtype
 	var match *FileCoverage
-	for _, fc := range fcs {
+	for _, c := range fc {
 		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
-		if strings.HasSuffix(strings.TrimLeft(fc.File, "./"), strings.TrimLeft(file, "./")) {
-			if match == nil || len(match.File) > len(fc.File) {
-				match = fc
+		if strings.HasSuffix(strings.TrimLeft(c.File, "./"), strings.TrimLeft(file, "./")) {
+			if match == nil || len(match.File) > len(c.File) {
+				match = c
 			}
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !strings.HasPrefix(fc.File, "/") && strings.HasSuffix(file, fc.File) {
-			if match == nil || len(match.File) > len(fc.File) {
-				match = fc
+		if !strings.HasPrefix(c.File, "/") && strings.HasSuffix(file, c.File) {
+			if match == nil || len(match.File) > len(c.File) {
+				match = c
 			}
 			continue
 		}
@@ -107,13 +107,13 @@ func (fcs FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) {
 	return nil, fmt.Errorf("file name not found: %s", file)
 }
 
-func (fcs FileCoverages) PathPrefix() (string, error) {
-	if len(fcs) == 0 {
+func (fc FileCoverages) PathPrefix() (string, error) { //nostyle:recvtype
+	if len(fc) == 0 {
 		return "", errors.New("no file coverages")
 	}
-	p := strings.Split(filepath.Dir(filepath.ToSlash(fcs[0].File)), "/")
-	for _, fc := range fcs {
-		d := strings.Split(filepath.Dir(filepath.ToSlash(fc.File)), "/")
+	p := strings.Split(filepath.Dir(filepath.ToSlash(fc[0].File)), "/")
+	for _, c := range fc {
+		d := strings.Split(filepath.Dir(filepath.ToSlash(c.File)), "/")
 		i := 0
 		for {
 			if len(p) <= i {
@@ -130,7 +130,7 @@ func (fcs FileCoverages) PathPrefix() (string, error) {
 		p = p[:i]
 	}
 	s := strings.Join(p, "/")
-	if s == "" && strings.HasPrefix(fcs[0].File, "/") {
+	if s == "" && strings.HasPrefix(fc[0].File, "/") {
 		s = "/"
 	}
 	if s == "." {
@@ -163,20 +163,20 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 	}
 }
 
-func (dfcs DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, error) {
+func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, error) { //nostyle:recvtype
 	var match *DiffFileCoverage
-	for _, dfc := range dfcs {
+	for _, c := range dc {
 		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
-		if strings.HasSuffix(strings.TrimLeft(dfc.File, "./"), strings.TrimLeft(file, "./")) {
-			if match == nil || len(match.File) > len(dfc.File) {
-				match = dfc
+		if strings.HasSuffix(strings.TrimLeft(c.File, "./"), strings.TrimLeft(file, "./")) {
+			if match == nil || len(match.File) > len(c.File) {
+				match = c
 			}
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !strings.HasPrefix(dfc.File, "/") && strings.HasSuffix(file, dfc.File) {
-			if match == nil || len(match.File) > len(dfc.File) {
-				match = dfc
+		if !strings.HasPrefix(c.File, "/") && strings.HasSuffix(file, c.File) {
+			if match == nil || len(match.File) > len(c.File) {
+				match = c
 			}
 			continue
 		}
@@ -187,21 +187,21 @@ func (dfcs DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, e
 	return nil, fmt.Errorf("file name not found: %s", file)
 }
 
-func (bcs BlockCoverages) MaxCount() int {
-	c := map[int]int{}
-	for _, bc := range bcs {
-		sl := *bc.StartLine
-		el := *bc.EndLine
+func (bc BlockCoverages) MaxCount() int { //nostyle:recvtype
+	counts := map[int]int{}
+	for _, c := range bc {
+		sl := *c.StartLine
+		el := *c.EndLine
 		for i := sl; i <= el; i++ {
-			_, ok := c[i]
+			_, ok := counts[i]
 			if !ok {
-				c[i] = 0
+				counts[i] = 0
 			}
-			c[i] += *bc.Count
+			counts[i] += *c.Count
 		}
 	}
 	max := 0
-	for _, v := range c {
+	for _, v := range counts {
 		if v > max {
 			max = v
 		}
@@ -221,17 +221,17 @@ type PosCoverage struct {
 
 type PosCoverages []*PosCoverage
 
-func (ps PosCoverages) FindCountByPos(pos int) (int, error) {
+func (pc PosCoverages) FindCountByPos(pos int) (int, error) { //nostyle:recvtype
 	before := PosCoverages{}
 	after := PosCoverages{}
-	for _, p := range ps {
+	for _, c := range pc {
 		switch {
-		case p.Pos < pos:
-			before = append(before, p)
-		case p.Pos == pos:
-			return p.Count, nil
-		case p.Pos > pos:
-			after = append(after, p)
+		case c.Pos < pos:
+			before = append(before, c)
+		case c.Pos == pos:
+			return c.Count, nil
+		case c.Pos > pos:
+			after = append(after, c)
 		}
 	}
 
@@ -262,59 +262,59 @@ type LineCoverage struct {
 
 type LineCoverages []*LineCoverage
 
-func (lcs LineCoverages) FindByLine(l int) (*LineCoverage, error) {
-	for _, lc := range lcs {
-		if lc.Line == l {
-			return lc, nil
+func (lc LineCoverages) FindByLine(l int) (*LineCoverage, error) { //nostyle:recvtype
+	for _, c := range lc {
+		if c.Line == l {
+			return c, nil
 		}
 	}
 	return nil, fmt.Errorf("no line coverage: %d", l)
 }
 
-func (lcs LineCoverages) Total() int {
-	return len(lcs)
+func (lc LineCoverages) Total() int { //nostyle:recvtype
+	return len(lc)
 }
 
-func (lcs LineCoverages) Covered() int {
+func (lc LineCoverages) Covered() int { //nostyle:recvtype
 	covered := 0
-	for _, lc := range lcs {
-		if lc.Count > 0 {
+	for _, c := range lc {
+		if c.Count > 0 {
 			covered += 1
 		}
 	}
 	return covered
 }
 
-func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
+func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 	m := skipmap.NewInt()
 
-	for _, bc := range bcs {
-		sl := *bc.StartLine
-		el := *bc.EndLine
+	for _, c := range bc {
+		sl := *c.StartLine
+		el := *c.EndLine
 		for i := sl; i <= el; i++ {
 			var mm *skipmap.IntMap
 			v, ok := m.Load(i)
 			if ok {
 				mm, ok = v.(*skipmap.IntMap)
 				if !ok {
-					panic("invalid type")
+					panic("invalid type") //nostyle:dontpanic
 				}
 			} else {
 				mm = skipmap.NewInt()
 			}
 			m.Store(i, mm)
 
-			if bc.Type == TypeLOC || (sl < i && i < el) {
+			if c.Type == TypeLOC || (sl < i && i < el) {
 				// TypeLOC or TypeStmt
-				mm.Range(func(key int, v interface{}) bool {
-					mm.Store(key, v.(int)+*bc.Count)
+				mm.Range(func(key int, v any) bool {
+					mm.Store(key, v.(int)+*c.Count)
 					return true
 				})
 				if _, ok := mm.Load(startPos); !ok {
-					mm.Store(startPos, *bc.Count)
+					mm.Store(startPos, *c.Count)
 				}
 				if _, ok := mm.Load(endPos); !ok {
-					mm.Store(endPos, *bc.Count)
+					mm.Store(endPos, *c.Count)
 				}
 				continue
 			}
@@ -324,9 +324,11 @@ func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 			endCount := 0
 			startTo := startPos
 			endFrom := endPos
-			pos := []int{}
-			counts := []int{}
-			mm.Range(func(key int, v interface{}) bool {
+			var (
+				pos    []int
+				counts []int
+			)
+			mm.Range(func(key int, v any) bool {
 				pos = append(pos, key)
 				counts = append(counts, v.(int))
 				return true
@@ -344,52 +346,52 @@ func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 
 			switch {
 			case i == sl && i != el:
-				mm.Range(func(key int, v interface{}) bool {
-					if key >= *bc.StartCol {
-						mm.Store(key, v.(int)+*bc.Count)
+				mm.Range(func(key int, v any) bool {
+					if key >= *c.StartCol {
+						mm.Store(key, v.(int)+*c.Count)
 					}
 					return true
 				})
-				if _, ok := mm.Load(*bc.StartCol); !ok {
-					mm.Store(*bc.StartCol, *bc.Count)
+				if _, ok := mm.Load(*c.StartCol); !ok {
+					mm.Store(*c.StartCol, *c.Count)
 				}
 				if _, ok := mm.Load(endPos); !ok {
-					mm.Store(endPos, *bc.Count)
+					mm.Store(endPos, *c.Count)
 				}
 			case i == sl && i == el:
-				for j := *bc.StartCol; j <= *bc.EndCol; j++ {
+				for j := *c.StartCol; j <= *c.EndCol; j++ {
 					v, ok := mm.Load(j)
 					if ok {
-						mm.Store(j, v.(int)+*bc.Count)
+						mm.Store(j, v.(int)+*c.Count)
 					} else {
 						if j <= startTo {
-							mm.Store(j, startCount+*bc.Count)
+							mm.Store(j, startCount+*c.Count)
 						} else if endFrom <= j {
-							mm.Store(j, endCount+*bc.Count)
+							mm.Store(j, endCount+*c.Count)
 						} else {
-							mm.Store(j, *bc.Count)
+							mm.Store(j, *c.Count)
 						}
 					}
 				}
 			case i != sl && i == el:
-				mm.Range(func(key int, v interface{}) bool {
-					if key <= *bc.EndCol {
-						mm.Store(key, v.(int)+*bc.Count)
+				mm.Range(func(key int, v any) bool {
+					if key <= *c.EndCol {
+						mm.Store(key, v.(int)+*c.Count)
 					}
 					return true
 				})
 				if _, ok := mm.Load(startPos); !ok {
-					mm.Store(startPos, *bc.Count)
+					mm.Store(startPos, *c.Count)
 				}
-				if _, ok := mm.Load(*bc.EndCol); !ok {
-					mm.Store(*bc.EndCol, *bc.Count)
+				if _, ok := mm.Load(*c.EndCol); !ok {
+					mm.Store(*c.EndCol, *c.Count)
 				}
 			}
 		}
 	}
 
 	lcs := LineCoverages{}
-	m.Range(func(line int, mmi interface{}) bool {
+	m.Range(func(line int, mmi any) bool {
 		mm, ok := mmi.(*skipmap.IntMap)
 		if !ok {
 			return false
@@ -399,7 +401,7 @@ func (bcs BlockCoverages) ToLineCoverages() LineCoverages {
 			Count:        0,
 			PosCoverages: PosCoverages{},
 		}
-		mm.Range(func(pos int, ci interface{}) bool {
+		mm.Range(func(pos int, ci any) bool {
 			c, ok := ci.(int)
 			if !ok {
 				return false

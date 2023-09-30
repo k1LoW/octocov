@@ -47,7 +47,7 @@ type FS struct {
 	gscfs  *gcsfs.FS
 }
 
-func (fsys *FS) Open(name string) (fs.File, error) {
+func (fsys *FS) Open(name string) (fs.File, error) { //nostyle:recvnames
 	return fsys.gscfs.Open(filepath.Join(fsys.prefix, name))
 }
 

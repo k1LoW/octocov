@@ -89,11 +89,8 @@ func TestMerge(t *testing.T) {
 			t.Fatal(err)
 		}
 		got := tt.r1
-
-		opts := []cmp.Option{}
-
-		if diff := cmp.Diff(got, tt.want, opts...); diff != "" {
-			t.Errorf("%s", diff)
+		if diff := cmp.Diff(got, tt.want); diff != "" {
+			t.Error(diff)
 		}
 	}
 }

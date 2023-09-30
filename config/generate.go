@@ -25,7 +25,7 @@ func Generate(ctx context.Context, lang string, wr io.Writer) error {
 			log.Print(err)
 		}
 	}
-	d := map[string]interface{}{
+	d := map[string]any{
 		"CodeToTestRatio": cttr,
 	}
 	if err := tmpl.Execute(wr, d); err != nil {

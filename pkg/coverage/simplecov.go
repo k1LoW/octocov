@@ -21,7 +21,7 @@ type SimplecovCoverage struct {
 }
 
 type SimplecovFileCoverage struct {
-	Lines []interface{} `json:"lines"`
+	Lines []any `json:"lines"`
 }
 
 func NewSimplecov() *Simplecov {
@@ -36,18 +36,18 @@ type skipLine map[int]struct{}
 
 type skipLines map[string]skipLine
 
-func (sls skipLines) add(path string, line int) {
-	if _, ok := sls[path]; !ok {
-		sls[path] = skipLine{}
+func (sl skipLines) add(path string, line int) {
+	if _, ok := sl[path]; !ok {
+		sl[path] = skipLine{}
 	}
-	sls[path][line] = struct{}{}
+	sl[path][line] = struct{}{}
 }
 
-func (sls skipLines) exists(path string, line int) bool {
-	if _, ok := sls[path]; !ok {
+func (sl skipLines) exists(path string, line int) bool {
+	if _, ok := sl[path]; !ok {
 		return false
 	}
-	if _, ok := sls[path][line]; !ok {
+	if _, ok := sl[path][line]; !ok {
 		return false
 	}
 	return true
@@ -141,7 +141,7 @@ func (s *Simplecov) detectReportPath(path string) (string, error) {
 
 func (c *SimplecovCoverage) UnmarshalJSON(data []byte) error {
 	s := struct {
-		Coverage map[string]interface{} `json:"coverage"`
+		Coverage map[string]any `json:"coverage"`
 	}{}
 	err := json.Unmarshal(data, &s)
 	if err != nil {
@@ -150,11 +150,11 @@ func (c *SimplecovCoverage) UnmarshalJSON(data []byte) error {
 	c.Coverage = map[string]SimplecovFileCoverage{}
 	for k, l := range s.Coverage {
 		switch v := l.(type) {
-		case map[string]interface{}:
+		case map[string]any:
 			c.Coverage[k] = SimplecovFileCoverage{
-				Lines: v["lines"].([]interface{}),
+				Lines: v["lines"].([]any),
 			}
-		case []interface{}:
+		case []any:
 			c.Coverage[k] = SimplecovFileCoverage{
 				Lines: v,
 			}

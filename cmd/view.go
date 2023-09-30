@@ -75,7 +75,7 @@ var viewCmd = &cobra.Command{
 					}
 				}
 				if err := coverage.NewPrinter(fc).Print(fp, os.Stdout); err != nil {
-					_ = fp.Close()
+					_ = fp.Close() //nostyle:handlerrors
 					return err
 				}
 				if err := fp.Close(); err != nil {

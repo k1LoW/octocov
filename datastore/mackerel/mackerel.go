@@ -40,7 +40,7 @@ func (m *Mackerel) StoreReport(ctx context.Context, r *report.Report) error {
 	}
 	repo := strings.Replace(r.Repository, "/", "-", -1)
 	t := r.Timestamp.Unix()
-	values := []*mkr.MetricValue{}
+	var values []*mkr.MetricValue
 	if r.Coverage != nil {
 		name := fmt.Sprintf("coverage.%s", repo)
 		v := &mkr.MetricValue{

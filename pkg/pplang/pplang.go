@@ -38,7 +38,7 @@ func DetectFS(fsys fs.FS) (string, error) {
 }
 
 func DetectUsingAPI(client *github.Client, fsys fs.FS) (string, error) {
-	owner, repo, err := getOwnerRepo(fsys)
+	owner, repo, err := ownerRepo(fsys)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +61,7 @@ func DetectUsingAPI(client *github.Client, fsys fs.FS) (string, error) {
 	return "", errors.New("can not detect project programming language")
 }
 
-func getOwnerRepo(fsys fs.FS) (string, string, error) {
+func ownerRepo(fsys fs.FS) (string, string, error) {
 	if os.Getenv("GITHUB_REPOSITORY") != "" {
 		splitted := strings.Split(os.Getenv("GITHUB_REPOSITORY"), "/")
 		if len(splitted) == 2 {

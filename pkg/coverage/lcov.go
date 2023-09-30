@@ -73,17 +73,17 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			total += 1
 			nums := strings.Split(splitted[1], ",")
 			if len(nums) != 2 {
-				_ = r.Close()
+				_ = r.Close() //nostyle:handlerrors
 				return nil, "", fmt.Errorf("can not parse: %s", l)
 			}
 			line, err := strconv.Atoi(nums[0])
 			if err != nil {
-				_ = r.Close()
+				_ = r.Close() //nostyle:handlerrors
 				return nil, "", err
 			}
 			count, err := strconv.Atoi(nums[1])
 			if err != nil {
-				_ = r.Close()
+				_ = r.Close() //nostyle:handlerrors
 				return nil, "", err
 			}
 			if count > 0 {
@@ -108,7 +108,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	return cov, rp, nil
 }
 
-func (s *Lcov) detectReportPath(path string) (string, error) {
+func (l *Lcov) detectReportPath(path string) (string, error) {
 	p, err := os.Stat(path)
 	if err != nil {
 		return "", err

@@ -48,12 +48,12 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	var files []*gh.PullRequestFile
 	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
 	if err == nil {
-		files, err = g.GetPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
+		files, err = g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		files, err = g.GetChangedFiles(ctx, repo.Owner, repo.Repo)
+		files, err = g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 		if err != nil {
 			return "", err
 		}
@@ -85,7 +85,7 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	comment := []string{fmt.Sprintf("## %s", title)}
 
 	if err := c.Acceptable(r, rPrev); err != nil {
-		merr, ok := err.(*multierror.Error)
+		merr, ok := err.(*multierror.Error) //nolint:errorlint
 		if !ok {
 			return "", fmt.Errorf("failed to convert error to multierror: %w", err)
 		}
@@ -99,21 +99,9 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		comment = append(comment, merr.Error())
 	}
 
-	comment = append(
-		comment,
-		table,
-		"",
-		fileTable,
-	)
-	comment = append(
-		comment,
-		customTables...,
-	)
-	comment = append(
-		comment,
-		"---",
-		footer,
-	)
+	comment = append(comment, table, "", fileTable)
+	comment = append(comment, customTables...)
+	comment = append(comment, "---", footer)
 
 	return strings.Join(comment, "\n"), nil
 }

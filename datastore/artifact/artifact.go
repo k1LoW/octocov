@@ -81,7 +81,7 @@ func (a *Artifact) FS() (fs.FS, error) {
 		}
 	}
 	log.Printf("artifact name: %s", name)
-	af, err := a.gh.GetLatestArtifact(ctx, r.Owner, r.Repo, name, reportFilename)
+	af, err := a.gh.FetchLatestArtifact(ctx, r.Owner, r.Repo, name, reportFilename)
 	fsys := fstest.MapFS{}
 	if err == nil {
 		fsys[path] = &fstest.MapFile{

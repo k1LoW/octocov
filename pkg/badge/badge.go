@@ -51,7 +51,7 @@ var noto []byte
 func New(l, m string) *Badge {
 	ttf, err := truetype.Parse(noto)
 	if err != nil {
-		panic(err)
+		panic(err) //nostyle:dontpanic
 	}
 
 	return &Badge{
@@ -84,7 +84,7 @@ func (b *Badge) AddIconFile(f string) error {
 	return b.AddIcon(imgf)
 }
 
-func (b *Badge) SetLabelColor(c interface{}) error {
+func (b *Badge) SetLabelColor(c any) error {
 	rgb, err := castColor(c)
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func (b *Badge) SetLabelColor(c interface{}) error {
 	return nil
 }
 
-func (b *Badge) SetMessageColor(c interface{}) error {
+func (b *Badge) SetMessageColor(c any) error {
 	rgb, err := castColor(c)
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (b *Badge) SetMessageColor(c interface{}) error {
 	return nil
 }
 
-func castColor(c interface{}) (string, error) {
+func castColor(c any) (string, error) {
 	switch v := c.(type) {
 	case string:
 		rgb := strings.ToUpper(strings.TrimPrefix(v, "#"))
@@ -126,7 +126,7 @@ func (b *Badge) Render(wr io.Writer) error {
 	mx := (lw * 10) + (mw * 10 / 2)
 	iw := 0.0
 	var icon string
-	if b.Icon != nil {
+	if len(b.Icon) != 0 {
 		iw = 15.5
 		if issvg.Is(b.Icon) {
 			imgdoc, err := xmlquery.Parse(bytes.NewReader(b.Icon))
@@ -144,7 +144,7 @@ func (b *Badge) Render(wr io.Writer) error {
 		}
 	}
 
-	d := map[string]interface{}{
+	d := map[string]any{
 		"Label":        b.Label,
 		"Message":      b.Message,
 		"LabelColor":   b.LabelColor,
@@ -164,7 +164,7 @@ func (b *Badge) Render(wr io.Writer) error {
 }
 
 func (b *Badge) stringWidth(s string) float64 {
-	converted := []rune{}
+	var converted []rune
 	for _, c := range s {
 		if utf8string.NewString(string([]rune{c})).IsASCII() {
 			converted = append(converted, c)

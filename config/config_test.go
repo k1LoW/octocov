@@ -17,7 +17,8 @@ func TestMain(m *testing.M) {
 	m.Run()
 
 	if err := revertEnv(envCache); err != nil {
-		panic(err)
+		_, _ = fmt.Fprint(os.Stderr, err) //nostyle:handlerrors
+		os.Exit(1)
 	}
 }
 
@@ -64,7 +65,7 @@ func TestLoadComment(t *testing.T) {
 		}
 		got := c.Comment
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -86,7 +87,7 @@ func TestLoadCentralPush(t *testing.T) {
 		}
 		got := c.Central.Push
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-			t.Errorf("%s", diff)
+			t.Error(diff)
 		}
 	}
 }
@@ -111,7 +112,7 @@ func TestCoveragePaths(t *testing.T) {
 			c.Build()
 			got := c.Coverage.Paths
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
-				t.Errorf("%s", diff)
+				t.Error(diff)
 			}
 		})
 	}

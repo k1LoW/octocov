@@ -1,6 +1,7 @@
 package pplang
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -56,31 +57,44 @@ func TestDetectFS(t *testing.T) {
 
 func TestDetectUsingAPI(t *testing.T) {
 	tests := []struct {
-		env   string
-		txtar string
-		want  string
+		env     string
+		txtar   string
+		want    string
+		wantErr bool
 	}{
-		{"owner/repo", "none.txtar", "Ruby"},
-		{"", "none.txtar", ""},
-		{"", "gitconfig.txtar", "Ruby"},
+		{"owner/repo", "none.txtar", "Ruby", false},
+		{"", "none.txtar", "", true},
+		{"", "gitconfig.txtar", "Ruby", false},
 	}
-	for _, tt := range tests {
-		t.Setenv("GITHUB_REPOSITORY", tt.env)
-		a, err := txtar.ParseFile(filepath.Join(testdataDir(t), tt.txtar))
-		if err != nil {
-			t.Error(err)
-			continue
-		}
-		got, _ := DetectUsingAPI(mockedClient(t), txtarfs.As(a))
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			t.Setenv("GITHUB_REPOSITORY", tt.env)
+			a, err := txtar.ParseFile(filepath.Join(testdataDir(t), tt.txtar))
+			if err != nil {
+				t.Error(err)
+				return
+			}
+			got, err := DetectUsingAPI(mockedClient(t), txtarfs.As(a))
+			if err != nil {
+				if !tt.wantErr {
+					t.Error(err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want error")
+				return
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 
 func mockedClient(t *testing.T) *github.Client {
-	mockedHTTPClient := mock.NewMockedHTTPClient(
-		mock.WithRequestMatch(
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposLanguagesByOwnerByRepo,
 			map[string]int{
 				"Ruby":       12345,
