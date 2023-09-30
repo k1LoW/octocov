@@ -1157,6 +1157,13 @@ octocov detect pull request number following order.
 2. Get pull request number from [`GITHUB_REF`](https://docs.github.com/en/actions/learn-github-actions/variables) ( e.g. `refs/pull/1/merge` ).
 3. Get branch name from [`GITHUB_REF`](https://docs.github.com/en/actions/learn-github-actions/variables) ( e.g. `refs/heads/branch/branch/name` ) and detect pull request number using GitHub API.
 
+### Override environment variables
+
+If an environment variable with prefix `OCTOCOV_` is set, it is used as an unprefixed environment variable in octocov.
+
+For example, if `OCTOCOV_GITHUB_REF` is set, it is handled as `GITHUB_REF` in octocov.
+
+This feature allows [environment variables that cannot normally be overridden](https://docs.github.com/en/actions/learn-github-actions/variables#naming-conventions-for-environment-variables) to be changed on octocov.
 
 ## Install
 
