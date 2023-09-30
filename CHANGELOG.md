@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.54.0](https://github.com/k1LoW/octocov/compare/v0.53.0...v0.54.0) - 2023-09-30
+### Breaking Changes 🛠
+- Always override existing environment variables with the prefix `OCTOCOV_` by @k1LoW in https://github.com/k1LoW/octocov/pull/282
+### Fix bug 🐛
+- Delete/Minimize previous comments all by @k1LoW in https://github.com/k1LoW/octocov/pull/280
+
 ## [v0.53.0](https://github.com/k1LoW/octocov/compare/v0.52.2...v0.53.0) - 2023-09-30
 ### Breaking Changes 🛠
 - Update linter setting by @k1LoW in https://github.com/k1LoW/octocov/pull/277
