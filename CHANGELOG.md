@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.53.0](https://github.com/k1LoW/octocov/compare/v0.52.2...v0.53.0) - 2023-09-30
+### Breaking Changes 🛠
+- Update linter setting by @k1LoW in https://github.com/k1LoW/octocov/pull/277
+### New Features 🎉
+- Support `if:` section for three metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/279
+### Other Changes
+- Remove title if three metrics are not mesured by @k1LoW in https://github.com/k1LoW/octocov/pull/278
+
 ## [v0.52.2](https://github.com/k1LoW/octocov/compare/v0.52.1...v0.52.2) - 2023-09-29
 ### Other Changes
 - Allow to merge no coverages reports by @k1LoW in https://github.com/k1LoW/octocov/pull/274
