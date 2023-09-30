@@ -81,9 +81,10 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		}
 	}
 
-	title := r.Title()
-	comment := []string{fmt.Sprintf("## %s", title)}
-
+	var comment []string
+	if r.IsMeasuredCoverage() || r.IsMeasuredTestExecutionTime() || r.IsMeasuredCodeToTestRatio() {
+		comment = append(comment, fmt.Sprintf("## %s", r.Title()))
+	}
 	if err := c.Acceptable(r, rPrev); err != nil {
 		merr, ok := err.(*multierror.Error) //nolint:errorlint
 		if !ok {
@@ -98,8 +99,9 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		}
 		comment = append(comment, merr.Error())
 	}
-
-	comment = append(comment, table, "", fileTable)
+	if r.IsMeasuredCoverage() || r.IsMeasuredTestExecutionTime() || r.IsMeasuredCodeToTestRatio() {
+		comment = append(comment, table, "", fileTable)
+	}
 	comment = append(comment, customTables...)
 	comment = append(comment, "---", footer)
 
