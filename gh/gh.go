@@ -614,40 +614,64 @@ type minimizeCommentMutation struct {
 }
 
 func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n int, sig string) error {
-	opts := &github.IssueListCommentsOptions{}
-	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
-	if err != nil {
-		return err
-	}
-	for _, c := range comments {
-		if strings.Contains(*c.Body, sig) {
-			var m minimizeCommentMutation
-			input := githubv4.MinimizeCommentInput{
-				SubjectID:        githubv4.ID(c.GetNodeID()),
-				Classifier:       githubv4.ReportedContentClassifiers("OUTDATED"),
-				ClientMutationID: nil,
-			}
-			if err := g.v4Client.Mutate(ctx, &m, input, nil); err != nil {
-				return err
+	page := 1
+	for {
+		opts := &github.IssueListCommentsOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: 100,
+			},
+		}
+		comments, res, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
+		if err != nil {
+			return err
+		}
+		for _, c := range comments {
+			if strings.Contains(*c.Body, sig) {
+				var m minimizeCommentMutation
+				input := githubv4.MinimizeCommentInput{
+					SubjectID:        githubv4.ID(c.GetNodeID()),
+					Classifier:       githubv4.ReportedContentClassifiers("OUTDATED"),
+					ClientMutationID: nil,
+				}
+				if err := g.v4Client.Mutate(ctx, &m, input, nil); err != nil {
+					return err
+				}
 			}
 		}
+		if res.NextPage == 0 {
+			break
+		}
+		page = res.NextPage
 	}
 	return nil
 }
 
 func (g *Gh) deletePreviousComments(ctx context.Context, owner, repo string, n int, sig string) error {
-	opts := &github.IssueListCommentsOptions{}
-	comments, _, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
-	if err != nil {
-		return err
-	}
-	for _, c := range comments {
-		if strings.Contains(*c.Body, sig) {
-			_, err = g.client.Issues.DeleteComment(ctx, owner, repo, *c.ID)
-			if err != nil {
-				return err
+	page := 1
+	for {
+		opts := &github.IssueListCommentsOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: 100,
+			},
+		}
+		comments, res, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
+		if err != nil {
+			return err
+		}
+		for _, c := range comments {
+			if strings.Contains(*c.Body, sig) {
+				_, err = g.client.Issues.DeleteComment(ctx, owner, repo, *c.ID)
+				if err != nil {
+					return err
+				}
 			}
 		}
+		if res.NextPage == 0 {
+			break
+		}
+		page = res.NextPage
 	}
 	return nil
 }
