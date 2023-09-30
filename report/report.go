@@ -567,6 +567,8 @@ func makeHeadTitleWithLink(ref, commit string, covPaths []string) string {
 	case strings.HasPrefix(ref, "refs/pull/"):
 		n := strings.TrimPrefix(strings.TrimSuffix(strings.TrimSuffix(ref, "/head"), "/merge"), "refs/pull/")
 		refLink = fmt.Sprintf("[#%s](%s/pull/%s)", n, repoURL, n)
+	default:
+		refLink = ref
 	}
 	if len(commit) > 7 {
 		commitLink = fmt.Sprintf("[%s](%s/commit/%s)", commit[:7], repoURL, commit)
