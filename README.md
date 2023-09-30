@@ -370,6 +370,15 @@ coverage:
     path: docs/coverage.svg
 ```
 
+### `coverage.if:`
+
+Conditions for measuring code coverage.
+
+``` yaml
+coverage:
+  if: is_default_branch
+```
+
 ### `codeToTestRatio:`
 
 Configuration for code to test ratio.
@@ -430,6 +439,15 @@ codeToTestRatio:
     path: docs/ratio.svg
 ```
 
+### `codeToTestRatio.if:`
+
+Conditions for measuring code to test ratio.
+
+``` yaml
+codeToTestRatio:
+  if: is_default_branch
+```
+
 ### `testExecutionTime:`
 
 Configuration for test execution time.
@@ -488,6 +506,15 @@ The path to the badge.
 testExecutionTime:
   badge:
     path: docs/time.svg
+```
+
+### `testExecutionTime.if:`
+
+Conditions for measuring test execution time.
+
+``` yaml
+testExecutionTime:
+  if: is_pull_request
 ```
 
 ### `push:`
