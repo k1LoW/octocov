@@ -16,6 +16,13 @@ func (c *Config) CoverageConfigReady() error {
 	if len(c.Coverage.Paths) == 0 {
 		return errors.New("coverage.paths: is not set")
 	}
+	ok, err := c.CheckIf(c.Coverage.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Coverage.If)
+	}
 	return nil
 }
 
@@ -26,6 +33,13 @@ func (c *Config) CodeToTestRatioConfigReady() error {
 	if len(c.CodeToTestRatio.Test) == 0 {
 		return errors.New("codeToTestRatio.test: is not set")
 	}
+	ok, err := c.CheckIf(c.CodeToTestRatio.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.CodeToTestRatio.If)
+	}
 	return nil
 }
 
@@ -35,6 +49,13 @@ func (c *Config) TestExecutionTimeConfigReady() error {
 	}
 	if err := c.CoverageConfigReady(); err != nil && len(c.TestExecutionTime.Steps) == 0 {
 		return err
+	}
+	ok, err := c.CheckIf(c.TestExecutionTime.If)
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.TestExecutionTime.If)
 	}
 	return nil
 }
