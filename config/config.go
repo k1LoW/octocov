@@ -61,6 +61,7 @@ type Coverage struct {
 	Paths      []string      `yaml:"paths,omitempty"`
 	Badge      CoverageBadge `yaml:"badge,omitempty"`
 	Acceptable string        `yaml:"acceptable,omitempty"`
+	If         string        `yaml:"if,omitempty"`
 }
 
 type CoverageBadge struct {
@@ -72,6 +73,7 @@ type CodeToTestRatio struct {
 	Test       []string             `yaml:"test"`
 	Badge      CodeToTestRatioBadge `yaml:"badge,omitempty"`
 	Acceptable string               `yaml:"acceptable,omitempty"`
+	If         string               `yaml:"if,omitempty"`
 }
 
 type CodeToTestRatioBadge struct {
@@ -82,6 +84,7 @@ type TestExecutionTime struct {
 	Badge      TestExecutionTimeBadge `yaml:"badge,omitempty"`
 	Acceptable string                 `yaml:"acceptable,omitempty"`
 	Steps      []string               `yaml:"steps,omitempty"`
+	If         string                 `yaml:"if,omitempty"`
 }
 
 type TestExecutionTimeBadge struct {
