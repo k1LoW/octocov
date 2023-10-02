@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.54.1](https://github.com/k1LoW/octocov/compare/v0.54.0...v0.54.1) - 2023-10-02
+### Fix bug 🐛
+- Fix report of custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/284
+
 ## [v0.54.0](https://github.com/k1LoW/octocov/compare/v0.53.0...v0.54.0) - 2023-09-30
 ### Breaking Changes 🛠
 - Always override existing environment variables with the prefix `OCTOCOV_` by @k1LoW in https://github.com/k1LoW/octocov/pull/282
