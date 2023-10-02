@@ -1,8 +1,8 @@
 <details><summary>Metadata</summary>
 
-|            |  ([2345678](https://github.com/owner/repo/commit/2345678901)) |  ([1234567](https://github.com/owner/repo/commit/1234567890)) |
-|------------|--------------------------------------------------------------:|--------------------------------------------------------------:|
-| **goos**   |                                                         arwin |                                                        darwin |
-| **goarch** |                                                         arm64 |                                                         amd64 |
+|            | main ([2345678](https://github.com/owner/repo/commit/2345678901)) | main ([1234567](https://github.com/owner/repo/commit/1234567890)) |
+|------------|------------------------------------------------------------------:|------------------------------------------------------------------:|
+| **goos**   |                                                             arwin |                                                            darwin |
+| **goarch** |                                                             arm64 |                                                             amd64 |
 
 </details>
