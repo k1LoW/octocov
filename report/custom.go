@@ -118,6 +118,9 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 		return nil
 	}
 	table := tablewriter.NewWriter(w)
+	if s.Name == "" {
+		s.Name = s.Key
+	}
 	table.SetHeader([]string{s.Name, makeHeadTitle(s.report.Ref, s.report.Commit, s.report.covPaths)})
 	table.SetHeaderColor(tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{})
 	table.SetAutoFormatHeaders(false)
@@ -130,6 +133,9 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
 	for _, m := range s.Metrics {
+		if m.Name == "" {
+			m.Name = m.Key
+		}
 		var v string
 		if isInt(m.Value) {
 			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
@@ -232,6 +238,9 @@ func (d *DiffCustomMetricSet) Table() string {
 		return d.A.Table()
 	}
 	buf := new(bytes.Buffer)
+	if d.Name == "" {
+		d.Name = d.Key
+	}
 	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", d.Name)) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
@@ -272,6 +281,9 @@ func (d *DiffCustomMetricSet) Table() string {
 			vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
 			diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
 		}
+		if m.Name == "" {
+			m.Name = m.Key
+		}
 		table.Append([]string{fmt.Sprintf("**%s**", m.Name), vb, va, diff})
 	}
 	table.Render()
@@ -301,7 +313,10 @@ func (d *DiffCustomMetricSet) MetadataTable() string {
 		if !ok {
 			mb = &MetadataKV{}
 		}
-		table.Append([]string{fmt.Sprintf("**%s**", ma.Key), mb.Value, ma.Value})
+		if ma.Name == "" {
+			ma.Name = ma.Key
+		}
+		table.Append([]string{fmt.Sprintf("**%s**", ma.Name), mb.Value, ma.Value})
 	}
 	table.Render()
 	buf.WriteString("\n</details>\n")
