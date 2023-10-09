@@ -1196,6 +1196,12 @@ $ apk add octocov.apk
 $ brew install k1LoW/tap/octocov
 ```
 
+**[aqua](https://aquaproj.github.io/):**
+
+```console
+$ aqua g -i k1LoW/octocov
+```
+
 **manually:**
 
 Download binary from [releases page](https://github.com/k1LoW/octocov/releases)
