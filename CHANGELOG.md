@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.54.2](https://github.com/k1LoW/octocov/compare/v0.54.1...v0.54.2) - 2023-10-12
+### Other Changes
+- docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/k1LoW/octocov/pull/286
+- Bump golang.org/x/net from 0.7.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/octocov/pull/288
+
 ## [v0.54.1](https://github.com/k1LoW/octocov/compare/v0.54.0...v0.54.1) - 2023-10-02
 ### Fix bug 🐛
 - Fix report of custom metrics by @k1LoW in https://github.com/k1LoW/octocov/pull/284
