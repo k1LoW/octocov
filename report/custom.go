@@ -13,6 +13,8 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
+const swapXYMin = 5
+
 //go:embed custom_metrics_schema.json
 var schema []byte
 
@@ -59,6 +61,9 @@ func (s *CustomMetricSet) Table() string {
 	if len(s.Metrics) == 0 {
 		return ""
 	}
+	if len(s.Metrics) >= swapXYMin {
+		return s.tableSwaped()
+	}
 	var (
 		h []string
 		d []string
@@ -84,6 +89,28 @@ func (s *CustomMetricSet) Table() string {
 	table.Append(d)
 	table.Render()
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
+}
+
+func (s *CustomMetricSet) tableSwaped() string {
+	buf := new(bytes.Buffer)
+	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name)) //nostyle:handlerrors
+	table := tablewriter.NewWriter(buf)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
+	for _, m := range s.Metrics {
+		var v string
+		if isInt(m.Value) {
+			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
+		} else {
+			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
+		}
+		table.Append([]string{m.Name, v})
+	}
+	table.Render()
+	return strings.Replace(buf.String(), "---|", "--:|", len(s.Metrics))
 }
 
 func (s *CustomMetricSet) MetadataTable() string {
