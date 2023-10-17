@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.54.3](https://github.com/k1LoW/octocov/compare/v0.54.2...v0.54.3) - 2023-10-17
+### Other Changes
+- Swap table XY if custom metrics have many columns. by @k1LoW in https://github.com/k1LoW/octocov/pull/289
+
 ## [v0.54.2](https://github.com/k1LoW/octocov/compare/v0.54.1...v0.54.2) - 2023-10-12
 ### Other Changes
 - docs: add the installation guide with aqua by @suzuki-shunsuke in https://github.com/k1LoW/octocov/pull/286
