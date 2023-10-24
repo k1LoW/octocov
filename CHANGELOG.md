@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.54.4](https://github.com/k1LoW/octocov/compare/v0.54.3...v0.54.4) - 2023-10-24
+### Fix bug 🐛
+- `octocov ls-files` and `octocov view` should run locally as much as possible. by @k1LoW in https://github.com/k1LoW/octocov/pull/293
+### Other Changes
+- Make clear the error message of if section by @k1LoW in https://github.com/k1LoW/octocov/pull/292
+
 ## [v0.54.3](https://github.com/k1LoW/octocov/compare/v0.54.2...v0.54.3) - 2023-10-17
 ### Other Changes
 - Swap table XY if custom metrics have many columns. by @k1LoW in https://github.com/k1LoW/octocov/pull/289
