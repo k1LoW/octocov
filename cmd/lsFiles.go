@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -53,8 +54,8 @@ var lsFilesCmd = &cobra.Command{
 			c.CodeToTestRatio = nil
 			c.TestExecutionTime = nil
 		}
-		if err := c.CoverageConfigReady(); err != nil {
-			return err
+		if c.Coverage == nil {
+			return errors.New("coverage: is not set")
 		}
 		r, err := report.New(c.Repository)
 		if err != nil {
