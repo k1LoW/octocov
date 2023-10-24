@@ -18,7 +18,7 @@ func (c *Config) CoverageConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Coverage.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Coverage.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Coverage.If)
@@ -35,7 +35,7 @@ func (c *Config) CodeToTestRatioConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.CodeToTestRatio.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.CodeToTestRatio.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.CodeToTestRatio.If)
@@ -52,7 +52,7 @@ func (c *Config) TestExecutionTimeConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.TestExecutionTime.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.TestExecutionTime.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.TestExecutionTime.If)
@@ -101,7 +101,7 @@ func (c *Config) CommentConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Comment.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Comment.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Comment.If)
@@ -121,7 +121,7 @@ func (c *Config) SummaryConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Summary.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Summary.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Summary.If)
@@ -153,7 +153,7 @@ func (c *Config) BodyConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Body.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Body.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Body.If)
@@ -203,7 +203,7 @@ func (c *Config) CentralConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Central.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Central.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Central.If)
@@ -223,7 +223,7 @@ func (c *Config) CentralPushConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Central.Push.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Central.Push.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Central.Push.If)
@@ -240,7 +240,7 @@ func (c *Config) CentralReReportReady() error {
 	}
 	ok, err := c.CheckIf(c.Central.ReReport.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Central.ReReport.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Central.ReReport.If)
@@ -257,7 +257,7 @@ func (c *Config) DiffConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Diff.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Diff.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Diff.If)
@@ -271,7 +271,7 @@ func (c *Config) ReportConfigReady() error {
 	}
 	ok, err := c.CheckIf(c.Report.If)
 	if err != nil {
-		return err
+		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Report.If, err)
 	}
 	if !ok {
 		return fmt.Errorf("the condition in the `if` section is not met (%s)", c.Report.If)
