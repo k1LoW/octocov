@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.54.5](https://github.com/k1LoW/octocov/compare/v0.54.4...v0.54.5) - 2023-10-26
+### Other Changes
+- Bump google.golang.org/grpc from 1.53.0 to 1.56.3 by @dependabot in https://github.com/k1LoW/octocov/pull/295
+
 ## [v0.54.4](https://github.com/k1LoW/octocov/compare/v0.54.3...v0.54.4) - 2023-10-24
 ### Fix bug 🐛
 - `octocov ls-files` and `octocov view` should run locally as much as possible. by @k1LoW in https://github.com/k1LoW/octocov/pull/293
