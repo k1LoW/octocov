@@ -10,8 +10,10 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/k1LoW/octocov/datastore/artifact"
 	"github.com/k1LoW/octocov/datastore/bq"
 	"github.com/k1LoW/octocov/datastore/gcs"
@@ -97,7 +99,18 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 	case S3:
 		bucket := args[0]
 		prefix := args[1]
-		sess, err := session.NewSession()
+		region, err := s3manager.GetBucketRegion(
+			ctx,
+			session.Must(session.NewSession()),
+			bucket,
+			"us-east-1",
+		)
+		if err != nil {
+			return nil, err
+		}
+		sess, err := session.NewSession(&aws.Config{
+			Region: aws.String(region),
+		})
 		if err != nil {
 			return nil, err
 		}
