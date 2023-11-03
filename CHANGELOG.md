@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.54.6](https://github.com/k1LoW/octocov/compare/v0.54.5...v0.54.6) - 2023-11-03
+### Fix bug 🐛
+- Identify the region of the bucket by @k1LoW in https://github.com/k1LoW/octocov/pull/301
+### Other Changes
+- Bump golang.org/x/image from 0.5.0 to 0.10.0 by @dependabot in https://github.com/k1LoW/octocov/pull/299
+
 ## [v0.54.5](https://github.com/k1LoW/octocov/compare/v0.54.4...v0.54.5) - 2023-10-26
 ### Other Changes
 - Bump google.golang.org/grpc from 1.53.0 to 1.56.3 by @dependabot in https://github.com/k1LoW/octocov/pull/295
