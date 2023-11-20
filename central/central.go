@@ -233,7 +233,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 		if err != nil {
 			return err
 		}
-		rootURL = fmt.Sprintf("%s/%s/%s/blob/%s/", host, repo.Owner, repo.Repo, b)
+		rootURL = fmt.Sprintf("%s/%s/%s/blob/%s", host, repo.Owner, repo.Repo, b)
 		query = "?raw=true"
 	}
 
