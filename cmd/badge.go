@@ -31,7 +31,7 @@ import (
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/pkg/badge"
+	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )

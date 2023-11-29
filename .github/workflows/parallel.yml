@@ -22,14 +22,14 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Run tests pkg/coverage
-        run: go test ./pkg/coverage/... -coverprofile=coverage_coverage.out -covermode=count
+      - name: Run tests coverage
+        run: go test ./coverage/... -coverprofile=coverage_coverage.out -covermode=count
 
-      - name: Run tests pkg/ratio
-        run: go test ./pkg/ratio/... -coverprofile=coverage_ratio.out -covermode=count
+      - name: Run tests ratio
+        run: go test ./ratio/... -coverprofile=coverage_ratio.out -covermode=count
 
-      - name: Run tests pkg/badge
-        run: go test ./pkg/badge/... -coverprofile=coverage_badge.out -covermode=count
+      - name: Run tests badge
+        run: go test ./badge/... -coverprofile=coverage_badge.out -covermode=count
 
       - uses: actions/upload-artifact@v2
         with:
@@ -54,7 +54,7 @@ jobs:
           go-version-file: go.mod
 
       - name: Run tests other
-        run: go test $(go list ./... | grep -v pkg) -coverprofile=coverage_other.out -covermode=count
+        run: go test $(go list ./... | grep -v coverage | grep -v ratio | grep -v badge) -coverprofile=coverage_other.out -covermode=count
 
       - uses: actions/upload-artifact@v2
         with:

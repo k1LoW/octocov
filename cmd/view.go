@@ -27,7 +27,7 @@ import (
 	"path/filepath"
 
 	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/pkg/coverage"
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )

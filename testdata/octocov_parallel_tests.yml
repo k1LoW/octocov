@@ -8,9 +8,9 @@ coverage:
     - ../coverage_other.out
 testExecutionTime:
   steps:
-    - Run tests pkg/coverage
-    - Run tests pkg/ratio
-    - Run tests pkg/badge
+    - Run tests coverage
+    - Run tests ratio
+    - Run tests badge
     - Run tests other
 comment:
   if: false

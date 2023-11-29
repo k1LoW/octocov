@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/pkg/coverage"
-	"github.com/k1LoW/octocov/pkg/ratio"
+	"github.com/k1LoW/octocov/coverage"
+	"github.com/k1LoW/octocov/ratio"
 	"github.com/olekukonko/tablewriter"
 )
 

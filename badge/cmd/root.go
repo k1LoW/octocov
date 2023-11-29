@@ -24,7 +24,7 @@ package cmd
 import (
 	"os"
 
-	"github.com/k1LoW/octocov/pkg/badge"
+	"github.com/k1LoW/octocov/badge"
 	"github.com/spf13/cobra"
 )
 
