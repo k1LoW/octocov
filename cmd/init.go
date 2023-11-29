@@ -29,7 +29,7 @@ import (
 	"path/filepath"
 
 	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/pkg/pplang"
+	"github.com/k1LoW/octocov/pplang"
 	"github.com/spf13/cobra"
 )
 

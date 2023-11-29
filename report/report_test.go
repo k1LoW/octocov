@@ -13,9 +13,9 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/pkg/coverage"
-	"github.com/k1LoW/octocov/pkg/ratio"
+	"github.com/k1LoW/octocov/ratio"
 )
 
 func TestNew(t *testing.T) {
@@ -530,7 +530,7 @@ func coverageTestdataDir(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "pkg", "coverage", "testdata"))
+	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "coverage", "testdata"))
 	if err != nil {
 		t.Fatal(err)
 	}

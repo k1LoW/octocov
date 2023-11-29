@@ -21,7 +21,7 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/k1LoW/octocov/pkg/badge/cmd"
+import "github.com/k1LoW/octocov/badge/cmd"
 
 func main() {
 	cmd.Execute()

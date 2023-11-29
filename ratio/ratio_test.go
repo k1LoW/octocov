@@ -103,7 +103,7 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := "pkg/ratio/ratio_test.go"
+		want := "ratio/ratio_test.go"
 		ok := false
 		for _, f := range got.CodeFiles {
 			if f.Path == want {
@@ -111,7 +111,7 @@ func TestPathMatch(t *testing.T) {
 			}
 		}
 		if ok {
-			t.Error("pkg/ratio/ratio_test.go should not be contained")
+			t.Error("ratio/ratio_test.go should not be contained")
 		}
 	}
 
@@ -124,7 +124,7 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := "pkg/ratio/ratio_test.go"
+		want := "ratio/ratio_test.go"
 		ok := false
 		for _, f := range got.CodeFiles {
 			if f.Path == want {
@@ -132,7 +132,7 @@ func TestPathMatch(t *testing.T) {
 			}
 		}
 		if !ok {
-			t.Error("pkg/ratio/ratio_test.go should be contained")
+			t.Error("ratio/ratio_test.go should be contained")
 		}
 	}
 }
@@ -162,7 +162,7 @@ func testdataDir(t *testing.T) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dir, err := filepath.Abs(filepath.Join(filepath.Dir(filepath.Dir(wd)), "testdata"))
+	dir, err := filepath.Abs(filepath.Join(filepath.Dir(wd), "testdata"))
 	if err != nil {
 		t.Fatal(err)
 	}

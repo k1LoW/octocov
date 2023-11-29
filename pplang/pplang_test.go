@@ -18,7 +18,7 @@ func TestDetect(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dir, err := filepath.Abs(filepath.Dir(filepath.Dir(wd)))
+	dir, err := filepath.Abs(filepath.Dir(wd))
 	if err != nil {
 		t.Fatal(err)
 	}

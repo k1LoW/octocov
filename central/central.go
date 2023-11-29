@@ -19,7 +19,7 @@ import (
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/pkg/badge"
+	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/report"
 )
 
