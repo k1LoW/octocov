@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.55.0](https://github.com/k1LoW/octocov/compare/v0.54.6...v0.55.0) - 2023-11-29
+### Breaking Changes 🛠
+- mv pkg/* to ./ by @k1LoW in https://github.com/k1LoW/octocov/pull/303
+
 ## [v0.54.6](https://github.com/k1LoW/octocov/compare/v0.54.5...v0.54.6) - 2023-11-03
 ### Fix bug 🐛
 - Identify the region of the bucket by @k1LoW in https://github.com/k1LoW/octocov/pull/301
