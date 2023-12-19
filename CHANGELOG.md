@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.55.1](https://github.com/k1LoW/octocov/compare/v0.55.0...v0.55.1) - 2023-12-19
+### Other Changes
+- Bump golang.org/x/crypto from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/octocov/pull/304
+
 ## [v0.55.0](https://github.com/k1LoW/octocov/compare/v0.54.6...v0.55.0) - 2023-11-29
 ### Breaking Changes 🛠
 - mv pkg/* to ./ by @k1LoW in https://github.com/k1LoW/octocov/pull/303
