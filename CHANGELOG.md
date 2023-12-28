@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.55.2](https://github.com/k1LoW/octocov/compare/v0.55.1...v0.55.2) - 2023-12-28
+### Other Changes
+- Bump github.com/go-git/go-git/v5 from 5.5.2 to 5.11.0 by @dependabot in https://github.com/k1LoW/octocov/pull/306
+
 ## [v0.55.1](https://github.com/k1LoW/octocov/compare/v0.55.0...v0.55.1) - 2023-12-19
 ### Other Changes
 - Bump golang.org/x/crypto from 0.14.0 to 0.17.0 by @dependabot in https://github.com/k1LoW/octocov/pull/304
