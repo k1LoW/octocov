@@ -11,6 +11,9 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
 	"github.com/xeipuuv/gojsonschema"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
+	"golang.org/x/text/number"
 )
 
 const swapXYMin = 5
@@ -70,13 +73,7 @@ func (s *CustomMetricSet) Table() string {
 	)
 	for _, m := range s.Metrics {
 		h = append(h, m.Name)
-		var v string
-		if isInt(m.Value) {
-			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
-		} else {
-			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
-		}
-		d = append(d, v)
+		d = append(d, fmt.Sprintf("%s%s", convertFormat(m.Value), m.Unit))
 	}
 	buf := new(bytes.Buffer)
 	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name)) //nostyle:handlerrors
@@ -101,13 +98,7 @@ func (s *CustomMetricSet) tableSwaped() string {
 	table.SetCenterSeparator("|")
 	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
 	for _, m := range s.Metrics {
-		var v string
-		if isInt(m.Value) {
-			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
-		} else {
-			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
-		}
-		table.Append([]string{m.Name, v})
+		table.Append([]string{m.Name, fmt.Sprintf("%s%s", convertFormat(m.Value), m.Unit)})
 	}
 	table.Render()
 	return strings.Replace(buf.String(), "---|", "--:|", len(s.Metrics))
@@ -163,13 +154,7 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 		if m.Name == "" {
 			m.Name = m.Key
 		}
-		var v string
-		if isInt(m.Value) {
-			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
-		} else {
-			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
-		}
-		table.Rich([]string{m.Name, v}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+		table.Rich([]string{m.Name, fmt.Sprintf("%s%s", convertFormat(m.Value), m.Unit)}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
 	table.Render()
@@ -283,30 +268,20 @@ func (d *DiffCustomMetricSet) Table() string {
 			continue
 		case m.A != nil && m.B == nil:
 			vb = ""
-			if isInt(*m.A) {
-				va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
-				diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
-			} else {
-				va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
-				diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
-			}
+			va = fmt.Sprintf("%s%s", convertFormat(*m.A), m.customMetricA.Unit)
+			diff = fmt.Sprintf("%s%s", convertFormat(m.Diff), m.customMetricA.Unit)
 		case m.A == nil && m.B != nil:
 			va = ""
-			if isInt(*m.B) {
-				vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
-				diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricB.Unit)
-			} else {
-				vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
-				diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricB.Unit)
-			}
+			va = fmt.Sprintf("%s%s", convertFormat(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%s%s", convertFormat(m.Diff), m.customMetricB.Unit)
 		case isInt(*m.A) && isInt(*m.B):
-			va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
-			vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
-			diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
+			va = fmt.Sprintf("%s%s", convertFormat(*m.A), m.customMetricA.Unit)
+			vb = fmt.Sprintf("%s%s", convertFormat(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%s%s", convertFormat(m.Diff), m.customMetricA.Unit)
 		default:
-			va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
-			vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
-			diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
+			va = fmt.Sprintf("%s%s", convertFormat(*m.A), m.customMetricA.Unit)
+			vb = fmt.Sprintf("%s%s", convertFormat(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%s%s", convertFormat(m.Diff), m.customMetricA.Unit)
 		}
 		if m.Name == "" {
 			m.Name = m.Key
@@ -352,4 +327,9 @@ func (d *DiffCustomMetricSet) MetadataTable() string {
 
 func isInt(v float64) bool {
 	return v == float64(int64(v))
+}
+
+func convertFormat(v interface{}) string {
+	p := message.NewPrinter(language.Japanese)
+	return p.Sprint(number.Decimal(v))
 }
