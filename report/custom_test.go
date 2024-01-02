@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/tenntenn/golden"
 )
 
@@ -338,6 +339,43 @@ func TestDiffCustomMetricSetMetadataTable(t *testing.T) {
 				return
 			}
 			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestConvertFormat(t *testing.T) {
+	tests := []struct {
+		n    interface{}
+		want string
+	}{
+		{
+			int(10),
+			"10",
+		},
+		{
+			int32(3200),
+			"3,200",
+		},
+		{
+			float32(10.0),
+			"10",
+		},
+		{
+			float32(1000.1),
+			"1,000.1",
+		},
+		{
+			int(1000),
+			"1,000",
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			got := convertFormat(tt.n)
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}
 		})
