@@ -62,7 +62,6 @@ func (s *CustomMetricSet) Table() string {
 		return ""
 	}
 	if len(s.Metrics) >= swapXYMin {
-		// TODO: conifg
 		return s.tableSwaped()
 	}
 	var (
