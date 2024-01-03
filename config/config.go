@@ -17,6 +17,7 @@ import (
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
+	"golang.org/x/text/language"
 )
 
 const defaultBadgesDatastore = "local://reports"
@@ -48,6 +49,7 @@ type Config struct {
 	Body              *Body              `yaml:"body,omitempty"`
 	Diff              *Diff              `yaml:"diff,omitempty"`
 	Timeout           time.Duration      `yaml:"timeout,omitempty"`
+	Locale            *language.Tag      `yaml:"locale,omitempty"`
 	GitRoot           string             `yaml:"-"`
 	// working directory
 	wd string

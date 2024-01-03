@@ -5,6 +5,7 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
+	"golang.org/x/text/language"
 )
 
 var commentRe = regexp.MustCompile(`(?m)^comment:`)
@@ -25,6 +26,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		Body              *Body              `yaml:"body,omitempty"`
 		Diff              *Diff              `yaml:"diff,omitempty"`
 		Timeout           string             `yaml:"timeout,omitempty"`
+		Locale            string             `yaml:"locale,omitempty"`
 	}{}
 	err := yaml.Unmarshal(data, &s)
 	if err != nil {
@@ -83,6 +85,15 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		c.Push = cp
 	case *Push:
 		c.Push = v
+	}
+
+	if s.Locale != "" {
+		tag, err := language.Parse(s.Locale)
+		if err != nil {
+			return err
+		}
+
+		c.Locale = &tag
 	}
 
 	return nil
