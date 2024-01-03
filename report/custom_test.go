@@ -9,9 +9,15 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/tenntenn/golden"
+	"golang.org/x/text/language"
 )
 
 func TestCustomMetricSetTable(t *testing.T) {
+	locales := []*language.Tag{
+		nil,
+		&language.Japanese,
+		&language.French,
+	}
 	tests := []struct {
 		s *CustomMetricSet
 	}{
@@ -52,17 +58,27 @@ func TestCustomMetricSetTable(t *testing.T) {
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			got := tt.s.Table()
-			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_table.%d", i))
-			if os.Getenv("UPDATE_GOLDEN") != "" {
-				golden.Update(t, testdataDir(t), f, got)
-				return
+		for _, locale := range locales {
+			SetLocale(locale)
+			var tc string
+			if locale != nil {
+				tc = fmt.Sprintf("%d.%s", i, locale.String())
+			} else {
+				tc = fmt.Sprintf("%d", i)
 			}
-			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
-				t.Error(diff)
-			}
-		})
+
+			t.Run(tc, func(t *testing.T) {
+				got := tt.s.Table()
+				f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_table.%s", tc))
+				if os.Getenv("UPDATE_GOLDEN") != "" {
+					golden.Update(t, testdataDir(t), f, got)
+					return
+				}
+				if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+					t.Error(diff)
+				}
+			})
+		}
 	}
 }
 
@@ -98,6 +114,12 @@ func TestCustomMetricSetMetadataTable(t *testing.T) {
 }
 
 func TestCustomMetricSetOut(t *testing.T) {
+	locales := []*language.Tag{
+		nil,
+		&language.Japanese,
+		&language.French,
+	}
+
 	tests := []struct {
 		s *CustomMetricSet
 	}{
@@ -130,20 +152,30 @@ func TestCustomMetricSetOut(t *testing.T) {
 		}},
 	}
 	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			got := new(bytes.Buffer)
-			if err := tt.s.Out(got); err != nil {
-				t.Fatal(err)
+		for _, locale := range locales {
+			SetLocale(locale)
+			var tc string
+			if locale != nil {
+				tc = fmt.Sprintf("%d.%s", i, locale.String())
+			} else {
+				tc = fmt.Sprintf("%d", i)
 			}
-			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_out.%d", i))
-			if os.Getenv("UPDATE_GOLDEN") != "" {
-				golden.Update(t, testdataDir(t), f, got)
-				return
-			}
-			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
-				t.Error(diff)
-			}
-		})
+
+			t.Run(tc, func(t *testing.T) {
+				got := new(bytes.Buffer)
+				if err := tt.s.Out(got); err != nil {
+					t.Fatal(err)
+				}
+				f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_out.%s", tc))
+				if os.Getenv("UPDATE_GOLDEN") != "" {
+					golden.Update(t, testdataDir(t), f, got)
+					return
+				}
+				if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+					t.Error(diff)
+				}
+			})
+		}
 	}
 }
 
@@ -208,6 +240,12 @@ func TestCustomMetricsSetValidate(t *testing.T) {
 }
 
 func TestDiffCustomMetricSetTable(t *testing.T) {
+	locales := []*language.Tag{
+		nil,
+		&language.Japanese,
+		&language.French,
+	}
+
 	tests := []struct {
 		a *CustomMetricSet
 		b *CustomMetricSet
@@ -261,18 +299,28 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	for i, tt := range tests {
-		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			d := tt.a.Compare(tt.b)
-			got := d.Table()
-			f := filepath.Join("custom_metrics", fmt.Sprintf("diff_custom_metric_set_table.%d", i))
-			if os.Getenv("UPDATE_GOLDEN") != "" {
-				golden.Update(t, testdataDir(t), f, got)
-				return
+		for _, locale := range locales {
+			SetLocale(locale)
+			var tc string
+			if locale != nil {
+				tc = fmt.Sprintf("%d.%s", i, locale.String())
+			} else {
+				tc = fmt.Sprintf("%d", i)
 			}
-			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
-				t.Error(diff)
-			}
-		})
+
+			t.Run(tc, func(t *testing.T) {
+				d := tt.a.Compare(tt.b)
+				got := d.Table()
+				f := filepath.Join("custom_metrics", fmt.Sprintf("diff_custom_metric_set_table.%s", tc))
+				if os.Getenv("UPDATE_GOLDEN") != "" {
+					golden.Update(t, testdataDir(t), f, got)
+					return
+				}
+				if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+					t.Error(diff)
+				}
+			})
+		}
 	}
 }
 
@@ -371,6 +419,8 @@ func TestConvertFormat(t *testing.T) {
 			"1,000",
 		},
 	}
+
+	SetLocale(&language.Japanese)
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
