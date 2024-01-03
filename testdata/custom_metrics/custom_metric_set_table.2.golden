@@ -2,4 +2,4 @@
 
 | Number of iterations | Nanoseconds per iteration |
 |---------------------:|--------------------------:|
-|               1500.0 | 1340.0 ns/op              |
+|                 1500 | 1340 ns/op                |

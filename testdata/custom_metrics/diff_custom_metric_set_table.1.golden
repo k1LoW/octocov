@@ -2,5 +2,5 @@
 
 |                               | main ([2345678](https://github.com/owner/repo/commit/2345678901)) | main ([1234567](https://github.com/owner/repo/commit/1234567890)) |     +/-     |
 |-------------------------------|------------------------------------------------------------------:|------------------------------------------------------------------:|------------:|
-| **Number of iterations**      |                                                            9393.0 |                                                            1000.0 |     -8393.0 |
-| **Nanoseconds per iteration** |                                                       456.0 ns/op |                                                       676.5 ns/op | 220.5 ns/op |
+| **Number of iterations**      |                                                              9393 |                                                              1000 |       -8393 |
+| **Nanoseconds per iteration** |                                                         456 ns/op |                                                       676.5 ns/op | 220.5 ns/op |

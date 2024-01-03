@@ -2,8 +2,8 @@
 
 |           | main ([1234567](https://github.com/owner/repo/commit/1234567890)) |
 |----------:|------------------------------------------------------------------:|
-| Metrics A |                                                            1500.0 |
-| Metrics B |                                                            1340.0 |
-| Metrics C |                                                            1600.0 |
-| Metrics D |                                                            1010.0 |
-| Metrics E |                                                            1800.0 |
+| Metrics A |                                                              1500 |
+| Metrics B |                                                              1340 |
+| Metrics C |                                                              1600 |
+| Metrics D |                                                              1010 |
+| Metrics E |                                                              1800 |

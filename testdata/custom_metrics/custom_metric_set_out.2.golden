@@ -1,4 +1,4 @@
   [1m       Benchmark-1       [0m  main (1234567)  
 ---------------------------------------------
-  [1mNumber of iterations[0m               1500.0  
-  [1mNanoseconds per iteration[0m    1340.0 ns/op  
+  [1mNumber of iterations[0m                 1500  
+  [1mNanoseconds per iteration[0m      1340 ns/op  

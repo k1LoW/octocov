@@ -24,7 +24,10 @@ func convertFormat(v interface{}) string {
 	switch vv := v.(type) {
 	case int, int8, int16, int32, int64:
 		return fmt.Sprintf("%d", vv)
-	case float32, float64:
+	case float64:
+		if isInt(vv) {
+			return fmt.Sprintf("%d", int(vv))
+		}
 		return fmt.Sprintf("%.1f", vv)
 	default:
 		panic(fmt.Errorf("convert format error .Unknown type:%v", vv))
