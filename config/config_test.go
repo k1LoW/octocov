@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/text/language"
 )
 
 func TestMain(m *testing.M) {
@@ -89,6 +90,40 @@ func TestLoadCentralPush(t *testing.T) {
 		if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 			t.Error(diff)
 		}
+	}
+}
+
+func TestLoadLocale(t *testing.T) {
+	tests := []struct {
+		path      string
+		want      *language.Tag
+		wantError bool
+	}{
+		{"locale_nothing.yml", nil, false},
+		{"locale_empty.yml", nil, false},
+		{"locale_ja.yml", &language.Japanese, false},
+		{"locale_ja_uppercase.yml", &language.Japanese, false},
+		{"locale_fr.yml", &language.French, false},
+		{"locale_unkown.yml", nil, true},
+	}
+	for _, tt := range tests {
+		c := New()
+		t.Run(fmt.Sprintf("%v", tt.path), func(t *testing.T) {
+			p := filepath.Join(testdataDir(t), tt.path)
+			if err := c.Load(p); err != nil {
+				if tt.wantError {
+					return
+				}
+				t.Fatal(err)
+			}
+			got := c.Locale
+			if tt.want == nil && got == nil {
+				return
+			}
+			if diff := cmp.Diff(got.String(), tt.want.String(), nil); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }
 
