@@ -11,9 +11,6 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
 	"github.com/xeipuuv/gojsonschema"
-	"golang.org/x/text/language"
-	"golang.org/x/text/message"
-	"golang.org/x/text/number"
 )
 
 const swapXYMin = 5
@@ -65,6 +62,7 @@ func (s *CustomMetricSet) Table() string {
 		return ""
 	}
 	if len(s.Metrics) >= swapXYMin {
+		// TODO: conifg
 		return s.tableSwaped()
 	}
 	var (
@@ -327,9 +325,4 @@ func (d *DiffCustomMetricSet) MetadataTable() string {
 
 func isInt(v float64) bool {
 	return v == float64(int64(v))
-}
-
-func convertFormat(v interface{}) string {
-	p := message.NewPrinter(language.Japanese)
-	return p.Sprint(number.Decimal(v))
 }
