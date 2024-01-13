@@ -16,7 +16,6 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/report"
 	"golang.org/x/text/language"
 )
 
@@ -192,7 +191,14 @@ func (c *Config) Loaded() bool {
 	return c.path != ""
 }
 
-func (c *Config) Acceptable(r, rPrev *report.Report) error {
+type Reporter interface {
+	CoveragePercent() float64
+	CodeToTestRatioRatio() float64
+	TestExecutionTimeNano() float64
+	IsMeasuredTestExecutionTime() bool
+}
+
+func (c *Config) Acceptable(r, rPrev Reporter) error {
 	var result *multierror.Error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := 0.0
