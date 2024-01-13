@@ -16,15 +16,22 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/hashicorp/go-multierror"
-	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/ratio"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
+	"golang.org/x/text/message"
+	"golang.org/x/text/number"
 )
 
 const filesHideMin = 30
 const filesSkipMax = 100
+
+var (
+	_ config.Reporter = (*Report)(nil)
+)
 
 type Report struct {
 	Repository        string             `json:"repository"`
@@ -38,9 +45,10 @@ type Report struct {
 
 	// coverage report paths
 	covPaths []string
+	config   *ReportOptions
 }
 
-func New(ownerrepo string) (*Report, error) {
+func New(ownerrepo string, opts ...ReportOption) (*Report, error) {
 	if ownerrepo == "" {
 		ownerrepo = os.Getenv("GITHUB_REPOSITORY")
 	}
@@ -60,12 +68,17 @@ func New(ownerrepo string) (*Report, error) {
 			commit = strings.TrimSuffix(string(b), "\n")
 		}
 	}
+	config := &ReportOptions{}
+	for _, setter := range opts {
+		setter(config)
+	}
 
 	return &Report{
 		Repository: ownerrepo,
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
+		config:     config,
 	}, nil
 }
 
@@ -536,6 +549,25 @@ func (r *Report) findCustomMetricSetByKey(key string) *CustomMetricSet {
 		}
 	}
 	return nil
+}
+
+func (r *Report) convertFormat(v interface{}) string {
+	if r.config != nil && r.config.Locale != nil {
+		p := message.NewPrinter(*r.config.Locale)
+		return p.Sprint(number.Decimal(v))
+	}
+
+	switch vv := v.(type) {
+	case int, int8, int16, int32, int64:
+		return fmt.Sprintf("%d", vv)
+	case float64:
+		if isInt(vv) {
+			return fmt.Sprintf("%d", int(vv))
+		}
+		return fmt.Sprintf("%.1f", vv)
+	default:
+		panic(fmt.Errorf("convert format error .Unknown type:%v", vv))
+	}
 }
 
 func makeHeadTitle(ref, commit string, covPaths []string) string {
