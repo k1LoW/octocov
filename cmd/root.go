@@ -33,12 +33,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/report"
 	"github.com/k1LoW/octocov/version"
 	"github.com/spf13/cobra"
@@ -161,7 +161,7 @@ var rootCmd = &cobra.Command{
 			return nil
 		}
 
-		r, err := report.New(c.Repository)
+		r, err := report.New(c.Repository, report.Locale(c.Locale))
 		if err != nil {
 			return err
 		}
@@ -354,7 +354,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 			if c.Diff.Path != "" {
-				rt, err := report.New(c.Repository)
+				rt, err := report.New(c.Repository, report.Locale(c.Locale))
 				if err != nil {
 					return err
 				}
@@ -502,7 +502,7 @@ func printMetrics(cmd *cobra.Command) error {
 		c.CodeToTestRatio = nil
 		c.TestExecutionTime = nil
 	}
-	r, err := report.New(c.Repository)
+	r, err := report.New(c.Repository, report.Locale(c.Locale))
 	if err != nil {
 		return err
 	}

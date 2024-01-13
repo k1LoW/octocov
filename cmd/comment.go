@@ -62,7 +62,6 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if hideFooterLink {
 		footer = "Reported by octocov"
 	}
-	report.SetLocale(c.Locale)
 	var (
 		table, fileTable string
 		customTables     []string
