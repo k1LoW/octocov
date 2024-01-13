@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/tenntenn/golden"
+	"golang.org/x/text/language"
 )
 
 func TestCustomMetricSetTable(t *testing.T) {
@@ -47,20 +48,52 @@ func TestCustomMetricSetTable(t *testing.T) {
 				covPaths: []string{"testdata/cover.out"},
 			},
 		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_0",
+			Name: "Benchmark-0",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+			},
+			report: &Report{
+				config: &ReportOptions{Locale: &language.French},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_1",
+			Name: "Benchmark-1",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
+			},
+			report: &Report{
+				config: &ReportOptions{Locale: &language.Japanese},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "many_metrics",
+			Name: "Many Metrics",
+			Metrics: []*CustomMetric{
+				{Key: "A", Name: "Metrics A", Value: 1500.0, Unit: ""},
+				{Key: "B", Name: "Metrics B", Value: 1340.0, Unit: ""},
+				{Key: "C", Name: "Metrics C", Value: 1600.0, Unit: ""},
+				{Key: "D", Name: "Metrics D", Value: 1010.0, Unit: ""},
+				{Key: "E", Name: "Metrics E", Value: 1800.0, Unit: ""},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+				config:   &ReportOptions{Locale: &language.French},
+			},
+		}},
 	}
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	for i, tt := range tests {
-		var tc string
-		if tt.s.report != nil && tt.s.report.config.Locale != nil {
-			tc = fmt.Sprintf("%d.%s", i, tt.s.report.config.Locale.String())
-		} else {
-			tc = fmt.Sprintf("%d", i)
-		}
-
-		t.Run(tc, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			got := tt.s.Table()
-			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_table.%s", tc))
+			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_table.%d", i))
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, testdataDir(t), f, got)
 				return
@@ -134,21 +167,42 @@ func TestCustomMetricSetOut(t *testing.T) {
 				covPaths: []string{"testdata/cover.out"},
 			},
 		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_0",
+			Name: "Benchmark-0",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+				config:   &ReportOptions{Locale: &language.French},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_1",
+			Name: "Benchmark-1",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+				config:   &ReportOptions{Locale: &language.Japanese},
+			},
+		}},
 	}
 	for i, tt := range tests {
-		var tc string
-		if tt.s.report != nil && tt.s.report.config.Locale != nil {
-			tc = fmt.Sprintf("%d.%s", i, tt.s.report.config.Locale.String())
-		} else {
-			tc = fmt.Sprintf("%d", i)
-		}
-
-		t.Run(tc, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			got := new(bytes.Buffer)
 			if err := tt.s.Out(got); err != nil {
 				t.Fatal(err)
 			}
-			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_out.%s", tc))
+			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_out.%d", i))
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, testdataDir(t), f, got)
 				return
@@ -269,22 +323,61 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 				},
 			},
 		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					config:   &ReportOptions{Locale: &language.French},
+				},
+			},
+			nil,
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					config:   &ReportOptions{Locale: &language.Japanese},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 9393.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 456.0, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
 	}
 
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	for i, tt := range tests {
-		var tc string
-		if tt.a.report != nil && tt.a.report.config.Locale != nil {
-			tc = fmt.Sprintf("%d.%s", i, tt.a.report.config.Locale.String())
-		} else {
-			tc = fmt.Sprintf("%d", i)
-		}
-
-		t.Run(tc, func(t *testing.T) {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			d := tt.a.Compare(tt.b)
 			got := d.Table()
-			f := filepath.Join("custom_metrics", fmt.Sprintf("diff_custom_metric_set_table.%s", tc))
+			f := filepath.Join("custom_metrics", fmt.Sprintf("diff_custom_metric_set_table.%d", i))
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, testdataDir(t), f, got)
 				return
