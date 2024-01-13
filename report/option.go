@@ -2,14 +2,14 @@ package report
 
 import "golang.org/x/text/language"
 
-type ReportOptions struct {
+type Options struct {
 	Locale *language.Tag
 }
 
-type ReportOption func(*ReportOptions)
+type Option func(*Options)
 
-func Locale(locale *language.Tag) ReportOption {
-	return func(args *ReportOptions) {
+func Locale(locale *language.Tag) Option {
+	return func(args *Options) {
 		args.Locale = locale
 	}
 }

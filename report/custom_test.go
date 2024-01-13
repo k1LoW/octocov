@@ -56,7 +56,7 @@ func TestCustomMetricSetTable(t *testing.T) {
 				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
 			},
 			report: &Report{
-				config: &ReportOptions{Locale: &language.French},
+				opts: &Options{Locale: &language.French},
 			},
 		}},
 		{&CustomMetricSet{
@@ -67,7 +67,7 @@ func TestCustomMetricSetTable(t *testing.T) {
 				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
 			},
 			report: &Report{
-				config: &ReportOptions{Locale: &language.Japanese},
+				opts: &Options{Locale: &language.Japanese},
 			},
 		}},
 		{&CustomMetricSet{
@@ -84,7 +84,7 @@ func TestCustomMetricSetTable(t *testing.T) {
 				Ref:      "main",
 				Commit:   "1234567890",
 				covPaths: []string{"testdata/cover.out"},
-				config:   &ReportOptions{Locale: &language.French},
+				opts:     &Options{Locale: &language.French},
 			},
 		}},
 	}
@@ -178,7 +178,7 @@ func TestCustomMetricSetOut(t *testing.T) {
 				Ref:      "main",
 				Commit:   "1234567890",
 				covPaths: []string{"testdata/cover.out"},
-				config:   &ReportOptions{Locale: &language.French},
+				opts:     &Options{Locale: &language.French},
 			},
 		}},
 		{&CustomMetricSet{
@@ -192,7 +192,7 @@ func TestCustomMetricSetOut(t *testing.T) {
 				Ref:      "main",
 				Commit:   "1234567890",
 				covPaths: []string{"testdata/cover.out"},
-				config:   &ReportOptions{Locale: &language.Japanese},
+				opts:     &Options{Locale: &language.Japanese},
 			},
 		}},
 	}
@@ -335,7 +335,7 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 					Ref:      "main",
 					Commit:   "1234567890",
 					covPaths: []string{"testdata/cover.out"},
-					config:   &ReportOptions{Locale: &language.French},
+					opts:     &Options{Locale: &language.French},
 				},
 			},
 			nil,
@@ -352,7 +352,7 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 					Ref:      "main",
 					Commit:   "1234567890",
 					covPaths: []string{"testdata/cover.out"},
-					config:   &ReportOptions{Locale: &language.Japanese},
+					opts:     &Options{Locale: &language.Japanese},
 				},
 			},
 			&CustomMetricSet{
@@ -422,6 +422,52 @@ func TestDiffCustomMetricSetMetadataTable(t *testing.T) {
 					Ref:      "main",
 					Commit:   "1234567890",
 					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metadata: []*MetadataKV{
+					{Key: "goos", Value: "arwin"},
+					{Key: "goarch", Value: "arm64"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metadata: []*MetadataKV{
+					{Key: "goos", Value: "darwin"},
+					{Key: "goarch", Value: "amd64"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.French},
+				},
+			},
+			nil,
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metadata: []*MetadataKV{
+					{Key: "goos", Value: "darwin"},
+					{Key: "goarch", Value: "amd64"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.Japanese},
 				},
 			},
 			&CustomMetricSet{

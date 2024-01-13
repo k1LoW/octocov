@@ -568,7 +568,7 @@ func TestConvertFormat(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			l := language.Japanese
-			r := &Report{config: &ReportOptions{Locale: &l}}
+			r := &Report{opts: &Options{Locale: &l}}
 
 			got := r.convertFormat(tt.n)
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {

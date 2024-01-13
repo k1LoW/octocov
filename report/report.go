@@ -45,10 +45,10 @@ type Report struct {
 
 	// coverage report paths
 	covPaths []string
-	config   *ReportOptions
+	opts     *Options
 }
 
-func New(ownerrepo string, opts ...ReportOption) (*Report, error) {
+func New(ownerrepo string, opts ...Option) (*Report, error) {
 	if ownerrepo == "" {
 		ownerrepo = os.Getenv("GITHUB_REPOSITORY")
 	}
@@ -68,9 +68,9 @@ func New(ownerrepo string, opts ...ReportOption) (*Report, error) {
 			commit = strings.TrimSuffix(string(b), "\n")
 		}
 	}
-	config := &ReportOptions{}
+	o := &Options{}
 	for _, setter := range opts {
-		setter(config)
+		setter(o)
 	}
 
 	return &Report{
@@ -78,7 +78,7 @@ func New(ownerrepo string, opts ...ReportOption) (*Report, error) {
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
-		config:     config,
+		opts:       o,
 	}, nil
 }
 
@@ -552,8 +552,8 @@ func (r *Report) findCustomMetricSetByKey(key string) *CustomMetricSet {
 }
 
 func (r *Report) convertFormat(v interface{}) string {
-	if r.config != nil && r.config.Locale != nil {
-		p := message.NewPrinter(*r.config.Locale)
+	if r.opts != nil && r.opts.Locale != nil {
+		p := message.NewPrinter(*r.opts.Locale)
 		return p.Sprint(number.Decimal(v))
 	}
 
