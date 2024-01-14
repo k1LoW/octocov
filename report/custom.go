@@ -290,7 +290,7 @@ func (d *DiffCustomMetricSet) Table() string {
 			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
 		case m.A == nil && m.B != nil:
 			va = ""
-			va = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
+			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
 			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricB.Unit)
 		case isInt(*m.A) && isInt(*m.B):
 			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
