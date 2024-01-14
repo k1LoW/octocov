@@ -175,11 +175,11 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 
 func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 	d := &DiffCustomMetricSet{
-		Key:  s.Key,
-		Name: s.Name,
-		A:    s,
-		B:    s2,
-		// report: s.report,
+		Key:    s.Key,
+		Name:   s.Name,
+		A:      s,
+		B:      s2,
+		report: s.report,
 	}
 	if s2 == nil {
 		for _, m := range s.Metrics {
