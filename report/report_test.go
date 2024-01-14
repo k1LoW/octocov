@@ -44,6 +44,29 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestNewWithOptions(t *testing.T) {
+	tests := []struct {
+		opts []Option
+		want *language.Tag
+	}{
+		{nil, nil},
+		{[]Option{Locale(&language.Japanese)}, &language.Japanese},
+		{[]Option{Locale(&language.French)}, &language.French},
+		{[]Option{Locale(&language.Japanese), Locale(&language.French)}, &language.French}, // Be overwritten
+	}
+	for _, tt := range tests {
+		r, err := New("somthing", tt.opts...)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		got := r.opts.Locale
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
 func TestMeasureCoverage(t *testing.T) {
 	log.SetOutput(io.Discard) // Disable log in challengeParseReport()
 
