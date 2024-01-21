@@ -563,7 +563,7 @@ func coverageTestdataDir(t *testing.T) string {
 
 func TestConvertFormat(t *testing.T) {
 	tests := []struct {
-		n    interface{}
+		n    any
 		want string
 	}{
 		{
