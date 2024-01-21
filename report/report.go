@@ -271,6 +271,9 @@ func (r *Report) IsMeasuredCodeToTestRatio() bool {
 }
 
 func (r *Report) IsMeasuredTestExecutionTime() bool {
+	if r == nil {
+		return false
+	}
 	return r.TestExecutionTime != nil
 }
 
@@ -474,7 +477,7 @@ func (r *Report) CodeToTestRatioRatio() float64 {
 }
 
 func (r *Report) TestExecutionTimeNano() float64 {
-	if r.TestExecutionTime == nil {
+	if r == nil || r.TestExecutionTime == nil {
 		return 0.0
 	}
 	return *r.TestExecutionTime
