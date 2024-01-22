@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	giturls "github.com/chainguard-dev/git-urls"
 	"github.com/google/go-github/v50/github"
 	"github.com/k1LoW/go-github-client/v50/factory"
-	giturls "github.com/whilp/git-urls"
 	"gopkg.in/ini.v1"
 )
 
