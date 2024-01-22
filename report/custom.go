@@ -64,19 +64,17 @@ func (s *CustomMetricSet) Table() string {
 	if len(s.Metrics) >= swapXYMin {
 		return s.tableSwaped()
 	}
+	report := s.report
+	if report == nil {
+		report = &Report{}
+	}
 	var (
 		h []string
 		d []string
 	)
 	for _, m := range s.Metrics {
 		h = append(h, m.Name)
-		var v string
-		if isInt(m.Value) {
-			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
-		} else {
-			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
-		}
-		d = append(d, v)
+		d = append(d, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit))
 	}
 	buf := new(bytes.Buffer)
 	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name)) //nostyle:handlerrors
@@ -100,14 +98,10 @@ func (s *CustomMetricSet) tableSwaped() string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
+
+	report := s.report
 	for _, m := range s.Metrics {
-		var v string
-		if isInt(m.Value) {
-			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
-		} else {
-			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
-		}
-		table.Append([]string{m.Name, v})
+		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
 	}
 	table.Render()
 	return strings.Replace(buf.String(), "---|", "--:|", len(s.Metrics))
@@ -159,17 +153,16 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 	table.SetBorder(false)
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
+	report := s.report
+	if report == nil {
+		report = &Report{}
+	}
+
 	for _, m := range s.Metrics {
 		if m.Name == "" {
 			m.Name = m.Key
 		}
-		var v string
-		if isInt(m.Value) {
-			v = fmt.Sprintf("%d%s", int(m.Value), m.Unit)
-		} else {
-			v = fmt.Sprintf("%.1f%s", m.Value, m.Unit)
-		}
-		table.Rich([]string{m.Name, v}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+		table.Rich([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
 	table.Render()
@@ -276,6 +269,8 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
 	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
+	report := d.report()
+
 	for _, m := range d.Metrics {
 		var va, vb, diff string
 		switch {
@@ -283,30 +278,20 @@ func (d *DiffCustomMetricSet) Table() string {
 			continue
 		case m.A != nil && m.B == nil:
 			vb = ""
-			if isInt(*m.A) {
-				va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
-				diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
-			} else {
-				va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
-				diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
-			}
+			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
+			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
 		case m.A == nil && m.B != nil:
 			va = ""
-			if isInt(*m.B) {
-				vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
-				diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricB.Unit)
-			} else {
-				vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
-				diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricB.Unit)
-			}
+			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricB.Unit)
 		case isInt(*m.A) && isInt(*m.B):
-			va = fmt.Sprintf("%d%s", int(*m.A), m.customMetricA.Unit)
-			vb = fmt.Sprintf("%d%s", int(*m.B), m.customMetricB.Unit)
-			diff = fmt.Sprintf("%d%s", int(m.Diff), m.customMetricA.Unit)
+			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
+			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
 		default:
-			va = fmt.Sprintf("%.1f%s", *m.A, m.customMetricA.Unit)
-			vb = fmt.Sprintf("%.1f%s", *m.B, m.customMetricB.Unit)
-			diff = fmt.Sprintf("%.1f%s", m.Diff, m.customMetricA.Unit)
+			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
+			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
+			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
 		}
 		if m.Name == "" {
 			m.Name = m.Key
@@ -348,6 +333,17 @@ func (d *DiffCustomMetricSet) MetadataTable() string {
 	table.Render()
 	buf.WriteString("\n</details>\n")
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
+}
+
+func (d *DiffCustomMetricSet) report() *Report {
+	if d.A != nil && d.A.report != nil {
+		return d.A.report
+	}
+	if d.B != nil && d.B.report != nil {
+		return d.B.report
+	}
+
+	return &Report{}
 }
 
 func isInt(v float64) bool {

@@ -16,6 +16,7 @@ import (
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/ratio"
+	"golang.org/x/text/language"
 )
 
 func TestNew(t *testing.T) {
@@ -37,6 +38,29 @@ func TestNew(t *testing.T) {
 			continue
 		}
 		got := r.Repository
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestNewWithOptions(t *testing.T) {
+	tests := []struct {
+		opts []Option
+		want *language.Tag
+	}{
+		{nil, nil},
+		{[]Option{Locale(&language.Japanese)}, &language.Japanese},
+		{[]Option{Locale(&language.French)}, &language.French},
+		{[]Option{Locale(&language.Japanese), Locale(&language.French)}, &language.French}, // Be overwritten
+	}
+	for _, tt := range tests {
+		r, err := New("somthing", tt.opts...)
+		if err != nil {
+			t.Error(err)
+			continue
+		}
+		got := r.opts.Locale
 		if got != tt.want {
 			t.Errorf("got %v\nwant %v", got, tt.want)
 		}
@@ -535,4 +559,44 @@ func coverageTestdataDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return dir
+}
+
+func TestConvertFormat(t *testing.T) {
+	tests := []struct {
+		n    any
+		want string
+	}{
+		{
+			int(10),
+			"10",
+		},
+		{
+			int32(3200),
+			"3,200",
+		},
+		{
+			float32(10.0),
+			"10",
+		},
+		{
+			float32(1000.1),
+			"1,000.1",
+		},
+		{
+			int(1000),
+			"1,000",
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			l := language.Japanese
+			r := &Report{opts: &Options{Locale: &l}}
+
+			got := r.convertFormat(tt.n)
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
 }

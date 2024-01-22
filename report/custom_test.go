@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/tenntenn/golden"
+	"golang.org/x/text/language"
 )
 
 func TestCustomMetricSetTable(t *testing.T) {
@@ -45,6 +46,45 @@ func TestCustomMetricSetTable(t *testing.T) {
 				Ref:      "main",
 				Commit:   "1234567890",
 				covPaths: []string{"testdata/cover.out"},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_0",
+			Name: "Benchmark-0",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+			},
+			report: &Report{
+				opts: &Options{Locale: &language.French},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_1",
+			Name: "Benchmark-1",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
+			},
+			report: &Report{
+				opts: &Options{Locale: &language.Japanese},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "many_metrics",
+			Name: "Many Metrics",
+			Metrics: []*CustomMetric{
+				{Key: "A", Name: "Metrics A", Value: 1500.0, Unit: ""},
+				{Key: "B", Name: "Metrics B", Value: 1340.0, Unit: ""},
+				{Key: "C", Name: "Metrics C", Value: 1600.0, Unit: ""},
+				{Key: "D", Name: "Metrics D", Value: 1010.0, Unit: ""},
+				{Key: "E", Name: "Metrics E", Value: 1800.0, Unit: ""},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+				opts:     &Options{Locale: &language.French},
 			},
 		}},
 	}
@@ -125,6 +165,34 @@ func TestCustomMetricSetOut(t *testing.T) {
 				Ref:      "main",
 				Commit:   "1234567890",
 				covPaths: []string{"testdata/cover.out"},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_0",
+			Name: "Benchmark-0",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+				opts:     &Options{Locale: &language.French},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_1",
+			Name: "Benchmark-1",
+			Metrics: []*CustomMetric{
+				{Key: "N", Name: "Number of iterations", Value: 1500.0, Unit: ""},
+				{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 1340.0, Unit: " ns/op"},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+				opts:     &Options{Locale: &language.Japanese},
 			},
 		}},
 	}
@@ -255,6 +323,52 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 				},
 			},
 		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.French},
+				},
+			},
+			nil,
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.Japanese},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 9393.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 456.0, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
 	}
 
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
@@ -308,6 +422,52 @@ func TestDiffCustomMetricSetMetadataTable(t *testing.T) {
 					Ref:      "main",
 					Commit:   "1234567890",
 					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metadata: []*MetadataKV{
+					{Key: "goos", Value: "arwin"},
+					{Key: "goarch", Value: "arm64"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metadata: []*MetadataKV{
+					{Key: "goos", Value: "darwin"},
+					{Key: "goarch", Value: "amd64"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.French},
+				},
+			},
+			nil,
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metadata: []*MetadataKV{
+					{Key: "goos", Value: "darwin"},
+					{Key: "goarch", Value: "amd64"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.Japanese},
 				},
 			},
 			&CustomMetricSet{

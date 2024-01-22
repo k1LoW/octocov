@@ -16,7 +16,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/report"
+	"golang.org/x/text/language"
 )
 
 const defaultBadgesDatastore = "local://reports"
@@ -48,6 +48,7 @@ type Config struct {
 	Body              *Body              `yaml:"body,omitempty"`
 	Diff              *Diff              `yaml:"diff,omitempty"`
 	Timeout           time.Duration      `yaml:"timeout,omitempty"`
+	Locale            *language.Tag      `yaml:"locale,omitempty"`
 	GitRoot           string             `yaml:"-"`
 	// working directory
 	wd string
@@ -190,23 +191,24 @@ func (c *Config) Loaded() bool {
 	return c.path != ""
 }
 
-func (c *Config) Acceptable(r, rPrev *report.Report) error {
+type Reporter interface {
+	CoveragePercent() float64
+	CodeToTestRatioRatio() float64
+	TestExecutionTimeNano() float64
+	IsMeasuredTestExecutionTime() bool
+}
+
+func (c *Config) Acceptable(r, rPrev Reporter) error {
 	var result *multierror.Error
 	if err := c.CoverageConfigReady(); err == nil {
-		prev := 0.0
-		if rPrev != nil {
-			prev = rPrev.CoveragePercent()
-		}
+		prev := rPrev.CoveragePercent()
 		if err := coverageAcceptable(r.CoveragePercent(), prev, c.Coverage.Acceptable); err != nil {
 			result = multierror.Append(result, err)
 		}
 	}
 
 	if err := c.CodeToTestRatioConfigReady(); err == nil {
-		prev := 0.0
-		if rPrev != nil {
-			prev = rPrev.CodeToTestRatioRatio()
-		}
+		prev := rPrev.CodeToTestRatioRatio()
 		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), prev, c.CodeToTestRatio.Acceptable); err != nil {
 			result = multierror.Append(result, err)
 		}
@@ -214,10 +216,8 @@ func (c *Config) Acceptable(r, rPrev *report.Report) error {
 
 	if err := c.TestExecutionTimeConfigReady(); err == nil {
 		prev := largeEnoughTime
-		if rPrev != nil {
-			if rPrev.IsMeasuredTestExecutionTime() {
-				prev = rPrev.TestExecutionTimeNano()
-			}
+		if rPrev.IsMeasuredTestExecutionTime() {
+			prev = rPrev.TestExecutionTimeNano()
 		}
 
 		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), prev, c.TestExecutionTime.Acceptable); err != nil {

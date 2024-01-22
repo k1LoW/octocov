@@ -16,15 +16,22 @@ import (
 
 	"github.com/goccy/go-json"
 	"github.com/hashicorp/go-multierror"
-	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/ratio"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
+	"golang.org/x/text/message"
+	"golang.org/x/text/number"
 )
 
 const filesHideMin = 30
 const filesSkipMax = 100
+
+var (
+	_ config.Reporter = (*Report)(nil)
+)
 
 type Report struct {
 	Repository        string             `json:"repository"`
@@ -38,9 +45,10 @@ type Report struct {
 
 	// coverage report paths
 	covPaths []string
+	opts     *Options
 }
 
-func New(ownerrepo string) (*Report, error) {
+func New(ownerrepo string, opts ...Option) (*Report, error) {
 	if ownerrepo == "" {
 		ownerrepo = os.Getenv("GITHUB_REPOSITORY")
 	}
@@ -60,12 +68,17 @@ func New(ownerrepo string) (*Report, error) {
 			commit = strings.TrimSuffix(string(b), "\n")
 		}
 	}
+	o := &Options{}
+	for _, setter := range opts {
+		setter(o)
+	}
 
 	return &Report{
 		Repository: ownerrepo,
 		Ref:        ref,
 		Commit:     commit,
 		Timestamp:  time.Now().UTC(),
+		opts:       o,
 	}, nil
 }
 
@@ -258,6 +271,9 @@ func (r *Report) IsMeasuredCodeToTestRatio() bool {
 }
 
 func (r *Report) IsMeasuredTestExecutionTime() bool {
+	if r == nil {
+		return false
+	}
 	return r.TestExecutionTime != nil
 }
 
@@ -447,21 +463,21 @@ func (r *Report) CollectCustomMetrics() error {
 }
 
 func (r *Report) CoveragePercent() float64 {
-	if r.Coverage == nil || r.Coverage.Total == 0 {
+	if r == nil || r.Coverage == nil || r.Coverage.Total == 0 {
 		return 0.0
 	}
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
 }
 
 func (r *Report) CodeToTestRatioRatio() float64 {
-	if r.CodeToTestRatio == nil || r.CodeToTestRatio.Code == 0 {
+	if r == nil || r.CodeToTestRatio == nil || r.CodeToTestRatio.Code == 0 {
 		return 0.0
 	}
 	return float64(r.CodeToTestRatio.Test) / float64(r.CodeToTestRatio.Code)
 }
 
 func (r *Report) TestExecutionTimeNano() float64 {
-	if r.TestExecutionTime == nil {
+	if r == nil || r.TestExecutionTime == nil {
 		return 0.0
 	}
 	return *r.TestExecutionTime
@@ -536,6 +552,25 @@ func (r *Report) findCustomMetricSetByKey(key string) *CustomMetricSet {
 		}
 	}
 	return nil
+}
+
+func (r *Report) convertFormat(v any) string {
+	if r.opts != nil && r.opts.Locale != nil {
+		p := message.NewPrinter(*r.opts.Locale)
+		return p.Sprint(number.Decimal(v))
+	}
+
+	switch vv := v.(type) {
+	case int, int8, int16, int32, int64:
+		return fmt.Sprintf("%d", vv)
+	case float64:
+		if isInt(vv) {
+			return fmt.Sprintf("%d", int(vv))
+		}
+		return fmt.Sprintf("%.1f", vv)
+	default:
+		panic(fmt.Errorf("convert format error .Unknown type:%v", vv))
+	}
 }
 
 func makeHeadTitle(ref, commit string, covPaths []string) string {
