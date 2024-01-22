@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.56.1](https://github.com/k1LoW/octocov/compare/v0.56.0...v0.56.1) - 2024-01-22
+### Other Changes
+- Use github.com/chainguard-dev/git-urls v1.0.2 for fixing https://github.com/advisories/GHSA-3f2q-6294-fmq5 by @k1LoW in https://github.com/k1LoW/octocov/pull/311
+
 ## [v0.56.0](https://github.com/k1LoW/octocov/compare/v0.55.2...v0.56.0) - 2024-01-22
 ### New Features 🎉
 - Improving readability of benchmark scores by @k2tzumi in https://github.com/k1LoW/octocov/pull/308
