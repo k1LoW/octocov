@@ -4,4 +4,4 @@ package version
 const Name string = "octocov"
 
 // Version for this.
-var Version = "0.55.2" //nostyle:repetition
+var Version = "0.56.0" //nostyle:repetition
