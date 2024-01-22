@@ -9,6 +9,7 @@ require (
 	github.com/antonmedv/expr v1.12.0
 	github.com/aws/aws-sdk-go v1.44.204
 	github.com/bmatcuk/doublestar/v4 v4.6.0
+	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/fatih/color v1.14.1
 	github.com/go-enry/go-enry/v2 v2.8.3
 	github.com/go-git/go-git/v5 v5.11.0
@@ -40,7 +41,6 @@ require (
 	github.com/shurcooL/githubv4 v0.0.0-20230215024106-420ad0987b9b
 	github.com/spf13/cobra v1.6.1
 	github.com/tenntenn/golden v0.4.0
-	github.com/whilp/git-urls v1.0.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/zhangyunhao116/skipmap v0.8.0
 	golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb
