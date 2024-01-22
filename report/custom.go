@@ -45,7 +45,6 @@ type DiffCustomMetricSet struct {
 	A       *CustomMetricSet    `json:"a"`
 	B       *CustomMetricSet    `json:"b"`
 	Metrics []*DiffCustomMetric `json:"metrics"`
-	report  *Report
 }
 
 type DiffCustomMetric struct {
@@ -101,9 +100,6 @@ func (s *CustomMetricSet) tableSwaped() string {
 	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
 
 	report := s.report
-	if report == nil {
-		report = &Report{}
-	}
 	for _, m := range s.Metrics {
 		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
 	}
@@ -175,11 +171,10 @@ func (s *CustomMetricSet) Out(w io.Writer) error {
 
 func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 	d := &DiffCustomMetricSet{
-		Key:    s.Key,
-		Name:   s.Name,
-		A:      s,
-		B:      s2,
-		report: s.report,
+		Key:  s.Key,
+		Name: s.Name,
+		A:    s,
+		B:    s2,
 	}
 	if s2 == nil {
 		for _, m := range s.Metrics {
@@ -274,10 +269,7 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
 	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
-	report := d.report
-	if report == nil {
-		report = &Report{}
-	}
+	report := d.report()
 
 	for _, m := range d.Metrics {
 		var va, vb, diff string
@@ -341,6 +333,17 @@ func (d *DiffCustomMetricSet) MetadataTable() string {
 	table.Render()
 	buf.WriteString("\n</details>\n")
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
+}
+
+func (d *DiffCustomMetricSet) report() *Report {
+	if d.A != nil && d.A.report != nil {
+		return d.A.report
+	}
+	if d.B != nil && d.B.report != nil {
+		return d.B.report
+	}
+
+	return &Report{}
 }
 
 func isInt(v float64) bool {
