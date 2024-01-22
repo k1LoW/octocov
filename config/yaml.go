@@ -88,12 +88,12 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 	}
 
 	if s.Locale != "" {
-		tag, err := language.Parse(s.Locale)
+		l, err := language.Parse(s.Locale)
 		if err != nil {
 			return err
 		}
 
-		c.Locale = &tag
+		c.Locale = &l
 	}
 
 	return nil
