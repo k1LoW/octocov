@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.56.0](https://github.com/k1LoW/octocov/compare/v0.55.2...v0.56.0) - 2024-01-22
+### New Features 🎉
+- Improving readability of benchmark scores by @k2tzumi in https://github.com/k1LoW/octocov/pull/308
+### Other Changes
+- Bump github.com/cloudflare/circl from 1.3.3 to 1.3.7 by @dependabot in https://github.com/k1LoW/octocov/pull/309
+
 ## [v0.55.2](https://github.com/k1LoW/octocov/compare/v0.55.1...v0.55.2) - 2023-12-28
 ### Other Changes
 - Bump github.com/go-git/go-git/v5 from 5.5.2 to 5.11.0 by @dependabot in https://github.com/k1LoW/octocov/pull/306
