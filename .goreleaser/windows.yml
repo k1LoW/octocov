@@ -1,0 +1,38 @@
+before:
+  hooks:
+    - go mod download
+    - go mod tidy
+builds:
+  -
+    id: octocov-windows
+    ldflags:
+      - -s -w -X github.com/k1LoW/octocov.version={{.Version}} -X github.com/k1LoW/octocov.commit={{.FullCommit}} -X github.com/k1LoW/octocov.date={{.Date}} -X github.com/k1LoW/octocov/version.Version={{.Version}}
+    env:
+      - CGO_ENABLED=1
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+archives:
+  -
+    id: octocov-archive
+    name_template: '{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - CREDITS
+      - README.md
+      - CHANGELOG.md  
+checksum:
+  name_template: 'checksums-windows.txt'
+snapshot:
+  name_template: "{{ .Version }}-next"
+changelog:
+  skip: true
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
