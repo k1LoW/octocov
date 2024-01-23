@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.56.2](https://github.com/k1LoW/octocov/compare/v0.56.1...v0.56.2) - 2024-01-23
+### New Features 🎉
+- Support Windows by @k1LoW in https://github.com/k1LoW/octocov/pull/313
+
 ## [v0.56.1](https://github.com/k1LoW/octocov/compare/v0.56.0...v0.56.1) - 2024-01-22
 ### Other Changes
 - Use github.com/chainguard-dev/git-urls v1.0.2 for fixing https://github.com/advisories/GHSA-3f2q-6294-fmq5 by @k1LoW in https://github.com/k1LoW/octocov/pull/311
