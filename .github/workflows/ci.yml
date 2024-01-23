@@ -20,8 +20,6 @@ jobs:
 
       - name: Check out source code
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Go
         id: setup-go
@@ -73,3 +71,26 @@ jobs:
         run: |
           curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
           
+  test-windows:
+    name: Test for Windows
+    runs-on: windows-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEBUG: 1
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        id: setup-go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: go.mod
+          check-latest: true
+
+      - name: Run tests
+        run: make ci
+
+      - name: Run test_central
+        if: ${{ github.event_name == 'pull_request' }}
+        run: make test_central
