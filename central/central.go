@@ -15,11 +15,11 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -266,8 +266,8 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	d := map[string]any{
 		"Host":          host,
 		"Reports":       c.reports,
-		"BadgesLinkRel": badgesLinkRel,
-		"BadgesURLRel":  badgesURLRel,
+		"BadgesLinkRel": filepath.ToSlash(badgesLinkRel),
+		"BadgesURLRel":  filepath.ToSlash(badgesURLRel),
 		"RootURL":       rootURL,
 		"IsPrivate":     isPrivate,
 		"Query":         query,

@@ -152,6 +152,7 @@ func (c *Config) Setwd(path string) {
 }
 
 func (c *Config) Load(path string) error {
+	path = filepath.FromSlash(path)
 	if path == "" {
 		for _, p := range DefaultPaths {
 			if f, err := os.Stat(filepath.Join(c.wd, p)); err == nil && !f.IsDir() {
@@ -165,7 +166,7 @@ func (c *Config) Load(path string) error {
 	if path == "" {
 		return nil
 	}
-	if strings.HasPrefix(path, "/") {
+	if filepath.IsAbs(path) {
 		c.path = path
 	} else {
 		c.path = filepath.Join(c.wd, path)

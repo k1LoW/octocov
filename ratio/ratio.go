@@ -68,6 +68,12 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 	ratio := New()
 	defined := gocloc.NewDefinedLanguages()
 	opts := gocloc.NewClocOptions()
+	for i, p := range code {
+		code[i] = filepath.FromSlash(p)
+	}
+	for i, p := range test {
+		test[i] = filepath.FromSlash(p)
+	}
 
 	if err := filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
 		if err != nil {

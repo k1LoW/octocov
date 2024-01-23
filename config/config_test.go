@@ -140,13 +140,17 @@ func TestCoveragePaths(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(fmt.Sprintf("%v", tt.paths), func(t *testing.T) {
 			c := New()
-			c.path = tt.configPath
+			c.path = filepath.FromSlash(tt.configPath)
 			c.Coverage = &Coverage{
 				Paths: tt.paths,
 			}
 			c.Build()
 			got := c.Coverage.Paths
-			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+			var want []string
+			for _, p := range tt.want {
+				want = append(want, filepath.FromSlash(p))
+			}
+			if diff := cmp.Diff(got, want, nil); diff != "" {
 				t.Error(diff)
 			}
 		})

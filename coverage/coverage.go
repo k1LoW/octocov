@@ -94,7 +94,7 @@ func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !strings.HasPrefix(c.File, "/") && strings.HasSuffix(file, c.File) {
+		if !filepath.IsAbs(c.File) && strings.HasSuffix(file, c.File) {
 			if match == nil || len(match.File) > len(c.File) {
 				match = c
 			}
@@ -130,7 +130,7 @@ func (fc FileCoverages) PathPrefix() (string, error) { //nostyle:recvtype
 		p = p[:i]
 	}
 	s := strings.Join(p, "/")
-	if s == "" && strings.HasPrefix(fc[0].File, "/") {
+	if s == "" && filepath.IsAbs(fc[0].File) {
 		s = "/"
 	}
 	if s == "." {
@@ -174,7 +174,7 @@ func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, err
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !strings.HasPrefix(c.File, "/") && strings.HasSuffix(file, c.File) {
+		if !filepath.IsAbs(c.File) && strings.HasSuffix(file, c.File) {
 			if match == nil || len(match.File) > len(c.File) {
 				match = c
 			}

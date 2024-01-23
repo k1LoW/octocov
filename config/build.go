@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/k1LoW/octocov/internal"
 )
@@ -28,6 +27,7 @@ func (c *Config) Build() {
 	} else {
 		var paths []string
 		for _, p := range c.Coverage.Paths {
+			p = filepath.FromSlash(p)
 			paths = append(paths, filepath.Join(filepath.Dir(c.path), p))
 		}
 		c.Coverage.Paths = paths
@@ -45,7 +45,7 @@ func (c *Config) Build() {
 		if c.Central.Root == "" {
 			c.Central.Root = "."
 		}
-		if !strings.HasPrefix(c.Central.Root, "/") {
+		if !filepath.IsAbs(c.Central.Root) {
 			c.Central.Root = filepath.Clean(filepath.Join(c.Root(), c.Central.Root))
 		}
 		if len(c.Central.Reports.Datastores) == 0 {
