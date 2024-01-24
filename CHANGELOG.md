@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.56.3](https://github.com/k1LoW/octocov/compare/v0.56.2...v0.56.3) - 2024-01-24
+### Fix bug 🐛
+- Fix path handling for Windows by @k1LoW in https://github.com/k1LoW/octocov/pull/315
+
 ## [v0.56.2](https://github.com/k1LoW/octocov/compare/v0.56.1...v0.56.2) - 2024-01-23
 ### New Features 🎉
 - Support Windows by @k1LoW in https://github.com/k1LoW/octocov/pull/313
