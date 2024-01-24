@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestParseUNIX(t *testing.T) {
+func TestParseWindows(t *testing.T) {
 	var tests = []struct {
 		in        string
 		wantType  Type
@@ -21,8 +21,8 @@ func TestParseUNIX(t *testing.T) {
 		{"local://reports", Local, []string{filepath.Join(testdataDir(t), "reports")}, false},
 		{"local://./reports", Local, []string{filepath.Join(testdataDir(t), "reports")}, false},
 		{"local:///reports", UnknownType, nil, true},
-		{"local://C:/reports", Local, []string{"C:\reports"}, false},
-		{"local://C:\reports", Local, []string{"C:\reports"}, false},
+		{"local://C:/reports", Local, []string{"C:\\reports"}, false},
+		{"local://C:\\reports", Local, []string{"C:\\reports"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {

@@ -103,7 +103,7 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := "ratio/ratio_test.go"
+		want := filepath.FromSlash("ratio/ratio_test.go")
 		ok := false
 		for _, f := range got.CodeFiles {
 			if f.Path == want {
@@ -124,7 +124,7 @@ func TestPathMatch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := "ratio/ratio_test.go"
+		want := filepath.FromSlash("ratio/ratio_test.go")
 		ok := false
 		for _, f := range got.CodeFiles {
 			if f.Path == want {
