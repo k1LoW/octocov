@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"cloud.google.com/go/bigquery"
@@ -222,7 +223,11 @@ func parse(u, root string) (Type, []string, error) {
 		return Mackerel, []string{service}, nil
 	default:
 		p := strings.TrimSuffix(strings.TrimPrefix(strings.TrimPrefix(u, "file://"), "local://"), "/")
-		if strings.HasPrefix(p, "/") {
+		if runtime.GOOS == "windows" && strings.HasPrefix(p, "/") {
+			return UnknownType, nil, fmt.Errorf("invalid file path: %s", u)
+		}
+		p = filepath.FromSlash(p)
+		if filepath.IsAbs(p) {
 			root = p
 		} else {
 			root = filepath.Join(root, p)

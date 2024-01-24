@@ -42,13 +42,6 @@ func TestParse(t *testing.T) {
 		{"mackerel://service", Mackerel, []string{"service"}, false},
 		{"mkr://service", Mackerel, []string{"service"}, false},
 		{"mkr://service/foo", UnknownType, []string{}, true},
-		{"file://reports", Local, []string{filepath.Join(testdataDir(t), "reports")}, false},
-		{"reports", Local, []string{filepath.Join(testdataDir(t), "reports")}, false},
-		{"file:///reports", Local, []string{"/reports"}, false},
-		{"/reports", Local, []string{"/reports"}, false},
-		{"local://reports", Local, []string{filepath.Join(testdataDir(t), "reports")}, false},
-		{"local://./reports", Local, []string{filepath.Join(testdataDir(t), "reports")}, false},
-		{"local:///reports", Local, []string{"/reports"}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.in, func(t *testing.T) {

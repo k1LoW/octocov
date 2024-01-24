@@ -94,7 +94,7 @@ func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !strings.HasPrefix(c.File, "/") && strings.HasSuffix(file, c.File) {
+		if !filepath.IsAbs(c.File) && strings.HasSuffix(file, c.File) {
 			if match == nil || len(match.File) > len(c.File) {
 				match = c
 			}
@@ -105,38 +105,6 @@ func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //
 		return match, nil
 	}
 	return nil, fmt.Errorf("file name not found: %s", file)
-}
-
-func (fc FileCoverages) PathPrefix() (string, error) { //nostyle:recvtype
-	if len(fc) == 0 {
-		return "", errors.New("no file coverages")
-	}
-	p := strings.Split(filepath.Dir(filepath.ToSlash(fc[0].File)), "/")
-	for _, c := range fc {
-		d := strings.Split(filepath.Dir(filepath.ToSlash(c.File)), "/")
-		i := 0
-		for {
-			if len(p) <= i {
-				break
-			}
-			if len(d) <= i {
-				break
-			}
-			if p[i] != d[i] {
-				break
-			}
-			i += 1
-		}
-		p = p[:i]
-	}
-	s := strings.Join(p, "/")
-	if s == "" && strings.HasPrefix(fc[0].File, "/") {
-		s = "/"
-	}
-	if s == "." {
-		s = ""
-	}
-	return s, nil
 }
 
 func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
@@ -174,7 +142,7 @@ func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, err
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !strings.HasPrefix(c.File, "/") && strings.HasSuffix(file, c.File) {
+		if !filepath.IsAbs(c.File) && strings.HasSuffix(file, c.File) {
 			if match == nil || len(match.File) > len(c.File) {
 				match = c
 			}
