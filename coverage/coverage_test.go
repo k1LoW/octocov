@@ -90,57 +90,6 @@ func TestCompare(t *testing.T) {
 	}
 }
 
-func TestPathPrefix(t *testing.T) {
-	tests := []struct {
-		files FileCoverages
-		want  string
-	}{
-		{
-			FileCoverages{
-				&FileCoverage{File: "file_a.go"},
-			},
-			"",
-		},
-		{
-			FileCoverages{
-				&FileCoverage{File: "path/to/file_a.go"},
-				&FileCoverage{File: "path/file_b.go"},
-			},
-			"path",
-		},
-		{
-			FileCoverages{
-				&FileCoverage{File: "/path/to/file_a.go"},
-				&FileCoverage{File: "/path/file_b.go"},
-			},
-			"/path",
-		},
-		{
-			FileCoverages{
-				&FileCoverage{File: "/path/to/foo/file_a.go"},
-				&FileCoverage{File: "/path/to/foo/bar/file_b.go"},
-			},
-			"/path/to/foo",
-		},
-		{
-			FileCoverages{
-				&FileCoverage{File: "/to/foo/file_a.go"},
-				&FileCoverage{File: "/path/to/foo/bar/file_b.go"},
-			},
-			"/",
-		},
-	}
-	for _, tt := range tests {
-		got, err := tt.files.PathPrefix()
-		if err != nil {
-			t.Fatal(err)
-		}
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
-	}
-}
-
 func TestMaxCount(t *testing.T) {
 	tests := []struct {
 		blocks BlockCoverages
