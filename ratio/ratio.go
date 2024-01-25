@@ -141,7 +141,7 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		if !isCode && !isTest {
 			return nil
 		}
-		ext, ok := fileType(path)
+		ext, ok := getFileType(path)
 		if !ok {
 			if _, err := fmt.Fprintf(os.Stderr, "could not detect language: %s\n", path); err != nil {
 				return err
@@ -150,7 +150,7 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		}
 		l, ok := gocloc.Exts[ext]
 		if !ok {
-			if _, err := fmt.Fprintf(os.Stderr, "unsupported language: %s\n", ext); err != nil {
+			if _, err := fmt.Fprintf(os.Stderr, "unsupported language (%s): %s\n", ext, path); err != nil {
 				return err
 			}
 			return nil

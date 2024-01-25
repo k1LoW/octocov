@@ -21,7 +21,7 @@ require (
 	github.com/google/go-github/v50 v50.0.0
 	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hashicorp/go-multierror v1.1.1
-	github.com/hhatto/gocloc v0.4.3
+	github.com/hhatto/gocloc v0.5.2
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca
 	github.com/jszwec/s3fs v0.4.0
 	github.com/k1LoW/duration v1.2.0
