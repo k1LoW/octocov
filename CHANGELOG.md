@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.56.4](https://github.com/k1LoW/octocov/compare/v0.56.3...v0.56.4) - 2024-01-25
+### Other Changes
+- Update gocloc by @k1LoW in https://github.com/k1LoW/octocov/pull/318
+
 ## [v0.56.3](https://github.com/k1LoW/octocov/compare/v0.56.2...v0.56.3) - 2024-01-24
 ### Fix bug 🐛
 - Fix path handling for Windows by @k1LoW in https://github.com/k1LoW/octocov/pull/315
