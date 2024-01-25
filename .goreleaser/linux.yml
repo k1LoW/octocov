@@ -75,6 +75,21 @@ nfpms:
       - apk
     bindir: /usr/bin
     epoch: 1
+  -
+    id: octocov-nfpms-arm64
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
+    builds:
+      - octocov-linux-arm64
+    homepage: https://github.com/k1LoW/octocov
+    maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
+    description: octocov is a toolkit for collecting code metrics.
+    license: MIT
+    formats:
+      - deb
+      - rpm
+      - apk
+    bindir: /usr/bin
+    epoch: 1
 release:
   draft: true
   skip_upload: true

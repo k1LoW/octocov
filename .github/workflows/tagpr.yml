@@ -90,7 +90,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Upload assets
         run: |
-          gh release upload ${{ needs.tagpr.outputs.tagpr-tag }} dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}_linux_arm64.tar.gz dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}_linux_amd64.tar.gz dist/checksums-linux.txt --repo ${{ github.repository }} --clobber
+          gh release upload ${{ needs.tagpr.outputs.tagpr-tag }} dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}_linux_arm64.tar.gz dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}_linux_amd64.tar.gz dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}-1_arm64.apk dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}-1_arm64.deb dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}-1_arm64.rpm dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}-1_amd64.apk dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}-1_amd64.deb dist/octocov_${{ needs.tagpr.outputs.tagpr-tag }}-1_amd64.rpm dist/checksums-linux.txt --repo ${{ github.repository }} --clobber
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
