@@ -1,10 +1,9 @@
 package ratio
 
-// original: https://github.com/hhatto/gocloc/blob/b2dad3847df87ab84c56bb8d27c91ca041e69c16/language.go
+// original: https://github.com/hhatto/gocloc/blob/7b24285f3e4368e0b3df5cd16b0969f3c9be03cb/language.go
 import (
 	"bufio"
 	"bytes"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -27,9 +26,9 @@ var shebang2ext = map[string]string{
 	"escript": "erl",
 }
 
-func shebang(line string) (shebangLang string, ok bool) {
+func getShebang(line string) (shebangLang string, ok bool) {
 	ret := reShebangEnv.FindAllStringSubmatch(line, -1)
-	if len(ret) != 0 && len(ret[0]) == 3 {
+	if ret != nil && len(ret[0]) == 3 {
 		shebangLang = ret[0][2]
 		if sl, ok := shebang2ext[shebangLang]; ok {
 			return sl, ok
@@ -38,7 +37,7 @@ func shebang(line string) (shebangLang string, ok bool) {
 	}
 
 	ret = reShebangLang.FindAllStringSubmatch(line, -1)
-	if len(ret) != 0 && len(ret[0]) >= 2 {
+	if ret != nil && len(ret[0]) >= 2 {
 		shebangLang = ret[0][1]
 		if sl, ok := shebang2ext[shebangLang]; ok {
 			return sl, ok
@@ -49,18 +48,47 @@ func shebang(line string) (shebangLang string, ok bool) {
 	return "", false
 }
 
-func fileType(path string) (ext string, ok bool) {
+func getFileTypeByShebang(path string) (shebangLang string, ok bool) {
+	f, err := os.Open(path)
+	if err != nil {
+		return // ignore error
+	}
+	defer f.Close()
+
+	reader := bufio.NewReader(f)
+	line, err := reader.ReadBytes('\n')
+	if err != nil {
+		return
+	}
+	line = bytes.TrimLeftFunc(line, unicode.IsSpace)
+
+	if len(line) > 2 && line[0] == '#' && line[1] == '!' {
+		return getShebang(string(line))
+	}
+	return
+}
+
+func getFileType(path string) (ext string, ok bool) {
 	ext = filepath.Ext(path)
 	base := filepath.Base(path)
 
 	switch ext {
 	case ".m", ".v", ".fs", ".r", ".ts":
-		content, err := os.ReadFile(filepath.Clean(path))
+		content, err := os.ReadFile(path)
 		if err != nil {
 			return "", false
 		}
 		lang := enry.GetLanguage(path, content)
-		log.Printf("path=%v, lang=%v\n", path, lang)
+		return lang, true
+	case ".mo":
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return "", false
+		}
+		lang := enry.GetLanguage(path, content)
+		if lang != "" {
+			return "Motoko", true
+		}
 		return lang, true
 	}
 
@@ -88,7 +116,7 @@ func fileType(path string) (ext string, ok bool) {
 		return "", false
 	}
 
-	shebangLang, ok := fileTypeByShebang(path)
+	shebangLang, ok := getFileTypeByShebang(path)
 	if ok {
 		return shebangLang, true
 	}
@@ -97,26 +125,4 @@ func fileType(path string) (ext string, ok bool) {
 		return ext[1:], true
 	}
 	return ext, ok
-}
-
-func fileTypeByShebang(path string) (shebangLang string, ok bool) {
-	f, err := os.Open(filepath.Clean(path))
-	if err != nil {
-		return // ignore error
-	}
-	reader := bufio.NewReader(f)
-	line, err := reader.ReadBytes('\n')
-	if err != nil {
-		_ = f.Close() //nostyle:handlerrors
-		return
-	}
-	line = bytes.TrimLeftFunc(line, unicode.IsSpace)
-
-	if len(line) > 2 && line[0] == '#' && line[1] == '!' {
-		_ = f.Close() //nostyle:handlerrors
-		return shebang(string(line))
-	}
-	_ = f.Close() //nostyle:handlerrors
-
-	return
 }

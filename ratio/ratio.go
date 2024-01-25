@@ -141,7 +141,7 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		if !isCode && !isTest {
 			return nil
 		}
-		ext, ok := fileType(path)
+		ext, ok := getFileType(path)
 		if !ok {
 			if _, err := fmt.Fprintf(os.Stderr, "could not detect language: %s\n", path); err != nil {
 				return err
