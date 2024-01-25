@@ -150,7 +150,7 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		}
 		l, ok := gocloc.Exts[ext]
 		if !ok {
-			if _, err := fmt.Fprintf(os.Stderr, "unsupported language: %s\n", ext); err != nil {
+			if _, err := fmt.Fprintf(os.Stderr, "unsupported language (%s): %s\n", ext, path); err != nil {
 				return err
 			}
 			return nil
