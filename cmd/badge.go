@@ -29,9 +29,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/internal"
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
@@ -85,7 +85,7 @@ var badgeCmd = &cobra.Command{
 			if err := c.CoverageConfigReady(); err != nil {
 				return err
 			}
-			if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
+			if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 				return err
 			}
 			cp := r.CoveragePercent()

@@ -327,6 +327,17 @@ coverage:
     - tests/coverage.xml
 ```
 
+### `coverage.exclude:`
+
+Exclude files from the coverage report.
+
+``` yaml
+coverage:
+  exclude:
+    - 'cmd/*.go'
+    - 'proto/**/*.pb.go'
+```
+
 ### `coverage.acceptable:`
 
 acceptable coverage condition.

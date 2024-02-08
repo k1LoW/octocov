@@ -109,7 +109,7 @@ func TestMeasureCoverage(t *testing.T) {
 	}
 	for _, tt := range tests {
 		r := &Report{}
-		if err := r.MeasureCoverage(tt.paths); err != nil {
+		if err := r.MeasureCoverage(tt.paths, nil); err != nil {
 			if !tt.wantErr {
 				t.Error(err)
 			}

@@ -297,7 +297,7 @@ func (r *Report) Load(path string) error {
 	return nil
 }
 
-func (r *Report) MeasureCoverage(paths []string) error {
+func (r *Report) MeasureCoverage(paths, exclude []string) error {
 	if len(paths) == 0 {
 		return fmt.Errorf("coverage report not found: %s", paths)
 	}
@@ -330,6 +330,11 @@ func (r *Report) MeasureCoverage(paths []string) error {
 	}
 
 	if r.Coverage == nil {
+		return cerr
+	}
+
+	if err := r.Coverage.Exclude(exclude); err != nil {
+		cerr = multierror.Append(cerr, err)
 		return cerr
 	}
 

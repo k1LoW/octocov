@@ -60,6 +60,7 @@ type Config struct {
 type Coverage struct {
 	Path       string        `yaml:"path,omitempty"`
 	Paths      []string      `yaml:"paths,omitempty"`
+	Exclude    []string      `yaml:"exclude,omitempty"`
 	Badge      CoverageBadge `yaml:"badge,omitempty"`
 	Acceptable string        `yaml:"acceptable,omitempty"`
 	If         string        `yaml:"if,omitempty"`

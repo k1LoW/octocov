@@ -57,7 +57,7 @@ var viewCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
+		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			return err
 		}
 		for _, f := range args {
