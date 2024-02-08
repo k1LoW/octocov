@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v50/github"
-	"github.com/k1LoW/go-github-client/v50/factory"
+	"github.com/google/go-github/v58/github"
+	"github.com/k1LoW/go-github-client/v58/factory"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
 
