@@ -169,7 +169,7 @@ var rootCmd = &cobra.Command{
 		if err := c.CoverageConfigReady(); err != nil {
 			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 		} else {
-			if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
+			if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 			}
 		}
@@ -358,7 +358,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if err := rt.MeasureCoverage([]string{c.Diff.Path}); err == nil {
+				if err := rt.MeasureCoverage([]string{c.Diff.Path}, c.Coverage.Exclude); err == nil {
 					if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 						rPrev = rt
 					}
@@ -508,7 +508,7 @@ func printMetrics(cmd *cobra.Command) error {
 	}
 
 	if err := c.CoverageConfigReady(); err == nil {
-		if err := r.MeasureCoverage(c.Coverage.Paths); err != nil {
+		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 		}
 	}
