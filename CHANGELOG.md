@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.57.0](https://github.com/k1LoW/octocov/compare/v0.56.4...v0.57.0) - 2024-02-08
+### Breaking Changes 🛠
+- Support coverage.exclude: for excluding files from coverage reports by @k1LoW in https://github.com/k1LoW/octocov/pull/323
+### Other Changes
+- Fix CD pipeline by @k1LoW in https://github.com/k1LoW/octocov/pull/320
+- Update pkgs by @k1LoW in https://github.com/k1LoW/octocov/pull/324
+
 ## [v0.56.4](https://github.com/k1LoW/octocov/compare/v0.56.3...v0.56.4) - 2024-01-25
 ### Other Changes
 - Update gocloc by @k1LoW in https://github.com/k1LoW/octocov/pull/318
