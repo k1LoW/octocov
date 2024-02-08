@@ -90,49 +90,64 @@ func TestMeasure(t *testing.T) {
 
 func TestPathMatch(t *testing.T) {
 	root := filepath.Join(testdataDir(t), "..")
-	{
-		code := []string{
-			"**/*.go",
-			"!**/*_test.go",
-		}
-		test := []string{
-			"!**/*.go",
-			"**/*_test.go",
-		}
-		got, err := Measure(root, code, test)
-		if err != nil {
-			t.Fatal(err)
-		}
-		want := filepath.FromSlash("ratio/ratio_test.go")
-		ok := false
-		for _, f := range got.CodeFiles {
-			if f.Path == want {
-				ok = true
-			}
-		}
-		if ok {
-			t.Error("ratio/ratio_test.go should not be contained")
-		}
+	tests := []struct {
+		code   []string
+		test   []string
+		target string
+		inCode bool
+		inTest bool
+	}{
+		{
+			[]string{
+				"**/*.go",
+				"!**/*_test.go",
+			},
+			[]string{
+				"!**/*.go",
+				"**/*_test.go",
+			},
+			"ratio/ratio_test.go",
+			false,
+			true,
+		},
+		{
+			[]string{
+				"!**/*.go",
+				"**/*_test.go",
+			},
+			nil,
+			"ratio/ratio_test.go",
+			true,
+			false,
+		},
 	}
-
-	{
-		code := []string{
-			"!**/*_test.go",
-			"**/*.go",
-		}
-		got, err := Measure(root, code, []string{})
+	for _, tt := range tests {
+		m, err := Measure(root, tt.code, tt.test)
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := filepath.FromSlash("ratio/ratio_test.go")
-		ok := false
-		for _, f := range got.CodeFiles {
-			if f.Path == want {
-				ok = true
+		p := filepath.FromSlash(tt.target)
+		{
+			got := false
+			for _, f := range m.CodeFiles {
+				if f.Path == p {
+					got = true
+				}
+			}
+			if got != tt.inCode {
+				t.Errorf("got %v want %v: %s in code", got, tt.inCode, tt.target)
 			}
 		}
-		if !ok {
-			t.Error("ratio/ratio_test.go should be contained")
+		{
+			got := false
+			for _, f := range m.TestFiles {
+				if f.Path == p {
+					got = true
+				}
+			}
+			if got != tt.inTest {
+				t.Errorf("got %v want %v: %s in code", got, tt.inTest, tt.target)
+			}
 		}
 	}
 }
