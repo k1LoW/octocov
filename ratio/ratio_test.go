@@ -1,6 +1,7 @@
 package ratio
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -91,11 +92,12 @@ func TestMeasure(t *testing.T) {
 func TestPathMatch(t *testing.T) {
 	root := filepath.Join(testdataDir(t), "..")
 	tests := []struct {
-		code   []string
-		test   []string
-		target string
-		inCode bool
-		inTest bool
+		code    []string
+		test    []string
+		target  string
+		inCode  bool
+		inTest  bool
+		wantErr bool
 	}{
 		{
 			[]string{
@@ -109,46 +111,68 @@ func TestPathMatch(t *testing.T) {
 			"ratio/ratio_test.go",
 			false,
 			true,
+			false,
 		},
 		{
 			[]string{
+				"**/*.go",
 				"!**/*.go",
-				"**/*_test.go",
 			},
 			nil,
-			"ratio/ratio_test.go",
+			"ratio/ratio.go",
+			false,
+			false,
 			true,
+		},
+		{
+			[]string{
+				"!**/*_test.go",
+				"**/*.go",
+			},
+			nil,
+			"ratio/ratio.go",
+			true,
+			false,
 			false,
 		},
 	}
-	for _, tt := range tests {
-		m, err := Measure(root, tt.code, tt.test)
-		if err != nil {
-			t.Fatal(err)
-		}
-		p := filepath.FromSlash(tt.target)
-		{
-			got := false
-			for _, f := range m.CodeFiles {
-				if f.Path == p {
-					got = true
+	for i, tt := range tests {
+		tt := tt
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
+			m, err := Measure(root, tt.code, tt.test)
+			if err != nil {
+				if !tt.wantErr {
+					t.Fatal(err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Errorf("got %v\nwant err", m)
+			}
+			p := filepath.FromSlash(tt.target)
+			{
+				got := false
+				for _, f := range m.CodeFiles {
+					if f.Path == p {
+						got = true
+					}
+				}
+				if got != tt.inCode {
+					t.Errorf("got %v want %v: %s in code", got, tt.inCode, tt.target)
 				}
 			}
-			if got != tt.inCode {
-				t.Errorf("got %v want %v: %s in code", got, tt.inCode, tt.target)
-			}
-		}
-		{
-			got := false
-			for _, f := range m.TestFiles {
-				if f.Path == p {
-					got = true
+			{
+				got := false
+				for _, f := range m.TestFiles {
+					if f.Path == p {
+						got = true
+					}
+				}
+				if got != tt.inTest {
+					t.Errorf("got %v want %v: %s in code", got, tt.inTest, tt.target)
 				}
 			}
-			if got != tt.inTest {
-				t.Errorf("got %v want %v: %s in code", got, tt.inTest, tt.target)
-			}
-		}
+		})
 	}
 }
 
