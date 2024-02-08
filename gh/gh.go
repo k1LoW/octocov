@@ -22,9 +22,9 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v58/github"
 	"github.com/k1LoW/go-github-actions/artifact"
-	"github.com/k1LoW/go-github-client/v50/factory"
+	"github.com/k1LoW/go-github-client/v58/factory"
 	"github.com/k1LoW/repin"
 	"github.com/lestrrat-go/backoff/v2"
 	"github.com/shurcooL/githubv4"
@@ -115,7 +115,7 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 		Tree:    tree,
 		Parents: []*github.Commit{parent},
 	}
-	resC, _, err := srv.CreateCommit(ctx, owner, repo, commit)
+	resC, _, err := srv.CreateCommit(ctx, owner, repo, commit, &github.CreateCommitOptions{})
 	if err != nil {
 		return err
 	}
@@ -528,6 +528,7 @@ type ArtifactFile struct {
 }
 
 func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
+	const maxRedirect = 5
 	page := 1
 	for {
 		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{
@@ -542,7 +543,7 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 			if a.GetName() != name {
 				continue
 			}
-			u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), true)
+			u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), maxRedirect)
 			if err != nil {
 				return nil, err
 			}

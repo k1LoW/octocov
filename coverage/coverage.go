@@ -254,28 +254,23 @@ func (lc LineCoverages) Covered() int { //nostyle:recvtype
 }
 
 func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
-	m := skipmap.NewInt()
+	m := skipmap.NewInt[*skipmap.IntMap[int]]()
 
 	for _, c := range bc {
 		sl := *c.StartLine
 		el := *c.EndLine
 		for i := sl; i <= el; i++ {
-			var mm *skipmap.IntMap
-			v, ok := m.Load(i)
-			if ok {
-				mm, ok = v.(*skipmap.IntMap)
-				if !ok {
-					panic("invalid type") //nostyle:dontpanic
-				}
-			} else {
-				mm = skipmap.NewInt()
+			var mm *skipmap.IntMap[int]
+			mm, ok := m.Load(i)
+			if !ok {
+				mm = skipmap.NewInt[int]()
 			}
 			m.Store(i, mm)
 
 			if c.Type == TypeLOC || (sl < i && i < el) {
 				// TypeLOC or TypeStmt
-				mm.Range(func(key int, v any) bool {
-					mm.Store(key, v.(int)+*c.Count)
+				mm.Range(func(key int, v int) bool {
+					mm.Store(key, v+*c.Count)
 					return true
 				})
 				if _, ok := mm.Load(startPos); !ok {
@@ -296,9 +291,9 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 				pos    []int
 				counts []int
 			)
-			mm.Range(func(key int, v any) bool {
+			mm.Range(func(key int, v int) bool {
 				pos = append(pos, key)
-				counts = append(counts, v.(int))
+				counts = append(counts, v)
 				return true
 			})
 
@@ -314,9 +309,9 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 
 			switch {
 			case i == sl && i != el:
-				mm.Range(func(key int, v any) bool {
+				mm.Range(func(key int, v int) bool {
 					if key >= *c.StartCol {
-						mm.Store(key, v.(int)+*c.Count)
+						mm.Store(key, v+*c.Count)
 					}
 					return true
 				})
@@ -330,7 +325,7 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 				for j := *c.StartCol; j <= *c.EndCol; j++ {
 					v, ok := mm.Load(j)
 					if ok {
-						mm.Store(j, v.(int)+*c.Count)
+						mm.Store(j, v+*c.Count)
 					} else {
 						if j <= startTo {
 							mm.Store(j, startCount+*c.Count)
@@ -342,9 +337,9 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 					}
 				}
 			case i != sl && i == el:
-				mm.Range(func(key int, v any) bool {
+				mm.Range(func(key int, v int) bool {
 					if key <= *c.EndCol {
-						mm.Store(key, v.(int)+*c.Count)
+						mm.Store(key, v+*c.Count)
 					}
 					return true
 				})
@@ -359,21 +354,13 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 	}
 
 	lcs := LineCoverages{}
-	m.Range(func(line int, mmi any) bool {
-		mm, ok := mmi.(*skipmap.IntMap)
-		if !ok {
-			return false
-		}
+	m.Range(func(line int, mm *skipmap.IntMap[int]) bool {
 		lc := &LineCoverage{
 			Line:         line,
 			Count:        0,
 			PosCoverages: PosCoverages{},
 		}
-		mm.Range(func(pos int, ci any) bool {
-			c, ok := ci.(int)
-			if !ok {
-				return false
-			}
+		mm.Range(func(pos int, c int) bool {
 			lc.PosCoverages = append(lc.PosCoverages, &PosCoverage{
 				Pos:   pos,
 				Count: c,
