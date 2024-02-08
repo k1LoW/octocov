@@ -19,7 +19,10 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			c.Files = append(c.Files, fc2)
 		}
 	}
-	// Recalculate
+	return c.reCalc()
+}
+
+func (c *Coverage) reCalc() error {
 	total := 0
 	covered := 0
 	for _, f := range c.Files {
