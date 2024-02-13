@@ -26,11 +26,27 @@ func (c *Coverage) reCalc() error {
 	total := 0
 	covered := 0
 	for _, f := range c.Files {
-		lcs := f.Blocks.ToLineCoverages()
-		f.Total = lcs.Total()
-		f.Covered = lcs.Covered()
-		total += f.Total
-		covered += f.Covered
+		var fileTotal, fileCovered int
+
+		switch f.Type {
+		case TypeLOC:
+			lcs := f.Blocks.ToLineCoverages()
+			fileTotal = lcs.Total()
+			fileCovered = lcs.Covered()
+
+		case TypeStmt:
+			for _, b := range f.Blocks {
+				fileTotal += *b.NumStmt
+				if *b.Count > 0 {
+					fileCovered += *b.NumStmt
+				}
+			}
+		}
+
+		f.Total = fileTotal
+		f.Covered = fileCovered
+		total += fileTotal
+		covered += fileCovered
 	}
 	c.Total = total
 	c.Covered = covered
