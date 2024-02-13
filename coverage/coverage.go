@@ -26,6 +26,7 @@ type Coverage struct {
 }
 
 type FileCoverage struct {
+	Type    Type           `json:"type"`
 	File    string         `json:"file"`
 	Total   int            `json:"total"`
 	Covered int            `json:"covered"`
@@ -58,9 +59,10 @@ func New() *Coverage {
 	}
 }
 
-func NewFileCoverage(file string) *FileCoverage { //nostyle:repetition
+func NewFileCoverage(file string, coverageType Type) *FileCoverage { //nostyle:repetition
 	return &FileCoverage{
 		File:    file,
+		Type:    coverageType,
 		Total:   0,
 		Covered: 0,
 		Blocks:  BlockCoverages{},
