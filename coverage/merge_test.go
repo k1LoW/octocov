@@ -419,6 +419,65 @@ func TestMerge(t *testing.T) {
 				},
 			},
 		},
+		{
+			&Coverage{
+				Type: TypeLOC,
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_a.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
+							newBlockCoverage(TypeLOC, 3, -1, 3, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type: TypeStmt,
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_b.go",
+						Type: TypeStmt,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeStmt, 1, 0, 1, 10, 1, 1),
+							newBlockCoverage(TypeStmt, 2, 0, 2, 10, 1, 0),
+							newBlockCoverage(TypeStmt, 3, 0, 3, 10, 2, 2),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:    TypeMerged,
+				Total:   7,
+				Covered: 5,
+				Files: FileCoverages{
+					&FileCoverage{
+						File:    "file_a.go",
+						Type:    TypeLOC,
+						Total:   3,
+						Covered: 2,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
+							newBlockCoverage(TypeLOC, 3, -1, 3, -1, -1, 1),
+						},
+					},
+					&FileCoverage{
+						File:    "file_b.go",
+						Type:    TypeStmt,
+						Total:   4,
+						Covered: 3,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeStmt, 1, 0, 1, 10, 1, 1),
+							newBlockCoverage(TypeStmt, 2, 0, 2, 10, 1, 0),
+							newBlockCoverage(TypeStmt, 3, 0, 3, 10, 2, 2),
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		if err := tt.c1.Merge(tt.c2); err != nil {
