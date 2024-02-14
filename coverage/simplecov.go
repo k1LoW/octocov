@@ -75,7 +75,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 		for fn, fc := range c.Coverage {
 			fcov, ok := fcovs[fn]
 			if !ok {
-				fcov = NewFileCoverage(fn)
+				fcov = NewFileCoverage(fn, TypeLOC)
 				fcovs[fn] = fcov
 				cov.Files = append(cov.Files, fcov)
 			}

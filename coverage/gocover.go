@@ -35,7 +35,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = g.Name()
 	for _, p := range profiles {
 		total, covered := g.countProfile(p)
-		fcov := NewFileCoverage(p.FileName)
+		fcov := NewFileCoverage(p.FileName, TypeStmt)
 		fcov.Total = total
 		fcov.Covered = covered
 		for _, b := range p.Blocks {

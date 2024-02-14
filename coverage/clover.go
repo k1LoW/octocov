@@ -136,7 +136,7 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 }
 
 func parseReportFile(f CloverReportFile) *FileCoverage {
-	fcov := NewFileCoverage(f.Name)
+	fcov := NewFileCoverage(f.Name, TypeLOC)
 	fcov.Covered = f.Metrics.Coveredstatements
 	fcov.Total = f.Metrics.Statements
 	for _, l := range f.Line {

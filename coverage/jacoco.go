@@ -122,7 +122,7 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	}
 
 	for f, blocks := range flm {
-		fcov := NewFileCoverage(f)
+		fcov := NewFileCoverage(f, TypeLOC)
 		for _, b := range blocks {
 			fcov.Total += 1
 			if *b.Count > 0 {
