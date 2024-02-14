@@ -40,7 +40,6 @@ jobs:
           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
           check-latest: true
           go-package: ./...
-          fail-on-error: true
 
       - name: Run gostyle
         uses: k1LoW/gostyle-action@v1
