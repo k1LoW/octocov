@@ -14,6 +14,9 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 	for _, fc2 := range c2.Files {
 		fc, err := c.Files.FindByFile(fc2.File)
 		if err == nil {
+			if fc2.Type != fc.Type {
+				fc.Type = TypeMerged
+			}
 			fc.Blocks = append(fc.Blocks, fc2.Blocks...)
 		} else {
 			c.Files = append(c.Files, fc2)
@@ -29,7 +32,7 @@ func (c *Coverage) reCalc() error {
 		var fileTotal, fileCovered int
 
 		switch f.Type {
-		case TypeLOC:
+		case TypeLOC, TypeMerged:
 			lcs := f.Blocks.ToLineCoverages()
 			fileTotal = lcs.Total()
 			fileCovered = lcs.Covered()

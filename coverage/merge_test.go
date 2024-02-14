@@ -234,7 +234,7 @@ func TestMerge(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File: "file_a.go",
-						Type: TypeLOC,
+						Type: TypeStmt,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeStmt, 1, 0, 1, 10, 1, 1),
 							newBlockCoverage(TypeStmt, 2, 0, 2, 10, 1, 0),
@@ -250,7 +250,7 @@ func TestMerge(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File:    "file_a.go",
-						Type:    TypeLOC,
+						Type:    TypeMerged,
 						Total:   3,
 						Covered: 2,
 						Blocks: BlockCoverages{
