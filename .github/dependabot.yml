@@ -3,8 +3,12 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    groups:
+      dependencies:
+        patterns:
+          - "*"
     schedule:
-      interval: "daily"
+      interval: "weekly"
       time: "08:00"
       timezone: "Asia/Tokyo"
     commit-message:
@@ -21,7 +25,7 @@ updates:
         patterns:
           - "*"
     schedule:
-      interval: "daily"
+      interval: "weekly"
       time: "08:00"
       timezone: "Asia/Tokyo"
     commit-message:
