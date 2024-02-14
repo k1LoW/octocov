@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.58.0](https://github.com/k1LoW/octocov/compare/v0.57.0...v0.58.0) - 2024-02-14
+### Breaking Changes 🛠
+- Fix statement type coverage calculation by @furusax0621 in https://github.com/k1LoW/octocov/pull/327
+### Other Changes
+- Enable dependabot and update Go version by @k1LoW in https://github.com/k1LoW/octocov/pull/326
+- chore(deps): bump docker/setup-qemu-action from 2 to 3 by @dependabot in https://github.com/k1LoW/octocov/pull/329
+- chore(deps): bump docker/login-action from 2 to 3 by @dependabot in https://github.com/k1LoW/octocov/pull/330
+- chore(deps): bump docker/setup-buildx-action from 2 to 3 by @dependabot in https://github.com/k1LoW/octocov/pull/331
+- chore(deps): bump actions/setup-go from 4 to 5 by @dependabot in https://github.com/k1LoW/octocov/pull/332
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/337
+- chore(deps): bump actions/checkout from 3 to 4 by @dependabot in https://github.com/k1LoW/octocov/pull/333
+- chore(deps): bump docker/build-push-action from 2 to 5 by @dependabot in https://github.com/k1LoW/octocov/pull/335
+
 ## [v0.57.0](https://github.com/k1LoW/octocov/compare/v0.56.4...v0.57.0) - 2024-02-08
 ### Breaking Changes 🛠
 - Support coverage.exclude: for excluding files from coverage reports by @k1LoW in https://github.com/k1LoW/octocov/pull/323
