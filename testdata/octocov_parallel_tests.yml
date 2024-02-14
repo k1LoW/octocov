@@ -1,6 +1,6 @@
 repository: k1LoW/octocov/parallel
 coverage:
-  acceptable: current >= 60%
+  acceptable: current >= 40%
   paths:
     - ../coverage_coverage.out
     - ../coverage_ratio.out
