@@ -5,7 +5,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      time: "8:00"
+      time: "08:00"
       timezone: "Asia/Tokyo"
     commit-message:
       prefix: "chore"
@@ -22,7 +22,7 @@ updates:
           - "*"
     schedule:
       interval: "daily"
-      time: "8:00"
+      time: "08:00"
       timezone: "Asia/Tokyo"
     commit-message:
       prefix: "chore"
