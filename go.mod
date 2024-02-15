@@ -48,7 +48,7 @@ require (
 	golang.org/x/oauth2 v0.17.0
 	golang.org/x/text v0.14.0
 	golang.org/x/tools v0.18.0
-	google.golang.org/api v0.164.0
+	google.golang.org/api v0.165.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
