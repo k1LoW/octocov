@@ -31,9 +31,9 @@ jobs:
       - name: Run tests badge
         run: go test ./badge/... -coverprofile=coverage_badge.out -covermode=count
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-files
+          name: coverage-report-files-pkgs
           path: |
             coverage_coverage.out
             coverage_ratio.out
@@ -56,9 +56,9 @@ jobs:
       - name: Run tests other
         run: go test $(go list ./... | grep -v coverage | grep -v ratio | grep -v badge) -coverprofile=coverage_other.out -covermode=count
 
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-files
+          name: coverage-report-files-other
           path: |
             coverage_other.out
 
@@ -80,9 +80,10 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
-          name: coverage-report-files
+          pattern: coverage-report-files*
+          merge-multiple: true
 
       - name: Build octocov and run as a action
         uses: ./testdata/actions/collect
