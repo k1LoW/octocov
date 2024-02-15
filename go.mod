@@ -3,10 +3,10 @@ module github.com/k1LoW/octocov
 go 1.22.0
 
 require (
-	cloud.google.com/go/bigquery v1.59.0
-	cloud.google.com/go/storage v1.37.0
+	cloud.google.com/go/bigquery v1.59.1
+	cloud.google.com/go/storage v1.38.0
 	github.com/antchfx/xmlquery v1.3.18
-	github.com/aws/aws-sdk-go v1.50.13
+	github.com/aws/aws-sdk-go v1.50.18
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/expr-lang/expr v1.16.0
@@ -40,15 +40,15 @@ require (
 	github.com/samber/lo v1.39.0
 	github.com/shurcooL/githubv4 v0.0.0-20240120211514-18a1ae0e79dc
 	github.com/spf13/cobra v1.8.0
-	github.com/tenntenn/golden v0.4.0
+	github.com/tenntenn/golden v0.5.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/zhangyunhao116/skipmap v0.10.1
 	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3
 	golang.org/x/image v0.15.0
 	golang.org/x/oauth2 v0.17.0
 	golang.org/x/text v0.14.0
-	golang.org/x/tools v0.17.0
-	google.golang.org/api v0.162.0
+	golang.org/x/tools v0.18.0
+	google.golang.org/api v0.164.0
 	gopkg.in/ini.v1 v1.67.0
 )
 

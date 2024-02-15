@@ -19,6 +19,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File: "file_a.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
@@ -27,6 +28,7 @@ func TestExclude(t *testing.T) {
 					},
 					&FileCoverage{
 						File: "file_b.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 0),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 1),
@@ -43,6 +45,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File:    "file_a.go",
+						Type:    TypeLOC,
 						Total:   3,
 						Covered: 2,
 						Blocks: BlockCoverages{
@@ -53,6 +56,7 @@ func TestExclude(t *testing.T) {
 					},
 					&FileCoverage{
 						File:    "file_b.go",
+						Type:    TypeLOC,
 						Total:   3,
 						Covered: 2,
 						Blocks: BlockCoverages{
@@ -70,6 +74,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File: "file_a.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
@@ -78,6 +83,7 @@ func TestExclude(t *testing.T) {
 					},
 					&FileCoverage{
 						File: "file_b.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 0),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 1),
@@ -96,6 +102,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File:    "file_b.go",
+						Type:    TypeLOC,
 						Total:   3,
 						Covered: 2,
 						Blocks: BlockCoverages{
@@ -113,6 +120,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File: "file_a.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
@@ -145,6 +153,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File: "file_a.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 0),
@@ -153,6 +162,7 @@ func TestExclude(t *testing.T) {
 					},
 					&FileCoverage{
 						File: "file_b.go",
+						Type: TypeLOC,
 						Blocks: BlockCoverages{
 							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 0),
 							newBlockCoverage(TypeLOC, 2, -1, 2, -1, -1, 1),
@@ -172,6 +182,7 @@ func TestExclude(t *testing.T) {
 				Files: FileCoverages{
 					&FileCoverage{
 						File:    "file_a.go",
+						Type:    TypeLOC,
 						Total:   3,
 						Covered: 2,
 						Blocks: BlockCoverages{
@@ -182,6 +193,7 @@ func TestExclude(t *testing.T) {
 					},
 					&FileCoverage{
 						File:    "file_b.go",
+						Type:    TypeLOC,
 						Total:   3,
 						Covered: 2,
 						Blocks: BlockCoverages{
