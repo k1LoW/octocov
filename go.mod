@@ -6,10 +6,10 @@ require (
 	cloud.google.com/go/bigquery v1.59.1
 	cloud.google.com/go/storage v1.38.0
 	github.com/antchfx/xmlquery v1.3.18
-	github.com/aws/aws-sdk-go v1.50.18
+	github.com/aws/aws-sdk-go v1.50.20
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/chainguard-dev/git-urls v1.0.2
-	github.com/expr-lang/expr v1.16.0
+	github.com/expr-lang/expr v1.16.1
 	github.com/fatih/color v1.16.0
 	github.com/go-enry/go-enry/v2 v2.8.6
 	github.com/go-git/go-git/v5 v5.11.0
