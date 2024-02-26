@@ -373,7 +373,7 @@ func TestOut(t *testing.T) {
 	}
 }
 
-func TestFileCoveagesTable(t *testing.T) {
+func TestFileCoveragesTable(t *testing.T) {
 	tests := []struct {
 		files []*gh.PullRequestFile
 		want  string
@@ -395,7 +395,7 @@ func TestFileCoveagesTable(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tt := range tests {
-		if got := r.FileCoveagesTable(tt.files); got != tt.want {
+		if got := r.FileCoveragesTable(tt.files); got != tt.want {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 	}
