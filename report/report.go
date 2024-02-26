@@ -183,7 +183,7 @@ func (r *Report) Out(w io.Writer) error {
 	return nil
 }
 
-func (r *Report) FileCoveagesTable(files []*gh.PullRequestFile) string {
+func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if r.Coverage == nil {
 		return ""
 	}

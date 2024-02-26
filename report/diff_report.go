@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/coverage"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/ratio"
 	"github.com/olekukonko/tablewriter"
 )
@@ -250,7 +250,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 	}
 }
 
-func (d *DiffReport) FileCoveagesTable(files []*gh.PullRequestFile) string {
+func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if d.Coverage == nil {
 		return ""
 	}

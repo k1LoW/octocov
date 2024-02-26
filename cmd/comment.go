@@ -69,13 +69,13 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if rPrev != nil {
 		d := r.Compare(rPrev)
 		table = d.Table()
-		fileTable = d.FileCoveagesTable(files)
+		fileTable = d.FileCoveragesTable(files)
 		for _, s := range d.CustomMetrics {
 			customTables = append(customTables, s.Table(), s.MetadataTable())
 		}
 	} else {
 		table = r.Table()
-		fileTable = r.FileCoveagesTable(files)
+		fileTable = r.FileCoveragesTable(files)
 		for _, s := range r.CustomMetrics {
 			customTables = append(customTables, s.Table(), s.MetadataTable())
 		}
