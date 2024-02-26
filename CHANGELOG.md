@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.58.1](https://github.com/k1LoW/octocov/compare/v0.58.0...v0.58.1) - 2024-02-26
+### Fix bug 🐛
+- Fix typo by @furusax0621 in https://github.com/k1LoW/octocov/pull/345
+### Other Changes
+- chore(deps): bump the dependencies group with 1 update by @dependabot in https://github.com/k1LoW/octocov/pull/339
+- Update artifact-action by @k1LoW in https://github.com/k1LoW/octocov/pull/338
+- Fix dependabot schedule by @k1LoW in https://github.com/k1LoW/octocov/pull/341
+- chore(deps): bump the dependencies group with 1 update by @dependabot in https://github.com/k1LoW/octocov/pull/342
+- chore(deps): bump the dependencies group with 2 updates by @dependabot in https://github.com/k1LoW/octocov/pull/343
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/octocov/pull/344
+
 ## [v0.58.0](https://github.com/k1LoW/octocov/compare/v0.57.0...v0.58.0) - 2024-02-14
 ### Breaking Changes 🛠
 - Fix statement type coverage calculation by @furusax0621 in https://github.com/k1LoW/octocov/pull/327
