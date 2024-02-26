@@ -6,12 +6,12 @@ require (
 	cloud.google.com/go/bigquery v1.59.1
 	cloud.google.com/go/storage v1.38.0
 	github.com/antchfx/xmlquery v1.3.18
-	github.com/aws/aws-sdk-go v1.50.20
+	github.com/aws/aws-sdk-go v1.50.25
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/expr-lang/expr v1.16.1
 	github.com/fatih/color v1.16.0
-	github.com/go-enry/go-enry/v2 v2.8.6
+	github.com/go-enry/go-enry/v2 v2.8.7
 	github.com/go-git/go-git/v5 v5.11.0
 	github.com/goark/gnkf v0.7.7
 	github.com/goccy/go-json v0.10.2
@@ -34,7 +34,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mackerelio/mackerel-client-go v0.29.0
 	github.com/mauri870/gcsfs v0.0.0-20240120035028-2326f4c97769
-	github.com/migueleliasweb/go-github-mock v0.0.22
+	github.com/migueleliasweb/go-github-mock v0.0.23
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/samber/lo v1.39.0
@@ -48,7 +48,7 @@ require (
 	golang.org/x/oauth2 v0.17.0
 	golang.org/x/text v0.14.0
 	golang.org/x/tools v0.18.0
-	google.golang.org/api v0.165.0
+	google.golang.org/api v0.167.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -80,13 +80,13 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/flatbuffers v23.5.26+incompatible // indirect
-	github.com/google/go-github/v56 v56.0.0 // indirect
 	github.com/google/go-github/v57 v57.0.0 // indirect
+	github.com/google/go-github/v59 v59.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.7 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.2 // indirect
-	github.com/googleapis/gax-go/v2 v2.12.0 // indirect
+	github.com/googleapis/gax-go/v2 v2.12.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -129,8 +129,8 @@ require (
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240205150955-31a09d347014 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20240205150955-31a09d347014 // indirect
-	google.golang.org/grpc v1.61.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240213162025-012b6fc9bca9 // indirect
+	google.golang.org/grpc v1.61.1 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
