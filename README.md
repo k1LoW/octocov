@@ -334,8 +334,8 @@ Exclude files from the coverage report.
 ``` yaml
 coverage:
   exclude:
-    - 'cmd/*.go'
-    - 'proto/**/*.pb.go'
+    - 'cmd/*.ts'
+    - 'proto/**/*.pb.ts'
 ```
 
 ### `coverage.acceptable:`
