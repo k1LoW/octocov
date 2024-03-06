@@ -6,7 +6,10 @@ require (
 	cloud.google.com/go/bigquery v1.59.1
 	cloud.google.com/go/storage v1.39.0
 	github.com/antchfx/xmlquery v1.3.18
-	github.com/aws/aws-sdk-go v1.50.30
+	github.com/aws/aws-sdk-go-v2 v1.25.2
+	github.com/aws/aws-sdk-go-v2/config v1.27.6
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.16.8
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.51.3
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/expr-lang/expr v1.16.1
@@ -23,7 +26,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hhatto/gocloc v0.5.2
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca
-	github.com/jszwec/s3fs v1.0.0
+	github.com/jszwec/s3fs/v2 v2.0.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/expand v0.11.0
 	github.com/k1LoW/ghfs v1.2.0
@@ -62,6 +65,21 @@ require (
 	github.com/ProtonMail/go-crypto v1.0.0 // indirect
 	github.com/antchfx/xpath v1.2.5 // indirect
 	github.com/apache/arrow/go/v14 v14.0.2 // indirect
+	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.1 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.6 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.15.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.2 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.0 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.11.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.3.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.11.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.17.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.20.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.28.3 // indirect
+	github.com/aws/smithy-go v1.20.1 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.9.0 // indirect
 	github.com/buildkite/interpolate v0.0.0-20200526001904-07f35b4ae251 // indirect
 	github.com/cli/go-gh/v2 v2.5.0 // indirect
