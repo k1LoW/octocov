@@ -1,6 +1,6 @@
 module github.com/k1LoW/octocov
 
-go 1.22.0
+go 1.22.1
 
 require (
 	cloud.google.com/go/bigquery v1.59.1
