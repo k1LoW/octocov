@@ -7,20 +7,29 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3iface"
-	"github.com/jszwec/s3fs"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/jszwec/s3fs/v2"
 	"github.com/k1LoW/octocov/report"
 )
 
+// Client is an interface for S3 client.
+type Client interface {
+	// https://pkg.go.dev/github.com/aws/aws-sdk-go-v2/service/s3#Client.PutObject
+	PutObject(context.Context, *s3.PutObjectInput, ...func(*s3.Options)) (*s3.PutObjectOutput, error)
+	// https://pkg.go.dev/github.com/jszwec/s3fs/v2#Client
+	s3fs.Client
+}
+
+var _ Client = (*s3.Client)(nil)
+
 type S3 struct {
-	client s3iface.S3API
+	client Client
 	bucket string
 	prefix string
 }
 
-func New(client s3iface.S3API, bucket, prefix string) (*S3, error) {
+func New(client Client, bucket, prefix string) (*S3, error) {
 	return &S3{
 		client: client,
 		bucket: bucket,
@@ -35,7 +44,7 @@ func (s *S3) StoreReport(ctx context.Context, r *report.Report) error {
 
 func (s *S3) Put(ctx context.Context, path string, content []byte) error {
 	key := filepath.Join(s.prefix, path)
-	_, err := s.client.PutObject(&s3.PutObjectInput{
+	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        &s.bucket,
 		Key:           &key,
 		Body:          bytes.NewReader(content),

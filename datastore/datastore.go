@@ -11,10 +11,9 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/k1LoW/octocov/datastore/artifact"
 	"github.com/k1LoW/octocov/datastore/bq"
 	"github.com/k1LoW/octocov/datastore/gcs"
@@ -100,22 +99,16 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 	case S3:
 		bucket := args[0]
 		prefix := args[1]
-		region, err := s3manager.GetBucketRegion(
-			ctx,
-			session.Must(session.NewSession()),
-			bucket,
-			"us-east-1",
-		)
+		cfg, err := config.LoadDefaultConfig(ctx)
 		if err != nil {
 			return nil, err
 		}
-		sess, err := session.NewSession(&aws.Config{
-			Region: aws.String(region),
-		})
+		region, err := manager.GetBucketRegion(ctx, s3.NewFromConfig(cfg), bucket)
 		if err != nil {
 			return nil, err
 		}
-		sc := s3.New(sess)
+		cfg.Region = region
+		sc := s3.NewFromConfig(cfg)
 		return s3d.New(sc, bucket, prefix)
 	case GCS:
 		bucket := args[0]
