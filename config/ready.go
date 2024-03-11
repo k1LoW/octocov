@@ -26,6 +26,16 @@ func (c *Config) CoverageConfigReady() error {
 	return nil
 }
 
+func (c *Config) CoverageConfigReadyOnLocal() error {
+	if c.Coverage == nil {
+		return errors.New("coverage: is not set")
+	}
+	if len(c.Coverage.Paths) == 0 {
+		return errors.New("coverage.paths: is not set")
+	}
+	return nil
+}
+
 func (c *Config) CodeToTestRatioConfigReady() error {
 	if c.CodeToTestRatio == nil {
 		return errors.New("codeToTestRatio: is not set")

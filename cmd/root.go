@@ -507,7 +507,7 @@ func printMetrics(cmd *cobra.Command) error {
 		return err
 	}
 
-	if err := c.CoverageConfigReady(); err == nil {
+	if err := c.CoverageConfigReadyOnLocal(); err == nil {
 		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 		}
