@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.59.0](https://github.com/k1LoW/octocov/compare/v0.58.1...v0.59.0) - 2024-03-11
+### Breaking Changes 🛠
+- Mitigate conditions for local coverage display. by @k1LoW in https://github.com/k1LoW/octocov/pull/351
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/octocov/pull/346
+- Update go and pkg version by @k1LoW in https://github.com/k1LoW/octocov/pull/349
+- Migrate to AWS SDK Go V2 by @furusax0621 in https://github.com/k1LoW/octocov/pull/348
+- chore(deps): bump the dependencies group with 9 updates by @dependabot in https://github.com/k1LoW/octocov/pull/350
+
 ## [v0.58.1](https://github.com/k1LoW/octocov/compare/v0.58.0...v0.58.1) - 2024-02-26
 ### Fix bug 🐛
 - Fix typo by @furusax0621 in https://github.com/k1LoW/octocov/pull/345
