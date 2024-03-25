@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.59.1](https://github.com/k1LoW/octocov/compare/v0.59.0...v0.59.1) - 2024-03-25
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/octocov/pull/352
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/354
+
 ## [v0.59.0](https://github.com/k1LoW/octocov/compare/v0.58.1...v0.59.0) - 2024-03-11
 ### Breaking Changes 🛠
 - Mitigate conditions for local coverage display. by @k1LoW in https://github.com/k1LoW/octocov/pull/351
