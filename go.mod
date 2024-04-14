@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.53.1
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/chainguard-dev/git-urls v1.0.2
-	github.com/expr-lang/expr v1.16.3
+	github.com/expr-lang/expr v1.16.4
 	github.com/fatih/color v1.16.0
 	github.com/go-enry/go-enry/v2 v2.8.7
 	github.com/go-git/go-git/v5 v5.12.0
