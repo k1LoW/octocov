@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.59.3](https://github.com/k1LoW/octocov/compare/v0.59.2...v0.59.3) - 2024-04-24
+
 ## [v0.59.2](https://github.com/k1LoW/octocov/compare/v0.59.1...v0.59.2) - 2024-04-24
 ### Fix bug 🐛
 - Fix typo by @sapuri in https://github.com/k1LoW/octocov/pull/361
