@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.59.2](https://github.com/k1LoW/octocov/compare/v0.59.1...v0.59.2) - 2024-04-24
+### Fix bug 🐛
+- Fix typo by @sapuri in https://github.com/k1LoW/octocov/pull/361
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/356
+- chore(deps): bump github.com/expr-lang/expr from 1.16.3 to 1.16.4 in the dependencies group by @dependabot in https://github.com/k1LoW/octocov/pull/359
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/octocov/pull/360
+
 ## [v0.59.1](https://github.com/k1LoW/octocov/compare/v0.59.0...v0.59.1) - 2024-04-09
 ### Other Changes
 - chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/octocov/pull/352
