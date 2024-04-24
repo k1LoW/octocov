@@ -32,7 +32,7 @@ import (
 )
 
 const DefaultGithubServerURL = "https://github.com"
-const maxCopySize = 1073741824 //1GB
+const maxCopySize = 1073741824 // 1GB
 
 var octocovNameRe = regexp.MustCompile(`(?i)(octocov|coverage)`)
 
@@ -203,7 +203,7 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 			return jobs.Jobs[0].GetID(), nil
 		}
 		for _, j := range jobs.Jobs {
-			if j.GetName() == os.Getenv("GTIHUB_JOB") {
+			if j.GetName() == os.Getenv("GITHUB_JOB") {
 				return j.GetID(), nil
 			}
 			for _, s := range j.Steps {
