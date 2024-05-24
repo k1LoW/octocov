@@ -134,20 +134,20 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 	if d.Coverage != nil {
 		{
 			dd := d.Coverage.Diff
-			ds := fmt.Sprintf("%.1f%%", dd)
+			ds := fmt.Sprintf("%.1f%%", floor1(dd))
 			cc := tablewriter.Colors{}
 			if dd > 0 {
-				ds = fmt.Sprintf("+%.1f%%", dd)
+				ds = fmt.Sprintf("+%.1f%%", floor1(dd))
 				cc = g
 			} else if dd < 0 {
-				ds = fmt.Sprintf("%.1f%%", dd)
+				ds = fmt.Sprintf("%.1f%%", floor1(dd))
 				cc = r
 			}
 			t := "Coverage"
 			if !detail {
 				t = "**Coverage**"
 			}
-			table.Rich([]string{t, fmt.Sprintf("%.1f%%", d.Coverage.B), fmt.Sprintf("%.1f%%", d.Coverage.A), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+			table.Rich([]string{t, fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
@@ -181,22 +181,22 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 	}
 	if d.CodeToTestRatio != nil {
 		dd := d.CodeToTestRatio.Diff
-		ds := fmt.Sprintf("%.1f", dd)
+		ds := fmt.Sprintf("%.1f", floor1(dd))
 		cc := tablewriter.Colors{}
 		if dd > 0 {
-			ds = fmt.Sprintf("+%.1f", dd)
+			ds = fmt.Sprintf("+%.1f", floor1(dd))
 			cc = g
 		} else if dd < 0 {
-			ds = fmt.Sprintf("%.1f", dd)
+			ds = fmt.Sprintf("%.1f", floor1(dd))
 			cc = r
 		}
 		ratioA := "-"
 		ratioB := "-"
 		if d.CodeToTestRatio.RatioA != nil && (d.CodeToTestRatio.RatioA.Code != 0 || d.CodeToTestRatio.RatioA.Test != 0) {
-			ratioA = fmt.Sprintf("1:%.1f", d.CodeToTestRatio.A)
+			ratioA = fmt.Sprintf("1:%.1f", floor1(d.CodeToTestRatio.A))
 		}
 		if d.CodeToTestRatio.RatioB != nil && (d.CodeToTestRatio.RatioB.Code != 0 || d.CodeToTestRatio.RatioB.Test != 0) {
-			ratioB = fmt.Sprintf("1:%.1f", d.CodeToTestRatio.B)
+			ratioB = fmt.Sprintf("1:%.1f", floor1(d.CodeToTestRatio.B))
 		}
 		t := "Code to Test Ratio"
 		if !detail {
@@ -266,9 +266,9 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 			continue
 		}
 		exist = true
-		diff := fmt.Sprintf("%.1f%%", fc.Diff)
+		diff := fmt.Sprintf("%.1f%%", floor1(fc.Diff))
 		if fc.Diff > 0 {
-			diff = fmt.Sprintf("+%.1f%%", fc.Diff)
+			diff = fmt.Sprintf("+%.1f%%", floor1(fc.Diff))
 		}
 		if fc.FileCoverageA != nil {
 			c += fc.FileCoverageA.Covered
@@ -278,7 +278,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 			pc += fc.FileCoverageB.Covered
 			pt += fc.FileCoverageB.Total
 		}
-		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", fc.A), diff})
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", floor1(fc.A)), diff})
 	}
 	if !exist {
 		return ""
@@ -292,7 +292,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 		prevAll = 0.0
 	}
 	arrow := "→"
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", prevAll, arrow, coverAll)
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", floor1(prevAll), arrow, floor1(coverAll))
 	buf := new(bytes.Buffer)
 	buf.WriteString(fmt.Sprintf("%s\n\n", title))
 

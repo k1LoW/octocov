@@ -25,6 +25,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -89,7 +90,7 @@ var badgeCmd = &cobra.Command{
 				return err
 			}
 			cp := r.CoveragePercent()
-			b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
+			b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
 			b.MessageColor = c.CoverageColor(cp)
 			if err := b.AddIcon(internal.Icon); err != nil {
 				return err
@@ -108,7 +109,7 @@ var badgeCmd = &cobra.Command{
 				return err
 			}
 			tr := r.CodeToTestRatioRatio()
-			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
+			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
 			b.MessageColor = c.CodeToTestRatioColor(tr)
 			if err := b.AddIcon(internal.Icon); err != nil {
 				return err
@@ -146,4 +147,9 @@ func init() {
 	rootCmd.AddCommand(badgeCmd)
 	badgeCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	badgeCmd.Flags().StringVarP(&outPath, "out", "", "", "output file path")
+}
+
+// floor1 round down to one decimal place.
+func floor1(v float64) float64 {
+	return math.Floor(v*10) / 10
 }

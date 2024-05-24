@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -142,7 +143,7 @@ func (c *Central) generateBadges() ([]string, error) {
 		cp := r.CoveragePercent()
 		bp := filepath.Join(r.Repository, "coverage.svg")
 		out := new(bytes.Buffer)
-		b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
+		b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
 		b.MessageColor = c.config.CoverageColor(cp)
 		if err := b.AddIcon(internal.Icon); err != nil {
 			return nil, err
@@ -157,7 +158,7 @@ func (c *Central) generateBadges() ([]string, error) {
 			tr := r.CodeToTestRatioRatio()
 			bp := filepath.Join(r.Repository, "ratio.svg")
 			out := new(bytes.Buffer)
-			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
+			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
 			b.MessageColor = c.config.CodeToTestRatioColor(tr)
 			if err := b.AddIcon(internal.Icon); err != nil {
 				return nil, err
@@ -282,13 +283,13 @@ func (c *Central) renderIndex(wr io.Writer) error {
 func funcs() map[string]any {
 	return template.FuncMap{
 		"coverage": func(r *report.Report) string {
-			return fmt.Sprintf("%.1f%%", r.CoveragePercent())
+			return fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent()))
 		},
 		"ratio": func(r *report.Report) string {
 			if r.CodeToTestRatio == nil {
 				return "-"
 			}
-			return fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())
+			return fmt.Sprintf("1:%.1f", floor1(r.CodeToTestRatioRatio()))
 		},
 		"time": func(r *report.Report) string {
 			if r.TestExecutionTime == nil {
@@ -297,4 +298,9 @@ func funcs() map[string]any {
 			return time.Duration(r.TestExecutionTimeNano()).String()
 		},
 	}
+}
+
+// floor1 round down to one decimal place.
+func floor1(v float64) float64 {
+	return math.Floor(v*10) / 10
 }

@@ -163,29 +163,38 @@ func TestCoverageAcceptable(t *testing.T) {
 		cov     float64
 		prev    float64
 		wantErr bool
+		errMsg  string
 	}{
-		{"60%", 50.0, 0, true},
-		{"50%", 50.0, 0, false},
-		{"49.9%", 50.0, 0, false},
-		{"49.9", 50.0, 0, false},
-		{">= 60%", 50.0, 0, true},
-		{">= 50%", 50.0, 0, false},
-		{">= 49.9%", 50.0, 0, false},
-		{">= 49.9", 50.0, 0, false},
-		{">=60%", 50.0, 0, true},
-		{">=50%", 50.0, 0, false},
-		{">=49.9%", 50.0, 0, false},
-		{">=49.9", 50.0, 0, false},
+		{"60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`60%`)"},
+		{"50%", 50.0, 0, false, ""},
+		{"49.9%", 50.0, 0, false, ""},
+		{"49.9", 50.0, 0, false, ""},
+		{">= 60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`>= 60%`)"},
+		{">= 50%", 50.0, 0, false, ""},
+		{">= 49.9%", 50.0, 0, false, ""},
+		{">= 49.9", 50.0, 0, false, ""},
+		{">= 49.9%", 49.9, 0, false, ""},
+		{">= 49.9", 49.9, 0, false, ""},
+		{"> 49.9", 49.9, 0, true, "code coverage is 49.9%. the condition in the `coverage.acceptable:` section is not met (`> 49.9`)"},
+		{">=60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`>=60%`)"},
+		{">=50%", 50.0, 0, false, ""},
+		{">=49.9%", 50.0, 0, false, ""},
+		{">=49.9", 50.0, 0, false, ""},
 
-		{"current >= 60%", 50.0, 0, true},
-		{"current > prev", 50.0, 49.0, false},
-		{"diff >= 0", 50.0, 49.0, false},
-		{"current >= 50% && diff >= 0%", 50.0, 49.0, false},
+		{"current >= 60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
+		{"current >= 60%", 59.9, 0, true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
+		{"current >= 60%", 59.99, 0, true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
+		{"current > prev", 50.0, 49.0, false, ""},
+		{"diff >= 0", 50.0, 49.0, false, ""},
+		{"current >= 50% && diff >= 0%", 50.0, 49.0, false, ""},
 	}
 	for _, tt := range tests {
 		if err := coverageAcceptable(tt.cov, tt.prev, tt.cond); err != nil {
 			if !tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+			}
+			if err.Error() != tt.errMsg {
+				t.Errorf("got %v\nwant %v", err.Error(), tt.errMsg)
 			}
 		} else {
 			if tt.wantErr {
