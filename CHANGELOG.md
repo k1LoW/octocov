@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.60.0](https://github.com/k1LoW/octocov/compare/v0.59.3...v0.60.0) - 2024-05-24
+### Breaking Changes 🛠
+- All numbers are displayed rounded down to one decimal place. by @k1LoW in https://github.com/k1LoW/octocov/pull/371
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot in https://github.com/k1LoW/octocov/pull/363
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/octocov/pull/365
+- Bump up go version by @k1LoW in https://github.com/k1LoW/octocov/pull/367
+- chore(deps): bump the dependencies group with 7 updates by @dependabot in https://github.com/k1LoW/octocov/pull/366
+- chore(deps): bump the dependencies group with 7 updates by @dependabot in https://github.com/k1LoW/octocov/pull/369
+
 ## [v0.59.3](https://github.com/k1LoW/octocov/compare/v0.59.2...v0.59.3) - 2024-04-24
 
 ## [v0.59.2](https://github.com/k1LoW/octocov/compare/v0.59.1...v0.59.2) - 2024-04-24
