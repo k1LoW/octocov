@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -264,7 +265,7 @@ func coverageAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", current, org)
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(current), org)
 	}
 	return nil
 }
@@ -294,7 +295,7 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 	}
 
 	if !ok.(bool) {
-		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", current, org)
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", floor1(current), org)
 	}
 	return nil
 }
@@ -465,4 +466,9 @@ func envMap() map[string]string {
 		m[k] = parts[1]
 	}
 	return m
+}
+
+// floor1 round down to one decimal place.
+func floor1(v float64) float64 {
+	return math.Floor(v*10) / 10
 }

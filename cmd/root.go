@@ -231,7 +231,7 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, bp)
 
-				b := badge.New("coverage", fmt.Sprintf("%.1f%%", cp))
+				b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
 				b.MessageColor = c.CoverageColor(cp)
 				if err := b.AddIcon(internal.Icon); err != nil {
 					return err
@@ -265,7 +265,7 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, bp)
 
-				b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", tr))
+				b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
 				b.MessageColor = c.CodeToTestRatioColor(tr)
 				if err := b.AddIcon(internal.Icon); err != nil {
 					return err

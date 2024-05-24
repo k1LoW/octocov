@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -120,11 +121,11 @@ func (r *Report) Table() string {
 	)
 	if r.IsMeasuredCoverage() {
 		h = append(h, "Coverage")
-		m = append(m, fmt.Sprintf("%.1f%%", r.CoveragePercent()))
+		m = append(m, fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent())))
 	}
 	if r.IsMeasuredCodeToTestRatio() {
 		h = append(h, "Code to Test Ratio")
-		m = append(m, fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio()))
+		m = append(m, fmt.Sprintf("1:%.1f", floor1(r.CodeToTestRatioRatio())))
 	}
 	if r.IsMeasuredTestExecutionTime() {
 		h = append(h, "Test Execution Time")
@@ -156,11 +157,11 @@ func (r *Report) Out(w io.Writer) error {
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT})
 
 	if r.IsMeasuredCoverage() {
-		table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", r.CoveragePercent())}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+		table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent()))}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
 	if r.IsMeasuredCodeToTestRatio() {
-		table.Rich([]string{"Code to Test Ratio", fmt.Sprintf("1:%.1f", r.CodeToTestRatioRatio())}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+		table.Rich([]string{"Code to Test Ratio", fmt.Sprintf("1:%.1f", floor1(r.CodeToTestRatioRatio()))}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 	}
 
 	if r.IsMeasuredTestExecutionTime() {
@@ -205,7 +206,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 		if fc.Total == 0 {
 			cover = 0.0
 		}
-		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", cover)})
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", floor1(cover))})
 	}
 	if !exist {
 		return ""
@@ -214,7 +215,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if t == 0 {
 		coverAll = 0.0
 	}
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%)", coverAll)
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%)", floor1(coverAll))
 
 	buf := new(bytes.Buffer)
 	buf.WriteString(fmt.Sprintf("%s\n\n", title))
@@ -572,7 +573,7 @@ func (r *Report) convertFormat(v any) string {
 		if isInt(vv) {
 			return fmt.Sprintf("%d", int(vv))
 		}
-		return fmt.Sprintf("%.1f", vv)
+		return fmt.Sprintf("%.1f", floor1(vv))
 	default:
 		panic(fmt.Errorf("convert format error .Unknown type:%v", vv))
 	}
@@ -690,4 +691,9 @@ func challengeParseReport(path string) (*coverage.Coverage, string, error) {
 	log.Println(msg)
 
 	return nil, "", errors.New(msg)
+}
+
+// floor1 round down to one decimal place.
+func floor1(v float64) float64 {
+	return math.Floor(v*10) / 10
 }

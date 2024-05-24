@@ -313,14 +313,14 @@ func TestTable(t *testing.T) {
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
 			`| Coverage |
 |---------:|
-| 68.5%    |
+| 68.4%    |
 `,
 		},
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
 			`| Coverage | Code to Test Ratio | Test Execution Time |
 |---------:|-------------------:|--------------------:|
-| 68.5%    | 1:0.5              | 4m40s               |
+| 68.4%    | 1:0.5              | 4m40s               |
 `,
 		},
 	}
@@ -348,11 +348,11 @@ func TestOut(t *testing.T) {
 	}{
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
-			"            master (896d3c5)  \n------------------------------\n  \x1b[1mCoverage\x1b[0m             68.5%  \n",
+			"            master (896d3c5)  \n------------------------------\n  \x1b[1mCoverage\x1b[0m             68.4%  \n",
 		},
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
-			"                       master (896d3c5)  \n-----------------------------------------\n  \x1b[1mCoverage\x1b[0m                        68.5%  \n  \x1b[1mCode to Test Ratio\x1b[0m              1:0.5  \n  \x1b[1mTest Execution Time\x1b[0m             4m40s  \n",
+			"                       master (896d3c5)  \n-----------------------------------------\n  \x1b[1mCoverage\x1b[0m                        68.4%  \n  \x1b[1mCode to Test Ratio\x1b[0m              1:0.5  \n  \x1b[1mTest Execution Time\x1b[0m             4m40s  \n",
 		},
 	}
 	for _, tt := range tests {
@@ -381,11 +381,11 @@ func TestFileCoveragesTable(t *testing.T) {
 		{[]*gh.PullRequestFile{}, ""},
 		{
 			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go"}},
-			`### Code coverage of files in pull request scope (41.7%)
+			`### Code coverage of files in pull request scope (41.6%)
 
 |                                  Files                                  | Coverage |
 |-------------------------------------------------------------------------|---------:|
-| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.7%    |
+| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.6%    |
 `,
 		},
 	}
