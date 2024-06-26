@@ -47,7 +47,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/zhangyunhao116/skipmap v0.10.1
 	golang.org/x/exp v0.0.0-20240213143201-ec583247a57a
-	golang.org/x/image v0.17.0
+	golang.org/x/image v0.18.0
 	golang.org/x/oauth2 v0.21.0
 	golang.org/x/text v0.16.0
 	golang.org/x/tools v0.22.0
