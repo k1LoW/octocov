@@ -39,6 +39,7 @@ jobs:
         with:
           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
           check-latest: true
+          cache: false
           go-package: ./...
 
       - name: Run gostyle
