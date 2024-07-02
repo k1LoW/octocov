@@ -92,6 +92,28 @@ func TestMeasureCoverage(t *testing.T) {
 		},
 		{
 			[]string{
+				filepath.Join(coverageTestdataDir(t), "**", "*.out"),
+			},
+			1,
+			false,
+		},
+		{
+			[]string{
+				filepath.Join(coverageTestdataDir(t), "**", "*.info"),
+				filepath.Join(coverageTestdataDir(t), "**", "*.out"),
+			},
+			2,
+			false,
+		},
+		{
+			[]string{
+				filepath.Join(coverageTestdataDir(t), "..", "**", "*.info"),
+			},
+			1,
+			false,
+		},
+		{
+			[]string{
 				filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
 			},
 			1,
@@ -107,21 +129,23 @@ func TestMeasureCoverage(t *testing.T) {
 			true,
 		},
 	}
-	for _, tt := range tests {
-		r := &Report{}
-		if err := r.MeasureCoverage(tt.paths, nil); err != nil {
-			if !tt.wantErr {
-				t.Error(err)
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("%v", i), func(t *testing.T) {
+			r := &Report{}
+			if err := r.MeasureCoverage(tt.paths, nil); err != nil {
+				if !tt.wantErr {
+					t.Error(err)
+				}
+				return
 			}
-			continue
-		}
-		if tt.wantErr {
-			t.Error("want error")
-		}
-		got := len(r.covPaths)
-		if got != tt.want {
-			t.Errorf("got %v\nwant %v", got, tt.want)
-		}
+			if tt.wantErr {
+				t.Error("want error")
+			}
+			got := len(r.covPaths)
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 
