@@ -1,5 +1,21 @@
 # Changelog
 
+## [v0.61.0](https://github.com/k1LoW/octocov/compare/v0.60.0...v0.61.0) - 2024-07-02
+### Breaking Changes 🛠
+- Update go-github-actions by @k1LoW in https://github.com/k1LoW/octocov/pull/384
+### New Features 🎉
+- Support wildcard paths in `coverage.paths:` by @k1LoW in https://github.com/k1LoW/octocov/pull/388
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/octocov/pull/372
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/octocov/pull/375
+- chore(deps): bump the dependencies group with 10 updates by @dependabot in https://github.com/k1LoW/octocov/pull/377
+- Use goreleaser v2 by @k1LoW in https://github.com/k1LoW/octocov/pull/378
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/octocov/pull/379
+- chore(deps): bump docker/build-push-action from 5 to 6 in the dependencies group by @dependabot in https://github.com/k1LoW/octocov/pull/380
+- chore(deps): bump the dependencies group with 5 updates by @dependabot in https://github.com/k1LoW/octocov/pull/381
+- chore(deps): bump golang.org/x/image from 0.17.0 to 0.18.0 by @dependabot in https://github.com/k1LoW/octocov/pull/382
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot in https://github.com/k1LoW/octocov/pull/386
+
 ## [v0.60.0](https://github.com/k1LoW/octocov/compare/v0.59.3...v0.60.0) - 2024-05-24
 ### Breaking Changes 🛠
 - All numbers are displayed rounded down to one decimal place. by @k1LoW in https://github.com/k1LoW/octocov/pull/371
