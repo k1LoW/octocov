@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/goccy/go-json"
 	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/octocov/config"
@@ -298,11 +299,18 @@ func (r *Report) Load(path string) error {
 	return nil
 }
 
-func (r *Report) MeasureCoverage(paths, exclude []string) error {
-	if len(paths) == 0 {
-		return fmt.Errorf("coverage report not found: %s", paths)
+func (r *Report) MeasureCoverage(patterns, exclude []string) error {
+	if len(patterns) == 0 {
+		return fmt.Errorf("coverage report not found: %s", patterns)
 	}
-
+	var paths []string
+	for _, pattern := range patterns {
+		p, err := doublestar.FilepathGlob(pattern)
+		if err != nil {
+			return err
+		}
+		paths = append(paths, p...)
+	}
 	var cerr *multierror.Error
 	for _, path := range paths {
 		cov, rp, err := challengeParseReport(path)
