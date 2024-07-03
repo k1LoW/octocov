@@ -66,6 +66,7 @@ jobs:
           MACKEREL_API_KEY: ${{ secrets.MACKEREL_API_KEY }}
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_1: ./testdata/custom_metrics/benchmark_1.json
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_0: ./testdata/custom_metrics/benchmark_0.json
+          GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
 
       - name: Show rate limit
         run: |

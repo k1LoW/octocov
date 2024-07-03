@@ -76,6 +76,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up Go
+        id: setup-go
         uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -87,3 +88,5 @@ jobs:
 
       - name: Build octocov and run as a action
         uses: ./testdata/actions/collect
+        env:
+          GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
