@@ -31,6 +31,8 @@ jobs:
       - name: Run lint
         uses: reviewdog/action-golangci-lint@v2
         with:
+          go_version_file: go.mod
+          cache: false
           fail_on_error: true
           golangci_lint_flags: --timeout=5m
 
