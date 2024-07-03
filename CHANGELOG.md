@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.61.1](https://github.com/k1LoW/octocov/compare/v0.61.0...v0.61.1) - 2024-07-03
+### Other Changes
+- Update go version by @k1LoW in https://github.com/k1LoW/octocov/pull/389
+
 ## [v0.61.0](https://github.com/k1LoW/octocov/compare/v0.60.0...v0.61.0) - 2024-07-02
 ### Breaking Changes 🛠
 - Update go-github-actions by @k1LoW in https://github.com/k1LoW/octocov/pull/384
