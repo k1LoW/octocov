@@ -33,5 +33,5 @@
 	vPrefix = true
 	releaseBranch = main
 	release = draft
-	versionFile = version/version.go,testdata/actions/collect/Dockerfile,testdata/actions/coverage/Dockerfile
+	versionFile = version/version.go
 	command = "make prerelease_for_tagpr"
