@@ -1,3 +1,3 @@
-FROM golang:latest
+FROM golang:1.22.5
 
 ENTRYPOINT ["env", "GOPATH=/go", "GOROOT=", "go", "run", "main.go"]
