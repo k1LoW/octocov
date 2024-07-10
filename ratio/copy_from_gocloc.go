@@ -26,9 +26,9 @@ var shebang2ext = map[string]string{
 	"escript": "erl",
 }
 
-func getShebang(line string) (shebangLang string, ok bool) {
+func getShebang(line string) (shebangLang string, ok bool) { //nostyle:getters
 	ret := reShebangEnv.FindAllStringSubmatch(line, -1)
-	if ret != nil && len(ret[0]) == 3 {
+	if ret != nil && len(ret[0]) == 3 { //nostyle:nilslices
 		shebangLang = ret[0][2]
 		if sl, ok := shebang2ext[shebangLang]; ok {
 			return sl, ok
@@ -37,7 +37,7 @@ func getShebang(line string) (shebangLang string, ok bool) {
 	}
 
 	ret = reShebangLang.FindAllStringSubmatch(line, -1)
-	if ret != nil && len(ret[0]) >= 2 {
+	if ret != nil && len(ret[0]) >= 2 { //nostyle:nilslices
 		shebangLang = ret[0][1]
 		if sl, ok := shebang2ext[shebangLang]; ok {
 			return sl, ok
@@ -48,7 +48,7 @@ func getShebang(line string) (shebangLang string, ok bool) {
 	return "", false
 }
 
-func getFileTypeByShebang(path string) (shebangLang string, ok bool) {
+func getFileTypeByShebang(path string) (shebangLang string, ok bool) { //nostyle:getters
 	f, err := os.Open(path)
 	if err != nil {
 		return // ignore error
@@ -68,7 +68,7 @@ func getFileTypeByShebang(path string) (shebangLang string, ok bool) {
 	return
 }
 
-func getFileType(path string) (ext string, ok bool) {
+func getFileType(path string) (ext string, ok bool) { //nostyle:getters
 	ext = filepath.Ext(path)
 	base := filepath.Base(path)
 

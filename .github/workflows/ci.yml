@@ -49,6 +49,7 @@ jobs:
         with:
           go-version-input: '${{ steps.setup-go.outputs.go-version }}'
           fail-on-error: true
+          config-file: .gostyle.yml
 
       - name: Run tests
         run: make ci
