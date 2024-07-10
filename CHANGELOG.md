@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.62.0](https://github.com/k1LoW/octocov/compare/v0.61.1...v0.62.0) - 2024-07-10
+### Breaking Changes 🛠
+- Always count by LOC when merging multiple coverage. by @k1LoW in https://github.com/k1LoW/octocov/pull/395
+### Other Changes
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/octocov/pull/396
+- chore(deps): bump google.golang.org/grpc from 1.64.0 to 1.64.1 by @dependabot in https://github.com/k1LoW/octocov/pull/393
+
 ## [v0.61.1](https://github.com/k1LoW/octocov/compare/v0.61.0...v0.61.1) - 2024-07-03
 ### Other Changes
 - Update go version by @k1LoW in https://github.com/k1LoW/octocov/pull/389
