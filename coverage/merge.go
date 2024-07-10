@@ -2,12 +2,13 @@ package coverage
 
 func (c *Coverage) Merge(c2 *Coverage) error {
 	if c2 == nil {
-		c2 = &Coverage{}
+		return c.reCalc()
 	}
 	// Type
 	switch {
 	case c2.Type == "":
 	case c.Type != TypeLOC || c2.Type != TypeLOC:
+		// If either is not LOC, merge as Merged
 		c.Type = TypeMerged
 	}
 	// Files
@@ -17,6 +18,7 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			if fc2.Type != fc.Type {
 				fc.Type = TypeMerged
 			}
+			// Merged coverage should be counted as LOC as duplicate blocks may be stacked.
 			fc.Blocks = append(fc.Blocks, fc2.Blocks...)
 		} else {
 			c.Files = append(c.Files, fc2)
@@ -31,13 +33,13 @@ func (c *Coverage) reCalc() error {
 	for _, f := range c.Files {
 		var fileTotal, fileCovered int
 
-		switch f.Type {
+		switch c.Type {
 		case TypeLOC, TypeMerged:
 			lcs := f.Blocks.ToLineCoverages()
 			fileTotal = lcs.Total()
 			fileCovered = lcs.Covered()
 
-		case TypeStmt:
+		case TypeStmt: // Coverage of a single unmerged TypeStmt.
 			for _, b := range f.Blocks {
 				fileTotal += *b.NumStmt
 				if *b.Count > 0 {
