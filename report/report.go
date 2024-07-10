@@ -583,7 +583,7 @@ func (r *Report) convertFormat(v any) string {
 		}
 		return fmt.Sprintf("%.1f", floor1(vv))
 	default:
-		panic(fmt.Errorf("convert format error .Unknown type:%v", vv))
+		panic(fmt.Errorf("convert format error .Unknown type:%v", vv)) //nostyle:dontpanic
 	}
 }
 

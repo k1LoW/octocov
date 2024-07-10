@@ -49,7 +49,7 @@ func (l *Local) Put(ctx context.Context, path string, content []byte) error {
 			return err
 		}
 	}
-	return os.WriteFile(p, content, os.ModePerm)
+	return os.WriteFile(p, content, os.ModePerm) // #nosec
 }
 
 func (l *Local) FS() (fs.FS, error) {

@@ -451,7 +451,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if err := os.WriteFile(rp, r.Bytes(), os.ModePerm); err != nil {
+				if err := os.WriteFile(rp, r.Bytes(), os.ModePerm); err != nil { //nolint:gosec
 					return err
 				}
 				addPaths = append(addPaths, rp)

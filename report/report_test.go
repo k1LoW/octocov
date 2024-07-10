@@ -249,7 +249,7 @@ func TestCollectCustomMetrics(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					if err := os.WriteFile(filepath.Join(testdataDir(t), "custom_metrics", fmt.Sprintf("%s.json", m.Key)), b, os.ModePerm); err != nil {
+					if err := os.WriteFile(filepath.Join(testdataDir(t), "custom_metrics", fmt.Sprintf("%s.json", m.Key)), b, 0600); err != nil {
 						t.Fatal(err)
 					}
 				}
