@@ -307,6 +307,14 @@ In case of monorepo, code metrics can be reported to datastore separately by spe
 repository: k1LoW/octocov
 ```
 
+### `timeout:`
+
+Timeout for octocov execution. (default: `30sec`)
+
+``` yaml
+timeout: 5min
+```
+
 ### `coverage:`
 
 Configuration for code coverage.
