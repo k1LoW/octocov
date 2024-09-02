@@ -58,7 +58,7 @@ jobs:
         name: Run tests with coverage report output
         run: go test ./... -coverprofile=coverage.out
       -
-        uses: k1LoW/octocov-action@v0
+        uses: k1LoW/octocov-action@v1
 ```
 
 Then, octocov comment the report of the code metrics to the pull request.
