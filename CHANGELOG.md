@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.62.2](https://github.com/k1LoW/octocov/compare/v0.62.1...v0.62.2) - 2024-10-07
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 16 updates by @dependabot in https://github.com/k1LoW/octocov/pull/414
+
 ## [v0.62.1](https://github.com/k1LoW/octocov/compare/v0.62.0...v0.62.1) - 2024-09-02
 ### Other Changes
 - docs(README): use k1LoW/octocov-action@v1 by @azu in https://github.com/k1LoW/octocov/pull/408
