@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.62.2](https://github.com/k1LoW/octocov/compare/v0.62.1...v0.62.2) - 2024-11-25
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 16 updates by @dependabot in https://github.com/k1LoW/octocov/pull/414
+- chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.0 to 4.5.1 by @dependabot in https://github.com/k1LoW/octocov/pull/421
+- chore(deps): bump the dependencies group across 1 directory with 18 updates by @dependabot in https://github.com/k1LoW/octocov/pull/425
+
 ## [v0.62.1](https://github.com/k1LoW/octocov/compare/v0.62.0...v0.62.1) - 2024-09-02
 ### Other Changes
 - docs(README): use k1LoW/octocov-action@v1 by @azu in https://github.com/k1LoW/octocov/pull/408
