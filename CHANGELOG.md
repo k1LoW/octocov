@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.62.4](https://github.com/k1LoW/octocov/compare/v0.62.3...v0.62.4) - 2024-12-19
+### Other Changes
+- Update pkgs by @k1LoW in https://github.com/k1LoW/octocov/pull/433
+- chore(deps): bump the dependencies group across 1 directory with 2 updates by @dependabot in https://github.com/k1LoW/octocov/pull/434
+
 ## [v0.62.3](https://github.com/k1LoW/octocov/compare/v0.62.2...v0.62.3) - 2024-11-27
 ### Other Changes
 - chore(deps): bump github.com/cli/go-gh/v2 from 2.6.0 to 2.11.1 by @dependabot in https://github.com/k1LoW/octocov/pull/426
