@@ -575,6 +575,15 @@ comment:
   hideFooterLink: true
 ```
 
+### `comment.disableDetails:`
+
+Disable details tag for report.
+
+``` yaml
+comment:
+  disableDetails: true
+```
+
 ### `comment.deletePrevious:`
 
 Delete previous code metrics report comments instead of hiding them
@@ -609,6 +618,15 @@ summary:
   hideFooterLink: true
 ```
 
+### `summary.disableDetails:`
+
+Disable details tag for report.
+
+``` yaml
+comment:
+  disableDetails: true
+```
+
 ### `summary.if:`
 
 Conditions for adding report to job summary page.
@@ -632,6 +650,15 @@ Hide footer [octocov](https://github.com/k1LoW/octocov) link.
 ``` yaml
 body:
   hideFooterLink: true
+```
+
+### `body.disableDetails:`
+
+Disable details tag for report.
+
+``` yaml
+comment:
+  disableDetails: true
 ```
 
 ### `body.if:`
