@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.62.5](https://github.com/k1LoW/octocov/compare/v0.62.4...v0.62.5) - 2025-01-12
+### Other Changes
+- Fix lint warn by @k1LoW in https://github.com/k1LoW/octocov/pull/441
+- docs: fix a typo in Readme by @mikatuo in https://github.com/k1LoW/octocov/pull/440
+- Update pkgs by @k1LoW in https://github.com/k1LoW/octocov/pull/444
+
 ## [v0.62.4](https://github.com/k1LoW/octocov/compare/v0.62.3...v0.62.4) - 2024-12-19
 ### Other Changes
 - Update pkgs by @k1LoW in https://github.com/k1LoW/octocov/pull/433
