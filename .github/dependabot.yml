@@ -34,6 +34,10 @@ updates:
     ignore:
       - dependency-name: "github.com/migueleliasweb/go-github-mock"
         versions: ["1.1.x"]
+      - dependency-name: "github.com/goark/gnkf"
+        versions: ["0.x.x"]
+      - dependency-name: "github.com/hhatto/gocloc"
+        versions: ["0.x.x"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"
