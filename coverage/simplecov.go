@@ -151,8 +151,12 @@ func (c *SimplecovCoverage) UnmarshalJSON(data []byte) error {
 	for k, l := range s.Coverage {
 		switch v := l.(type) {
 		case map[string]any:
+			lines, ok := v["lines"].([]any)
+			if !ok {
+				return errors.New("unsupported SimpleCov report format")
+			}
 			c.Coverage[k] = SimplecovFileCoverage{
-				Lines: v["lines"].([]any),
+				Lines: lines,
 			}
 		case []any:
 			c.Coverage[k] = SimplecovFileCoverage{
