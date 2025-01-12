@@ -681,7 +681,7 @@ Conditions for comparing reports
 
 ``` yaml
 # .octocov.yml
-report:
+diff:
   if: is_pull_request
   path: path/to/report.json
 ```
