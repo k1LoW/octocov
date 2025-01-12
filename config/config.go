@@ -264,7 +264,11 @@ func coverageAcceptable(current, prev float64, cond string) error {
 		return err
 	}
 
-	if !ok.(bool) {
+	tf, okk := ok.(bool)
+	if !okk {
+		return fmt.Errorf("invalid condition `%s`", cond)
+	}
+	if !tf {
 		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(current), org)
 	}
 	return nil
@@ -293,8 +297,11 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 	if err != nil {
 		return err
 	}
-
-	if !ok.(bool) {
+	tf, okk := ok.(bool)
+	if !okk {
+		return fmt.Errorf("invalid condition `%s`", cond)
+	}
+	if !tf {
 		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", floor1(current), org)
 	}
 	return nil
@@ -330,7 +337,11 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 		return err
 	}
 
-	if !ok.(bool) {
+	tf, okk := ok.(bool)
+	if !okk {
+		return fmt.Errorf("invalid condition `%s`", cond)
+	}
+	if !tf {
 		return fmt.Errorf("test execution time is %v. the condition in the `testExecutionTime.acceptable:` section is not met (`%s`)", time.Duration(current), org)
 	}
 	return nil
@@ -448,7 +459,11 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return ok.(bool), nil
+	tf, okk := ok.(bool)
+	if !okk {
+		return false, fmt.Errorf("invalid condition `%s`", cond)
+	}
+	return tf, nil
 }
 
 func envMap() map[string]string {
