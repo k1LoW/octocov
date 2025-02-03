@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.62.6](https://github.com/k1LoW/octocov/compare/v0.62.5...v0.62.6) - 2025-02-03
+### Other Changes
+- chore: Update go directive version by @k1LoW in https://github.com/k1LoW/octocov/pull/448
+- chore(deps): bump the dependencies group across 1 directory with 12 updates by @dependabot in https://github.com/k1LoW/octocov/pull/450
+
 ## [v0.62.5](https://github.com/k1LoW/octocov/compare/v0.62.4...v0.62.5) - 2025-01-12
 ### Other Changes
 - Fix lint warn by @k1LoW in https://github.com/k1LoW/octocov/pull/441
