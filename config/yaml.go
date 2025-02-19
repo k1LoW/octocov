@@ -10,7 +10,6 @@ import (
 
 var commentRe = regexp.MustCompile(`(?m)^comment:`)
 var pushRe = regexp.MustCompile(`(?m)^push:`)
-var centralPushRe = regexp.MustCompile(`(?m)^\s+push:`)
 
 func (c *Config) UnmarshalYAML(data []byte) error {
 	s := struct {
@@ -120,7 +119,7 @@ func (c *Central) UnmarshalYAML(data []byte) error {
 
 	switch v := s.Push.(type) {
 	case nil:
-		if centralPushRe.Match(data) {
+		if pushRe.Match(data) {
 			c.Push = &Push{}
 		}
 	case map[string]any:

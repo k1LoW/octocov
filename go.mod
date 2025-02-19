@@ -18,7 +18,7 @@ require (
 	github.com/go-git/go-git/v5 v5.13.2
 	github.com/goark/gnkf v0.7.7
 	github.com/goccy/go-json v0.10.5
-	github.com/goccy/go-yaml v1.15.16
+	github.com/goccy/go-yaml v1.15.23
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/go-github/v58 v58.0.0
@@ -28,7 +28,7 @@ require (
 	github.com/josharian/txtarfs v0.0.0-20210615234325-77aca6df5bca
 	github.com/jszwec/s3fs/v2 v2.0.0
 	github.com/k1LoW/duration v1.2.0
-	github.com/k1LoW/expand v0.15.4
+	github.com/k1LoW/expand v0.15.5
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-actions v0.1.0
 	github.com/k1LoW/go-github-client/v58 v58.0.13
