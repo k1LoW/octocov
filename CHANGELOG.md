@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.63.0](https://github.com/k1LoW/octocov/compare/v0.62.6...v0.63.0) - 2025-02-22
+### Breaking Changes 🛠
+- fix(deps): update goccy/go-yaml by @k1LoW in https://github.com/k1LoW/octocov/pull/460
+### Other Changes
+- chore(deps): update Go version to 1.23.6 in go.mod by @k1LoW in https://github.com/k1LoW/octocov/pull/456
+- chore(deps): bump the dependencies group across 1 directory with 15 updates by @dependabot in https://github.com/k1LoW/octocov/pull/461
+
 ## [v0.62.6](https://github.com/k1LoW/octocov/compare/v0.62.5...v0.62.6) - 2025-02-03
 ### Other Changes
 - chore: Update go directive version by @k1LoW in https://github.com/k1LoW/octocov/pull/448
