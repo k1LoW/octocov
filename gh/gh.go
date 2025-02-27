@@ -532,6 +532,7 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 	page := 1
 	for {
 		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListArtifactsOptions{
+			Name: &name,
 			ListOptions: github.ListOptions{
 				Page:    page,
 				PerPage: 100,
