@@ -543,9 +543,6 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 		}
 		page += 1
 		for _, a := range l.Artifacts {
-			if a.GetName() != name {
-				continue
-			}
 			u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), maxRedirect)
 			if err != nil {
 				return nil, err
