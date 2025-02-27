@@ -22,6 +22,7 @@ require (
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v58 v58.0.0
+	github.com/google/go-github/v67 v67.0.0
 	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hhatto/gocloc v0.5.3
@@ -32,6 +33,7 @@ require (
 	github.com/k1LoW/ghfs v1.3.2
 	github.com/k1LoW/go-github-actions v0.1.0
 	github.com/k1LoW/go-github-client/v58 v58.0.13
+	github.com/k1LoW/go-github-client/v67 v67.0.13
 	github.com/k1LoW/repin v0.3.4
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0

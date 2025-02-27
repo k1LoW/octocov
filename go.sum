@@ -1507,6 +1507,8 @@ github.com/google/go-github/v64 v64.0.0 h1:4G61sozmY3eiPAjjoOHponXDBONm+utovTKby
 github.com/google/go-github/v64 v64.0.0/go.mod h1:xB3vqMQNdHzilXBiO2I+M7iEFtHf+DP/omBOv6tQzVo=
 github.com/google/go-github/v66 v66.0.0 h1:ADJsaXj9UotwdgK8/iFZtv7MLc8E8WBl62WLd/D/9+M=
 github.com/google/go-github/v66 v66.0.0/go.mod h1:+4SO9Zkuyf8ytMj0csN1NR/5OTR+MfqPp8P8dVlcvY4=
+github.com/google/go-github/v67 v67.0.0 h1:g11NDAmfaBaCO8qYdI9fsmbaRipHNWRIU/2YGvlh4rg=
+github.com/google/go-github/v67 v67.0.0/go.mod h1:zH3K7BxjFndr9QSeFibx4lTKkYS3K9nDanoI1NjaOtY=
 github.com/google/go-pkcs11 v0.2.0/go.mod h1:6eQoGcuNJpa7jnd5pMGdkSaQpNDYvPlXWMcjXXThLlY=
 github.com/google/go-pkcs11 v0.2.1-0.20230907215043-c6f79328ddf9/go.mod h1:6eQoGcuNJpa7jnd5pMGdkSaQpNDYvPlXWMcjXXThLlY=
 github.com/google/go-querystring v1.1.0 h1:AnCroh3fv4ZBgVIf1Iwtovgjaw/GiKJo8M8yD/fhyJ8=
@@ -1622,6 +1624,8 @@ github.com/k1LoW/go-github-actions v0.1.0 h1:H2wm27ULj/2BSAX5YhqCSKFE69qcuZtBhMH
 github.com/k1LoW/go-github-actions v0.1.0/go.mod h1:LFbGxDc0rMV42XFLCtG2H2a4qgGP94H9ikknv+EAYn4=
 github.com/k1LoW/go-github-client/v58 v58.0.13 h1:iTZdV3EQBVSaTyF5dEPEyrULxgienSRDur571yoIgcI=
 github.com/k1LoW/go-github-client/v58 v58.0.13/go.mod h1:KRNfRyjoqVrYPYSVOtNOQBLXQS5tJ+yWNoGDjH5uXZ0=
+github.com/k1LoW/go-github-client/v67 v67.0.13 h1:PjzG1zRpA+kKQEq3Z0fZ/8UMJLHaLGoHptMpOPViptw=
+github.com/k1LoW/go-github-client/v67 v67.0.13/go.mod h1:lc+16Z0jIZ11eqy2IeGKUZ9XPKBxyWXIKVfFMy7MEgU=
 github.com/k1LoW/repin v0.3.4 h1:xcNuBBc/ISHUNBzjXNTCux4OYZND5ZMiyz4SrRtpDhg=
 github.com/k1LoW/repin v0.3.4/go.mod h1:1abQMGdYFegTCsxbhZ3O5P8aKENYS37UhQKwKYKiYkg=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51/go.mod h1:CzGEWj7cYgsdH8dAjBGEr58BoE7ScuLd+fwFZ44+/x8=
