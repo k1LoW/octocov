@@ -531,9 +531,11 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 	const maxRedirect = 5
 	page := 1
 	for {
-		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListOptions{
-			Page:    page,
-			PerPage: 100,
+		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListArtifactsOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: 100,
+			},
 		})
 		if err != nil {
 			return nil, err
