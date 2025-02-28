@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.64.0](https://github.com/k1LoW/octocov/compare/v0.63.0...v0.64.0) - 2025-02-28
+### Other Changes
+- Upgrade go-github (and the dependants) and pass name option by @wreulicke in https://github.com/k1LoW/octocov/pull/463
+- chore(deps): bump google.golang.org/api from 0.218.0 to 0.222.0 in the dependencies group by @dependabot in https://github.com/k1LoW/octocov/pull/462
+
 ## [v0.63.0](https://github.com/k1LoW/octocov/compare/v0.62.6...v0.63.0) - 2025-02-22
 ### Breaking Changes 🛠
 - fix(deps): update goccy/go-yaml by @k1LoW in https://github.com/k1LoW/octocov/pull/460
