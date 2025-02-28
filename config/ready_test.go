@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/v58/github"
-	"github.com/k1LoW/go-github-client/v58/factory"
+	"github.com/google/go-github/v67/github"
+	"github.com/k1LoW/go-github-client/v67/factory"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
