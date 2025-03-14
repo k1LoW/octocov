@@ -60,7 +60,7 @@ func (d *DiffReport) Out(w io.Writer) {
 
 var leftSepRe = regexp.MustCompile(`(?m)^\|`)
 
-func (d *DiffReport) Table() string {
+func (d *DiffReport) Table(disableDetails bool) string {
 	var out []string
 
 	// Markdown table
@@ -120,7 +120,11 @@ func (d *DiffReport) Table() string {
 			t2 = strings.Replace(t2, "  | Test Execution", "+ | Test Execution", 1)
 		}
 	}
-	out = append(out, fmt.Sprintf("<details>\n\n<summary>Details</summary>\n\n``` diff\n%s```\n\n</details>\n", t2))
+	if disableDetails {
+		out = append(out, fmt.Sprintf("``` diff\n%s```\n", t2))
+	} else {
+		out = append(out, fmt.Sprintf("<details>\n\n<summary>Details</summary>\n\n``` diff\n%s```\n\n</details>\n", t2))
+	}
 
 	return strings.Join(out, "\n")
 }
