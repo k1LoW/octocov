@@ -378,7 +378,7 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				content, err := createReportContent(ctx, c, r, rPrev, c.Comment.HideFooterLink)
+				content, err := createReportContent(ctx, c, r, rPrev, c.Comment.Message, c.Comment.HideFooterLink)
 				if err != nil {
 					return err
 				}
@@ -403,7 +403,7 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				content, err := createReportContent(ctx, c, r, rPrev, c.Summary.HideFooterLink)
+				content, err := createReportContent(ctx, c, r, rPrev, c.Summary.Message, c.Summary.HideFooterLink)
 				if err != nil {
 					return err
 				}
@@ -428,7 +428,7 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				content, err := createReportContent(ctx, c, r, rPrev, c.Body.HideFooterLink)
+				content, err := createReportContent(ctx, c, r, rPrev, c.Body.Message, c.Body.HideFooterLink)
 				if err != nil {
 					return err
 				}
