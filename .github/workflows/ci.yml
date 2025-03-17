@@ -36,20 +36,19 @@ jobs:
           fail_on_error: true
           golangci_lint_flags: --timeout=5m
 
-      - name: Run govulncheck
-        uses: golang/govulncheck-action@v1
-        with:
-          go-version-input: '${{ steps.setup-go.outputs.go-version }}'
-          check-latest: true
-          cache: false
-          go-package: ./...
-
       - name: Run gostyle
         uses: k1LoW/gostyle-action@v1
         with:
-          go-version-input: '${{ steps.setup-go.outputs.go-version }}'
-          fail-on-error: true
           config-file: .gostyle.yml
+          fail-on-error: true
+
+      - name: Run govulncheck
+        uses: golang/govulncheck-action@v1
+        with:
+          go-version-input: ''
+          go-version-file: go.mod
+          repo-checkout: false
+          go-package: ./...
 
       - name: Run tests
         run: make ci
