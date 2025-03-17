@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.65.0](https://github.com/k1LoW/octocov/compare/v0.64.0...v0.65.0) - 2025-03-17
+### New Features 🎉
+- [Feature Reqeust] Add message to code metrics report by @terut in https://github.com/k1LoW/octocov/pull/471
+### Other Changes
+- chore(deps): bump golang.org/x/net from 0.35.0 to 0.36.0 by @dependabot in https://github.com/k1LoW/octocov/pull/467
+- ci: update CI workflow and Go version by @k1LoW in https://github.com/k1LoW/octocov/pull/472
+- chore(deps): bump the dependencies group across 1 directory with 14 updates by @dependabot in https://github.com/k1LoW/octocov/pull/473
+
 ## [v0.64.0](https://github.com/k1LoW/octocov/compare/v0.63.0...v0.64.0) - 2025-02-28
 ### Other Changes
 - Upgrade go-github (and the dependants) and pass name option by @wreulicke in https://github.com/k1LoW/octocov/pull/463
