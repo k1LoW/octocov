@@ -119,16 +119,19 @@ type Push struct {
 type Comment struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	DeletePrevious bool   `yaml:"deletePrevious"`
+	Message        string `yaml:"message,omitempty"`
 	If             string `yaml:"if,omitempty"`
 }
 
 type Summary struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
+	Message        string `yaml:"message,omitempty"`
 	If             string `yaml:"if,omitempty"`
 }
 
 type Body struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
+	Message        string `yaml:"message,omitempty"`
 	If             string `yaml:"if,omitempty"`
 }
 

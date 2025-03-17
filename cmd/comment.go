@@ -36,7 +36,7 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 	return nil
 }
 
-func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report, hideFooterLink bool) (string, error) {
+func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report, message string, hideFooterLink bool) (string, error) {
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return "", err
@@ -84,6 +84,9 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	var comment []string
 	if r.IsMeasuredCoverage() || r.IsMeasuredTestExecutionTime() || r.IsMeasuredCodeToTestRatio() {
 		comment = append(comment, fmt.Sprintf("## %s", r.Title()))
+	}
+	if message != "" {
+		comment = append(comment, message)
 	}
 	if err := c.Acceptable(r, rPrev); err != nil {
 		merr, ok := err.(*multierror.Error) //nolint:errorlint

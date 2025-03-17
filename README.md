@@ -584,6 +584,15 @@ comment:
   deletePrevious: true
 ```
 
+### `comment.message:`
+
+Add message to code metrics report comments.
+
+```yaml
+comment:
+  message: See [coverage html](https://github.com/k1LoW/octocov).
+```
+
 ### `comment.if:`
 
 Conditions for commenting report.
@@ -609,6 +618,15 @@ summary:
   hideFooterLink: true
 ```
 
+### `summary.message:`
+
+Add message to report.
+
+```yaml
+summary:
+  message: See [coverage html](https://github.com/k1LoW/octocov).
+```
+
 ### `summary.if:`
 
 Conditions for adding report to job summary page.
@@ -632,6 +650,15 @@ Hide footer [octocov](https://github.com/k1LoW/octocov) link.
 ``` yaml
 body:
   hideFooterLink: true
+```
+
+### `body.message:`
+
+Add message to report.
+
+```yaml
+body:
+  message: See [coverage html](https://github.com/k1LoW/octocov).
 ```
 
 ### `body.if:`
