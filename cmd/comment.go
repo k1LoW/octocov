@@ -36,7 +36,7 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 	return nil
 }
 
-func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report, hideFooterLink bool) (string, error) {
+func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report, hideFooterLink bool, disableDetails bool) (string, error) {
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {
 		return "", err
@@ -68,7 +68,7 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	)
 	if rPrev != nil {
 		d := r.Compare(rPrev)
-		table = d.Table()
+		table = d.Table(disableDetails)
 		fileTable = d.FileCoveragesTable(files)
 		for _, s := range d.CustomMetrics {
 			customTables = append(customTables, s.Table(), s.MetadataTable())

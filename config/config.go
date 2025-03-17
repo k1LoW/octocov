@@ -118,17 +118,20 @@ type Push struct {
 
 type Comment struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
+	DisableDetails bool   `yaml:"disableDetails"`
 	DeletePrevious bool   `yaml:"deletePrevious"`
 	If             string `yaml:"if,omitempty"`
 }
 
 type Summary struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
+	DisableDetails bool   `yaml:"disableDetails"`
 	If             string `yaml:"if,omitempty"`
 }
 
 type Body struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
+	DisableDetails bool   `yaml:"disableDetails"`
 	If             string `yaml:"if,omitempty"`
 }
 
