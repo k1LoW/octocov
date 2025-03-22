@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.65.1](https://github.com/k1LoW/octocov/compare/v0.65.0...v0.65.1) - 2025-03-22
+### Other Changes
+- ci: pin dependencies using pinact by @k1LoW in https://github.com/k1LoW/octocov/pull/474
+- chore(deps): bump github.com/golang-jwt/jwt/v4 from 4.5.1 to 4.5.2 by @dependabot in https://github.com/k1LoW/octocov/pull/477
+
 ## [v0.65.0](https://github.com/k1LoW/octocov/compare/v0.64.0...v0.65.0) - 2025-03-17
 ### New Features 🎉
 - [Feature Reqeust] Add message to code metrics report by @terut in https://github.com/k1LoW/octocov/pull/471
