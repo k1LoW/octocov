@@ -3,7 +3,7 @@ module github.com/k1LoW/octocov
 go 1.23.7
 
 require (
-	cloud.google.com/go/bigquery v1.66.2
+	cloud.google.com/go/bigquery v1.67.0
 	cloud.google.com/go/storage v1.51.0
 	github.com/antchfx/xmlquery v1.4.4
 	github.com/aws/aws-sdk-go-v2 v1.36.3
@@ -12,7 +12,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
 	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/chainguard-dev/git-urls v1.0.2
-	github.com/expr-lang/expr v1.17.0
+	github.com/expr-lang/expr v1.17.1
 	github.com/fatih/color v1.18.0
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/go-git/go-git/v5 v5.14.0
@@ -29,15 +29,15 @@ require (
 	github.com/jszwec/s3fs/v2 v2.0.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/expand v0.16.0
-	github.com/k1LoW/ghfs v1.4.0
+	github.com/k1LoW/ghfs v1.5.0
 	github.com/k1LoW/go-github-actions v0.1.0
-	github.com/k1LoW/go-github-client/v67 v67.0.13
+	github.com/k1LoW/go-github-client/v67 v67.0.16
 	github.com/k1LoW/repin v0.3.4
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mackerelio/mackerel-client-go v0.35.0
 	github.com/mauri870/gcsfs v0.0.0-20240120035028-2326f4c97769
-	github.com/migueleliasweb/go-github-mock v1.0.1
+	github.com/migueleliasweb/go-github-mock v1.1.0
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/samber/lo v1.49.1
@@ -51,7 +51,7 @@ require (
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/text v0.23.0
 	golang.org/x/tools v0.31.0
-	google.golang.org/api v0.224.0
+	google.golang.org/api v0.227.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -90,10 +90,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
-	github.com/bradleyfalzon/ghinstallation/v2 v2.12.0 // indirect
+	github.com/bradleyfalzon/ghinstallation/v2 v2.14.0 // indirect
 	github.com/buildkite/interpolate v0.1.5 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/cli/go-gh/v2 v2.11.1 // indirect
+	github.com/cli/go-gh/v2 v2.11.2 // indirect
 	github.com/cli/safeexec v1.0.1 // indirect
 	github.com/cloudflare/circl v1.6.0 // indirect
 	github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42 // indirect
@@ -113,11 +113,11 @@ require (
 	github.com/golang/groupcache v0.0.0-20241129210726-2c02b8208cf8 // indirect
 	github.com/google/flatbuffers v24.3.25+incompatible // indirect
 	github.com/google/go-github/v64 v64.0.0 // indirect
-	github.com/google/go-github/v66 v66.0.0 // indirect
+	github.com/google/go-github/v69 v69.0.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/s2a-go v0.1.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/googleapis/enterprise-certificate-proxy v0.3.5 // indirect
+	github.com/googleapis/enterprise-certificate-proxy v0.3.6 // indirect
 	github.com/googleapis/gax-go/v2 v2.14.1 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
@@ -165,11 +165,11 @@ require (
 	golang.org/x/net v0.37.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/time v0.10.0 // indirect
+	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	google.golang.org/grpc v1.71.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
