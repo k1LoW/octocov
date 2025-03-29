@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.65.2](https://github.com/k1LoW/octocov/compare/v0.65.1...v0.65.2) - 2025-03-29
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/479
+- migrate .golangci.yml by @TP-113 in https://github.com/k1LoW/octocov/pull/481
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/octocov/pull/478
+
 ## [v0.65.1](https://github.com/k1LoW/octocov/compare/v0.65.0...v0.65.1) - 2025-03-22
 ### Other Changes
 - ci: pin dependencies using pinact by @k1LoW in https://github.com/k1LoW/octocov/pull/474
