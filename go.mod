@@ -1,18 +1,19 @@
 module github.com/k1LoW/octocov
 
 go 1.23.7
+toolchain go1.24.1
 
 require (
 	cloud.google.com/go/bigquery v1.67.0
 	cloud.google.com/go/storage v1.51.0
 	github.com/antchfx/xmlquery v1.4.4
 	github.com/aws/aws-sdk-go-v2 v1.36.3
-	github.com/aws/aws-sdk-go-v2/config v1.29.9
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.66
+	github.com/aws/aws-sdk-go-v2/config v1.29.12
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.69
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.78.2
 	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/chainguard-dev/git-urls v1.0.2
-	github.com/expr-lang/expr v1.17.1
+	github.com/expr-lang/expr v1.17.2
 	github.com/fatih/color v1.18.0
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/go-git/go-git/v5 v5.14.0
@@ -35,7 +36,7 @@ require (
 	github.com/k1LoW/repin v0.3.4
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.2.0
-	github.com/mackerelio/mackerel-client-go v0.35.0
+	github.com/mackerelio/mackerel-client-go v0.36.0
 	github.com/mauri870/gcsfs v0.0.0-20240120035028-2326f4c97769
 	github.com/migueleliasweb/go-github-mock v1.1.0
 	github.com/oklog/ulid/v2 v2.1.0
@@ -51,7 +52,7 @@ require (
 	golang.org/x/oauth2 v0.28.0
 	golang.org/x/text v0.23.0
 	golang.org/x/tools v0.31.0
-	google.golang.org/api v0.227.0
+	google.golang.org/api v0.228.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
@@ -59,7 +60,7 @@ require (
 	cel.dev/expr v0.19.2 // indirect
 	cloud.google.com/go v0.118.3 // indirect
 	cloud.google.com/go/auth v0.15.0 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/iam v1.4.1 // indirect
 	cloud.google.com/go/monitoring v1.24.0 // indirect
@@ -76,7 +77,7 @@ require (
 	github.com/antchfx/xpath v1.3.3 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.62 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.65 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
@@ -86,8 +87,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.15 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.25.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.29.1 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.25.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.17 // indirect
 	github.com/aws/smithy-go v1.22.2 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.14.0 // indirect
@@ -171,7 +172,7 @@ require (
 	google.golang.org/genproto/googleapis/api v0.0.0-20250303144028-a0af3efb3deb // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250313205543-e70fdf4c4cb4 // indirect
 	google.golang.org/grpc v1.71.0 // indirect
-	google.golang.org/protobuf v1.36.5 // indirect
+	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
