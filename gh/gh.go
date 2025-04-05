@@ -505,6 +505,24 @@ func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment,
 	return nil
 }
 
+func (g *Gh) PutCommentWithUpdate(ctx context.Context, owner, repo string, n int, comment, key string) error {
+	sig := generateSig(key)
+	commentId, err := g.findPreviousComment(ctx, owner, repo, n, sig)
+	if err != nil {
+		return err
+	}
+
+	if commentId == 0 {
+		return g.PutComment(ctx, owner, repo, n, comment, key)
+	} else {
+		c := strings.Join([]string{comment, sig}, "\n")
+		if _, _, err := g.client.Issues.EditComment(ctx, owner, repo, commentId, &github.IssueComment{Body: &c}); err != nil {
+			return err
+		}
+		return nil
+	}
+}
+
 func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n int, comment, key string) error {
 	sig := generateSig(key)
 	if err := g.deletePreviousComments(ctx, owner, repo, n, sig); err != nil {
@@ -646,6 +664,32 @@ func (g *Gh) minimizePreviousComments(ctx context.Context, owner, repo string, n
 		page = res.NextPage
 	}
 	return nil
+}
+
+func (g *Gh) findPreviousComment(ctx context.Context, owner, repo string, n int, sig string) (int64, error) {
+	page := 1
+	for {
+		opts := &github.IssueListCommentsOptions{
+			ListOptions: github.ListOptions{
+				Page:    page,
+				PerPage: 100,
+			},
+		}
+		comments, res, err := g.client.Issues.ListComments(ctx, owner, repo, n, opts)
+		if err != nil {
+			return 0, err
+		}
+		for _, c := range comments {
+			if strings.Contains(*c.Body, sig) {
+				return *c.ID, nil
+			}
+		}
+		if res.NextPage == 0 {
+			break
+		}
+		page = res.NextPage
+	}
+	return 0, nil
 }
 
 func (g *Gh) deletePreviousComments(ctx context.Context, owner, repo string, n int, sig string) error {
