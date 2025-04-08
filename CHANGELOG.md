@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.65.2](https://github.com/k1LoW/octocov/compare/v0.65.1...v0.65.2) - 2025-04-08
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/479
+- migrate .golangci.yml by @TP-113 in https://github.com/k1LoW/octocov/pull/481
+- chore(deps): bump the dependencies group with 3 updates by @dependabot in https://github.com/k1LoW/octocov/pull/478
+- chore(deps): bump goreleaser/goreleaser-action from 6.2.1 to 6.3.0 in the dependencies group by @dependabot in https://github.com/k1LoW/octocov/pull/482
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot in https://github.com/k1LoW/octocov/pull/485
+- chore: fix lint warn by @k1LoW in https://github.com/k1LoW/octocov/pull/487
+
 ## [v0.65.1](https://github.com/k1LoW/octocov/compare/v0.65.0...v0.65.1) - 2025-03-22
 ### Other Changes
 - ci: pin dependencies using pinact by @k1LoW in https://github.com/k1LoW/octocov/pull/474
