@@ -38,7 +38,7 @@ func (m *Mackerel) StoreReport(ctx context.Context, r *report.Report) error {
 			return err
 		}
 	}
-	repo := strings.Replace(r.Repository, "/", "-", -1)
+	repo := strings.ReplaceAll(r.Repository, "/", "-")
 	t := r.Timestamp.Unix()
 	var values []*mkr.MetricValue
 	if r.Coverage != nil {
