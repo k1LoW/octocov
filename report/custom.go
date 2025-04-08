@@ -77,7 +77,7 @@ func (s *CustomMetricSet) Table() string {
 		d = append(d, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit))
 	}
 	buf := new(bytes.Buffer)
-	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name)) //nostyle:handlerrors
+	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
@@ -91,7 +91,7 @@ func (s *CustomMetricSet) Table() string {
 
 func (s *CustomMetricSet) tableSwaped() string {
 	buf := new(bytes.Buffer)
-	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", s.Name)) //nostyle:handlerrors
+	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
@@ -261,7 +261,7 @@ func (d *DiffCustomMetricSet) Table() string {
 	if d.Name == "" {
 		d.Name = d.Key
 	}
-	_, _ = buf.WriteString(fmt.Sprintf("## %s\n\n", d.Name)) //nostyle:handlerrors
+	_, _ = fmt.Fprintf(buf, "## %s\n\n", d.Name) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)

@@ -294,10 +294,10 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	arrow := "→"
 	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", floor1(prevAll), arrow, floor1(coverAll))
 	buf := new(bytes.Buffer)
-	buf.WriteString(fmt.Sprintf("%s\n\n", title))
+	fmt.Fprintf(buf, "%s\n\n", title)
 
 	if len(rows) > filesSkipMax {
-		buf.WriteString(fmt.Sprintf("Skip file coverages because there are too many files (%d)\n", len(rows)))
+		fmt.Fprintf(buf, "Skip file coverages because there are too many files (%d)\n", len(rows))
 		return buf.String()
 	}
 
