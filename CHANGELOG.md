@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.66.0](https://github.com/k1LoW/octocov/compare/v0.65.2...v0.66.0) - 2025-04-15
+### New Features 🎉
+- Add status of diff files on PR report by @TP-113 in https://github.com/k1LoW/octocov/pull/486
+### Other Changes
+- chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/489
+
 ## [v0.65.2](https://github.com/k1LoW/octocov/compare/v0.65.1...v0.65.2) - 2025-04-08
 ### Other Changes
 - chore(deps): bump the dependencies group with 6 updates by @dependabot in https://github.com/k1LoW/octocov/pull/479
