@@ -28,6 +28,10 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 		if err := g.PutCommentWithDeletion(ctx, repo.Owner, repo.Repo, n, content, key); err != nil {
 			return err
 		}
+	} else if c.Comment.UpdatePrevious {
+		if err := g.PutCommentWithUpdate(ctx, repo.Owner, repo.Repo, n, content, key); err != nil {
+			return err
+		}
 	} else {
 		if err := g.PutComment(ctx, repo.Owner, repo.Repo, n, content, key); err != nil {
 			return err
