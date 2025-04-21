@@ -119,6 +119,7 @@ type Push struct {
 type Comment struct {
 	HideFooterLink bool   `yaml:"hideFooterLink"`
 	DeletePrevious bool   `yaml:"deletePrevious"`
+	UpdatePrevious bool   `yaml:"updatePrevious"`
 	Message        string `yaml:"message,omitempty"`
 	If             string `yaml:"if,omitempty"`
 }
