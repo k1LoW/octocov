@@ -38,6 +38,8 @@ updates:
         versions: ["0.x.x"]
       - dependency-name: "github.com/hhatto/gocloc"
         versions: ["0.x.x"]
+      - dependency-name: "github.com/olekukonko/tablewriter"
+        versions: ["1.x.x"]
     open-pull-requests-limit: 10
     assignees:
       - "k1LoW"
