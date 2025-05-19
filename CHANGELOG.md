@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.67.2](https://github.com/k1LoW/octocov/compare/v0.67.1...v0.67.2) - 2025-05-19
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot in https://github.com/k1LoW/octocov/pull/501
+
 ## [v0.67.1](https://github.com/k1LoW/octocov/compare/v0.67.0...v0.67.1) - 2025-05-15
 ### Other Changes
 - chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot in https://github.com/k1LoW/octocov/pull/499
