@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"math/big"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -208,26 +209,29 @@ type Reporter interface {
 func (c *Config) Acceptable(r, rPrev Reporter) error {
 	var result *multierror.Error
 	if err := c.CoverageConfigReady(); err == nil {
-		prev := rPrev.CoveragePercent()
-		if err := coverageAcceptable(r.CoveragePercent(), prev, c.Coverage.Acceptable); err != nil {
+		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
+		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
+		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable); err != nil {
 			result = multierror.Append(result, err)
 		}
 	}
 
 	if err := c.CodeToTestRatioConfigReady(); err == nil {
-		prev := rPrev.CodeToTestRatioRatio()
-		if err := codeToTestRatioAcceptable(r.CodeToTestRatioRatio(), prev, c.CodeToTestRatio.Acceptable); err != nil {
+		prev := big.NewRat(int64(rPrev.CodeToTestRatioRatio()*10000), 10000)
+		curr := big.NewRat(int64(r.CodeToTestRatioRatio()*10000), 10000)
+		if err := codeToTestRatioAcceptable(curr, prev, c.CodeToTestRatio.Acceptable); err != nil {
 			result = multierror.Append(result, err)
 		}
 	}
 
 	if err := c.TestExecutionTimeConfigReady(); err == nil {
-		prev := largeEnoughTime
+		prevVal := largeEnoughTime
 		if rPrev.IsMeasuredTestExecutionTime() {
-			prev = rPrev.TestExecutionTimeNano()
+			prevVal = rPrev.TestExecutionTimeNano()
 		}
-
-		if err := testExecutionTimeAcceptable(r.TestExecutionTimeNano(), prev, c.TestExecutionTime.Acceptable); err != nil {
+		prev := big.NewRat(int64(prevVal*10000), 10000)
+		curr := big.NewRat(int64(r.TestExecutionTimeNano()*10000), 10000)
+		if err := testExecutionTimeAcceptable(curr, prev, c.TestExecutionTime.Acceptable); err != nil {
 			result = multierror.Append(result, err)
 		}
 	}
@@ -244,7 +248,7 @@ var (
 	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
-func coverageAcceptable(current, prev float64, cond string) error {
+func coverageAcceptable(current, prev *big.Rat, cond string) error {
 	if cond == "" {
 		return nil
 	}
@@ -258,10 +262,14 @@ func coverageAcceptable(current, prev float64, cond string) error {
 		cond = fmt.Sprintf("current %s", cond)
 	}
 
+	diff := new(big.Rat).Sub(current, prev)
+	diffF, _ := diff.Float64()
+	currentF, _ := current.Float64()
+	prevF, _ := prev.Float64()
 	variables := map[string]any{
-		"current": current,
-		"prev":    prev,
-		"diff":    current - prev,
+		"current": currentF,
+		"prev":    prevF,
+		"diff":    diffF,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -273,12 +281,12 @@ func coverageAcceptable(current, prev float64, cond string) error {
 		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
-		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(current), org)
+		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), org)
 	}
 	return nil
 }
 
-func codeToTestRatioAcceptable(current, prev float64, cond string) error {
+func codeToTestRatioAcceptable(current, prev *big.Rat, cond string) error {
 	if cond == "" {
 		return nil
 	}
@@ -292,10 +300,14 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 		cond = fmt.Sprintf("current %s", cond)
 	}
 
+	diff := new(big.Rat).Sub(current, prev)
+	diffF, _ := diff.Float64()
+	currentF, _ := current.Float64()
+	prevF, _ := prev.Float64()
 	variables := map[string]any{
-		"current": current,
-		"prev":    prev,
-		"diff":    current - prev,
+		"current": currentF,
+		"prev":    prevF,
+		"diff":    diffF,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -306,12 +318,12 @@ func codeToTestRatioAcceptable(current, prev float64, cond string) error {
 		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
-		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", floor1(current), org)
+		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", floor1(currentF), org)
 	}
 	return nil
 }
 
-func testExecutionTimeAcceptable(current, prev float64, cond string) error {
+func testExecutionTimeAcceptable(current, prev *big.Rat, cond string) error {
 	if cond == "" {
 		return nil
 	}
@@ -331,10 +343,14 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 		cond = fmt.Sprintf("current %s", cond)
 	}
 
+	diff := new(big.Rat).Sub(current, prev)
+	diffF, _ := diff.Float64()
+	currentF, _ := current.Float64()
+	prevF, _ := prev.Float64()
 	variables := map[string]any{
-		"current": current,
-		"prev":    prev,
-		"diff":    current - prev,
+		"current": currentF,
+		"prev":    prevF,
+		"diff":    diffF,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -346,7 +362,7 @@ func testExecutionTimeAcceptable(current, prev float64, cond string) error {
 		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
-		return fmt.Errorf("test execution time is %v. the condition in the `testExecutionTime.acceptable:` section is not met (`%s`)", time.Duration(current), org)
+		return fmt.Errorf("test execution time is %v. the condition in the `testExecutionTime.acceptable:` section is not met (`%s`)", time.Duration(int64(currentF)), org)
 	}
 	return nil
 }

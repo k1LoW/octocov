@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"strings"
@@ -158,130 +159,250 @@ func TestCoveragePaths(t *testing.T) {
 }
 
 func TestCoverageAcceptable(t *testing.T) {
+	// Pre-calculate special big.Rat values
+	// For comparing 59.9999999999999 and 60
+	almostSixty := new(big.Rat).SetFrac64(600000000000000-1, 10000000000000)
+
+	// Value of 1/3
+	oneThird := new(big.Rat).SetFrac64(1, 3)
+
+	// Very small number
+	verySmallNumber := new(big.Rat)
+	_, _ = verySmallNumber.SetString("1/10000000000000000000")
+
+	// 1/3 + small value
+	oneThirdPlusSmall := new(big.Rat).Add(oneThird, verySmallNumber)
+
 	tests := []struct {
 		cond    string
 		cov     float64
 		prev    float64
+		covRat  *big.Rat // To allow direct specification of big.Rat values
+		prevRat *big.Rat // To allow direct specification of big.Rat values
 		wantErr bool
 		errMsg  string
 	}{
-		{"60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`60%`)"},
-		{"50%", 50.0, 0, false, ""},
-		{"49.9%", 50.0, 0, false, ""},
-		{"49.9", 50.0, 0, false, ""},
-		{">= 60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`>= 60%`)"},
-		{">= 50%", 50.0, 0, false, ""},
-		{">= 49.9%", 50.0, 0, false, ""},
-		{">= 49.9", 50.0, 0, false, ""},
-		{">= 49.9%", 49.9, 0, false, ""},
-		{">= 49.9", 49.9, 0, false, ""},
-		{"> 49.9", 49.9, 0, true, "code coverage is 49.9%. the condition in the `coverage.acceptable:` section is not met (`> 49.9`)"},
-		{">=60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`>=60%`)"},
-		{">=50%", 50.0, 0, false, ""},
-		{">=49.9%", 50.0, 0, false, ""},
-		{">=49.9", 50.0, 0, false, ""},
+		// Normal test cases
+		{"60%", 50.0, 0, nil, nil, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`60%`)"},
+		{"50%", 50.0, 0, nil, nil, false, ""},
+		{"49.9%", 50.0, 0, nil, nil, false, ""},
+		{"49.9", 50.0, 0, nil, nil, false, ""},
+		{">= 60%", 50.0, 0, nil, nil, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`>= 60%`)"},
+		{">= 50%", 50.0, 0, nil, nil, false, ""},
+		{">= 49.9%", 50.0, 0, nil, nil, false, ""},
+		{">= 49.9", 50.0, 0, nil, nil, false, ""},
+		{">= 49.9%", 49.9, 0, nil, nil, false, ""},
+		{">= 49.9", 49.9, 0, nil, nil, false, ""},
+		{"> 49.9", 49.9, 0, nil, nil, true, "code coverage is 49.9%. the condition in the `coverage.acceptable:` section is not met (`> 49.9`)"},
+		{">=60%", 50.0, 0, nil, nil, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`>=60%`)"},
+		{">=50%", 50.0, 0, nil, nil, false, ""},
+		{">=49.9%", 50.0, 0, nil, nil, false, ""},
+		{">=49.9", 50.0, 0, nil, nil, false, ""},
 
-		{"current >= 60%", 50.0, 0, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
-		{"current >= 60%", 59.9, 0, true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
-		{"current >= 60%", 59.99, 0, true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
-		{"current > prev", 50.0, 49.0, false, ""},
-		{"diff >= 0", 50.0, 49.0, false, ""},
-		{"current >= 50% && diff >= 0%", 50.0, 49.0, false, ""},
+		{"current >= 60%", 50.0, 0, nil, nil, true, "code coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
+		{"current >= 60%", 59.9, 0, nil, nil, true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
+		{"current >= 60%", 59.99, 0, nil, nil, true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current >= 60%`)"},
+		{"current > prev", 50.0, 49.0, nil, nil, false, ""},
+		{"diff >= 0", 50.0, 49.0, nil, nil, false, ""},
+		{"current >= 50% && diff >= 0%", 50.0, 49.0, nil, nil, false, ""},
+
+		// Test cases leveraging big.Rat precision
+		// Test for small differences that cannot be represented by float64
+		// Note: When big.Rat values are converted to float64, precision is lost, so wantErr is true
+		{"current > 59.9999999999999", 0, 0, almostSixty, big.NewRat(0, 1), true, "code coverage is 59.9%. the condition in the `coverage.acceptable:` section is not met (`current > 59.9999999999999`)"}, // This test cannot be executed with float64
+		{"current > prev", 0, 0, oneThirdPlusSmall, oneThird, true, "code coverage is 0.3%. the condition in the `coverage.acceptable:` section is not met (`current > prev`)"},                            // This test cannot be executed with float64
 	}
-	for _, tt := range tests {
-		if err := coverageAcceptable(tt.cov, tt.prev, tt.cond); err != nil {
-			if !tt.wantErr {
-				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("case-%d", i), func(t *testing.T) {
+			var covRat, prevRat *big.Rat
+
+			if tt.covRat != nil && tt.prevRat != nil {
+				// Use big.Rat values directly specified
+				covRat = tt.covRat
+				prevRat = tt.prevRat
+			} else {
+				// Create big.Rat from conventional float64 values
+				covRat = big.NewRat(int64(tt.cov*10000), 10000)
+				prevRat = big.NewRat(int64(tt.prev*10000), 10000)
 			}
-			if err.Error() != tt.errMsg {
-				t.Errorf("got %v\nwant %v", err.Error(), tt.errMsg)
+
+			if err := coverageAcceptable(covRat, prevRat, tt.cond); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+				}
+				if tt.errMsg != "" && err.Error() != tt.errMsg {
+					t.Errorf("got %v\nwant %v", err.Error(), tt.errMsg)
+				}
+			} else {
+				if tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+				}
 			}
-		} else {
-			if tt.wantErr {
-				t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
-			}
-		}
+		})
 	}
 }
 
 func TestCodeToTestRatioAcceptable(t *testing.T) {
-	tests := []struct {
-		cond    string
-		ratio   float64
-		prev    float64
-		wantErr bool
-	}{
-		{"1:1", 1.0, 0, false},
-		{"1:1.1", 1.0, 0, true},
-		{"1", 1.0, 0, false},
-		{"1.1", 1.0, 0, true},
-		{">= 1:1", 1.0, 0, false},
-		{">= 1:1.1", 1.0, 0, true},
-		{">= 1", 1.0, 0, false},
-		{">= 1.1", 1.0, 0, true},
-		{">=1:1", 1.0, 0, false},
-		{">=1:1.1", 1.0, 0, true},
-		{">=1", 1.0, 0, false},
-		{">=1.1", 1.0, 0, true},
+	// Pre-calculate special big.Rat values
+	// Value of 1/3
+	oneThird := new(big.Rat).SetFrac64(1, 3)
 
-		{"current >= 1.1", 1.2, 1.1, false},
-		{"current > prev", 1.2, 1.1, false},
-		{"diff >= 0", 1.2, 1.1, false},
-		{"current >= 1.1 && diff >= 0", 1.2, 1.1, false},
+	// 1/3 + 1/3 + 1/3 (becomes 1.0 in float64, but is greater than 1.0 in big.Rat)
+	threeThirds := new(big.Rat).Add(oneThird, oneThird)
+	threeThirds = new(big.Rat).Add(threeThirds, oneThird)
+
+	// Value of 1/7
+	oneSeventh := new(big.Rat).SetFrac64(1, 7)
+
+	// Very small number
+	verySmallNumber := new(big.Rat)
+	_, _ = verySmallNumber.SetString("1/10000000000000000000")
+
+	// 1/7 + small value
+	oneSeventhPlusSmall := new(big.Rat).Add(oneSeventh, verySmallNumber)
+
+	tests := []struct {
+		cond     string
+		ratio    float64
+		prev     float64
+		ratioRat *big.Rat // To allow direct specification of big.Rat values
+		prevRat  *big.Rat // To allow direct specification of big.Rat values
+		wantErr  bool
+	}{
+		// Normal test cases
+		{"1:1", 1.0, 0, nil, nil, false},
+		{"1:1.1", 1.0, 0, nil, nil, true},
+		{"1", 1.0, 0, nil, nil, false},
+		{"1.1", 1.0, 0, nil, nil, true},
+		{">= 1:1", 1.0, 0, nil, nil, false},
+		{">= 1:1.1", 1.0, 0, nil, nil, true},
+		{">= 1", 1.0, 0, nil, nil, false},
+		{">= 1.1", 1.0, 0, nil, nil, true},
+		{">=1:1", 1.0, 0, nil, nil, false},
+		{">=1:1.1", 1.0, 0, nil, nil, true},
+		{">=1", 1.0, 0, nil, nil, false},
+		{">=1.1", 1.0, 0, nil, nil, true},
+
+		{"current >= 1.1", 1.2, 1.1, nil, nil, false},
+		{"current > prev", 1.2, 1.1, nil, nil, false},
+		{"diff >= 0", 1.2, 1.1, nil, nil, false},
+		{"current >= 1.1 && diff >= 0", 1.2, 1.1, nil, nil, false},
+
+		// Test cases leveraging big.Rat precision
+		// Note: When big.Rat values are converted to float64, precision is lost, so wantErr is true
+		{"current > 1.0", 0, 0, threeThirds, big.NewRat(1, 1), true},    // Case like 1/3 + 1/3 + 1/3 > 1.0
+		{"current > prev", 0, 0, oneSeventhPlusSmall, oneSeventh, true}, // Comparison of very small differences
 	}
-	for _, tt := range tests {
-		if err := codeToTestRatioAcceptable(tt.ratio, tt.prev, tt.cond); err != nil {
-			if !tt.wantErr {
-				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("case-%d", i), func(t *testing.T) {
+			var ratioRat, prevRat *big.Rat
+
+			if tt.ratioRat != nil && tt.prevRat != nil {
+				// Use big.Rat values directly specified
+				ratioRat = tt.ratioRat
+				prevRat = tt.prevRat
+			} else {
+				// Create big.Rat from conventional float64 values
+				ratioRat = big.NewRat(int64(tt.ratio*10000), 10000)
+				prevRat = big.NewRat(int64(tt.prev*10000), 10000)
 			}
-		} else {
-			if tt.wantErr {
-				t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+
+			if err := codeToTestRatioAcceptable(ratioRat, prevRat, tt.cond); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+				}
+			} else {
+				if tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+				}
 			}
-		}
+		})
 	}
 }
 
 func TestTestExecutionTimeAcceptable(t *testing.T) {
+	// Pre-calculate special big.Rat values
+	// Value of 1 minute
+	oneMinute := new(big.Rat).SetInt64(int64(time.Minute))
+
+	// Very small duration
+	verySmallDuration := new(big.Rat).SetFrac64(1, 1000000000)
+
+	// Value of 1 nanosecond
+	oneNano := new(big.Rat).SetInt64(1)
+
+	// Case of 59.999999999999 seconds (1 minute - small value)
+	almostOneMinute := new(big.Rat).Sub(oneMinute, verySmallDuration)
+
+	// 1 minute - 1 nanosecond
+	oneMinuteMinusNano := new(big.Rat).Sub(oneMinute, oneNano)
+
 	tests := []struct {
 		cond    string
 		ti      float64
 		prev    float64
+		tiRat   *big.Rat // To allow direct specification of big.Rat values
+		prevRat *big.Rat // To allow direct specification of big.Rat values
 		wantErr bool
 	}{
-		{"1min", float64(time.Minute), 0, false},
-		{"59s", float64(time.Minute), 0, true},
-		{"61sec", float64(time.Minute), 0, false},
-		{"<= 1min", float64(time.Minute), 0, false},
-		{"<= 59s", float64(time.Minute), 0, true},
-		{"<= 61sec", float64(time.Minute), 0, false},
-		{"<=1min", float64(time.Minute), 0, false},
-		{"<=59s", float64(time.Minute), 0, true},
-		{"<=61sec", float64(time.Minute), 0, false},
-		{"1 min", float64(time.Minute), 0, false},
-		{"59 s", float64(time.Minute), 0, true},
-		{"61 sec", float64(time.Minute), 0, false},
+		// Normal test cases
+		{"1min", float64(time.Minute), 0, nil, nil, false},
+		{"59s", float64(time.Minute), 0, nil, nil, true},
+		{"61sec", float64(time.Minute), 0, nil, nil, false},
+		{"<= 1min", float64(time.Minute), 0, nil, nil, false},
+		{"<= 59s", float64(time.Minute), 0, nil, nil, true},
+		{"<= 61sec", float64(time.Minute), 0, nil, nil, false},
+		{"<=1min", float64(time.Minute), 0, nil, nil, false},
+		{"<=59s", float64(time.Minute), 0, nil, nil, true},
+		{"<=61sec", float64(time.Minute), 0, nil, nil, false},
+		{"1 min", float64(time.Minute), 0, nil, nil, false},
+		{"59 s", float64(time.Minute), 0, nil, nil, true},
+		{"61 sec", float64(time.Minute), 0, nil, nil, false},
 
-		{"1min1sec", float64(time.Minute), 0, false},
-		{"<=1min1sec", float64(time.Minute), 0, false},
-		{"<= 1 min 1 sec", float64(time.Minute), 0, false},
-		{"current <= 1 min 1 sec", float64(time.Minute), 0, false},
+		{"1min1sec", float64(time.Minute), 0, nil, nil, false},
+		{"<=1min1sec", float64(time.Minute), 0, nil, nil, false},
+		{"<= 1 min 1 sec", float64(time.Minute), 0, nil, nil, false},
+		{"current <= 1 min 1 sec", float64(time.Minute), 0, nil, nil, false},
 
-		{"current <= 1min", float64(time.Minute), float64(59 * time.Second), false},
-		{"current > prev", float64(time.Minute), float64(59 * time.Second), false},
-		{"diff <= 1sec", float64(time.Minute), float64(59 * time.Second), false},
-		{"current <= 1min && diff <= 1sec", float64(time.Minute), float64(59 * time.Second), false},
+		{"current <= 1min", float64(time.Minute), float64(59 * time.Second), nil, nil, false},
+		{"current > prev", float64(time.Minute), float64(59 * time.Second), nil, nil, false},
+		{"diff <= 1sec", float64(time.Minute), float64(59 * time.Second), nil, nil, false},
+		{"current <= 1min && diff <= 1sec", float64(time.Minute), float64(59 * time.Second), nil, nil, false},
+
+		// Test cases leveraging big.Rat precision
+		// For test execution time, since the condition is "less than or equal to", it still meets the condition even when converted to float64
+		{"current <= 1min", 0, 0, almostOneMinute, big.NewRat(0, 1), false}, // Case like 59.999999999999 seconds
+		// Comparison of very small differences
+		// Comparing 1 minute - 1 nanosecond < 1 minute, but when converted to float64, both become the same value
+		{"current < prev", 0, 0, oneMinuteMinusNano, oneMinute, false}, // Comparison of very small differences
 	}
-	for _, tt := range tests {
-		if err := testExecutionTimeAcceptable(tt.ti, tt.prev, tt.cond); err != nil {
-			if !tt.wantErr {
-				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("case-%d", i), func(t *testing.T) {
+			var tiRat, prevRat *big.Rat
+
+			if tt.tiRat != nil && tt.prevRat != nil {
+				// Use big.Rat values directly specified
+				tiRat = tt.tiRat
+				prevRat = tt.prevRat
+			} else {
+				// Create big.Rat from conventional float64 values
+				tiRat = big.NewRat(int64(tt.ti*10000), 10000)
+				prevRat = big.NewRat(int64(tt.prev*10000), 10000)
 			}
-		} else {
-			if tt.wantErr {
-				t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+
+			if err := testExecutionTimeAcceptable(tiRat, prevRat, tt.cond); err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+				}
+			} else {
+				if tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+				}
 			}
-		}
+		})
 	}
 }
 
