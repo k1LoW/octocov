@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.68.0](https://github.com/k1LoW/octocov/compare/v0.67.2...v0.68.0) - 2025-05-23
+### Breaking Changes 🛠
+- fix: use big.Rat for precise calculation by @k1LoW in https://github.com/k1LoW/octocov/pull/504
+
 ## [v0.67.2](https://github.com/k1LoW/octocov/compare/v0.67.1...v0.67.2) - 2025-05-19
 ### Other Changes
 - chore(deps): bump the dependencies group with 2 updates by @dependabot in https://github.com/k1LoW/octocov/pull/501
