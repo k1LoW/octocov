@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.68.1](https://github.com/k1LoW/octocov/compare/v0.68.0...v0.68.1) - 2025-05-30
+### Other Changes
+- chore(deps): bump github.com/cli/go-gh/v2 from 2.12.0 to 2.12.1 by @dependabot in https://github.com/k1LoW/octocov/pull/507
+- chore(deps): bump the dependencies group with 4 updates by @dependabot in https://github.com/k1LoW/octocov/pull/506
+
 ## [v0.68.0](https://github.com/k1LoW/octocov/compare/v0.67.2...v0.68.0) - 2025-05-23
 ### Breaking Changes 🛠
 - fix: use big.Rat for precise calculation by @k1LoW in https://github.com/k1LoW/octocov/pull/504
