@@ -3,22 +3,22 @@ module github.com/k1LoW/octocov
 go 1.23.8
 
 require (
-	cloud.google.com/go/bigquery v1.68.0
-	cloud.google.com/go/storage v1.54.0
+	cloud.google.com/go/bigquery v1.69.0
+	cloud.google.com/go/storage v1.55.0
 	github.com/antchfx/xmlquery v1.4.4
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.14
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.76
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.79.4
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.77
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.80.0
 	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/chainguard-dev/git-urls v1.0.2
-	github.com/expr-lang/expr v1.17.3
+	github.com/expr-lang/expr v1.17.4
 	github.com/fatih/color v1.18.0
 	github.com/go-enry/go-enry/v2 v2.9.2
 	github.com/go-git/go-git/v5 v5.16.0
 	github.com/goark/gnkf v0.7.7
 	github.com/goccy/go-json v0.10.5
-	github.com/goccy/go-yaml v1.17.1
+	github.com/goccy/go-yaml v1.18.0
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/go-github/v67 v67.0.0
@@ -29,7 +29,7 @@ require (
 	github.com/jszwec/s3fs/v2 v2.0.0
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/expand v0.16.2
-	github.com/k1LoW/ghfs v1.5.0
+	github.com/k1LoW/ghfs v1.5.1
 	github.com/k1LoW/go-github-actions v0.2.0
 	github.com/k1LoW/go-github-client/v67 v67.0.17
 	github.com/k1LoW/repin v0.3.4
@@ -51,13 +51,13 @@ require (
 	golang.org/x/oauth2 v0.30.0
 	golang.org/x/text v0.25.0
 	golang.org/x/tools v0.33.0
-	google.golang.org/api v0.234.0
+	google.golang.org/api v0.235.0
 	gopkg.in/ini.v1 v1.67.0
 )
 
 require (
 	cel.dev/expr v0.20.0 // indirect
-	cloud.google.com/go v0.121.0 // indirect
+	cloud.google.com/go v0.121.1 // indirect
 	cloud.google.com/go/auth v0.16.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.7.0 // indirect
@@ -155,14 +155,14 @@ require (
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	github.com/zhangyunhao116/fastrand v0.3.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
-	go.opentelemetry.io/contrib/detectors/gcp v1.35.0 // indirect
+	go.opentelemetry.io/contrib/detectors/gcp v1.36.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.60.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0 // indirect
-	go.opentelemetry.io/otel v1.35.0 // indirect
-	go.opentelemetry.io/otel/metric v1.35.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.35.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v1.35.0 // indirect
-	go.opentelemetry.io/otel/trace v1.35.0 // indirect
+	go.opentelemetry.io/otel v1.36.0 // indirect
+	go.opentelemetry.io/otel/metric v1.36.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.36.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v1.36.0 // indirect
+	go.opentelemetry.io/otel/trace v1.36.0 // indirect
 	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/net v0.40.0 // indirect
@@ -171,7 +171,7 @@ require (
 	golang.org/x/time v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20250505200425-f936aa4a68b2 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20250505200425-f936aa4a68b2 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20250512202823-5a2f75b736a9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250512202823-5a2f75b736a9 // indirect
 	google.golang.org/grpc v1.72.1 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
