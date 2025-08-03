@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.68.2](https://github.com/k1LoW/octocov/compare/v0.68.1...v0.68.2) - 2025-08-03
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 9 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/517
+- chore(deps): bump docker/setup-buildx-action from 3.10.0 to 3.11.1 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/516
+- chore(deps): bump the dependencies group with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/519
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/521
+
 ## [v0.68.1](https://github.com/k1LoW/octocov/compare/v0.68.0...v0.68.1) - 2025-06-16
 ### Other Changes
 - chore(deps): bump github.com/cli/go-gh/v2 from 2.12.0 to 2.12.1 by @dependabot in https://github.com/k1LoW/octocov/pull/507
