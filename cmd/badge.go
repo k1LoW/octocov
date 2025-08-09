@@ -37,12 +37,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	badgeCoverage = "coverage"
-	badgeRatio    = "ratio"
-	badgeTime     = "time"
-)
-
 var outPath string
 
 // badgeCmd represents the badge command.
@@ -51,105 +45,154 @@ var badgeCmd = &cobra.Command{
 	Short:     "generate badge",
 	Long:      `generate badge.`,
 	Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
-	ValidArgs: []string{badgeCoverage, badgeRatio, badgeTime},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-		c := config.New()
-		if err := c.Load(configPath); err != nil {
-			return err
-		}
-		c.Build()
-
-		r, err := report.New(c.Repository)
-		if err != nil {
-			return err
-		}
-
-		var out io.Writer
-		if outPath != "" {
-			file, err := os.OpenFile(outPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-			if err != nil {
-				return err
-			}
-			defer func() {
-				if err := file.Close(); err != nil {
-					os.Exit(1)
-				}
-			}()
-			out = file
-		} else {
-			out = os.Stdout
-		}
-
-		switch args[0] {
-		case badgeCoverage:
-			if err := c.CoverageConfigReady(); err != nil {
-				return err
-			}
-			if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
-				return err
-			}
-			cp := r.CoveragePercent()
-			b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
-			b.MessageColor = c.CoverageColor(cp)
-			if err := b.AddIcon(internal.Icon); err != nil {
-				return err
-			}
-			if err := b.Render(out); err != nil {
-				return err
-			}
-		case badgeRatio:
-			if !c.Loaded() {
-				cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
-			}
-			if err := c.CodeToTestRatioConfigReady(); err != nil {
-				return err
-			}
-			if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
-				return err
-			}
-			tr := r.CodeToTestRatioRatio()
-			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
-			b.MessageColor = c.CodeToTestRatioColor(tr)
-			if err := b.AddIcon(internal.Icon); err != nil {
-				return err
-			}
-			if err := b.Render(out); err != nil {
-				return err
-			}
-		case badgeTime:
-			if err := c.TestExecutionTimeConfigReady(); err != nil {
-				return err
-			}
-			var stepNames []string
-			if len(c.TestExecutionTime.Steps) > 0 {
-				stepNames = c.TestExecutionTime.Steps
-			}
-			if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
-				return err
-			}
-			d := time.Duration(r.TestExecutionTimeNano())
-			b := badge.New("test execution time", d.String())
-			b.MessageColor = c.TestExecutionTimeColor(d)
-			if err := b.AddIcon(internal.Icon); err != nil {
-				return err
-			}
-			if err := b.Render(out); err != nil {
-				return err
-			}
-		}
-
-		return nil
+	ValidArgs: []string{"coverage", "ratio", "time"},
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		return cmd.Help()
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(badgeCmd)
-	badgeCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
-	badgeCmd.Flags().StringVarP(&outPath, "out", "", "", "output file path")
+// coverage subcommand
+var badgeCoverageCmd = &cobra.Command{
+	Use:   "coverage",
+	Short: "generate coverage badge",
+	RunE: func(_ *cobra.Command, _ []string) error {
+		c, r, err := loadConfigAndReport(configPath)
+		if err != nil {
+			return err
+		}
+		out, cleanup, err := openOut(outPath)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+
+		if err := c.CoverageConfigReady(); err != nil {
+			return err
+		}
+		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
+			return err
+		}
+		cp := r.CoveragePercent()
+		return renderBadgeWithIcon("coverage", fmt.Sprintf("%.1f%%", floor1(cp)), c.CoverageColor(cp), out)
+	},
+}
+
+// ratio subcommand
+var badgeRatioCmd = &cobra.Command{
+	Use:   "ratio",
+	Short: "generate code to test ratio badge",
+	RunE: func(cmd *cobra.Command, _ []string) error {
+		c, r, err := loadConfigAndReport(configPath)
+		if err != nil {
+			return err
+		}
+		out, cleanup, err := openOut(outPath)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+
+		if !c.Loaded() {
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
+		}
+		if err := c.CodeToTestRatioConfigReady(); err != nil {
+			return err
+		}
+		if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
+			return err
+		}
+		tr := r.CodeToTestRatioRatio()
+		return renderBadgeWithIcon("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)), c.CodeToTestRatioColor(tr), out)
+	},
+}
+
+// time subcommand
+var badgeTimeCmd = &cobra.Command{
+	Use:   "time",
+	Short: "generate test execution time badge",
+	RunE: func(_ *cobra.Command, _ []string) error {
+		c, r, err := loadConfigAndReport(configPath)
+		if err != nil {
+			return err
+		}
+		out, cleanup, err := openOut(outPath)
+		if err != nil {
+			return err
+		}
+		defer cleanup()
+
+		if err := c.TestExecutionTimeConfigReady(); err != nil {
+			return err
+		}
+		var stepNames []string
+		if len(c.TestExecutionTime.Steps) > 0 {
+			stepNames = c.TestExecutionTime.Steps
+		}
+		if err := r.MeasureTestExecutionTime(context.Background(), stepNames); err != nil {
+			return err
+		}
+		d := time.Duration(r.TestExecutionTimeNano())
+		return renderBadgeWithIcon("test execution time", d.String(), c.TestExecutionTimeColor(d), out)
+	},
+}
+
+// loadConfigAndReport load config and create report.
+func loadConfigAndReport(cfgPath string) (*config.Config, *report.Report, error) {
+	c := config.New()
+	if err := c.Load(cfgPath); err != nil {
+		return nil, nil, err
+	}
+	c.Build()
+	r, err := report.New(c.Repository)
+	if err != nil {
+		return nil, nil, err
+	}
+	return c, r, nil
+}
+
+// openOut open output writer and return cleanup function.
+func openOut(path string) (io.Writer, func(), error) {
+	if path == "" {
+		return os.Stdout, func() {}, nil
+	}
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
+	if err != nil {
+		return nil, nil, err
+	}
+	cleanup := func() {
+		if err := file.Close(); err != nil {
+			// keep the original behavior: exit on close error
+			os.Exit(1)
+		}
+	}
+	return file, cleanup, nil
+}
+
+// renderBadgeWithIcon render badge with icon.
+func renderBadgeWithIcon(name, message, color string, out io.Writer) error {
+	b := badge.New(name, message)
+	b.MessageColor = color
+	if err := b.AddIcon(internal.Icon); err != nil {
+		return err
+	}
+	return b.Render(out)
 }
 
 // floor1 round down to one decimal place.
 func floor1(v float64) float64 {
 	return math.Floor(v*10) / 10
+}
+
+// setBadgeFlags set flags for badge subcommands.
+func setBadgeFlags(cmd *cobra.Command) {
+	cmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
+	cmd.Flags().StringVarP(&outPath, "out", "", "", "output file path")
+}
+
+func init() {
+	rootCmd.AddCommand(badgeCmd)
+	badgeCmd.AddCommand(badgeCoverageCmd, badgeRatioCmd, badgeTimeCmd)
+	setBadgeFlags(badgeCoverageCmd)
+	setBadgeFlags(badgeRatioCmd)
+	setBadgeFlags(badgeTimeCmd)
 }
