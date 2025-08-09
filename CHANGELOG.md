@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.69.0](https://github.com/k1LoW/octocov/compare/v0.68.2...v0.69.0) - 2025-08-09
+### New Features 🎉
+- cmd: Refactor `badge` command into subcommands with shared flags by @umatare5 in https://github.com/k1LoW/octocov/pull/525
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/522
+
 ## [v0.68.2](https://github.com/k1LoW/octocov/compare/v0.68.1...v0.68.2) - 2025-08-03
 ### Other Changes
 - chore(deps): bump the dependencies group across 1 directory with 9 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/517
