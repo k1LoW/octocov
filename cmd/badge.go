@@ -47,7 +47,7 @@ var outPath string
 
 // badgeCmd represents the badge command.
 var badgeCmd = &cobra.Command{
-	Use:       "badge",
+	Use:       "badge <coverage|ratio|time>",
 	Short:     "generate badge",
 	Long:      `generate badge.`,
 	Args:      cobra.MatchAll(cobra.ExactArgs(1), cobra.OnlyValidArgs),
