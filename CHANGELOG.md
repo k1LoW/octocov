@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.70.0](https://github.com/k1LoW/octocov/compare/v0.69.0...v0.70.0) - 2025-08-29
+### Breaking Changes 🛠
+- fix: `ls-files` support monorepo directory structure by @k1LoW in https://github.com/k1LoW/octocov/pull/534
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/530
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/532
+
 ## [v0.69.0](https://github.com/k1LoW/octocov/compare/v0.68.2...v0.69.0) - 2025-08-09
 ### New Features 🎉
 - cmd: Refactor `badge` command into subcommands with shared flags by @umatare5 in https://github.com/k1LoW/octocov/pull/525
