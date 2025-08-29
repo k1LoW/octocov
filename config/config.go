@@ -18,6 +18,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/internal"
 	"golang.org/x/text/language"
 )
 
@@ -35,7 +36,7 @@ const (
 	red         = "#E05D44"
 )
 
-var DefaultPaths = []string{".octocov.yml", "octocov.yml"}
+var Paths = internal.ConfigPaths
 
 type Config struct {
 	Repository        string             `yaml:"repository"`
@@ -161,7 +162,7 @@ func (c *Config) Setwd(path string) {
 func (c *Config) Load(path string) error {
 	path = filepath.FromSlash(path)
 	if path == "" {
-		for _, p := range DefaultPaths {
+		for _, p := range Paths {
 			if f, err := os.Stat(filepath.Join(c.wd, p)); err == nil && !f.IsDir() {
 				if path != "" {
 					return fmt.Errorf("duplicate config file [%s, %s]", path, p)

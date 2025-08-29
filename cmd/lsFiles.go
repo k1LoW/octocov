@@ -26,6 +26,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -79,7 +80,7 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		gitRoot, err := internal.RootPath(wd)
+		root, err := internal.RootPath(wd)
 		if err != nil {
 			return err
 		}
@@ -102,11 +103,9 @@ var lsFilesCmd = &cobra.Command{
 		}); err != nil {
 			return err
 		}
-		sort.Slice(files, func(i int, j int) bool {
-			return files[i] < files[j]
-		})
+		slices.Sort(files)
 
-		prefix := internal.DetectPrefix(gitRoot, wd, files, cfiles)
+		prefix := internal.DetectPrefix(root, wd, files, cfiles)
 		for _, f := range r.Coverage.Files {
 			p := filepath.Clean(f.File)
 			if !strings.HasPrefix(p, prefix) {

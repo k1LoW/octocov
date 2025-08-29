@@ -47,7 +47,7 @@ var migrateBqTableCmd = &cobra.Command{
 			return err
 		}
 		if !c.Loaded() {
-			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.Paths, " and "))
 		}
 
 		c.Build()

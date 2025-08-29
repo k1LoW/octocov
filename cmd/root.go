@@ -74,7 +74,7 @@ var rootCmd = &cobra.Command{
 		c.Build()
 
 		if !c.Loaded() {
-			cmd.PrintErrf("%s are not found\n", strings.Join(config.DefaultPaths, " and "))
+			cmd.PrintErrf("%s are not found\n", strings.Join(config.Paths, " and "))
 		}
 
 		ctx, cancel := context.WithTimeout(context.Background(), c.Timeout)

@@ -44,7 +44,7 @@ var initCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		cf := config.DefaultPaths[0]
+		cf := config.Paths[0]
 		p := filepath.Join(wd, cf)
 		if _, err := os.Stat(p); err == nil {
 			return fmt.Errorf("%s already exist", p)
