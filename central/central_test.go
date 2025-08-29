@@ -37,7 +37,7 @@ func TestCollectReports(t *testing.T) {
 	}
 
 	got := ctr.reports
-	if want := 5; len(got) != want {
+	if want := 6; len(got) != want {
 		t.Errorf("got %v\nwant %v", len(got), want)
 	}
 }
@@ -71,7 +71,7 @@ func TestGenerateBadges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := 10; len(paths) != want {
+	if want := 11; len(paths) != want {
 		t.Errorf("got %v\nwant %v", len(paths), want)
 	}
 
@@ -89,7 +89,7 @@ func TestGenerateBadges(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if want := 10; len(got) != want {
+	if want := 11; len(got) != want {
 		t.Errorf("got %v\nwant %v", len(got), want)
 	}
 }
