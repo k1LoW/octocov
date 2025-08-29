@@ -8,6 +8,41 @@ import (
 	"strings"
 )
 
+var ConfigPaths = []string{".octocov.yml", "octocov.yml"}
+
+func GitRoot(base string) (string, error) {
+	p, err := filepath.Abs(base)
+	if err != nil {
+		return "", err
+	}
+	for {
+		fi, err := os.Stat(p)
+		if err != nil {
+			return "", err
+		}
+		if !fi.IsDir() {
+			p = filepath.Dir(p)
+			continue
+		}
+
+		// Check for .git/config file
+		gitConfig := filepath.Join(p, ".git", "config")
+		if fi, err := os.Stat(gitConfig); err == nil && !fi.IsDir() {
+			return p, nil
+		}
+
+		if filepath.Dir(p) == p {
+			// root directory
+			break
+		}
+		p = filepath.Dir(p)
+	}
+
+	// Build error message with all checked paths
+	allPaths := []string{".git/config"}
+	return "", fmt.Errorf("failed to traverse the root path (looking for %s): %s", strings.Join(allPaths, " or "), base)
+}
+
 func RootPath(base string) (string, error) {
 	p, err := filepath.Abs(base)
 	if err != nil {
@@ -22,20 +57,34 @@ func RootPath(base string) (string, error) {
 			p = filepath.Dir(p)
 			continue
 		}
+
+		// Check for .git/config file
 		gitConfig := filepath.Join(p, ".git", "config")
 		if fi, err := os.Stat(gitConfig); err == nil && !fi.IsDir() {
 			return p, nil
 		}
+
+		// Check for all config files in defaultConfigPaths
+		for _, configFile := range ConfigPaths {
+			configPath := filepath.Join(p, configFile)
+			if fi, err := os.Stat(configPath); err == nil && !fi.IsDir() {
+				return p, nil
+			}
+		}
+
 		if filepath.Dir(p) == p {
 			// root directory
 			break
 		}
 		p = filepath.Dir(p)
 	}
-	return "", fmt.Errorf("failed to traverse the Git root path: %s", base)
+
+	// Build error message with all checked paths
+	allPaths := append([]string{".git/config"}, ConfigPaths...)
+	return "", fmt.Errorf("failed to traverse the root path (looking for %s): %s", strings.Join(allPaths, " or "), base)
 }
 
-func DetectPrefix(gitRoot, wd string, files, cfiles []string) string {
+func DetectPrefix(root, wd string, files, cfiles []string) string {
 	var rcfiles [][]string
 	for _, f := range cfiles {
 		s := strings.Split(filepath.FromSlash(f), string(filepath.Separator))
@@ -74,17 +123,17 @@ func DetectPrefix(gitRoot, wd string, files, cfiles []string) string {
 				file := files[j]
 				fp := strings.TrimSuffix(file, suffix)
 
-				// fmt.Printf("gitRoot: %s\nwd: %s\n", gitRoot, wd)
+				// fmt.Printf("root: %s\nwd: %s\n", root, wd)
 				// fmt.Printf("file: %s\ncfile: %s\n", file, cfile)
 				// fmt.Printf("suffix: %s\n", suffix)
 				// fmt.Printf("file_prefix: %s\ncfile_prefix: %s\n", fp, cfp)
 				// fmt.Printf("---\n")
 
-				if len(fp) < len(gitRoot) {
-					cfp = filepath.Join(cfp, strings.TrimPrefix(gitRoot, fp))
+				if len(fp) < len(root) {
+					cfp = filepath.Join(cfp, strings.TrimPrefix(root, fp))
 				}
 
-				prefix := filepath.Join(cfp, strings.TrimPrefix(wd, gitRoot))
+				prefix := filepath.Join(cfp, strings.TrimPrefix(wd, root))
 				if prefix == "." {
 					return ""
 				}
