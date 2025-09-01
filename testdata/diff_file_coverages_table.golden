@@ -1,0 +1,9 @@
+### Code coverage of files in pull request scope (75.0% → 58.3%)
+
+|                                            Files                                            | Coverage |  +/-   |  Status  |
+|---------------------------------------------------------------------------------------------|---------:|-------:|---------:|
+| [zcase/added.go](https://github.com/k1LoW/octocov/blob/afterhash/zcase/added.go)            | 66.6%    | +66.6% | added    |
+| [zcase/affected.go](https://github.com/k1LoW/octocov/blob/afterhash/zcase/affected.go)      | 50.0%    | -33.4% | affected |
+| [zcase/removed.go](https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed.go)       | 0.0%     | -66.7% | removed  |
+| [zcase/rename_new.go](https://github.com/k1LoW/octocov/blob/afterhash/zcase/rename_new.go)  | 66.6%    | +66.6% | renamed  |
+| [zcase/rename_old.go](https://github.com/k1LoW/octocov/blob/beforehash/zcase/rename_old.go) | 0.0%     | -66.7% | affected |
