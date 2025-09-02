@@ -274,6 +274,94 @@ central:
   push:                                    # enable self git push
 ```
 
+### Merging reports from multiple GitHub Action jobs
+
+This example illustrates how to merge coverage reports from multiple jobs.
+It is useful when you are testing code branches for multiple targets (e.g. OS, runtime version, dependency version, etc).
+
+```yaml
+# .github/workflows/ci.yml
+name: merge coverages from multiple jobs
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - platform: 'macos-latest'
+          - platform: 'ubuntu-latest'
+          - platform: 'windows-latest'
+    runs-on: ${{ matrix.platform }}
+    permissions:
+      contents: read # to checkout
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: YOUR TEST HERE
+
+      - name: Upload coverage to workspace
+        uses: actions/upload-artifact@v4
+        with:
+          path: lcov.info # adjust this path to your coverage file
+          name: octocov-${{ matrix.platform }}
+          if-no-files-found: error
+
+  coverage-aggregation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # to checkout
+      pull-requests: write # for octocov to post comments
+      actions: read # for octocov to parse test execution time
+    needs:
+      - test
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: octocov-*
+
+      - uses: k1LoW/octocov-action@v1
+```
+
+```yaml
+# .octocov.yml
+codeToTestRatio:
+  code:
+    - '**/*.go'
+    - '!**/*_test.go'
+  test:
+    - '**/*_test.go'
+coverage:
+  paths:
+    # Name of artifacts uploaded by the test-running jobs.
+    # lcov.info (or equivalent) will be downloaded in the directory named after the below.
+    - "octocov-windows-latest"
+    - "octocov-ubuntu-latest"
+    - "octocov-macos-latest"
+comment:
+  if: is_pull_request
+  hideFooterLink: true
+  deletePrevious: true
+summary:
+  if: true
+report:
+  if: is_default_branch
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+diff:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+```
+
 #### Supported datastores
 
 - GitHub repository
