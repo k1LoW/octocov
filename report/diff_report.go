@@ -253,7 +253,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 	}
 }
 
-func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, wd string) string {
+func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd string) string {
 	if d.Coverage == nil {
 		return ""
 	}
@@ -289,7 +289,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, wd string) 
 
 	for _, fc := range d.Coverage.Files {
 		if prf, ok := prFiles[fc.File]; ok {
-			name := fmt.Sprintf("[%s](%s)", strings.TrimPrefix(prf.Filename, wd+"/"), prf.BlobURL)
+			name := fmt.Sprintf("[%s](%s)", prf.Filename, prf.BlobURL)
 			rows = append(rows, createRow(name, fc, prf.Status))
 			continue
 		}
@@ -308,13 +308,12 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, wd string) 
 		}
 
 		filePath := name
-		filePath = strings.TrimPrefix(filePath, repoURL)
-		if wd != "" && !strings.HasPrefix(filePath, wd+"/") && !filepath.IsAbs(filePath) {
-			filePath = filepath.Clean(filepath.Join(wd, filePath))
+		if relWd != "" && !strings.HasPrefix(filePath, relWd+"/") && !filepath.IsAbs(filePath) {
+			filePath = filepath.Clean(filepath.Join(relWd, filePath))
 		}
 
 		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {
-			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", name, repoURL, commit, filePath)
+			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", filePath, repoURL, commit, filePath)
 		}
 		rows = append(rows, createRow(name, fc, "affected"))
 	}
