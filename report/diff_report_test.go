@@ -75,7 +75,7 @@ func TestDiffFileCoveragesTable(t *testing.T) {
 		{Filename: "zcase/removed.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed.go", Status: "removed"},
 		{Filename: "zcase/removed_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed_test.go", Status: "removed"},
 		{Filename: "zcase/rename_new.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/rename_new.go", Status: "renamed"},
-	})
+	}, "")
 	f := "diff_file_coverages_table"
 	if os.Getenv("UPDATE_GOLDEN") != "" {
 		golden.Update(t, testdataDir(t), f, got)
