@@ -253,7 +253,7 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 	}
 }
 
-func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
+func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, wd string) string {
 	if d.Coverage == nil {
 		return ""
 	}
@@ -289,7 +289,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 
 	for _, fc := range d.Coverage.Files {
 		if prf, ok := prFiles[fc.File]; ok {
-			name := fmt.Sprintf("[%s](%s)", prf.Filename, prf.BlobURL)
+			name := fmt.Sprintf("[%s](%s)", strings.TrimPrefix(prf.Filename, wd+"/"), prf.BlobURL)
 			rows = append(rows, createRow(name, fc, prf.Status))
 			continue
 		}
@@ -297,17 +297,24 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile) string {
 			continue
 		}
 
-		name := fc.File
 		repoURL := fmt.Sprintf("%s/%s", os.Getenv("GITHUB_SERVER_URL"), os.Getenv("GITHUB_REPOSITORY"))
+		// trim prefix for Go coverage (no sufficient checks on the other formats)
+		name := strings.TrimPrefix(fc.File, strings.TrimPrefix(repoURL, "https://")+"/")
 		commit := ""
 		if fc.FileCoverageA != nil && d.CommitA != "" {
 			commit = d.CommitA
 		} else if fc.FileCoverageB != nil && d.CommitB != "" {
 			commit = d.CommitB
 		}
-		filePath := strings.TrimLeft(fc.File, repoURL)
-		if repoURL != "/" && repoURL != "" && commit != "" && !filepath.IsAbs(filePath) {
-			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", filePath, repoURL, commit, filePath)
+
+		filePath := name
+		filePath = strings.TrimPrefix(filePath, repoURL)
+		if wd != "" && !strings.HasPrefix(filePath, wd+"/") && !filepath.IsAbs(filePath) {
+			filePath = filepath.Clean(filepath.Join(wd, filePath))
+		}
+
+		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {
+			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", name, repoURL, commit, filePath)
 		}
 		rows = append(rows, createRow(name, fc, "affected"))
 	}
