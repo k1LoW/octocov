@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.71.1](https://github.com/k1LoW/octocov/compare/v0.71.0...v0.71.1) - 2025-09-03
+### Fix bug 🐛
+- fix: DiffReport.FileCoveragesTable file name & path by @toiroakr in https://github.com/k1LoW/octocov/pull/542
+### Other Changes
+- doc: example of merging reports from multiple jobs by @exoego in https://github.com/k1LoW/octocov/pull/539
+
 ## [v0.71.0](https://github.com/k1LoW/octocov/compare/v0.70.0...v0.71.0) - 2025-09-01
 ### Breaking Changes 🛠
 - Display not modified/but affected files  in file coverage by @toiroakr in https://github.com/k1LoW/octocov/pull/536
