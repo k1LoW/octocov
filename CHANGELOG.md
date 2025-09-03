@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.71.2](https://github.com/k1LoW/octocov/compare/v0.71.1...v0.71.2) - 2025-09-03
+### Other Changes
+- fix: update FileCoveragesTable to use relative working directory by @toiroakr in https://github.com/k1LoW/octocov/pull/543
+
 ## [v0.71.1](https://github.com/k1LoW/octocov/compare/v0.71.0...v0.71.1) - 2025-09-03
 ### Fix bug 🐛
 - fix: DiffReport.FileCoveragesTable file name & path by @toiroakr in https://github.com/k1LoW/octocov/pull/542
