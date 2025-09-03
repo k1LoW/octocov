@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
@@ -73,7 +74,16 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if rPrev != nil {
 		d := r.Compare(rPrev)
 		table = d.Table()
-		fileTable = d.FileCoveragesTable(files, c.Wd())
+		relWd := c.Root()
+		if c.GitRoot != "" {
+			if rw, err := filepath.Rel(c.GitRoot, c.Root()); err == nil {
+				relWd = filepath.ToSlash(rw)
+			}
+		}
+		if relWd == "." {
+			relWd = ""
+		}
+		fileTable = d.FileCoveragesTable(files, relWd)
 		for _, s := range d.CustomMetrics {
 			customTables = append(customTables, s.Table(), s.MetadataTable())
 		}
