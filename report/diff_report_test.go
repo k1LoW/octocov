@@ -68,7 +68,7 @@ func TestDiffFileCoveragesTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := a.Compare(b).FileCoveragesTable([]*gh.PullRequestFile{
+	got := a.Compare(b).FileCoveragesTable([]*gh.PullRequestFile{ //nostyle:funcfmt
 		{Filename: "zcase/added.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/added.go", Status: "added"},
 		{Filename: "zcase/added_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/added_test.go", Status: "added"},
 		{Filename: "zcase/affected_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/affected.go", Status: "modified"},

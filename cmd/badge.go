@@ -51,7 +51,7 @@ var badgeCmd = &cobra.Command{
 	},
 }
 
-// coverage subcommand
+// coverage subcommand.
 var badgeCoverageCmd = &cobra.Command{
 	Use:   "coverage",
 	Short: "generate coverage badge",
@@ -77,7 +77,7 @@ var badgeCoverageCmd = &cobra.Command{
 	},
 }
 
-// ratio subcommand
+// ratio subcommand.
 var badgeRatioCmd = &cobra.Command{
 	Use:   "ratio",
 	Short: "generate code to test ratio badge",
@@ -106,7 +106,7 @@ var badgeRatioCmd = &cobra.Command{
 	},
 }
 
-// time subcommand
+// time subcommand.
 var badgeTimeCmd = &cobra.Command{
 	Use:   "time",
 	Short: "generate test execution time badge",
