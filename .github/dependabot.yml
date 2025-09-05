@@ -32,11 +32,7 @@ updates:
       prefix: "chore"
       include: "scope"
     ignore:
-      - dependency-name: "github.com/migueleliasweb/go-github-mock"
-        versions: ["1.1.x"]
       - dependency-name: "github.com/goark/gnkf"
-        versions: ["0.x.x"]
-      - dependency-name: "github.com/hhatto/gocloc"
         versions: ["0.x.x"]
       - dependency-name: "github.com/olekukonko/tablewriter"
         versions: ["1.x.x"]
