@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.71.4](https://github.com/k1LoW/octocov/compare/v0.71.3...v0.71.4) - 2025-09-05
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/548
+
 ## [v0.71.3](https://github.com/k1LoW/octocov/compare/v0.71.2...v0.71.3) - 2025-09-04
 ### Fix bug 🐛
 - fix: fix GitRoot in config by @toiroakr in https://github.com/k1LoW/octocov/pull/545
