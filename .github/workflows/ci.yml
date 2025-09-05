@@ -41,6 +41,8 @@ jobs:
         with:
           config-file: .gostyle.yml
           fail-on-error: true
+        env:
+          GOTOOLCHAIN: auto
 
       - name: Run govulncheck
         uses: golang/govulncheck-action@b625fbe08f3bccbe446d94fbf87fcc875a4f50ee # v1.0.4
