@@ -1,4 +1,4 @@
-FROM golang:1-bullseye AS builder
+FROM golang:1.24.7 AS builder
 
 WORKDIR /workdir/
 COPY . /workdir/
@@ -9,7 +9,7 @@ RUN update-ca-certificates
 
 RUN make build
 
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /workdir/octocov ./usr/bin
