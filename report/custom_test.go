@@ -510,7 +510,7 @@ func TestDiffCustomMetricSetMetadataTable(t *testing.T) {
 	}
 }
 
-func TestReport_CustomMetricsAcceptables(t *testing.T) {
+func TestReport_CustomMetricsAcceptable(t *testing.T) {
 	tests := []struct {
 		name     string
 		current  *Report
@@ -697,18 +697,18 @@ func TestReport_CustomMetricsAcceptables(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.current.CustomMetricsAcceptables(tt.prev)
+			err := tt.current.CustomMetricsAcceptable(tt.prev)
 			if tt.wantErr {
 				if err == nil {
-					t.Errorf("CustomMetricsAcceptables() expected error, got nil")
+					t.Errorf("expected error, got nil")
 					return
 				}
 				if tt.errorMsg != "" && !strings.Contains(err.Error(), tt.errorMsg) {
-					t.Errorf("CustomMetricsAcceptables() error = %v, want error containing %q", err, tt.errorMsg)
+					t.Errorf("got error = %v, want error containing %q", err, tt.errorMsg)
 				}
 			} else {
 				if err != nil {
-					t.Errorf("CustomMetricsAcceptables() error = %v, want nil", err)
+					t.Errorf("got error = %v, want nil", err)
 				}
 			}
 		})

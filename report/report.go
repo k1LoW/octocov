@@ -560,7 +560,7 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 	return d
 }
 
-func (r *Report) CustomMetricsAcceptables(cr config.Reporter) error {
+func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 	if cr == nil {
 		return nil
 	}
@@ -571,10 +571,7 @@ func (r *Report) CustomMetricsAcceptables(cr config.Reporter) error {
 	var errs error
 	for _, set := range r.CustomMetrics {
 		setPrev, ok := lo.Find(rPrev.CustomMetrics, func(s *CustomMetricSet) bool {
-			if s.Key == set.Key {
-				return true
-			}
-			return false
+			return s.Key == set.Key
 		})
 		if !ok {
 			continue
@@ -585,10 +582,7 @@ func (r *Report) CustomMetricsAcceptables(cr config.Reporter) error {
 		for _, m := range set.Metrics {
 			current[m.Key] = m.Value
 			mPrev, ok := lo.Find(setPrev.Metrics, func(mm *CustomMetric) bool {
-				if mm.Key == m.Key {
-					return true
-				}
-				return false
+				return mm.Key == m.Key
 			})
 			var prevVal float64
 			if ok {
