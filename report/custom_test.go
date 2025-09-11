@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/tenntenn/golden"
@@ -258,6 +259,11 @@ func TestCustomMetricsSetValidate(t *testing.T) {
 				{Key: "goos", Value: "linux"},
 			},
 		}, true},
+		{&CustomMetricSet{
+			Key:         "key",
+			Metrics:     []*CustomMetric{},
+			Acceptables: []string{"true"},
+		}, true},
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
@@ -499,6 +505,211 @@ func TestDiffCustomMetricSetMetadataTable(t *testing.T) {
 			}
 			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
 				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestReport_CustomMetricsAcceptables(t *testing.T) {
+	tests := []struct {
+		name     string
+		current  *Report
+		prev     *Report
+		wantErr  bool
+		errorMsg string
+	}{
+		// Basic current variable usage
+		{
+			name: "basic_current_usage",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "score", Value: 85.5},
+						},
+						Acceptables: []string{"current.score > 80"},
+					},
+				},
+			},
+			prev:    &Report{CustomMetrics: []*CustomMetricSet{}},
+			wantErr: false,
+		},
+		// Previous comparison
+		{
+			name: "prev_comparison",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "requests", Value: 2000.0},
+						},
+						Acceptables: []string{"current.requests > prev.requests"},
+					},
+				},
+			},
+			prev: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "requests", Value: 1800.0},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		// Diff variable usage
+		{
+			name: "diff_usage",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "performance", Value: 95.0},
+						},
+						Acceptables: []string{"diff.performance > 0"},
+					},
+				},
+			},
+			prev: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "performance", Value: 90.0},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		// Condition failure
+		{
+			name: "condition_failure",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key:         "test",
+						Metrics:     []*CustomMetric{{Key: "score", Value: 75}},
+						Acceptables: []string{"current.score >= 80"},
+					},
+				},
+			},
+			prev: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key:     "test",
+						Metrics: []*CustomMetric{{Key: "score", Value: 85}},
+					},
+				},
+			},
+			wantErr:  true,
+			errorMsg: "not acceptable condition",
+		},
+		// No previous data
+		{
+			name: "no_previous_data",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "new_metric", Value: 100.0},
+						},
+						Acceptables: []string{"current.new_metric > 0 && prev.new_metric == 0"},
+					},
+				},
+			},
+			prev:    &Report{CustomMetrics: []*CustomMetricSet{}},
+			wantErr: false,
+		},
+		// Real usage pattern - performance monitoring
+		{
+			name: "performance_monitoring",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "performance_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "response_time", Value: 250.0},
+							{Key: "throughput", Value: 1500.0},
+							{Key: "error_rate", Value: 0.5},
+						},
+						Acceptables: []string{
+							"current.response_time < 300",
+							"current.throughput > 1000",
+							"current.error_rate < 1.0",
+						},
+					},
+				},
+			},
+			prev: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "performance_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "response_time", Value: 280.0},
+							{Key: "throughput", Value: 1400.0},
+							{Key: "error_rate", Value: 0.3},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+		// Real usage pattern - quality gate
+		{
+			name: "quality_gate",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "quality_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "coverage", Value: 85.0},
+							{Key: "complexity", Value: 7.5},
+						},
+						Acceptables: []string{
+							"current.coverage >= 80",
+							"current.complexity <= 8.0",
+							"current.coverage >= prev.coverage",
+						},
+					},
+				},
+			},
+			prev: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "quality_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "coverage", Value: 83.0},
+							{Key: "complexity", Value: 7.8},
+						},
+					},
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.current.CustomMetricsAcceptables(tt.prev)
+			if tt.wantErr {
+				if err == nil {
+					t.Errorf("CustomMetricsAcceptables() expected error, got nil")
+					return
+				}
+				if tt.errorMsg != "" && !strings.Contains(err.Error(), tt.errorMsg) {
+					t.Errorf("CustomMetricsAcceptables() error = %v, want error containing %q", err, tt.errorMsg)
+				}
+			} else {
+				if err != nil {
+					t.Errorf("CustomMetricsAcceptables() error = %v, want nil", err)
+				}
 			}
 		})
 	}

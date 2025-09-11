@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/expr-lang/expr"
 	"github.com/goccy/go-json"
 	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/octocov/config"
@@ -557,6 +558,69 @@ func (r *Report) Compare(r2 *Report) *DiffReport {
 		}
 	}
 	return d
+}
+
+func (r *Report) CustomMetricsAcceptables(cr config.Reporter) error {
+	if cr == nil {
+		return nil
+	}
+	rPrev, ok := cr.(*Report)
+	if !ok {
+		return fmt.Errorf("type assertion error: %T to *Report", cr)
+	}
+	var errs error
+	for _, set := range r.CustomMetrics {
+		setPrev, ok := lo.Find(rPrev.CustomMetrics, func(s *CustomMetricSet) bool {
+			if s.Key == set.Key {
+				return true
+			}
+			return false
+		})
+		if !ok {
+			continue
+		}
+		current := map[string]float64{}
+		prev := map[string]float64{}
+		diff := map[string]float64{}
+		for _, m := range set.Metrics {
+			current[m.Key] = m.Value
+			mPrev, ok := lo.Find(setPrev.Metrics, func(mm *CustomMetric) bool {
+				if mm.Key == m.Key {
+					return true
+				}
+				return false
+			})
+			var prevVal float64
+			if ok {
+				prevVal = mPrev.Value
+			}
+			prev[m.Key] = prevVal
+			diff[m.Key] = current[m.Key] - prev[m.Key]
+		}
+		variables := map[string]any{
+			"current": current,
+			"prev":    prev,
+			"diff":    diff,
+		}
+		for _, cond := range set.Acceptables {
+			if cond == "" {
+				continue
+			}
+			ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+			if err != nil {
+				errs = multierror.Append(errs, err)
+			}
+			tf, okk := ok.(bool)
+			if !okk {
+				errs = multierror.Append(errs, fmt.Errorf("invalid condition: %q", cond))
+			}
+			if !tf {
+				errs = multierror.Append(errs, fmt.Errorf("not acceptable condition: %q", cond))
+			}
+		}
+	}
+
+	return errs
 }
 
 func (r *Report) findCustomMetricSetByKey(key string) *CustomMetricSet {

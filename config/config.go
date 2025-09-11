@@ -205,6 +205,7 @@ type Reporter interface {
 	CodeToTestRatioRatio() float64
 	TestExecutionTimeNano() float64
 	IsMeasuredTestExecutionTime() bool
+	CustomMetricsAcceptables(Reporter) error
 }
 
 func (c *Config) Acceptable(r, rPrev Reporter) error {
@@ -235,6 +236,10 @@ func (c *Config) Acceptable(r, rPrev Reporter) error {
 		if err := testExecutionTimeAcceptable(curr, prev, c.TestExecutionTime.Acceptable); err != nil {
 			result = multierror.Append(result, err)
 		}
+	}
+
+	if err := r.CustomMetricsAcceptables(rPrev); err != nil {
+		result = multierror.Append(result, err)
 	}
 
 	return result.ErrorOrNil()
