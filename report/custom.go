@@ -25,11 +25,12 @@ type MetadataKV struct {
 }
 
 type CustomMetricSet struct {
-	Key      string          `json:"key"`
-	Name     string          `json:"name,omitempty"`
-	Metadata []*MetadataKV   `json:"metadata,omitempty"`
-	Metrics  []*CustomMetric `json:"metrics"`
-	report   *Report
+	Key         string          `json:"key"`
+	Name        string          `json:"name,omitempty"`
+	Metadata    []*MetadataKV   `json:"metadata,omitempty"`
+	Metrics     []*CustomMetric `json:"metrics"`
+	Acceptables []string        `json:"acceptables,omitempty"`
+	report      *Report
 }
 
 type CustomMetric struct {
