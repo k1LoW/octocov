@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.72.1](https://github.com/k1LoW/octocov/compare/v0.72.0...v0.72.1) - 2025-09-12
+### Fix bug 🐛
+- fix: handle nil or empty CustomMetrics in CustomMetricsAcceptable by @k1LoW in https://github.com/k1LoW/octocov/pull/557
+
 ## [v0.72.0](https://github.com/k1LoW/octocov/compare/v0.71.5...v0.72.0) - 2025-09-12
 ### New Features 🎉
 - feat: suppport `acceptables` for custom metirics by @k1LoW in https://github.com/k1LoW/octocov/pull/553
