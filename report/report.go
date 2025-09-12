@@ -567,6 +567,9 @@ func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 	if !ok {
 		return fmt.Errorf("type assertion error: %T to *Report", cr)
 	}
+	if rPrev == nil || len(rPrev.CustomMetrics) == 0 {
+		return nil
+	}
 	var errs []error
 	for _, set := range r.CustomMetrics {
 		setPrev, ok := lo.Find(rPrev.CustomMetrics, func(s *CustomMetricSet) bool {
