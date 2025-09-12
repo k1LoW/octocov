@@ -570,7 +570,7 @@ func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 	if rPrev == nil || len(rPrev.CustomMetrics) == 0 {
 		return nil
 	}
-	var errs []error
+	var errs error
 	for _, set := range r.CustomMetrics {
 		setPrev, ok := lo.Find(rPrev.CustomMetrics, func(s *CustomMetricSet) bool {
 			return s.Key == set.Key
@@ -604,20 +604,20 @@ func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 			}
 			ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 			if err != nil {
-				errs = append(errs, err)
+				errs = errors.Join(errs, err)
 			}
 			tf, okk := ok.(bool)
 			if !okk {
-				errs = append(errs, fmt.Errorf("invalid condition: %q", cond))
+				errs = errors.Join(errs, fmt.Errorf("invalid condition: %q", cond))
 			}
 			if !tf {
-				errs = append(errs, fmt.Errorf("not acceptable condition: %q", cond))
+				errs = errors.Join(errs, fmt.Errorf("not acceptable condition: %q", cond))
 			}
 		}
 	}
 
-	if len(errs) > 0 {
-		return errors.Join(errs...)
+	if errs != nil {
+		return errs
 	}
 	return nil
 }
