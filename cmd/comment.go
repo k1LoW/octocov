@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/hashicorp/go-multierror"
+	"github.com/k1LoW/errors"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
@@ -103,18 +103,12 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		comment = append(comment, message)
 	}
 	if err := c.Acceptable(r, rPrev); err != nil {
-		merr, ok := err.(*multierror.Error) //nolint:errorlint
-		if !ok {
-			return "", fmt.Errorf("failed to convert error to multierror: %w", err)
+		errs := errors.Errors(err)
+		var out string
+		for _, e := range errs {
+			out += fmt.Sprintf("**:no_entry_sign: %s**\n\n", capitalize(e.Error()))
 		}
-		merr.ErrorFormat = func(errors []error) string {
-			var out string
-			for _, err := range errors {
-				out += fmt.Sprintf("**:no_entry_sign: %s**\n\n", capitalize(err.Error()))
-			}
-			return out
-		}
-		comment = append(comment, merr.Error())
+		comment = append(comment, out)
 	}
 	if r.IsMeasuredCoverage() || r.IsMeasuredTestExecutionTime() || r.IsMeasuredCodeToTestRatio() {
 		comment = append(comment, table, "", fileTable)

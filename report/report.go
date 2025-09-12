@@ -3,7 +3,6 @@ package report
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,7 +17,7 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/expr-lang/expr"
 	"github.com/goccy/go-json"
-	"github.com/hashicorp/go-multierror"
+	"github.com/k1LoW/errors"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
@@ -312,19 +311,18 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 		}
 		paths = append(paths, p...)
 	}
-	var cerr *multierror.Error
+	var errs error
 	for _, path := range paths {
 		cov, rp, err := challengeParseReport(path)
 		if err != nil {
-			cerr = multierror.Append(cerr, err)
+			errs = errors.Join(errs, err)
 			continue
 		}
 		if r.Coverage == nil {
 			r.Coverage = cov
 		} else {
 			if err := r.Coverage.Merge(cov); err != nil {
-				cerr = multierror.Append(cerr, err)
-				return cerr
+				return errors.Join(errs, err)
 			}
 		}
 		r.covPaths = append(r.covPaths, rp)
@@ -334,18 +332,19 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 	if r.Coverage == nil && len(paths) == 1 {
 		path := paths[0]
 		if err := r.Load(path); err != nil {
-			cerr = multierror.Append(cerr, err)
-			return cerr
+			return errors.Join(errs, err)
 		}
 	}
 
 	if r.Coverage == nil {
-		return cerr
+		if errs != nil {
+			return errs
+		}
+		return nil
 	}
 
 	if err := r.Coverage.Exclude(exclude); err != nil {
-		cerr = multierror.Append(cerr, err)
-		return cerr
+		return errors.Join(errs, err)
 	}
 
 	return nil
@@ -568,7 +567,7 @@ func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 	if !ok {
 		return fmt.Errorf("type assertion error: %T to *Report", cr)
 	}
-	var errs error
+	var errs []error
 	for _, set := range r.CustomMetrics {
 		setPrev, ok := lo.Find(rPrev.CustomMetrics, func(s *CustomMetricSet) bool {
 			return s.Key == set.Key
@@ -602,19 +601,22 @@ func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 			}
 			ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 			if err != nil {
-				errs = multierror.Append(errs, err)
+				errs = append(errs, err)
 			}
 			tf, okk := ok.(bool)
 			if !okk {
-				errs = multierror.Append(errs, fmt.Errorf("invalid condition: %q", cond))
+				errs = append(errs, fmt.Errorf("invalid condition: %q", cond))
 			}
 			if !tf {
-				errs = multierror.Append(errs, fmt.Errorf("not acceptable condition: %q", cond))
+				errs = append(errs, fmt.Errorf("not acceptable condition: %q", cond))
 			}
 		}
 	}
 
-	return errs
+	if len(errs) > 0 {
+		return errors.Join(errs...)
+	}
+	return nil
 }
 
 func (r *Report) findCustomMetricSetByKey(key string) *CustomMetricSet {

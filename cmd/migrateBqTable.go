@@ -23,12 +23,11 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/hashicorp/go-multierror"
+	"github.com/k1LoW/errors"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/bq"
@@ -71,21 +70,24 @@ var migrateBqTableCmd = &cobra.Command{
 			return errors.New("bq:// are not exists")
 		}
 
-		var merr *multierror.Error
+		var errs error
 		for u, d := range datastores {
 			b, ok := d.(*bq.BQ)
 			if !ok {
 				continue
 			}
 			if err := b.CreateTable(ctx); err != nil {
-				merr = multierror.Append(merr, err)
+				errs = errors.Join(errs, err)
 			} else {
 				if _, err := fmt.Fprintf(os.Stderr, "%s has been created\n", u); err != nil {
-					merr = multierror.Append(merr, err)
+					errs = errors.Join(errs, err)
 				}
 			}
 		}
-		return merr
+		if errs != nil {
+			return errs
+		}
+		return nil
 	},
 }
 
