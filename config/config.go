@@ -14,8 +14,8 @@ import (
 
 	"github.com/expr-lang/expr"
 	"github.com/goccy/go-yaml"
-	"github.com/hashicorp/go-multierror"
 	"github.com/k1LoW/duration"
+	"github.com/k1LoW/errors"
 	"github.com/k1LoW/expand"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
@@ -209,12 +209,12 @@ type Reporter interface {
 }
 
 func (c *Config) Acceptable(r, rPrev Reporter) error {
-	var result *multierror.Error
+	var errs error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
 		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
 		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable); err != nil {
-			result = multierror.Append(result, err)
+			errs = errors.Join(errs, err)
 		}
 	}
 
@@ -222,7 +222,7 @@ func (c *Config) Acceptable(r, rPrev Reporter) error {
 		prev := big.NewRat(int64(rPrev.CodeToTestRatioRatio()*10000), 10000)
 		curr := big.NewRat(int64(r.CodeToTestRatioRatio()*10000), 10000)
 		if err := codeToTestRatioAcceptable(curr, prev, c.CodeToTestRatio.Acceptable); err != nil {
-			result = multierror.Append(result, err)
+			errs = errors.Join(errs, err)
 		}
 	}
 
@@ -234,15 +234,18 @@ func (c *Config) Acceptable(r, rPrev Reporter) error {
 		prev := big.NewRat(int64(prevVal*10000), 10000)
 		curr := big.NewRat(int64(r.TestExecutionTimeNano()*10000), 10000)
 		if err := testExecutionTimeAcceptable(curr, prev, c.TestExecutionTime.Acceptable); err != nil {
-			result = multierror.Append(result, err)
+			errs = errors.Join(errs, err)
 		}
 	}
 
 	if err := r.CustomMetricsAcceptable(rPrev); err != nil {
-		result = multierror.Append(result, err)
+		errs = errors.Join(errs, err)
 	}
 
-	return result.ErrorOrNil()
+	if errs != nil {
+		return errs
+	}
+	return nil
 }
 
 var (
