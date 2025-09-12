@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.72.0](https://github.com/k1LoW/octocov/compare/v0.71.5...v0.72.0) - 2025-09-12
+### New Features 🎉
+- feat: suppport `acceptables` for custom metirics by @k1LoW in https://github.com/k1LoW/octocov/pull/553
+### Other Changes
+- chore(deps): bump Songmu/tagpr from 1.7.2 to 1.8.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/551
+- chore: use k1LoW/errors instead by @k1LoW in https://github.com/k1LoW/octocov/pull/555
+- chore(deps): bump golang.org/x/oauth2 from 0.30.0 to 0.31.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/550
+
 ## [v0.71.5](https://github.com/k1LoW/octocov/compare/v0.71.4...v0.71.5) - 2025-09-06
 
 ## [v0.71.4](https://github.com/k1LoW/octocov/compare/v0.71.3...v0.71.4) - 2025-09-05
