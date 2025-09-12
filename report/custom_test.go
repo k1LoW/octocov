@@ -693,6 +693,22 @@ func TestReport_CustomMetricsAcceptable(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "no prev report",
+			current: &Report{
+				CustomMetrics: []*CustomMetricSet{
+					{
+						Key: "test_metrics",
+						Metrics: []*CustomMetric{
+							{Key: "score", Value: 85.5},
+						},
+						Acceptables: []string{"current.score > 80"},
+					},
+				},
+			},
+			prev:    nil,
+			wantErr: false,
+		},
 	}
 
 	for _, tt := range tests {
