@@ -1283,6 +1283,60 @@ The JSON schema for custom metrics can be found [here](report/custom_metrics_sch
 
 If there are multiple custom metrics JSON files, specify each file path in a separate environment variable (example [here](https://github.com/k1LoW/octocov/blob/68e007b4164ad6dab4ad978bce8e88c21280900a/.github/workflows/ci.yml#L59-L60)) or [combine the JSONs that satisfy the JSON schema into an array](testdata/custom_metrics/benchmark_0_1.json).
 
+#### Custom metrics acceptable conditions
+
+You can set acceptable conditions for custom metrics using the `acceptables` array within your JSON file.
+
+**JSON file format with acceptables:**
+
+``` json
+{
+  "key": "performance_metrics",
+  "name": "Performance Metrics",
+  "metrics": [
+    {
+      "key": "response_time",
+      "name": "Response Time",
+      "value": 250.0,
+      "unit": "ms"
+    },
+    {
+      "key": "throughput",
+      "name": "Throughput",
+      "value": 1500.0,
+      "unit": "req/s"
+    },
+    {
+      "key": "error_rate",
+      "name": "Error Rate",
+      "value": 0.5,
+      "unit": "%"
+    }
+  ],
+  "acceptables": [
+    "current.response_time < 300",
+    "current.throughput > 1000",
+    "current.error_rate < 1.0",
+    "current.response_time <= prev.response_time"
+  ]
+}
+```
+
+**Available variables in acceptables conditions:**
+
+| Variable | Description |
+| --- | --- |
+| `current.{metric_key}` | Current metric value for the specified key |
+| `prev.{metric_key}` | Previous metric value. This value is taken from `diff.datastores:` |
+| `diff.{metric_key}` | The result of `current.{metric_key} - prev.{metric_key}` |
+
+If conditions are not met:
+
+``` console
+$ octocov
+Error: custom metrics "performance_metrics" not acceptable condition (`current.response_time < 300`)
+```
+
 ## Detecting pull request number
 
 octocov detect pull request number following order.
