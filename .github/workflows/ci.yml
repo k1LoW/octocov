@@ -37,7 +37,7 @@ jobs:
           golangci_lint_flags: --timeout=5m
 
       - name: Run gostyle
-        uses: k1LoW/gostyle-action@49a891e165af912f2066da065331dd20563c3369 # v1.4.0
+        uses: k1LoW/gostyle-action@56cc0ed69a96366aa5be08df58a858e306c1518c # v1.5.0
         with:
           config-file: .gostyle.yml
           fail-on-error: true
