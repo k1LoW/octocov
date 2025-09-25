@@ -72,6 +72,14 @@ jobs:
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_0: ./testdata/custom_metrics/benchmark_0.json
           GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
 
+      - name: 'RE: Build octocov and run as a action' # for checking re-upload artifact
+        uses: ./testdata/actions/coverage
+        env:
+          MACKEREL_API_KEY: ${{ secrets.MACKEREL_API_KEY }}
+          OCTOCOV_CUSTOM_METRICS_BENCHMARK_1: ./testdata/custom_metrics/benchmark_1.json
+          OCTOCOV_CUSTOM_METRICS_BENCHMARK_0: ./testdata/custom_metrics/benchmark_0.json
+          GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
+
       - name: Show rate limit
         run: |
           curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit

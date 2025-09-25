@@ -541,7 +541,19 @@ func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n i
 	return nil
 }
 
-func (g *Gh) PutArtifact(ctx context.Context, name, fp string, content []byte) error {
+func (g *Gh) PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error {
+	current, _, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, &github.ListOptions{})
+	if err != nil {
+		return err
+	}
+	for _, a := range current.Artifacts {
+		if a.GetName() == name {
+			if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, a.GetID()); err != nil {
+				return err
+			}
+			break
+		}
+	}
 	return artifact.Upload(ctx, name, fp, bytes.NewReader(content))
 }
 
