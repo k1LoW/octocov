@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.73.0](https://github.com/k1LoW/octocov/compare/v0.72.1...v0.73.0) - 2025-09-25
+### Other Changes
+- chore(deps): bump k1LoW/gostyle-action from 1.4.0 to 1.5.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/560
+- chore(deps): bump the dependencies group with 9 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/561
+- fix: support artifact re-upload by @k1LoW in https://github.com/k1LoW/octocov/pull/564
+- chore(deps): bump cloud.google.com/go/storage from 1.56.1 to 1.56.2 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/563
+
 ## [v0.72.1](https://github.com/k1LoW/octocov/compare/v0.72.0...v0.72.1) - 2025-09-12
 ### Fix bug 🐛
 - fix: handle nil or empty CustomMetrics in CustomMetricsAcceptable by @k1LoW in https://github.com/k1LoW/octocov/pull/557
