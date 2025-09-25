@@ -56,11 +56,11 @@ func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
 	if err != nil {
 		return err
 	}
-	runIDstr := os.Getenv("GITHUB_RUN_ID")
-	if runIDstr == "" {
-		return errors.New("GITHUB_RUN_ID is not set")
+	s := os.Getenv("GITHUB_RUN_ID")
+	if s == "" {
+		return errors.New("env GITHUB_RUN_ID is not set")
 	}
-	runID, err := strconv.ParseInt(runIDstr, 10, 64)
+	runID, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
 	}
