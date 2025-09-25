@@ -52,6 +52,7 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 }
 
 func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
+	// i think this fails
 	r, err := gh.Parse(a.repository)
 	if err != nil {
 		return err
