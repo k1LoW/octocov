@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"os"
+	"strconv"
 	"strings"
 	"testing/fstest"
 
@@ -50,7 +52,19 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 }
 
 func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
-	return a.gh.PutArtifact(ctx, a.name, path, content)
+	r, err := gh.Parse(a.repository)
+	if err != nil {
+		return err
+	}
+	runIDstr := os.Getenv("GITHUB_RUN_ID")
+	if runIDstr == "" {
+		return errors.New("GITHUB_RUN_ID is not set")
+	}
+	runID, err := strconv.ParseInt(runIDstr, 10, 64)
+	if err != nil {
+		return fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
+	}
+	return a.gh.PutArtifact(ctx, r.Owner, r.Repo, runID, a.name, path, content)
 }
 
 func (a *Artifact) FS() (fs.FS, error) {
