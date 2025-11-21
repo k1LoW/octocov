@@ -1,6 +1,6 @@
 module github.com/k1LoW/octocov
 
-go 1.24.8
+go 1.24.9
 
 require (
 	cloud.google.com/go/bigquery v1.71.0
@@ -49,7 +49,7 @@ require (
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/image v0.32.0
 	golang.org/x/oauth2 v0.32.0
-	golang.org/x/text v0.30.0
+	golang.org/x/text v0.31.0
 	golang.org/x/tools v0.38.0
 	google.golang.org/api v0.253.0
 	gopkg.in/ini.v1 v1.67.0
@@ -162,11 +162,11 @@ require (
 	go.opentelemetry.io/otel/sdk v1.37.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.37.0 // indirect
 	go.opentelemetry.io/otel/trace v1.37.0 // indirect
-	golang.org/x/crypto v0.43.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
 	golang.org/x/mod v0.29.0 // indirect
-	golang.org/x/net v0.46.0 // indirect
-	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.37.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sync v0.18.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/telemetry v0.0.0-20251008203120-078029d740a8 // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
