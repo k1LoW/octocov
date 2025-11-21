@@ -26,15 +26,13 @@ jobs:
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
           go-version-file: go.mod
-          check-latest: true
 
       - name: Run lint
         uses: reviewdog/action-golangci-lint@f9bba13753278f6a73b27a56a3ffb1bfda90ed71 # v2.8.0
         with:
           go_version_file: go.mod
           cache: false
-          fail_on_error: true
-          golangci_lint_flags: --timeout=5m
+          fail_level: warning
 
       - name: Run gostyle
         uses: k1LoW/gostyle-action@56cc0ed69a96366aa5be08df58a858e306c1518c # v1.5.0

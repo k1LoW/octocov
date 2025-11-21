@@ -1,4 +1,5 @@
 version: "2"
+timeout: 2m
 linters:
   enable:
     - errorlint
