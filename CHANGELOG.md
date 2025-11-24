@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.73.2](https://github.com/k1LoW/octocov/compare/v0.73.1...v0.73.2) - 2025-11-24
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/585
+
 ## [v0.73.1](https://github.com/k1LoW/octocov/compare/v0.73.0...v0.73.1) - 2025-11-21
 ### Other Changes
 - chore(deps): bump docker/login-action from 3.5.0 to 3.6.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/569
