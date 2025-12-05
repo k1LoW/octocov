@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.74.0](https://github.com/k1LoW/octocov/compare/v0.73.1...v0.74.0) - 2025-12-05
+### New Features 🎉
+- Support full `.yaml` exntesions for configuration files by @raviqqe in https://github.com/k1LoW/octocov/pull/588
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/585
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/587
+
 ## [v0.73.1](https://github.com/k1LoW/octocov/compare/v0.73.0...v0.73.1) - 2025-11-21
 ### Other Changes
 - chore(deps): bump docker/login-action from 3.5.0 to 3.6.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/569
