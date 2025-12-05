@@ -8,7 +8,12 @@ import (
 	"strings"
 )
 
-var ConfigPaths = []string{".octocov.yml", "octocov.yml"}
+var ConfigPaths = []string{
+	".octocov.yml",
+	".octocov.yaml",
+	"octocov.yml",
+	"octocov.yaml",
+}
 
 func GitRoot(base string) (string, error) {
 	p, err := filepath.Abs(base)
