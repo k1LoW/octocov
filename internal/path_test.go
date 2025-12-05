@@ -47,80 +47,44 @@ func TestRootPath(t *testing.T) {
 		}
 	})
 
-	t.Run("octocov.yml", func(t *testing.T) {
-		dir := t.TempDir()
-		if err := os.MkdirAll(filepath.Join(dir, "x", "y", "z"), 0700); err != nil {
-			t.Fatal(err)
-		}
-		f, err := os.Create(filepath.Join(dir, "x", ".octocov.yml"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		f.Close()
-
-		tests := []struct {
-			base    string
-			wantErr bool
-		}{
-			{filepath.Join(dir, "x", "y"), false},
-			{filepath.Join(dir, "x", "y", "z"), false},
-			{filepath.Join(dir, "x"), false},
-			{dir, true},
-		}
-		for _, tt := range tests {
-			got, err := RootPath(tt.base)
+	for _, path := range ConfigPaths {
+		t.Run(path, func(t *testing.T) {
+			dir := t.TempDir()
+			if err := os.MkdirAll(filepath.Join(dir, "x", "y", "z"), 0700); err != nil {
+				t.Fatal(err)
+			}
+			f, err := os.Create(filepath.Join(dir, "x", path))
 			if err != nil {
-				if !tt.wantErr {
-					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
-				}
-			} else {
-				if tt.wantErr {
-					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
-				}
-				if want := filepath.Join(dir, "x"); got != want {
-					t.Errorf("got %v\nwant %v", got, want)
+				t.Fatal(err)
+			}
+			f.Close()
+
+			tests := []struct {
+				base    string
+				wantErr bool
+			}{
+				{filepath.Join(dir, "x", "y"), false},
+				{filepath.Join(dir, "x", "y", "z"), false},
+				{filepath.Join(dir, "x"), false},
+				{dir, true},
+			}
+			for _, tt := range tests {
+				got, err := RootPath(tt.base)
+				if err != nil {
+					if !tt.wantErr {
+						t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+					}
+				} else {
+					if tt.wantErr {
+						t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+					}
+					if want := filepath.Join(dir, "x"); got != want {
+						t.Errorf("got %v\nwant %v", got, want)
+					}
 				}
 			}
-		}
-	})
-
-	t.Run("octocov.yml (no dot) config file", func(t *testing.T) {
-		dir := t.TempDir()
-		if err := os.MkdirAll(filepath.Join(dir, "a", "b", "c"), 0700); err != nil {
-			t.Fatal(err)
-		}
-		// Create octocov.yml (without dot)
-		f, err := os.Create(filepath.Join(dir, "a", "octocov.yml"))
-		if err != nil {
-			t.Fatal(err)
-		}
-		f.Close()
-
-		tests := []struct {
-			base    string
-			wantErr bool
-		}{
-			{filepath.Join(dir, "a", "b"), false},
-			{filepath.Join(dir, "a", "b", "c"), false},
-			{filepath.Join(dir, "a"), false},
-			{dir, true},
-		}
-		for _, tt := range tests {
-			got, err := RootPath(tt.base)
-			if err != nil {
-				if !tt.wantErr {
-					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
-				}
-			} else {
-				if tt.wantErr {
-					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
-				}
-				if want := filepath.Join(dir, "a"); got != want {
-					t.Errorf("got %v\nwant %v", got, want)
-				}
-			}
-		}
-	})
+		})
+	}
 
 	t.Run("octocov.yml found first", func(t *testing.T) {
 		dir := t.TempDir()
