@@ -6,10 +6,10 @@ require (
 	cloud.google.com/go/bigquery v1.72.0
 	cloud.google.com/go/storage v1.58.0
 	github.com/antchfx/xmlquery v1.5.0
-	github.com/aws/aws-sdk-go-v2 v1.40.1
-	github.com/aws/aws-sdk-go-v2/config v1.32.3
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.13
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.0
+	github.com/aws/aws-sdk-go-v2 v1.41.0
+	github.com/aws/aws-sdk-go-v2/config v1.32.5
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.20.15
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.93.2
 	github.com/bmatcuk/doublestar/v4 v4.9.1
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/expr-lang/expr v1.17.6
@@ -47,10 +47,10 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0
 	github.com/zhangyunhao116/skipmap v0.10.1
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
-	golang.org/x/image v0.33.0
-	golang.org/x/oauth2 v0.33.0
-	golang.org/x/text v0.31.0
-	golang.org/x/tools v0.39.0
+	golang.org/x/image v0.34.0
+	golang.org/x/oauth2 v0.34.0
+	golang.org/x/text v0.32.0
+	golang.org/x/tools v0.40.0
 	google.golang.org/api v0.257.0
 	gopkg.in/ini.v1 v1.67.0
 )
@@ -76,20 +76,20 @@ require (
 	github.com/antchfx/xpath v1.3.5 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.4 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.3 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.15 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.15 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.15 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.5 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.16 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.16 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.16 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.4 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.15 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.16 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.15 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.15 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.0.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.30.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.11 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.41.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.9.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.16 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.16 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.0.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.30.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.35.12 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.41.5 // indirect
 	github.com/aws/smithy-go v1.24.0 // indirect
 	github.com/bradleyfalzon/ghinstallation/v2 v2.17.0 // indirect
 	github.com/buildkite/interpolate v0.1.5 // indirect
@@ -162,12 +162,12 @@ require (
 	go.opentelemetry.io/otel/sdk v1.38.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.38.0 // indirect
 	go.opentelemetry.io/otel/trace v1.38.0 // indirect
-	golang.org/x/crypto v0.45.0 // indirect
-	golang.org/x/mod v0.30.0 // indirect
-	golang.org/x/net v0.47.0 // indirect
-	golang.org/x/sync v0.18.0 // indirect
-	golang.org/x/sys v0.38.0 // indirect
-	golang.org/x/telemetry v0.0.0-20251111182119-bc8e575c7b54 // indirect
+	golang.org/x/crypto v0.46.0 // indirect
+	golang.org/x/mod v0.31.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/telemetry v0.0.0-20251203150158-8fff8a5912fc // indirect
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20250922171735-9219d122eba9 // indirect
