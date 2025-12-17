@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.74.1](https://github.com/k1LoW/octocov/compare/v0.74.0...v0.74.1) - 2025-12-17
+### Other Changes
+- chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/591
+- chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/595
+- chore(deps): bump the dependencies group across 1 directory with 4 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/594
+- chore(deps): bump github.com/expr-lang/expr from 1.17.6 to 1.17.7 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/596
+
 ## [v0.74.0](https://github.com/k1LoW/octocov/compare/v0.73.1...v0.74.0) - 2025-12-05
 ### New Features 🎉
 - Support full `.yaml` exntesions for configuration files by @raviqqe in https://github.com/k1LoW/octocov/pull/588
