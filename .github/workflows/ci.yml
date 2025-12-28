@@ -35,7 +35,7 @@ jobs:
           fail_level: warning
 
       - name: Run gostyle
-        uses: k1LoW/gostyle-action@56cc0ed69a96366aa5be08df58a858e306c1518c # v1.5.0
+        uses: k1LoW/gostyle-action@e1b847d37b3041c5fdb8b911bcf00b350779ca61 # v1.5.1
         with:
           config-file: .gostyle.yml
           fail-on-error: true
