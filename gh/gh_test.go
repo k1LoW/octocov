@@ -182,9 +182,13 @@ func mockedGh(t *testing.T) *Gh {
 		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposPullsByOwnerByRepo,
 			[]*github.PullRequest{
-				&github.PullRequest{
+				{
 					Head: &github.PullRequestBranch{
 						Ref: github.String("branch/branch/name"),
+						Repo: &github.Repository{
+							Owner: &github.User{Login: github.String("owner")},
+							Name:  github.String("repo"),
+						},
 					},
 					Number: github.Int(13),
 				},
@@ -201,4 +205,227 @@ func mockedGh(t *testing.T) *Gh {
 	}
 	g.SetClient(client)
 	return g
+}
+
+func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
+	tests := []struct {
+		name       string
+		GITHUB_REF string
+		prs        []*github.PullRequest
+		want       int
+		wantErr    bool
+	}{
+		{
+			name:       "same repo PR is detected",
+			GITHUB_REF: "refs/heads/feature-branch",
+			prs: []*github.PullRequest{
+				{
+					Number: github.Int(10),
+					Head: &github.PullRequestBranch{
+						Ref: github.String("feature-branch"),
+						Repo: &github.Repository{
+							Owner: &github.User{Login: github.String("owner")},
+							Name:  github.String("repo"),
+						},
+					},
+				},
+			},
+			want:    10,
+			wantErr: false,
+		},
+		{
+			name:       "fork PR is skipped",
+			GITHUB_REF: "refs/heads/main",
+			prs: []*github.PullRequest{
+				{
+					Number: github.Int(20),
+					Head: &github.PullRequestBranch{
+						Ref: github.String("main"),
+						Repo: &github.Repository{
+							Owner: &github.User{Login: github.String("forked-user")},
+							Name:  github.String("repo"),
+						},
+					},
+				},
+			},
+			want:    0,
+			wantErr: true,
+		},
+		{
+			name:       "fork PR is skipped, same repo PR is detected",
+			GITHUB_REF: "refs/heads/main",
+			prs: []*github.PullRequest{
+				{
+					Number: github.Int(20),
+					Head: &github.PullRequestBranch{
+						Ref: github.String("main"),
+						Repo: &github.Repository{
+							Owner: &github.User{Login: github.String("forked-user")},
+							Name:  github.String("repo"),
+						},
+					},
+				},
+				{
+					Number: github.Int(30),
+					Head: &github.PullRequestBranch{
+						Ref: github.String("main"),
+						Repo: &github.Repository{
+							Owner: &github.User{Login: github.String("owner")},
+							Name:  github.String("repo"),
+						},
+					},
+				},
+			},
+			want:    30,
+			wantErr: false,
+		},
+		{
+			name:       "owner case insensitive match",
+			GITHUB_REF: "refs/heads/feature",
+			prs: []*github.PullRequest{
+				{
+					Number: github.Int(25),
+					Head: &github.PullRequestBranch{
+						Ref: github.String("feature"),
+						Repo: &github.Repository{
+							Owner: &github.User{Login: github.String("Owner")},
+							Name:  github.String("repo"),
+						},
+					},
+				},
+			},
+			want:    25,
+			wantErr: false,
+		},
+		{
+			name:       "nil head repo is skipped",
+			GITHUB_REF: "refs/heads/feature",
+			prs: []*github.PullRequest{
+				{
+					Number: github.Int(35),
+					Head: &github.PullRequestBranch{
+						Ref:  github.String("feature"),
+						Repo: nil,
+					},
+				},
+			},
+			want:    0,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "")
+			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			t.Setenv("GITHUB_TOKEN", "dummy")
+
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposPullsByOwnerByRepo,
+					tt.prs,
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			got, err := g.DetectCurrentPullRequestNumber(context.TODO(), "owner", "repo")
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got err: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Error("want err")
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsSameRepo(t *testing.T) {
+	tests := []struct {
+		name     string
+		headRepo *github.Repository
+		owner    string
+		repo     string
+		want     bool
+	}{
+		{
+			name: "exact match",
+			headRepo: &github.Repository{
+				Owner: &github.User{Login: github.String("owner")},
+				Name:  github.String("repo"),
+			},
+			owner: "owner",
+			repo:  "repo",
+			want:  true,
+		},
+		{
+			name: "owner case insensitive",
+			headRepo: &github.Repository{
+				Owner: &github.User{Login: github.String("Owner")},
+				Name:  github.String("repo"),
+			},
+			owner: "owner",
+			repo:  "repo",
+			want:  true,
+		},
+		{
+			name: "different owner",
+			headRepo: &github.Repository{
+				Owner: &github.User{Login: github.String("forked-user")},
+				Name:  github.String("repo"),
+			},
+			owner: "owner",
+			repo:  "repo",
+			want:  false,
+		},
+		{
+			name: "different repo name",
+			headRepo: &github.Repository{
+				Owner: &github.User{Login: github.String("owner")},
+				Name:  github.String("other-repo"),
+			},
+			owner: "owner",
+			repo:  "repo",
+			want:  false,
+		},
+		{
+			name:     "nil headRepo",
+			headRepo: nil,
+			owner:    "owner",
+			repo:     "repo",
+			want:     false,
+		},
+		{
+			name: "nil owner in headRepo",
+			headRepo: &github.Repository{
+				Owner: nil,
+				Name:  github.String("repo"),
+			},
+			owner: "owner",
+			repo:  "repo",
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isSameRepo(tt.headRepo, tt.owner, tt.repo)
+			if got != tt.want {
+				t.Errorf("isSameRepo() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
