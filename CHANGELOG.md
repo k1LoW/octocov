@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.74.2](https://github.com/k1LoW/octocov/compare/v0.74.1...v0.74.2) - 2026-01-19
+### Fix bug 🐛
+- fix: prevent false detection of fork PRs in DetectCurrentPullRequestNumber by @k1LoW in https://github.com/k1LoW/octocov/pull/605
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 13 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/601
+- chore(deps): bump the dependencies group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/600
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/603
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/604
+
 ## [v0.74.1](https://github.com/k1LoW/octocov/compare/v0.74.0...v0.74.1) - 2025-12-17
 ### Other Changes
 - chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/591
