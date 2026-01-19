@@ -252,7 +252,7 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 	}
 	var d *github.PullRequest
 	for _, pr := range l {
-		if pr.GetHead().GetRef() == b {
+		if pr.GetHead().GetRef() == b && isSameRepo(pr.GetHead().GetRepo(), owner, repo) {
 			if d != nil {
 				return 0, errors.New("could not detect number of pull request")
 			}
@@ -263,6 +263,15 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 		return d.GetNumber(), nil
 	}
 	return 0, errors.New("could not detect number of pull request")
+}
+
+// isSameRepo checks if the PR head repository matches the target repository.
+// For fork PRs, pr.GetHead().GetRepo() returns the fork repository.
+func isSameRepo(headRepo *github.Repository, owner, repo string) bool {
+	if headRepo == nil {
+		return false
+	}
+	return strings.EqualFold(headRepo.GetOwner().GetLogin(), owner) && headRepo.GetName() == repo
 }
 
 func (g *Gh) ReplaceInsertToBody(ctx context.Context, owner, repo string, number int, content, key string) error {
