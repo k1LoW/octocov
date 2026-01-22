@@ -407,7 +407,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				if err := addReportContentToSummary(content); err != nil {
+				if err := addReportContentToSummary(content, r.Key()); err != nil {
 					return err
 				}
 				return nil
