@@ -277,7 +277,7 @@ central:
 ### Merging reports from multiple GitHub Action jobs
 
 This example illustrates how to merge coverage reports from multiple jobs.
-It is useful when you are testing code branches for multiple targets (e.g. OS, runtime version, dependency version, etc).
+It is useful when you are testing code branches for multiple targets (e.g. test sharding, runtime version, dependency version, OS, etc).
 
 ```yaml
 # .github/workflows/ci.yml
@@ -295,11 +295,8 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        include:
-          - platform: 'macos-latest'
-          - platform: 'ubuntu-latest'
-          - platform: 'windows-latest'
-    runs-on: ${{ matrix.platform }}
+        shard: [1, 2, 3]
+    runs-on: ubuntu-latest
     permissions:
       contents: read # to checkout
     steps:
@@ -311,7 +308,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: lcov.info # adjust this path to your coverage file
-          name: octocov-${{ matrix.platform }}
+          name: octocov-${{ matrix.shard }}
           if-no-files-found: error
 
   coverage-aggregation:
@@ -344,9 +341,9 @@ coverage:
   paths:
     # Name of artifacts uploaded by the test-running jobs.
     # lcov.info (or equivalent) will be downloaded in the directory named after the below.
-    - "octocov-windows-latest"
-    - "octocov-ubuntu-latest"
-    - "octocov-macos-latest"
+    - "octocov-1"
+    - "octocov-2"
+    - "octocov-3"
 comment:
   if: is_pull_request
   hideFooterLink: true
