@@ -3,6 +3,7 @@ module github.com/k1LoW/octocov
 go 1.24.12
 
 require (
+	cloud.google.com/go/auth v0.18.1
 	cloud.google.com/go/bigquery v1.72.0
 	cloud.google.com/go/storage v1.59.2
 	github.com/antchfx/xmlquery v1.5.0
@@ -58,7 +59,6 @@ require (
 require (
 	cel.dev/expr v0.24.0 // indirect
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/auth v0.18.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	cloud.google.com/go/iam v1.5.3 // indirect

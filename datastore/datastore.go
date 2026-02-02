@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"strings"
 
+	"cloud.google.com/go/auth/credentials"
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/aws/aws-sdk-go-v2/config"
@@ -115,12 +116,21 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		prefix := args[1]
 		var client *storage.Client
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
-			client, err = storage.NewClient(ctx, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"))))
+			creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+				CredentialsJSON: []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")),
+			})
+			if err != nil {
+				return nil, err
+			}
+			client, err = storage.NewClient(ctx, option.WithAuthCredentials(creds))
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			client, err = storage.NewClient(ctx)
-		}
-		if err != nil {
-			return nil, err
+			if err != nil {
+				return nil, err
+			}
 		}
 		return gcs.New(client, bucket, prefix)
 	case BigQuery:
@@ -129,12 +139,21 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		table := args[2]
 		var client *bigquery.Client
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
-			client, err = bigquery.NewClient(ctx, project, option.WithCredentialsJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON"))))
+			creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+				CredentialsJSON: []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")),
+			})
+			if err != nil {
+				return nil, err
+			}
+			client, err = bigquery.NewClient(ctx, project, option.WithAuthCredentials(creds))
+			if err != nil {
+				return nil, err
+			}
 		} else {
 			client, err = bigquery.NewClient(ctx, project)
-		}
-		if err != nil {
-			return nil, err
+			if err != nil {
+				return nil, err
+			}
 		}
 		return bq.New(client, dataset, table)
 	case Mackerel:
