@@ -4,17 +4,17 @@ go 1.24.12
 
 require (
 	cloud.google.com/go/bigquery v1.72.0
-	cloud.google.com/go/storage v1.59.1
+	cloud.google.com/go/storage v1.59.2
 	github.com/antchfx/xmlquery v1.5.0
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.21.0
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.1
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.21.1
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.0
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/expr-lang/expr v1.17.7
 	github.com/fatih/color v1.18.0
-	github.com/go-enry/go-enry/v2 v2.9.3
+	github.com/go-enry/go-enry/v2 v2.9.4
 	github.com/go-git/go-git/v5 v5.16.4
 	github.com/goark/gnkf v0.7.9
 	github.com/goccy/go-json v0.10.5
@@ -51,7 +51,7 @@ require (
 	golang.org/x/oauth2 v0.34.0
 	golang.org/x/text v0.33.0
 	golang.org/x/tools v0.41.0
-	google.golang.org/api v0.262.0
+	google.golang.org/api v0.264.0
 	gopkg.in/ini.v1 v1.67.1
 )
 
@@ -172,7 +172,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20251202230838-ff82c1b0f217 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260120174246-409b4a993575 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260122232226-8e98ce8d340d // indirect
 	google.golang.org/grpc v1.78.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
