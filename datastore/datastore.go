@@ -117,6 +117,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		var client *storage.Client
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
 			creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+				Scopes:          []string{storage.ScopeFullControl},
 				CredentialsJSON: []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")),
 			})
 			if err != nil {
@@ -140,6 +141,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		var client *bigquery.Client
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
 			creds, err := credentials.DetectDefault(&credentials.DetectOptions{
+				Scopes:          []string{bigquery.Scope},
 				CredentialsJSON: []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")),
 			})
 			if err != nil {
