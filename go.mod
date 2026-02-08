@@ -4,12 +4,12 @@ go 1.24.13
 
 require (
 	cloud.google.com/go/auth v0.18.1
-	cloud.google.com/go/bigquery v1.72.0
+	cloud.google.com/go/bigquery v1.73.1
 	cloud.google.com/go/storage v1.59.2
 	github.com/antchfx/xmlquery v1.5.0
 	github.com/aws/aws-sdk-go-v2 v1.41.1
 	github.com/aws/aws-sdk-go-v2/config v1.32.7
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.21.1
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.22.0
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.96.0
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/chainguard-dev/git-urls v1.0.2
@@ -33,7 +33,7 @@ require (
 	github.com/k1LoW/ghfs v1.5.3
 	github.com/k1LoW/go-github-actions v0.2.0
 	github.com/k1LoW/go-github-client/v67 v67.0.21
-	github.com/k1LoW/repin v0.4.0
+	github.com/k1LoW/repin v0.4.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.3.0
 	github.com/mackerelio/mackerel-client-go v0.40.0
@@ -49,10 +49,10 @@ require (
 	github.com/zhangyunhao116/skipmap v0.10.1
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67
 	golang.org/x/image v0.35.0
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/oauth2 v0.35.0
 	golang.org/x/text v0.33.0
 	golang.org/x/tools v0.41.0
-	google.golang.org/api v0.264.0
+	google.golang.org/api v0.265.0
 	gopkg.in/ini.v1 v1.67.1
 )
 
@@ -171,8 +171,8 @@ require (
 	golang.org/x/time v0.14.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260122232226-8e98ce8d340d // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20260128011058-8636f8732409 // indirect
 	google.golang.org/grpc v1.78.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
