@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.74.5](https://github.com/k1LoW/octocov/compare/v0.74.4...v0.74.5) - 2026-02-10
+### Other Changes
+- chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/616
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.16.4 to 5.16.5 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/618
+
 ## [v0.74.4](https://github.com/k1LoW/octocov/compare/v0.74.3...v0.74.4) - 2026-02-06
 ### Fix bug 🐛
 - fix: add required Scopes to credentials.DetectDefault for GCS and BigQuery by @k1LoW in https://github.com/k1LoW/octocov/pull/614
