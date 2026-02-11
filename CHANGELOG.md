@@ -1,5 +1,7 @@
 # Changelog
 
+## [v0.74.6](https://github.com/k1LoW/octocov/compare/v0.74.5...v0.74.6) - 2026-02-11
+
 ## [v0.74.5](https://github.com/k1LoW/octocov/compare/v0.74.4...v0.74.5) - 2026-02-10
 ### Other Changes
 - chore(deps): bump the dependencies group with 5 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/616
