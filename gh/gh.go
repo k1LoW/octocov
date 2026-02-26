@@ -480,7 +480,7 @@ L:
 			return nil, err
 		}
 		for _, j := range jobs.Jobs {
-			log.Printf("search job: %d", j.GetID())
+			log.Printf("search job: %d", j.GetID()) //nolint:gosec // format string uses %d, no injection risk
 			l := len(j.Steps)
 			for i, s := range j.Steps {
 				if s.GetName() == name {
@@ -489,7 +489,7 @@ L:
 						steps = []Step{}
 						continue L
 					}
-					log.Printf("got job step [%d %d/%d]: %s %v-%v", j.GetID(), i+1, l, s.GetName(), s.StartedAt, s.CompletedAt)
+					log.Printf("got job step [%d %d/%d]: %s %v-%v", j.GetID(), i+1, l, s.GetName(), s.StartedAt, s.CompletedAt) //nolint:gosec // values from GitHub API response, not user input
 					steps = append(steps, Step{
 						Name:        s.GetName(),
 						StartedAt:   s.GetStartedAt().Time,
@@ -830,7 +830,7 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	if p == "" {
 		return i, fmt.Errorf("env %s is not set", "GITHUB_EVENT_PATH")
 	}
-	b, err := os.ReadFile(filepath.Clean(p))
+	b, err := os.ReadFile(filepath.Clean(p)) //nolint:gosec // p is from trusted GITHUB_EVENT_PATH env var
 	if err != nil {
 		return i, err
 	}

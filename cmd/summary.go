@@ -8,10 +8,10 @@ import (
 
 func addReportContentToSummary(content string) error {
 	p := os.Getenv("GITHUB_STEP_SUMMARY")
-	if _, err := os.Stat(p); err != nil {
+	if _, err := os.Stat(p); err != nil { //nolint:gosec // p is from trusted GITHUB_STEP_SUMMARY env var
 		return err
 	}
-	f, err := os.OpenFile(filepath.Clean(p), os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm)
+	f, err := os.OpenFile(filepath.Clean(p), os.O_RDWR|os.O_CREATE|os.O_APPEND, os.ModePerm) //nolint:gosec // p is from trusted GITHUB_STEP_SUMMARY env var
 	if err != nil {
 		return err
 	}

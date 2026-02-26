@@ -59,7 +59,7 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	for scanner.Scan() {
 		lc, _ := lcs.FindByLine(n) //nostyle:handlerrors
 		c, out := paintLine(n, w2, scanner.Text(), lc)
-		if _, err := fmt.Fprintf(dest, "%s %s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out); err != nil {
+		if _, err := fmt.Fprintf(dest, "%s %s %s\n", cl.Sprint(fmt.Sprintf(fmt.Sprintf("%%%dd", w), n)), c, out); err != nil { //nolint:gosec // dest is a terminal writer, not a web response
 			return err
 		}
 		n += 1
