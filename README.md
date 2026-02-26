@@ -304,6 +304,27 @@ jobs:
 
       - run: YOUR TEST HERE
 
+      # The generated coverage file may contain platform-dependent path (e.g. src/foo.ts on Mac/Ubuntu vs src\foo.ts on Windows)
+      # In that case, normalization is required so that octocov can merged the coverage correctly.
+      - name: Normalize coverage paths (repo-relative, POSIX)
+        working-directory: src-tauri
+        shell: bash # Works on Windows runner too.
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import os, re
+
+          p = Path('lcov.info')
+          data = p.read_text()
+
+          # unify separators (Windows -> POSIX)
+          data = data.replace('\\', '/')
+
+          # Add more normalization rules here if needed.
+
+          p.write_text(data)
+          PY
+
       - name: Upload coverage to workspace
         uses: actions/upload-artifact@v4
         with:
