@@ -322,6 +322,19 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 			path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
+
+			// Collect filesystem files once for normalizing all loaded reports
+			var gitRoot string
+			var fsFiles []string
+			if wd, err := os.Getwd(); err == nil {
+				if gr, err := internal.GitRoot(wd); err == nil {
+					if fs, err := internal.CollectFiles(gr); err == nil {
+						gitRoot = gr
+						fsFiles = fs
+					}
+				}
+			}
+
 			for _, s := range c.Diff.Datastores {
 				log.Printf("Get previous report from %s", s)
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
@@ -347,6 +360,9 @@ var rootCmd = &cobra.Command{
 				if err := json.Unmarshal(b, rt); err != nil {
 					log.Printf("%s: %v %s", s, err, string(b))
 					continue
+				}
+				if rt.Coverage != nil {
+					rt.Coverage.NormalizePaths(gitRoot, fsFiles)
 				}
 				// Select latest report
 				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {

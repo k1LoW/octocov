@@ -21,6 +21,7 @@ import (
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/ratio"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
@@ -311,6 +312,10 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 		}
 		paths = append(paths, p...)
 	}
+
+	// Collect filesystem files for path normalization
+	gitRoot, fsFiles := collectFSFilesForNormalization()
+
 	var errs error
 	for _, path := range paths {
 		cov, rp, err := challengeParseReport(path)
@@ -318,6 +323,7 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 			errs = errors.Join(errs, err)
 			continue
 		}
+		cov.NormalizePaths(gitRoot, fsFiles)
 		if r.Coverage == nil {
 			r.Coverage = cov
 		} else {
@@ -334,6 +340,9 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 		if err := r.Load(path); err != nil {
 			return errors.Join(errs, err)
 		}
+		if r.Coverage != nil {
+			r.Coverage.NormalizePaths(gitRoot, fsFiles)
+		}
 	}
 
 	if r.Coverage == nil {
@@ -348,6 +357,34 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 	}
 
 	return nil
+}
+
+// collectFSFilesForNormalization detects git root and collects filesystem files.
+// Returns empty values on failure (graceful degradation).
+func collectFSFilesForNormalization() (string, []string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", nil
+	}
+	gitRoot, err := internal.GitRoot(wd)
+	if err != nil {
+		return "", nil
+	}
+	fsFiles, err := internal.CollectFiles(gitRoot)
+	if err != nil {
+		return "", nil
+	}
+	return gitRoot, fsFiles
+}
+
+// NormalizeCoveragePaths normalizes coverage file paths relative to git root.
+// This is used for reports loaded from datastores that may not have NormalizedPath set.
+func (r *Report) NormalizeCoveragePaths() {
+	if r.Coverage == nil {
+		return
+	}
+	gitRoot, fsFiles := collectFSFilesForNormalization()
+	r.Coverage.NormalizePaths(gitRoot, fsFiles)
 }
 
 func (r *Report) MeasureCodeToTestRatio(root string, code, test []string) error {

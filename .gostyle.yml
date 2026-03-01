@@ -4,6 +4,8 @@ analyzers:
 analyzers-settings:
 #  dontpanic:
 #    exclude-test: true         # exclude test files (default: false)
+  errorstrings:
+    exclude-test: true
 #  handlerrors:
 #    exclude-test: true         # exclude test files (default: false)
 #  ifacenames:

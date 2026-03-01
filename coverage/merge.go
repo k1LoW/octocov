@@ -13,7 +13,10 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 	}
 	// Files
 	for _, fc2 := range c2.Files {
-		fc, err := c.Files.FindByFile(fc2.File)
+		fc, err := c.Files.FindByFile(fc2.EffectivePath())
+		if err != nil && fc2.EffectivePath() != fc2.File {
+			fc, err = c.Files.FindByFile(fc2.File)
+		}
 		if err == nil {
 			if fc2.Type != fc.Type {
 				fc.Type = TypeMerged
