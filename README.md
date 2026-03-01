@@ -422,14 +422,18 @@ coverage:
 
 ### `coverage.exclude:`
 
-Exclude files from the coverage report.
+Exclude files from the coverage report. Patterns are matched using [doublestar](https://github.com/bmatcuk/doublestar) glob syntax.
+
+octocov normalizes coverage file paths to **git-root-relative paths** before matching, so you can write patterns based on the repository directory structure regardless of coverage format.
 
 ``` yaml
 coverage:
   exclude:
-    - 'cmd/*.ts'
+    - 'internal/database/db/*.go'
     - 'proto/**/*.pb.ts'
 ```
+
+For backward compatibility, patterns are also matched against the original paths produced by the coverage tool (e.g., Go module paths like `github.com/owner/repo/pkg/*.go`).
 
 ### `coverage.acceptable:`
 
