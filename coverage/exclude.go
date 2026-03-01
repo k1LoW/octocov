@@ -25,6 +25,15 @@ func (c *Coverage) Exclude(exclude []string) error {
 			if err != nil {
 				return err
 			}
+			// Also try matching against the original File path so that
+			// existing patterns using module paths (e.g. "github.com/owner/repo/pkg/*.go")
+			// continue to work after normalization.
+			if !match && f.EffectivePath() != f.File {
+				match, err = doublestar.Match(e, f.File)
+				if err != nil {
+					return err
+				}
+			}
 			if match {
 				if not {
 					excluded = false

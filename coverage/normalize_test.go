@@ -471,6 +471,87 @@ func TestExclude_WithNormalizedPaths_Glob(t *testing.T) {
 	}
 }
 
+func TestExclude_FallbackToOriginalFile(t *testing.T) {
+	cov := &Coverage{
+		Type: TypeLOC,
+		Files: FileCoverages{
+			{
+				File:           "github.com/owner/repo/internal/database/db/query.go",
+				NormalizedPath: "internal/database/db/query.go",
+				Type:           TypeLOC,
+				Blocks: BlockCoverages{
+					newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+				},
+			},
+			{
+				File:           "github.com/owner/repo/cmd/root.go",
+				NormalizedPath: "cmd/root.go",
+				Type:           TypeLOC,
+				Blocks: BlockCoverages{
+					newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+				},
+			},
+			{
+				File:           "src/utils/groups.ts",
+				NormalizedPath: "internal/frontend/src/utils/groups.ts",
+				Type:           TypeLOC,
+				Blocks: BlockCoverages{
+					newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name      string
+		exclude   []string
+		wantFiles []string
+	}{
+		{
+			// Exclude using module path pattern (backward compat)
+			name:      "module path glob",
+			exclude:   []string{"github.com/owner/repo/internal/database/db/*.go"},
+			wantFiles: []string{"cmd/root.go", "internal/frontend/src/utils/groups.ts"},
+		},
+		{
+			// Exclude using normalized path pattern
+			name:      "normalized path glob",
+			exclude:   []string{"internal/database/db/*.go"},
+			wantFiles: []string{"cmd/root.go", "internal/frontend/src/utils/groups.ts"},
+		},
+		{
+			// Exclude using both module path and normalized path
+			name:      "both patterns",
+			exclude:   []string{"github.com/owner/repo/cmd/*.go", "internal/frontend/**/*.ts"},
+			wantFiles: []string{"internal/database/db/query.go"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Deep copy
+			c := &Coverage{
+				Type:  cov.Type,
+				Files: make(FileCoverages, len(cov.Files)),
+			}
+			for i, f := range cov.Files {
+				fc := *f
+				c.Files[i] = &fc
+			}
+			if err := c.Exclude(tt.exclude); err != nil {
+				t.Fatal(err)
+			}
+			var got []string
+			for _, f := range c.Files {
+				got = append(got, f.EffectivePath())
+			}
+			if diff := cmp.Diff(tt.wantFiles, got); diff != "" {
+				t.Errorf("files mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestNormalizePaths_DotSlashPrefix(t *testing.T) {
 	root := t.TempDir()
 	dir := filepath.Join(root, "src", "utils")
