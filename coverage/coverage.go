@@ -9,6 +9,18 @@ import (
 	"github.com/zhangyunhao116/skipmap"
 )
 
+// suffixIndex maps filename → list of absolute paths with that filename.
+type suffixIndex map[string][]string
+
+func buildSuffixIndex(fsFiles []string) suffixIndex {
+	idx := make(suffixIndex, len(fsFiles))
+	for _, f := range fsFiles {
+		base := filepath.Base(f)
+		idx[base] = append(idx[base], f)
+	}
+	return idx
+}
+
 type Type string
 
 const (
@@ -26,12 +38,100 @@ type Coverage struct {
 }
 
 type FileCoverage struct {
-	Type    Type           `json:"type"`
-	File    string         `json:"file"`
-	Total   int            `json:"total"`
-	Covered int            `json:"covered"`
-	Blocks  BlockCoverages `json:"blocks,omitempty"`
-	cache   map[int]BlockCoverages
+	Type Type   `json:"type"`
+	File string `json:"file"`
+	// NormalizedPath holds the git-root-relative path resolved via filesystem suffix matching.
+	// Different coverage formats produce inconsistent File paths (e.g., Go cover uses module paths
+	// like "github.com/user/repo/cmd/main.go", LCOV uses relative paths like "src/utils/groups.ts").
+	// NormalizedPath unifies them to git-root-relative paths (e.g., "cmd/main.go") so that
+	// matching, merging, comparing, and excluding work correctly across formats.
+	// File retains the original parser-produced path for backward compatibility with stored report.json.
+	NormalizedPath string         `json:"normalized_path,omitempty"`
+	Total          int            `json:"total"`
+	Covered        int            `json:"covered"`
+	Blocks         BlockCoverages `json:"blocks,omitempty"`
+	cache          map[int]BlockCoverages
+}
+
+// EffectivePath returns NormalizedPath if set, otherwise File.
+func (fc *FileCoverage) EffectivePath() string {
+	if fc.NormalizedPath != "" {
+		return fc.NormalizedPath
+	}
+	return fc.File
+}
+
+// NormalizePaths populates NormalizedPath for each file in Coverage.
+// root is the absolute path to the git root directory.
+// fsFiles are absolute paths of files found on the filesystem.
+func (c *Coverage) NormalizePaths(root string, fsFiles []string) {
+	if c == nil || len(fsFiles) == 0 || root == "" {
+		return
+	}
+	root = filepath.Clean(root)
+	idx := buildSuffixIndex(fsFiles)
+	for _, fc := range c.Files {
+		fc.NormalizedPath = normalizeSingle(root, fc.File, idx)
+	}
+}
+
+func normalizeSingle(root, file string, idx suffixIndex) string {
+	p := filepath.FromSlash(file)
+
+	// Absolute path within root → relative to root
+	if filepath.IsAbs(p) {
+		rel, err := filepath.Rel(root, p)
+		if err == nil && !strings.HasPrefix(rel, "..") {
+			return filepath.ToSlash(rel)
+		}
+		// Absolute but outside root → try suffix match below
+	}
+
+	// Suffix-match against filesystem files by comparing path segments from the end
+	base := filepath.Base(p)
+	candidates, ok := idx[base]
+	if !ok {
+		return ""
+	}
+
+	cleanFile := filepath.Clean(strings.TrimPrefix(p, "./"))
+	fileParts := splitPath(cleanFile)
+
+	var best string
+	bestMatchLen := 0
+	for _, cand := range candidates {
+		rel, err := filepath.Rel(root, cand)
+		if err != nil || strings.HasPrefix(rel, "..") {
+			continue
+		}
+		candParts := splitPath(cand)
+
+		// Count matching segments from the end
+		matchLen := 0
+		for fi, ci := len(fileParts)-1, len(candParts)-1; fi >= 0 && ci >= 0; fi, ci = fi-1, ci-1 {
+			if fileParts[fi] != candParts[ci] {
+				break
+			}
+			matchLen++
+		}
+		if matchLen == 0 {
+			continue
+		}
+
+		if matchLen > bestMatchLen || (matchLen == bestMatchLen && len(rel) < len(best)) {
+			best = rel
+			bestMatchLen = matchLen
+		}
+	}
+
+	if best != "" {
+		return filepath.ToSlash(best)
+	}
+	return ""
+}
+
+func splitPath(p string) []string {
+	return strings.Split(filepath.Clean(p), string(filepath.Separator))
 }
 
 type FileCoverages []*FileCoverage
@@ -78,7 +178,7 @@ func (c *Coverage) DeleteBlockCoverages() {
 
 func (fc FileCoverages) FindByFile(file string) (*FileCoverage, error) { //nostyle:recvtype
 	for _, c := range fc {
-		if c.File == file {
+		if c.EffectivePath() == file || c.File == file {
 			return c, nil
 		}
 	}
@@ -88,16 +188,17 @@ func (fc FileCoverages) FindByFile(file string) (*FileCoverage, error) { //nosty
 func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //nostyle:recvtype
 	var match *FileCoverage
 	for _, c := range fc {
+		ep := c.EffectivePath()
 		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
-		if strings.HasSuffix(strings.TrimLeft(c.File, "./"), strings.TrimLeft(file, "./")) {
-			if match == nil || len(match.File) > len(c.File) {
+		if strings.HasSuffix(strings.TrimLeft(ep, "./"), strings.TrimLeft(file, "./")) {
+			if match == nil || len(match.EffectivePath()) > len(ep) {
 				match = c
 			}
 			continue
 		}
 		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !filepath.IsAbs(c.File) && strings.HasSuffix(file, c.File) {
-			if match == nil || len(match.File) > len(c.File) {
+		if !filepath.IsAbs(ep) && strings.HasSuffix(file, ep) {
+			if match == nil || len(match.EffectivePath()) > len(ep) {
 				match = c
 			}
 			continue

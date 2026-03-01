@@ -39,29 +39,45 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 	d.B = coverB
 	d.Diff = coverA - coverB
 
+	// m maps path keys to DiffFileCoverage. A single DiffFileCoverage may be
+	// registered under multiple keys (EffectivePath and File) so that lookups
+	// succeed even when only one side has NormalizedPath set.
 	m := map[string]*DiffFileCoverage{}
+	var dfcList []*DiffFileCoverage
 	if c != nil {
 		for _, fc := range c.Files {
-			m[fc.File] = &DiffFileCoverage{
-				File:          fc.File,
+			ep := fc.EffectivePath()
+			dfc := &DiffFileCoverage{
+				File:          ep,
 				FileCoverageA: fc,
 			}
+			m[ep] = dfc
+			if fc.File != ep {
+				m[fc.File] = dfc
+			}
+			dfcList = append(dfcList, dfc)
 		}
 	}
 	if c2 != nil {
 		for _, fc := range c2.Files {
-			dfc, ok := m[fc.File]
-			if ok {
+			ep := fc.EffectivePath()
+			dfc := lookupDiffMap(m, ep, fc.File)
+			if dfc != nil {
 				dfc.FileCoverageB = fc
 			} else {
-				m[fc.File] = &DiffFileCoverage{
-					File:          fc.File,
+				dfc = &DiffFileCoverage{
+					File:          ep,
 					FileCoverageB: fc,
 				}
+				m[ep] = dfc
+				if fc.File != ep {
+					m[fc.File] = dfc
+				}
+				dfcList = append(dfcList, dfc)
 			}
 		}
 	}
-	for _, dfc := range m {
+	for _, dfc := range dfcList {
 		var coverA, coverB float64
 		if dfc.FileCoverageA != nil && dfc.FileCoverageA.Total != 0 {
 			coverA = float64(dfc.FileCoverageA.Covered) / float64(dfc.FileCoverageA.Total) * 100
@@ -76,4 +92,17 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 	}
 
 	return d
+}
+
+// lookupDiffMap tries to find an existing DiffFileCoverage by effectivePath first, then by file.
+func lookupDiffMap(m map[string]*DiffFileCoverage, effectivePath, file string) *DiffFileCoverage {
+	if dfc, ok := m[effectivePath]; ok {
+		return dfc
+	}
+	if file != effectivePath {
+		if dfc, ok := m[file]; ok {
+			return dfc
+		}
+	}
+	return nil
 }

@@ -89,6 +89,39 @@ func RootPath(base string) (string, error) {
 	return "", fmt.Errorf("failed to traverse the root path (looking for %s): %s", strings.Join(allPaths, " or "), base)
 }
 
+var defaultSkipDirs = map[string]struct{}{
+	".git":        {},
+	"node_modules": {},
+	"vendor":      {},
+	".bundle":     {},
+	"__pycache__": {},
+	".tox":        {},
+	".venv":       {},
+}
+
+// CollectFiles walks from root and returns absolute paths of all files,
+// skipping directories in defaultSkipDirs.
+func CollectFiles(root string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			if _, skip := defaultSkipDirs[info.Name()]; skip {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
+}
+
 func DetectPrefix(root, wd string, files, cfiles []string) string {
 	var rcfiles [][]string
 	for _, f := range cfiles {

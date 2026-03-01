@@ -40,6 +40,7 @@ var diffCmd = &cobra.Command{
 		if err := a.Load(args[0]); err != nil {
 			return err
 		}
+		a.NormalizeCoveragePaths()
 		if a.Timestamp.IsZero() {
 			fi, err := os.Stat(args[0])
 			if err != nil {
@@ -52,6 +53,7 @@ var diffCmd = &cobra.Command{
 		if err := b.Load(args[1]); err != nil {
 			return err
 		}
+		b.NormalizeCoveragePaths()
 		if b.Timestamp.IsZero() {
 			fi, err := os.Stat(args[1])
 			if err != nil {

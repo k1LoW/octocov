@@ -70,7 +70,7 @@ var lsFilesCmd = &cobra.Command{
 			if r.Coverage.Files[i].Total > t {
 				t = r.Coverage.Files[i].Total
 			}
-			return r.Coverage.Files[i].File < r.Coverage.Files[j].File
+			return r.Coverage.Files[i].EffectivePath() < r.Coverage.Files[j].EffectivePath()
 		})
 
 		if len(r.Coverage.Files) == 0 {
@@ -86,28 +86,17 @@ var lsFilesCmd = &cobra.Command{
 		}
 		var cfiles []string
 		for _, f := range r.Coverage.Files {
-			cfiles = append(cfiles, f.File)
+			cfiles = append(cfiles, f.EffectivePath())
 		}
-		var files []string
-		if err := filepath.Walk(wd, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-			if info.IsDir() && strings.Contains(path, ".git/") {
-				return filepath.SkipDir
-			}
-			if !info.IsDir() && !strings.Contains(path, ".git/") {
-				files = append(files, path)
-			}
-			return nil
-		}); err != nil {
+		files, err := internal.CollectFiles(wd)
+		if err != nil {
 			return err
 		}
 		slices.Sort(files)
 
 		prefix := internal.DetectPrefix(root, wd, files, cfiles)
 		for _, f := range r.Coverage.Files {
-			p := filepath.Clean(f.File)
+			p := filepath.Clean(f.EffectivePath())
 			if !strings.HasPrefix(p, prefix) {
 				continue
 			}

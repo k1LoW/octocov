@@ -3,6 +3,8 @@ package internal
 import (
 	"os"
 	"path/filepath"
+	"slices"
+	"sort"
 	"testing"
 )
 
@@ -180,4 +182,109 @@ func TestRootPath(t *testing.T) {
 			t.Errorf("got %v\nwant %v", got, want)
 		}
 	})
+}
+
+func TestCollectFiles(t *testing.T) {
+	root := t.TempDir()
+
+	// Create directory structure:
+	// root/
+	//   main.go
+	//   cmd/root.go
+	//   .git/config        (should be skipped)
+	//   node_modules/x.js  (should be skipped)
+	//   vendor/v.go         (should be skipped)
+	//   src/app.ts
+	dirs := []string{
+		filepath.Join(root, "cmd"),
+		filepath.Join(root, ".git"),
+		filepath.Join(root, "node_modules"),
+		filepath.Join(root, "vendor"),
+		filepath.Join(root, "src"),
+	}
+	for _, d := range dirs {
+		if err := os.MkdirAll(d, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	filesToCreate := map[string]bool{
+		filepath.Join(root, "main.go"):           true,
+		filepath.Join(root, "cmd", "root.go"):    true,
+		filepath.Join(root, "src", "app.ts"):     true,
+		filepath.Join(root, ".git", "config"):    false, // should be skipped
+		filepath.Join(root, "node_modules", "x.js"): false, // should be skipped
+		filepath.Join(root, "vendor", "v.go"):       false, // should be skipped
+	}
+	for f := range filesToCreate {
+		if err := os.WriteFile(f, []byte(""), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	got, err := CollectFiles(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sort.Strings(got)
+
+	var want []string
+	for f, included := range filesToCreate {
+		if included {
+			want = append(want, f)
+		}
+	}
+	sort.Strings(want)
+
+	if !slices.Equal(got, want) {
+		t.Errorf("CollectFiles() =\n  %v\nwant\n  %v", got, want)
+	}
+}
+
+func TestCollectFiles_Empty(t *testing.T) {
+	root := t.TempDir()
+	got, err := CollectFiles(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 0 {
+		t.Errorf("expected empty result for empty directory, got %v", got)
+	}
+}
+
+func TestCollectFiles_NestedSkipDirs(t *testing.T) {
+	root := t.TempDir()
+
+	// __pycache__ nested inside src/ should also be skipped
+	dirs := []string{
+		filepath.Join(root, "src", "__pycache__"),
+		filepath.Join(root, "src"),
+	}
+	for _, d := range dirs {
+		if err := os.MkdirAll(d, 0700); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	files := []string{
+		filepath.Join(root, "src", "app.py"),
+		filepath.Join(root, "src", "__pycache__", "app.pyc"),
+	}
+	for _, f := range files {
+		if err := os.WriteFile(f, []byte(""), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	got, err := CollectFiles(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{filepath.Join(root, "src", "app.py")}
+	sort.Strings(got)
+
+	if !slices.Equal(got, want) {
+		t.Errorf("CollectFiles() = %v, want %v", got, want)
+	}
 }

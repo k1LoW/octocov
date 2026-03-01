@@ -21,7 +21,7 @@ func (c *Coverage) Exclude(exclude []string) error {
 				e = strings.TrimPrefix(e, "!")
 				not = true
 			}
-			match, err := doublestar.Match(e, f.File)
+			match, err := doublestar.Match(e, f.EffectivePath())
 			if err != nil {
 				return err
 			}
