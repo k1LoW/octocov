@@ -24,6 +24,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
@@ -36,11 +37,24 @@ var diffCmd = &cobra.Command{
 	Aliases: []string{"compare"},
 	Args:    cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var gitRoot string
+		var fsFiles []string
+		if wd, err := os.Getwd(); err == nil {
+			if gr, err := internal.GitRoot(wd); err == nil {
+				if fs, err := internal.CollectFiles(gr); err == nil {
+					gitRoot = gr
+					fsFiles = fs
+				}
+			}
+		}
+
 		a := &report.Report{}
 		if err := a.Load(args[0]); err != nil {
 			return err
 		}
-		a.NormalizeCoveragePaths()
+		if a.Coverage != nil {
+			a.Coverage.NormalizePaths(gitRoot, fsFiles)
+		}
 		if a.Timestamp.IsZero() {
 			fi, err := os.Stat(args[0])
 			if err != nil {
@@ -53,7 +67,9 @@ var diffCmd = &cobra.Command{
 		if err := b.Load(args[1]); err != nil {
 			return err
 		}
-		b.NormalizeCoveragePaths()
+		if b.Coverage != nil {
+			b.Coverage.NormalizePaths(gitRoot, fsFiles)
+		}
 		if b.Timestamp.IsZero() {
 			fi, err := os.Stat(args[1])
 			if err != nil {
