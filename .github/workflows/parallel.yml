@@ -68,6 +68,9 @@ jobs:
       - test-pkgs
       - test-other
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       DEBUG: 1
