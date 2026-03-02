@@ -11,6 +11,14 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 		// If either is not LOC, merge as Merged
 		c.Type = TypeMerged
 	}
+	// Format
+	if c2.Format != "" {
+		if c.Format == "" {
+			c.Format = c2.Format
+		} else if c.Format != c2.Format {
+			c.Format = FormatMerged
+		}
+	}
 	// Files
 	for _, fc2 := range c2.Files {
 		fc, err := c.Files.FindByFile(fc2.EffectivePath())

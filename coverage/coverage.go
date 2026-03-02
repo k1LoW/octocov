@@ -27,6 +27,8 @@ const (
 	TypeLOC    Type = "loc"
 	TypeStmt   Type = "statement"
 	TypeMerged Type = "merged"
+
+	FormatMerged = "Merged"
 )
 
 type Coverage struct {
