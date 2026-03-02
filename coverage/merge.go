@@ -12,11 +12,11 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 		c.Type = TypeMerged
 	}
 	// Format
-	if c2.Format != "" && c.Format != c2.Format {
+	if c2.Format != "" {
 		if c.Format == "" {
 			c.Format = c2.Format
-		} else {
-			c.Format = "Merged"
+		} else if c.Format != c2.Format {
+			c.Format = FormatMerged
 		}
 	}
 	// Files

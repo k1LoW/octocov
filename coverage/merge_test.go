@@ -623,7 +623,7 @@ func TestMerge(t *testing.T) {
 			},
 			&Coverage{
 				Type:    TypeLOC,
-				Format:  "Merged",
+				Format:  FormatMerged,
 				Total:   2,
 				Covered: 2,
 				Files: FileCoverages{
