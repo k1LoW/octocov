@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.75.2](https://github.com/k1LoW/octocov/compare/v0.75.1...v0.75.2) - 2026-03-02
+### New Features 🎉
+- fix: update Coverage.Format field when merging different coverage formats by @k1LoW in https://github.com/k1LoW/octocov/pull/632
+
 ## [v0.75.1](https://github.com/k1LoW/octocov/compare/v0.75.0...v0.75.1) - 2026-03-02
 ### Other Changes
 - chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/630
