@@ -538,6 +538,204 @@ func TestMerge(t *testing.T) {
 				},
 			},
 		},
+		{
+			"Merge same format",
+			&Coverage{
+				Type:   TypeLOC,
+				Format: "LCOV",
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_a.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:   TypeLOC,
+				Format: "LCOV",
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_b.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:    TypeLOC,
+				Format:  "LCOV",
+				Total:   2,
+				Covered: 2,
+				Files: FileCoverages{
+					&FileCoverage{
+						File:    "file_a.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+					&FileCoverage{
+						File:    "file_b.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+		},
+		{
+			"Merge different formats",
+			&Coverage{
+				Type:   TypeLOC,
+				Format: "Go coverage",
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_a.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:   TypeLOC,
+				Format: "LCOV",
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_b.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:    TypeLOC,
+				Format:  "Merged",
+				Total:   2,
+				Covered: 2,
+				Files: FileCoverages{
+					&FileCoverage{
+						File:    "file_a.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+					&FileCoverage{
+						File:    "file_b.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+		},
+		{
+			"Merge with empty format",
+			&Coverage{
+				Type: TypeLOC,
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_a.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:   TypeLOC,
+				Format: "LCOV",
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_b.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			&Coverage{
+				Type:    TypeLOC,
+				Format:  "LCOV",
+				Total:   2,
+				Covered: 2,
+				Files: FileCoverages{
+					&FileCoverage{
+						File:    "file_a.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+					&FileCoverage{
+						File:    "file_b.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+		},
+		{
+			"Merge nil preserves format",
+			&Coverage{
+				Type:   TypeLOC,
+				Format: "Go coverage",
+				Files: FileCoverages{
+					&FileCoverage{
+						File: "file_a.go",
+						Type: TypeLOC,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+			nil,
+			&Coverage{
+				Type:    TypeLOC,
+				Format:  "Go coverage",
+				Total:   1,
+				Covered: 1,
+				Files: FileCoverages{
+					&FileCoverage{
+						File:    "file_a.go",
+						Type:    TypeLOC,
+						Total:   1,
+						Covered: 1,
+						Blocks: BlockCoverages{
+							newBlockCoverage(TypeLOC, 1, -1, 1, -1, -1, 1),
+						},
+					},
+				},
+			},
+		},
 	}
 	opts := []cmp.Option{
 		cmpopts.IgnoreUnexported(FileCoverage{}),
