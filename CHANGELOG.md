@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.75.1](https://github.com/k1LoW/octocov/compare/v0.75.0...v0.75.1) - 2026-03-02
+### Other Changes
+- chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/630
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/629
+
 ## [v0.75.0](https://github.com/k1LoW/octocov/compare/v0.74.6...v0.75.0) - 2026-03-01
 ### Breaking Changes 🛠
 - feat: normalize coverage file paths when merging multiple formats by @k1LoW in https://github.com/k1LoW/octocov/pull/627
