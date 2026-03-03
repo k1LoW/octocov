@@ -8,6 +8,64 @@ import (
 	"testing"
 )
 
+func TestGitRoot(t *testing.T) {
+	t.Run("normal repo", func(t *testing.T) {
+		dir := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(dir, "a", "b"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Mkdir(filepath.Join(dir, ".git"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, ".git", "config"), []byte("[core]"), 0600); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := GitRoot(filepath.Join(dir, "a", "b"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != dir {
+			t.Errorf("got %v, want %v", got, dir)
+		}
+	})
+
+	t.Run("worktree", func(t *testing.T) {
+		dir := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(dir, "a", "b"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		// Simulate worktree: .git is a file with "gitdir:" prefix
+		if err := os.WriteFile(filepath.Join(dir, ".git"), []byte("gitdir: /some/main/.git/worktrees/wt1"), 0600); err != nil {
+			t.Fatal(err)
+		}
+
+		got, err := GitRoot(filepath.Join(dir, "a", "b"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != dir {
+			t.Errorf("got %v, want %v", got, dir)
+		}
+	})
+
+	t.Run("invalid .git file", func(t *testing.T) {
+		dir := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(dir, "a"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		// .git file without "gitdir:" prefix should not be recognized
+		if err := os.WriteFile(filepath.Join(dir, ".git"), []byte("something else"), 0600); err != nil {
+			t.Fatal(err)
+		}
+
+		_, err := GitRoot(filepath.Join(dir, "a"))
+		if err == nil {
+			t.Error("expected error for invalid .git file, got nil")
+		}
+	})
+}
+
 func TestRootPath(t *testing.T) {
 	t.Run("git config", func(t *testing.T) {
 		dir := t.TempDir()
@@ -151,6 +209,41 @@ func TestRootPath(t *testing.T) {
 		}
 	})
 
+	t.Run("worktree .git file", func(t *testing.T) {
+		dir := t.TempDir()
+		if err := os.MkdirAll(filepath.Join(dir, "a", "b", "c"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		// Simulate worktree: .git is a file with "gitdir:" prefix
+		if err := os.WriteFile(filepath.Join(dir, "a", "b", ".git"), []byte("gitdir: /some/main/.git/worktrees/wt1"), 0600); err != nil {
+			t.Fatal(err)
+		}
+
+		tests := []struct {
+			base    string
+			wantErr bool
+		}{
+			{filepath.Join(dir, "a", "b", "c"), false},
+			{filepath.Join(dir, "a", "b"), false},
+			{filepath.Join(dir, "a"), true},
+		}
+		for _, tt := range tests {
+			got, err := RootPath(tt.base)
+			if err != nil {
+				if !tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+				}
+			} else {
+				if tt.wantErr {
+					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
+				}
+				if want := filepath.Join(dir, "a", "b"); got != want {
+					t.Errorf("got %v\nwant %v", got, want)
+				}
+			}
+		}
+	})
+
 	t.Run("both files in same directory - git config takes precedence", func(t *testing.T) {
 		dir := t.TempDir()
 		if err := os.MkdirAll(filepath.Join(dir, "m", "n"), 0700); err != nil {
@@ -286,5 +379,27 @@ func TestCollectFiles_NestedSkipDirs(t *testing.T) {
 
 	if !slices.Equal(got, want) {
 		t.Errorf("CollectFiles() = %v, want %v", got, want)
+	}
+}
+
+func TestCollectFiles_WorktreeGitFile(t *testing.T) {
+	root := t.TempDir()
+
+	// Create a .git file (worktree) and a regular file
+	if err := os.WriteFile(filepath.Join(root, ".git"), []byte("gitdir: /some/main/.git/worktrees/wt1"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "main.go"), []byte("package main"), 0600); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := CollectFiles(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := []string{filepath.Join(root, "main.go")}
+	if !slices.Equal(got, want) {
+		t.Errorf("CollectFiles() = %v, want %v (should not include .git file)", got, want)
 	}
 }
