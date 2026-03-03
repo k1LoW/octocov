@@ -15,6 +15,26 @@ var ConfigPaths = []string{
 	"octocov.yaml",
 }
 
+func isGitRoot(p string) bool {
+	dotGit := filepath.Join(p, ".git")
+	fi, err := os.Stat(dotGit)
+	if err != nil {
+		return false
+	}
+	if fi.IsDir() {
+		// Normal repo: .git/config exists
+		gitConfig := filepath.Join(dotGit, "config")
+		cfi, err := os.Stat(gitConfig)
+		return err == nil && !cfi.IsDir()
+	}
+	// Worktree: .git is a file starting with "gitdir:"
+	content, err := os.ReadFile(dotGit)
+	if err != nil {
+		return false
+	}
+	return strings.HasPrefix(string(content), "gitdir:")
+}
+
 func GitRoot(base string) (string, error) {
 	p, err := filepath.Abs(base)
 	if err != nil {
@@ -30,9 +50,7 @@ func GitRoot(base string) (string, error) {
 			continue
 		}
 
-		// Check for .git/config file
-		gitConfig := filepath.Join(p, ".git", "config")
-		if fi, err := os.Stat(gitConfig); err == nil && !fi.IsDir() {
+		if isGitRoot(p) {
 			return p, nil
 		}
 
@@ -44,7 +62,7 @@ func GitRoot(base string) (string, error) {
 	}
 
 	// Build error message with all checked paths
-	allPaths := []string{".git/config"}
+	allPaths := []string{".git"}
 	return "", fmt.Errorf("failed to traverse the root path (looking for %s): %s", strings.Join(allPaths, " or "), base)
 }
 
@@ -63,9 +81,7 @@ func RootPath(base string) (string, error) {
 			continue
 		}
 
-		// Check for .git/config file
-		gitConfig := filepath.Join(p, ".git", "config")
-		if fi, err := os.Stat(gitConfig); err == nil && !fi.IsDir() {
+		if isGitRoot(p) {
 			return p, nil
 		}
 
@@ -85,7 +101,7 @@ func RootPath(base string) (string, error) {
 	}
 
 	// Build error message with all checked paths
-	allPaths := append([]string{".git/config"}, ConfigPaths...)
+	allPaths := append([]string{".git"}, ConfigPaths...)
 	return "", fmt.Errorf("failed to traverse the root path (looking for %s): %s", strings.Join(allPaths, " or "), base)
 }
 
@@ -115,6 +131,10 @@ func CollectFiles(root string) ([]string, error) {
 			if _, skip := defaultSkipDirs[info.Name()]; skip {
 				return filepath.SkipDir
 			}
+			return nil
+		}
+		// Skip .git file (present in git worktrees instead of .git directory)
+		if info.Name() == ".git" {
 			return nil
 		}
 		files = append(files, path)
