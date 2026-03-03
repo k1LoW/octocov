@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.75.3](https://github.com/k1LoW/octocov/compare/v0.75.2...v0.75.3) - 2026-03-03
+### New Features 🎉
+- fix: support git worktree in GitRoot() and RootPath() by @k1LoW in https://github.com/k1LoW/octocov/pull/634
+
 ## [v0.75.2](https://github.com/k1LoW/octocov/compare/v0.75.1...v0.75.2) - 2026-03-02
 ### New Features 🎉
 - fix: update Coverage.Format field when merging different coverage formats by @k1LoW in https://github.com/k1LoW/octocov/pull/632
