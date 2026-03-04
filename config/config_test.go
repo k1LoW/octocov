@@ -441,3 +441,20 @@ func rootTestdataDir(t *testing.T) string {
 	}
 	return dir
 }
+
+func TestLoadPatchThreshold(t *testing.T) {
+	c := New()
+	p := filepath.Join(testdataDir(t), ".octocov_patch_threshold.yml")
+	if err := c.Load(p); err != nil {
+		t.Fatal(err)
+	}
+	if c.Coverage == nil {
+		t.Fatal("Coverage section not loaded")
+	}
+	if c.Coverage.PatchThreshold != "70%" {
+		t.Errorf("PatchThreshold got %v, want 70%%", c.Coverage.PatchThreshold)
+	}
+	if !c.Coverage.PatchFailUnder {
+		t.Errorf("PatchFailUnder got %v, want true", c.Coverage.PatchFailUnder)
+	}
+}
