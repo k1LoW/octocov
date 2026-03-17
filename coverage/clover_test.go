@@ -93,8 +93,8 @@ func TestCloverPathAttribute(t *testing.T) {
 		}
 		delete(wantFiles, f.File)
 	}
-	for path := range wantFiles {
-		t.Errorf("missing file: %s", path)
+	for f := range wantFiles {
+		t.Errorf("missing file: %s", f)
 	}
 }
 
