@@ -88,7 +88,7 @@ var lsFilesCmd = &cobra.Command{
 		for _, f := range r.Coverage.Files {
 			cfiles = append(cfiles, f.EffectivePath())
 		}
-		files, err := internal.CollectFiles(wd)
+		files, err := internal.CollectGitVisibleFiles(wd)
 		if err != nil {
 			return err
 		}
