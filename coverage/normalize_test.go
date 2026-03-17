@@ -575,6 +575,32 @@ func TestNormalizePaths_DotSlashPrefix(t *testing.T) {
 	}
 }
 
+func TestNormalizePaths_PrefersRepoPathOverCachePath(t *testing.T) {
+	root := t.TempDir()
+
+	repoFile := filepath.Join(root, "cmd", "main.go")
+	cacheFile := filepath.Join(root, ".cache", "go-build", "deadbeef", "main.go")
+	for _, f := range []string{repoFile, cacheFile} {
+		if err := os.MkdirAll(filepath.Dir(f), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(f, []byte(""), 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	cov := &Coverage{
+		Files: FileCoverages{
+			{File: "github.com/owner/repo/cmd/main.go"},
+		},
+	}
+	cov.NormalizePaths(root, []string{repoFile, cacheFile})
+
+	if got := cov.Files[0].NormalizedPath; got != "cmd/main.go" {
+		t.Errorf("NormalizedPath = %q, want %q", got, "cmd/main.go")
+	}
+}
+
 func TestCompare_OnlyOneSideNormalized(t *testing.T) {
 	// A has NormalizedPath, B does not (e.g., old stored report)
 	a := &Coverage{
