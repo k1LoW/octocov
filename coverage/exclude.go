@@ -17,8 +17,8 @@ func (c *Coverage) Exclude(exclude []string) error {
 		excluded := false
 		for _, e := range exclude {
 			not := false
-			if strings.HasPrefix(e, "!") {
-				e = strings.TrimPrefix(e, "!")
+			if rest, found := strings.CutPrefix(e, "!"); found {
+				e = rest
 				not = true
 			}
 			match, err := doublestar.Match(e, f.EffectivePath())

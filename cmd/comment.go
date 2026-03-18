@@ -104,11 +104,11 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	}
 	if err := c.Acceptable(r, rPrev); err != nil {
 		errs := errors.Errors(err)
-		var out string
+		var b strings.Builder
 		for _, e := range errs {
-			out += fmt.Sprintf("**:no_entry_sign: %s**\n\n", capitalize(e.Error()))
+			fmt.Fprintf(&b, "**:no_entry_sign: %s**\n\n", capitalize(e.Error()))
 		}
-		comment = append(comment, out)
+		comment = append(comment, b.String())
 	}
 	if r.IsMeasuredCoverage() || r.IsMeasuredTestExecutionTime() || r.IsMeasuredCodeToTestRatio() {
 		comment = append(comment, table, "", fileTable)
