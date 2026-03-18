@@ -55,6 +55,17 @@ type FileCoverage struct {
 	cache          map[int]BlockCoverages
 }
 
+func NewFileCoverage(file string, coverageType Type) *FileCoverage { //nostyle:repetition
+	return &FileCoverage{
+		File:    file,
+		Type:    coverageType,
+		Total:   0,
+		Covered: 0,
+		Blocks:  BlockCoverages{},
+		cache:   map[int]BlockCoverages{},
+	}
+}
+
 // EffectivePath returns NormalizedPath if set, otherwise File.
 func (fc *FileCoverage) EffectivePath() string {
 	if fc.NormalizedPath != "" {
@@ -158,17 +169,6 @@ type Processor interface {
 func New() *Coverage {
 	return &Coverage{
 		Files: FileCoverages{},
-	}
-}
-
-func NewFileCoverage(file string, coverageType Type) *FileCoverage { //nostyle:repetition
-	return &FileCoverage{
-		File:    file,
-		Type:    coverageType,
-		Total:   0,
-		Covered: 0,
-		Blocks:  BlockCoverages{},
-		cache:   map[int]BlockCoverages{},
 	}
 }
 

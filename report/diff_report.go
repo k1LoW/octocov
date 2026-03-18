@@ -128,6 +128,116 @@ func (d *DiffReport) Table() string {
 	return strings.Join(out, "\n")
 }
 
+func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd string) string {
+	if d.Coverage == nil {
+		return ""
+	}
+	if len(files) == 0 {
+		return ""
+	}
+	var t, c, pt, pc int
+	var rows [][]string
+	createRow := func(name string, fc *coverage.DiffFileCoverage, status string) []string {
+		diff := fmt.Sprintf("%.1f%%", floor1(fc.Diff))
+		if fc.Diff > 0 {
+			diff = fmt.Sprintf("+%s", diff)
+		}
+		if fc.FileCoverageA != nil {
+			c += fc.FileCoverageA.Covered
+			t += fc.FileCoverageA.Total
+		}
+		if fc.FileCoverageB != nil {
+			pc += fc.FileCoverageB.Covered
+			pt += fc.FileCoverageB.Total
+		}
+		return []string{name, fmt.Sprintf("%.1f%%", floor1(fc.A)), diff, status}
+	}
+
+	prFiles := map[string]*gh.PullRequestFile{}
+	for _, f := range files {
+		fc, err := d.Coverage.Files.FuzzyFindByFile(f.Filename)
+		if err != nil {
+			continue
+		}
+		prFiles[fc.File] = f
+	}
+
+	for _, fc := range d.Coverage.Files {
+		if prf, ok := prFiles[fc.File]; ok {
+			name := fmt.Sprintf("[%s](%s)", prf.Filename, prf.BlobURL)
+			rows = append(rows, createRow(name, fc, prf.Status))
+			continue
+		}
+		if fc.Diff == 0 {
+			continue
+		}
+
+		repoURL := fmt.Sprintf("%s/%s", os.Getenv("GITHUB_SERVER_URL"), os.Getenv("GITHUB_REPOSITORY"))
+		// trim prefix for Go coverage (no sufficient checks on the other formats)
+		name := strings.TrimPrefix(fc.File, strings.TrimPrefix(repoURL, "https://")+"/")
+		commit := ""
+		if fc.FileCoverageA != nil && d.CommitA != "" {
+			commit = d.CommitA
+		} else if fc.FileCoverageB != nil && d.CommitB != "" {
+			commit = d.CommitB
+		}
+
+		filePath := name
+		if relWd != "" && !strings.HasPrefix(filePath, relWd+"/") && !filepath.IsAbs(filePath) {
+			filePath = filepath.Clean(filepath.Join(relWd, filePath))
+		}
+
+		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {
+			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", filePath, repoURL, commit, filePath)
+		}
+		rows = append(rows, createRow(name, fc, "affected"))
+	}
+	if len(rows) == 0 {
+		return ""
+	}
+	coverAll := float64(c) / float64(t) * 100
+	if t == 0 {
+		coverAll = 0.0
+	}
+	prevAll := float64(pc) / float64(pt) * 100
+	if pt == 0 {
+		prevAll = 0.0
+	}
+	arrow := "→"
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", floor1(prevAll), arrow, floor1(coverAll))
+	buf := new(bytes.Buffer)
+	fmt.Fprintf(buf, "%s\n\n", title)
+
+	if len(rows) > filesSkipMax {
+		fmt.Fprintf(buf, "Skip file coverages because there are too many files (%d)\n", len(rows))
+		return buf.String()
+	}
+
+	if len(rows) > filesHideMin {
+		buf.WriteString("<details>\n\n")
+	}
+
+	table := tablewriter.NewWriter(buf)
+	h := []string{"Files", "Coverage", "+/-", "Status"}
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+
+	sort.Slice(rows, func(i, j int) bool { return rows[i][0] < rows[j][0] })
+	for _, v := range rows {
+		table.Append(v)
+	}
+	table.Render()
+
+	if len(rows) > filesHideMin {
+		buf.WriteString("\n</details>\n")
+	}
+
+	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
+}
+
 func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool) {
 	if withLink {
 		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
@@ -251,114 +361,4 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		}
 		table.Rich([]string{t, tb, ta, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 	}
-}
-
-func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd string) string {
-	if d.Coverage == nil {
-		return ""
-	}
-	if len(files) == 0 {
-		return ""
-	}
-	var t, c, pt, pc int
-	var rows [][]string
-	createRow := func(name string, fc *coverage.DiffFileCoverage, status string) []string {
-		diff := fmt.Sprintf("%.1f%%", floor1(fc.Diff))
-		if fc.Diff > 0 {
-			diff = fmt.Sprintf("+%s", diff)
-		}
-		if fc.FileCoverageA != nil {
-			c += fc.FileCoverageA.Covered
-			t += fc.FileCoverageA.Total
-		}
-		if fc.FileCoverageB != nil {
-			pc += fc.FileCoverageB.Covered
-			pt += fc.FileCoverageB.Total
-		}
-		return []string{name, fmt.Sprintf("%.1f%%", floor1(fc.A)), diff, status}
-	}
-
-	prFiles := map[string]*gh.PullRequestFile{}
-	for _, f := range files {
-		fc, err := d.Coverage.Files.FuzzyFindByFile(f.Filename)
-		if err != nil {
-			continue
-		}
-		prFiles[fc.File] = f
-	}
-
-	for _, fc := range d.Coverage.Files {
-		if prf, ok := prFiles[fc.File]; ok {
-			name := fmt.Sprintf("[%s](%s)", prf.Filename, prf.BlobURL)
-			rows = append(rows, createRow(name, fc, prf.Status))
-			continue
-		}
-		if fc.Diff == 0 {
-			continue
-		}
-
-		repoURL := fmt.Sprintf("%s/%s", os.Getenv("GITHUB_SERVER_URL"), os.Getenv("GITHUB_REPOSITORY"))
-		// trim prefix for Go coverage (no sufficient checks on the other formats)
-		name := strings.TrimPrefix(fc.File, strings.TrimPrefix(repoURL, "https://")+"/")
-		commit := ""
-		if fc.FileCoverageA != nil && d.CommitA != "" {
-			commit = d.CommitA
-		} else if fc.FileCoverageB != nil && d.CommitB != "" {
-			commit = d.CommitB
-		}
-
-		filePath := name
-		if relWd != "" && !strings.HasPrefix(filePath, relWd+"/") && !filepath.IsAbs(filePath) {
-			filePath = filepath.Clean(filepath.Join(relWd, filePath))
-		}
-
-		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {
-			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", filePath, repoURL, commit, filePath)
-		}
-		rows = append(rows, createRow(name, fc, "affected"))
-	}
-	if len(rows) == 0 {
-		return ""
-	}
-	coverAll := float64(c) / float64(t) * 100
-	if t == 0 {
-		coverAll = 0.0
-	}
-	prevAll := float64(pc) / float64(pt) * 100
-	if pt == 0 {
-		prevAll = 0.0
-	}
-	arrow := "→"
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", floor1(prevAll), arrow, floor1(coverAll))
-	buf := new(bytes.Buffer)
-	fmt.Fprintf(buf, "%s\n\n", title)
-
-	if len(rows) > filesSkipMax {
-		fmt.Fprintf(buf, "Skip file coverages because there are too many files (%d)\n", len(rows))
-		return buf.String()
-	}
-
-	if len(rows) > filesHideMin {
-		buf.WriteString("<details>\n\n")
-	}
-
-	table := tablewriter.NewWriter(buf)
-	h := []string{"Files", "Coverage", "+/-", "Status"}
-	table.SetHeader(h)
-	table.SetAutoFormatHeaders(false)
-	table.SetAutoWrapText(false)
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
-
-	sort.Slice(rows, func(i, j int) bool { return rows[i][0] < rows[j][0] })
-	for _, v := range rows {
-		table.Append(v)
-	}
-	table.Render()
-
-	if len(rows) > filesHideMin {
-		buf.WriteString("\n</details>\n")
-	}
-
-	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
