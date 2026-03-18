@@ -30,7 +30,6 @@ func TestDetectPrefix(t *testing.T) {
 		// {"/path/a/b/c/github.com/owner/repo/", "/path/a/b/c/github.com/owner/repo/foo", []string{"/path/a/b/c/github.com/owner/repo/bar/config/config.go", "/path/a/b/c/github.com/owner/repo/foo/config/config.go", "/path/a/b/c/github.com/owner/repo/foo/entity/hello.go"}, []string{"github.com/owner/repo/foo/config/config.go", "github.com/owner/repo/foo/entity/hello.go"}, "github.com/owner/repo/foo"},
 	}
 	for i, tt := range tests {
-		tt := tt
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			t.Parallel()
 			got := DetectPrefix(tt.gitRoot, tt.wd, tt.files, tt.cfiles)

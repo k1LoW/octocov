@@ -838,11 +838,11 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 		PullRequest struct {
 			Number int    `json:"number,omitempty"`
 			State  string `json:"state,omitempty"`
-		} `json:"pull_request,omitempty"`
+		} `json:"pull_request,omitzero"`
 		Issue struct {
 			Number int    `json:"number,omitempty"`
 			State  string `json:"state,omitempty"`
-		} `json:"issue,omitempty"`
+		} `json:"issue,omitzero"`
 	}{}
 	if err := json.Unmarshal(b, &s); err != nil {
 		return i, err
