@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.75.5](https://github.com/k1LoW/octocov/compare/v0.75.4...v0.75.5) - 2026-03-19
+### Other Changes
+- refactor: fix modernize linter issues by @k1LoW in https://github.com/k1LoW/octocov/pull/645
+- refactor: fix funcorder linter issues by reordering methods by @k1LoW in https://github.com/k1LoW/octocov/pull/647
+- chore(deps): bump google.golang.org/grpc from 1.79.2 to 1.79.3 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/648
+
 ## [v0.75.4](https://github.com/k1LoW/octocov/compare/v0.75.3...v0.75.4) - 2026-03-17
 ### Fix bug 🐛
 - fix: prefer path attribute over name in Clover XML parser by @k1LoW in https://github.com/k1LoW/octocov/pull/644
