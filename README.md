@@ -121,6 +121,7 @@ By setting `report:` ( `report.path:`  or `report.datastores` ) and `diff:` ( `d
 
 ``` yaml
 comment:
+  updatePrevious: true
 report:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
@@ -672,6 +673,18 @@ Delete previous code metrics report comments instead of hiding them
 comment:
   deletePrevious: true
 ```
+
+### `comment.updatePrevious:`
+
+Update the previous code metrics report comment instead of creating a new one.
+
+``` yaml
+comment:
+  updatePrevious: true
+```
+
+This is useful when you want octocov to keep a single managed pull request
+comment up to date.
 
 ### `comment.message:`
 
