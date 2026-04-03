@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.75.6](https://github.com/k1LoW/octocov/compare/v0.75.5...v0.75.6) - 2026-04-03
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/649
+- Document comment.updatePrevious by @kitsuyui in https://github.com/k1LoW/octocov/pull/651
+- chore(deps): bump the dependencies group with 9 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/652
+- chore(deps): bump github.com/go-jose/go-jose/v4 from 4.1.3 to 4.1.4 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/653
+
 ## [v0.75.5](https://github.com/k1LoW/octocov/compare/v0.75.4...v0.75.5) - 2026-03-19
 ### Other Changes
 - refactor: fix modernize linter issues by @k1LoW in https://github.com/k1LoW/octocov/pull/645
