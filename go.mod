@@ -16,7 +16,7 @@ require (
 	github.com/expr-lang/expr v1.17.8
 	github.com/fatih/color v1.19.0
 	github.com/go-enry/go-enry/v2 v2.9.6
-	github.com/go-git/go-git/v5 v5.17.2
+	github.com/go-git/go-git/v5 v5.18.0
 	github.com/goark/gnkf v0.7.9
 	github.com/goccy/go-json v0.10.6
 	github.com/goccy/go-yaml v1.19.2
