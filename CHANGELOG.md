@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.75.7](https://github.com/k1LoW/octocov/compare/v0.75.6...v0.75.7) - 2026-04-23
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/654
+- chore(deps): bump the dependencies group with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/655
+- chore(deps): bump go.opentelemetry.io/otel/sdk from 1.42.0 to 1.43.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/657
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/658
+- chore(deps): bump the dependencies group with 10 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/659
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.17.2 to 5.18.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/660
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/661
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/662
+
 ## [v0.75.6](https://github.com/k1LoW/octocov/compare/v0.75.5...v0.75.6) - 2026-04-03
 ### Other Changes
 - chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/649
