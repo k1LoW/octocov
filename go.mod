@@ -36,7 +36,7 @@ require (
 	github.com/k1LoW/repin v0.4.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.4.0
-	github.com/mackerelio/mackerel-client-go v0.41.0
+	github.com/mackerelio/mackerel-client-go v0.42.0
 	github.com/mauri870/gcsfs v0.0.0-20240120035028-2326f4c97769
 	github.com/migueleliasweb/go-github-mock v1.5.0
 	github.com/oklog/ulid/v2 v2.1.1
@@ -52,7 +52,7 @@ require (
 	golang.org/x/oauth2 v0.36.0
 	golang.org/x/text v0.37.0
 	golang.org/x/tools v0.45.0
-	google.golang.org/api v0.278.0
+	google.golang.org/api v0.279.0
 	gopkg.in/ini.v1 v1.67.2
 )
 
