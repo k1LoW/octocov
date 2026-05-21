@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.75.8](https://github.com/k1LoW/octocov/compare/v0.75.7...v0.75.8) - 2026-05-20
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/663
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/664
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.18.0 to 5.19.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/669
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/670
+- chore(deps): bump Songmu/tagpr from 1.18.3 to 1.19.0 in the dependencies group across 1 directory by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/667
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.19.0 to 5.19.1 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/672
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/671
+
 ## [v0.75.7](https://github.com/k1LoW/octocov/compare/v0.75.6...v0.75.7) - 2026-04-23
 ### Other Changes
 - chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/654
