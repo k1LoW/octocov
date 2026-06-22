@@ -61,12 +61,14 @@ type Config struct {
 }
 
 type Coverage struct {
-	Path       string        `yaml:"path,omitempty"`
-	Paths      []string      `yaml:"paths,omitempty"`
-	Exclude    []string      `yaml:"exclude,omitempty"`
-	Badge      CoverageBadge `yaml:"badge,omitempty"`
-	Acceptable string        `yaml:"acceptable,omitempty"`
-	If         string        `yaml:"if,omitempty"`
+	Path           string        `yaml:"path,omitempty"`
+	Paths          []string      `yaml:"paths,omitempty"`
+	Exclude        []string      `yaml:"exclude,omitempty"`
+	Badge          CoverageBadge `yaml:"badge,omitempty"`
+	Acceptable     string        `yaml:"acceptable,omitempty"`
+	PatchThreshold string        `yaml:"patchThreshold,omitempty"` // Patch coverage threshold
+	PatchFailUnder bool          `yaml:"patchFailUnder,omitempty"` // Fail if under threshold
+	If             string        `yaml:"if,omitempty"`
 }
 
 type CoverageBadge struct {

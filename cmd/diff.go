@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/k1LoW/octocov/internal"
@@ -78,7 +79,22 @@ var diffCmd = &cobra.Command{
 			b.Timestamp = fi.ModTime()
 		}
 
-		a.Compare(b).Out(os.Stdout)
+		dr := a.Compare(b)
+		dr.Out(os.Stdout)
+
+		// patchThreshold/patchFailUnder check
+		if a.Coverage != nil && a.Coverage.PatchThreshold != "" && a.Coverage.PatchFailUnder {
+			threshold := 0.0
+			t := a.Coverage.PatchThreshold
+			if len(t) > 0 && t[len(t)-1] == '%' {
+				t = t[:len(t)-1]
+			}
+			fmt.Sscanf(t, "%f", &threshold)
+			if dr.Coverage != nil && dr.Coverage.Diff < threshold {
+				// Fail if under threshold
+				os.Exit(1)
+			}
+		}
 		return nil
 	},
 }

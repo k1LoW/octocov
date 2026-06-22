@@ -1,0 +1,4 @@
+coverage:
+  acceptable: 80%
+  patchThreshold: 70%
+  patchFailUnder: true
