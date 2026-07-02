@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.75.9](https://github.com/carlosgandarez-lavvo/octocov/compare/v0.75.8...v0.75.9) - 2026-07-02
+### Other Changes
+- bump to v0.75.9 by @carlosgandarez-lavvo
+
 ## [v0.75.8](https://github.com/k1LoW/octocov/compare/v0.75.7...v0.75.8) - 2026-05-20
 ### Other Changes
 - chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/663
