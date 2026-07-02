@@ -1,4 +1,4 @@
-repository: k1LoW/octocov/parallel
+repository: carlosgandarez-lavvo/octocov/parallel
 coverage:
   acceptable: current >= 40%
   paths:

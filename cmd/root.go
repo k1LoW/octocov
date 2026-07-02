@@ -481,7 +481,8 @@ var rootCmd = &cobra.Command{
 		if err := c.PushConfigReady(); err != nil {
 			cmd.PrintErrf("Skip pushing generate files: %v\n", err)
 		} else {
-			cmd.PrintErrln("Pushing generated files...")
+			cmd.Println("Pushing generated files...")
+			cmd.Println("Files to be commit:" + strings.Join(addPaths, ", "))
 
 			m := defaultCommitMessage
 			if c.Push.Message != "" {

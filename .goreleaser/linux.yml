@@ -65,7 +65,7 @@ nfpms:
     file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
     builds:
       - octocov-linux
-    homepage: https://github.com/k1LoW/octocov
+    homepage: https://github.com/carlosgandarez-lavvo/octocov
     maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
     description: octocov is a toolkit for collecting code metrics.
     license: MIT
@@ -80,7 +80,7 @@ nfpms:
     file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
     builds:
       - octocov-linux-arm64
-    homepage: https://github.com/k1LoW/octocov
+    homepage: https://github.com/carlosgandarez-lavvo/octocov
     maintainer: Ken'ichiro Oyama <k1lowxb@gmail.com>
     description: octocov is a toolkit for collecting code metrics.
     license: MIT

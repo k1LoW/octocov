@@ -133,10 +133,10 @@ jobs:
           platforms: linux/amd64 #,linux/arm64
           push: false
           tags: |
-            ghcr.io/k1low/octocov:${{ steps.latest_version.outputs.version }}
-            ghcr.io/k1low/octocov:latest
+            ghcr.io/carlosgandarez-lavvo/octocov:${{ steps.latest_version.outputs.version }}
+            ghcr.io/carlosgandarez-lavvo/octocov:latest
           labels: |
             org.opencontainers.image.name=octocov
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ steps.latest_version.outputs.version }}
-            org.opencontainers.image.source=https://github.com/k1LoW/octocov
+            org.opencontainers.image.source=https://github.com/carlosgandarez-lavvo/octocov
