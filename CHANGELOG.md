@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.75.9](https://github.com/k1LoW/octocov/compare/v0.75.8...v0.75.9) - 2026-07-08
+
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/678
+- chore(deps): bump golang.org/x/image from 0.40.0 to 0.41.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/683
+- chore(deps): bump the dependencies group across 1 directory with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/682
+- chore(deps): bump the dependencies group across 1 directory with 12 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/684
+
 ## [v0.75.8](https://github.com/k1LoW/octocov/compare/v0.75.7...v0.75.8) - 2026-05-20
 ### Other Changes
 - chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/663
