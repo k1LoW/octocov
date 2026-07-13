@@ -1,6 +1,6 @@
 module github.com/k1LoW/octocov
 
-go 1.25.11
+go 1.25.12
 
 require (
 	cloud.google.com/go/auth v0.21.0
