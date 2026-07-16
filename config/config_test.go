@@ -227,7 +227,7 @@ func TestCoverageAcceptable(t *testing.T) {
 				prevRat = big.NewRat(int64(tt.prev*10000), 10000)
 			}
 
-			if err := coverageAcceptable(covRat, prevRat, tt.cond); err != nil {
+			if err := coverageAcceptable(covRat, prevRat, tt.cond, nil); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 				}
@@ -238,6 +238,57 @@ func TestCoverageAcceptable(t *testing.T) {
 				if tt.wantErr {
 					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
 				}
+			}
+		})
+	}
+}
+
+func TestCoverageAcceptableReferencesPatch(t *testing.T) {
+	tests := []struct {
+		cond string
+		want bool
+	}{
+		{"", false},
+		{"80%", false},
+		{"current >= 80%", false},
+		{"patch_current >= 80%", true},
+		{"patch_prev >= 80%", true},
+		{"patch_diff >= 0", true},
+		{"current >= 80% && patch_current >= 70%", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.cond, func(t *testing.T) {
+			c := &Coverage{Acceptable: tt.cond}
+			if got := c.AcceptableReferencesPatch(); got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+	var nilCov *Coverage
+	if nilCov.AcceptableReferencesPatch() {
+		t.Error("nil *Coverage should not reference patch")
+	}
+}
+
+func TestCoverageAcceptablePatchVariables(t *testing.T) {
+	tests := []struct {
+		cond    string
+		patch   *PatchAcceptableVars
+		wantErr bool
+	}{
+		{"patch_current >= 70%", &PatchAcceptableVars{Current: 80, Prev: 60}, false},
+		{"patch_current >= 70%", &PatchAcceptableVars{Current: 60, Prev: 60}, true},
+		{"patch_diff >= 0", &PatchAcceptableVars{Current: 80, Prev: 60}, false},
+		{"patch_diff >= 0", &PatchAcceptableVars{Current: 60, Prev: 80}, true},
+		{"patch_current >= patch_prev", &PatchAcceptableVars{Current: 80, Prev: 60}, false},
+	}
+	cov := big.NewRat(800000, 10000)
+	prev := big.NewRat(800000, 10000)
+	for _, tt := range tests {
+		t.Run(tt.cond, func(t *testing.T) {
+			err := coverageAcceptable(cov, prev, tt.cond, tt.patch)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -442,19 +493,3 @@ func rootTestdataDir(t *testing.T) string {
 	return dir
 }
 
-func TestLoadPatchThreshold(t *testing.T) {
-	c := New()
-	p := filepath.Join(testdataDir(t), ".octocov_patch_threshold.yml")
-	if err := c.Load(p); err != nil {
-		t.Fatal(err)
-	}
-	if c.Coverage == nil {
-		t.Fatal("Coverage section not loaded")
-	}
-	if c.Coverage.PatchThreshold != "70%" {
-		t.Errorf("PatchThreshold got %v, want 70%%", c.Coverage.PatchThreshold)
-	}
-	if !c.Coverage.PatchFailUnder {
-		t.Errorf("PatchFailUnder got %v, want true", c.Coverage.PatchFailUnder)
-	}
-}

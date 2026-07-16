@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"math/big"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/errors"
 	"github.com/k1LoW/expand"
+	cov "github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
 	"golang.org/x/text/language"
@@ -61,14 +63,23 @@ type Config struct {
 }
 
 type Coverage struct {
-	Path           string        `yaml:"path,omitempty"`
-	Paths          []string      `yaml:"paths,omitempty"`
-	Exclude        []string      `yaml:"exclude,omitempty"`
-	Badge          CoverageBadge `yaml:"badge,omitempty"`
-	Acceptable     string        `yaml:"acceptable,omitempty"`
-	PatchThreshold string        `yaml:"patchThreshold,omitempty"` // Patch coverage threshold
-	PatchFailUnder bool          `yaml:"patchFailUnder,omitempty"` // Fail if under threshold
-	If             string        `yaml:"if,omitempty"`
+	Path       string        `yaml:"path,omitempty"`
+	Paths      []string      `yaml:"paths,omitempty"`
+	Exclude    []string      `yaml:"exclude,omitempty"`
+	Badge      CoverageBadge `yaml:"badge,omitempty"`
+	Acceptable string        `yaml:"acceptable,omitempty"`
+	If         string        `yaml:"if,omitempty"`
+}
+
+var patchVarRe = regexp.MustCompile(`patch_(?:current|prev|diff)`)
+
+// AcceptableReferencesPatch reports whether the `coverage.acceptable:` condition
+// references any of the `patch_current`/`patch_prev`/`patch_diff` variables.
+func (c *Coverage) AcceptableReferencesPatch() bool {
+	if c == nil {
+		return false
+	}
+	return patchVarRe.MatchString(c.Acceptable)
 }
 
 type CoverageBadge struct {
@@ -208,15 +219,34 @@ type Reporter interface {
 	TestExecutionTimeNano() float64
 	IsMeasuredTestExecutionTime() bool
 	CustomMetricsAcceptable(Reporter) error
+	PatchCoverage(changedFiles map[string][]int) *cov.PatchCoverage
 }
 
-func (c *Config) Acceptable(r, rPrev Reporter) error {
+// PatchAcceptableVars holds the patch-coverage variables available to `coverage.acceptable:` expressions.
+type PatchAcceptableVars struct {
+	Current float64
+	Prev    float64
+}
+
+// Acceptable checks r (and rPrev, for comparison) against the configured acceptable conditions.
+// changedFiles maps a file path to the line numbers changed in that file (e.g. lines changed in a
+// pull request), and is used to compute the `patch_current`/`patch_prev`/`patch_diff` variables for
+// `coverage.acceptable:`. Pass nil if no pull request context is available; the patch coverage check
+// is then skipped for conditions that reference those variables.
+func (c *Config) Acceptable(r, rPrev Reporter, changedFiles map[string][]int) error {
 	var errs error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
 		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
-		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable); err != nil {
-			errs = errors.Join(errs, err)
+		needsPatch := c.Coverage.AcceptableReferencesPatch()
+		var patch *PatchAcceptableVars
+		if needsPatch {
+			patch = buildPatchAcceptableVars(r, rPrev, changedFiles)
+		}
+		if !needsPatch || patch != nil {
+			if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
+				errs = errors.Join(errs, err)
+			}
 		}
 	}
 
@@ -259,7 +289,25 @@ var (
 	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
-func coverageAcceptable(current, prev *big.Rat, cond string) error {
+// buildPatchAcceptableVars computes the patch-coverage variables for `coverage.acceptable:`.
+// It returns nil if changedFiles is unavailable (no pull request context) or no changed lines
+// could be matched against the current coverage report, in which case the patch coverage check
+// should be skipped rather than evaluated against zero/undefined values.
+func buildPatchAcceptableVars(r, rPrev Reporter, changedFiles map[string][]int) *PatchAcceptableVars {
+	if changedFiles == nil {
+		log.Println("coverage.acceptable references patch_* variables, but no pull request context is available: skipping patch coverage check")
+		return nil
+	}
+	currPatch := r.PatchCoverage(changedFiles)
+	if currPatch.Total == 0 {
+		log.Println("coverage.acceptable references patch_* variables, but no changed lines could be matched against the coverage report: skipping patch coverage check")
+		return nil
+	}
+	prevPatch := rPrev.PatchCoverage(changedFiles)
+	return &PatchAcceptableVars{Current: currPatch.Rate(), Prev: prevPatch.Rate()}
+}
+
+func coverageAcceptable(current, prev *big.Rat, cond string, patch *PatchAcceptableVars) error {
 	if cond == "" {
 		return nil
 	}
@@ -281,6 +329,11 @@ func coverageAcceptable(current, prev *big.Rat, cond string) error {
 		"current": currentF,
 		"prev":    prevF,
 		"diff":    diffF,
+	}
+	if patch != nil {
+		variables["patch_current"] = patch.Current
+		variables["patch_prev"] = patch.Prev
+		variables["patch_diff"] = patch.Current - patch.Prev
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {

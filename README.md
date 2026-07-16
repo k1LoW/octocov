@@ -447,11 +447,24 @@ coverage:
 
 The variables that can be used are as follows.
 
-| value     | description                                                  |
-| --------- | ------------------------------------------------------------ |
-| `current` | Current code metrics value                                   |
-| `prev`    | Previous value. This value is taken from `diff.datastores:`. |
-| `diff`    | The result of `current - prev`                               |
+| value           | description                                                                        |
+| --------------- | ----------------------------------------------------------------------------------- |
+| `current`       | Current code metrics value                                                           |
+| `prev`          | Previous value. This value is taken from `diff.datastores:`.                        |
+| `diff`          | The result of `current - prev`                                                      |
+| `patch_current` | Coverage of the lines changed in the current pull request ("patch coverage")        |
+| `patch_prev`    | `patch_current` computed against the previous report (`diff.datastores:`) instead   |
+| `patch_diff`    | The result of `patch_current - patch_prev`                                          |
+
+```yaml
+coverage:
+  acceptable: patch_current >= 80%
+```
+
+`patch_current`/`patch_prev`/`patch_diff` require pull request context: octocov fetches the list of
+changed files and lines for the current pull request via the GitHub API. If that context is not
+available (e.g. not running against a pull request, or the GitHub API is not accessible), the
+condition is skipped for that run rather than failing the build.
 
 It is also possible to omit the expression as follows
 
@@ -1401,18 +1414,5 @@ $ go install github.com/k1LoW/octocov@latest
 ```console
 $ docker pull ghcr.io/k1low/octocov:latest
 ```
-
-## Patch Coverage Threshold
-
-You can set `patchThreshold` and `patchFailUnder` in the `coverage` section of `octocov.yml` to control CI behavior based on PR diff coverage.
-
-```yaml
-coverage:
-  acceptable: 80%
-  patchThreshold: 70% # Patch coverage threshold for PR diff
-  patchFailUnder: true # Fail CI if under threshold (false: only warn)
-```
-
-With this setting, if the diff coverage is below `patchThreshold`, `octocov diff` will exit with code 1 and fail CI.
 
 ---
