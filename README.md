@@ -466,6 +466,17 @@ changed files and lines for the current pull request via the GitHub API. If that
 available (e.g. not running against a pull request, or the GitHub API is not accessible), the
 condition is skipped for that run rather than failing the build.
 
+`coverage.acceptable:` is a single condition, so this "skip if unavailable" behavior applies to the
+condition as a whole. If you combine `patch_current`/`patch_prev`/`patch_diff` with `current`/`prev`/`diff`
+in one expression (e.g. `current >= 80% && patch_current >= 70%`), the entire condition — including
+the `current >= 80%` part — is skipped when pull request context is unavailable, not just the patch
+part. If you want an absolute/diff coverage floor to always be enforced regardless of pull request
+context, keep it as a condition that does not reference `patch_current`/`patch_prev`/`patch_diff`.
+
+`octocov diff [REPORT_A] [REPORT_B] --patch` also prints a patch coverage table for `REPORT_A`
+(fetching changed files/lines via the GitHub API), when the `--patch` flag is given and pull
+request context is available. Without `--patch`, `octocov diff` makes no GitHub API calls, as before.
+
 It is also possible to omit the expression as follows
 
 | Omitted expression | Expanded expression |

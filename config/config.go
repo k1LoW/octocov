@@ -71,7 +71,7 @@ type Coverage struct {
 	If         string        `yaml:"if,omitempty"`
 }
 
-var patchVarRe = regexp.MustCompile(`patch_(?:current|prev|diff)`)
+var patchVarRe = regexp.MustCompile(`\bpatch_(?:current|prev|diff)\b`)
 
 // AcceptableReferencesPatch reports whether the `coverage.acceptable:` condition
 // references any of the `patch_current`/`patch_prev`/`patch_diff` variables.

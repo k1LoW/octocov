@@ -255,6 +255,8 @@ func TestCoverageAcceptableReferencesPatch(t *testing.T) {
 		{"patch_prev >= 80%", true},
 		{"patch_diff >= 0", true},
 		{"current >= 80% && patch_current >= 70%", true},
+		{"mypatch_current >= 80%", false},
+		{"patch_currently >= 80%", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.cond, func(t *testing.T) {
