@@ -494,4 +494,3 @@ func rootTestdataDir(t *testing.T) string {
 	}
 	return dir
 }
-
