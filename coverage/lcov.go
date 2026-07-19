@@ -81,19 +81,26 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 				_ = r.Close() //nostyle:handlerrors
 				return nil, "", err
 			}
-			count, err := strconv.Atoi(nums[1])
-			if err != nil {
+			// Parse as uint64: llvm-cov can emit u64-wrapped (negative)
+			// execution counts when profile counters race (e.g. a thread
+			// still running at process exit), so counts up to MaxUint64 are
+			// valid input. On ErrRange (> MaxUint64) ParseUint has already
+			// saturated the value; accept it instead of rejecting the whole
+			// report over one corrupt counter.
+			count, err := strconv.ParseUint(nums[1], 10, 64)
+			if err != nil && !errors.Is(err, strconv.ErrRange) {
 				_ = r.Close() //nostyle:handlerrors
 				return nil, "", err
 			}
 			if count > 0 {
 				covered += 1
 			}
+			c := ExecCount(count)
 			blocks = append(blocks, &BlockCoverage{
 				Type:      TypeLOC,
 				StartLine: &line,
 				EndLine:   &line,
-				Count:     &count,
+				Count:     &c,
 			})
 		default:
 			// not implemented

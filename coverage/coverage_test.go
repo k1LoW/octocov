@@ -93,7 +93,7 @@ func TestCompare(t *testing.T) {
 func TestMaxCount(t *testing.T) {
 	tests := []struct {
 		blocks BlockCoverages
-		want   int
+		want   ExecCount
 	}{
 		{
 			BlockCoverages{
@@ -407,11 +407,12 @@ func TestDiffFileCoveragesFuzzyFindByFile(t *testing.T) {
 }
 
 func newBlockCoverage(t Type, sl, sc, el, ec, ns, c int) *BlockCoverage {
+	cc := toExecCount(c)
 	bc := &BlockCoverage{
 		Type:      t,
 		StartLine: &sl,
 		EndLine:   &el,
-		Count:     &c,
+		Count:     &cc,
 	}
 	if sc >= 0 {
 		bc.StartCol = &sc
