@@ -166,7 +166,7 @@ type FileCoverages []*FileCoverage
 // to stop emitting "count".
 type ExecCount uint64
 
-func (c ExecCount) MarshalJSON() ([]byte, error) {
+func (c ExecCount) MarshalJSON() ([]byte, error) { //nostyle:recvtype
 	if c > math.MaxInt64 {
 		c = math.MaxInt64
 	}

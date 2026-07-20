@@ -764,42 +764,42 @@ func challengeParseReport(path string) (*coverage.Coverage, string, error) {
 		return cov, rp, nil
 	} else {
 		log.Printf("parse as Go coverage: %s", err)
-		errs = append(errs, fmt.Errorf("Go coverage: %w", err))
+		errs = append(errs, fmt.Errorf("go coverage: %w", err))
 	}
 	// lcov
 	if cov, rp, err := coverage.NewLcov().ParseReport(path); err == nil {
 		return cov, rp, nil
 	} else {
 		log.Printf("parse as LCOV: %s", err)
-		errs = append(errs, fmt.Errorf("LCOV: %w", err))
+		errs = append(errs, fmt.Errorf("lcov: %w", err))
 	}
 	// simplecov
 	if cov, rp, err := coverage.NewSimplecov().ParseReport(path); err == nil {
 		return cov, rp, nil
 	} else {
 		log.Printf("parse as SimpleCov: %s", err)
-		errs = append(errs, fmt.Errorf("SimpleCov: %w", err))
+		errs = append(errs, fmt.Errorf("simpleCov: %w", err))
 	}
 	// clover
 	if cov, rp, err := coverage.NewClover().ParseReport(path); err == nil {
 		return cov, rp, nil
 	} else {
 		log.Printf("parse as Clover: %s", err)
-		errs = append(errs, fmt.Errorf("Clover: %w", err))
+		errs = append(errs, fmt.Errorf("clover: %w", err))
 	}
 	// cobertura
 	if cov, rp, err := coverage.NewCobertura().ParseReport(path); err == nil {
 		return cov, rp, nil
 	} else {
 		log.Printf("parse as Cobertura: %s", err)
-		errs = append(errs, fmt.Errorf("Cobertura: %w", err))
+		errs = append(errs, fmt.Errorf("cobertura: %w", err))
 	}
 	// jacoco
 	if cov, rp, err := coverage.NewJacoco().ParseReport(path); err == nil {
 		return cov, rp, nil
 	} else {
 		log.Printf("parse as JaCoCo: %s", err)
-		errs = append(errs, fmt.Errorf("JaCoCo: %w", err))
+		errs = append(errs, fmt.Errorf("jacoco: %w", err))
 	}
 
 	msg := fmt.Sprintf("parsable coverage report not found: %s", path)
