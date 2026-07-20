@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -41,6 +42,40 @@ func TestLcov(t *testing.T) {
 		if got := f.Covered; got != covered {
 			t.Errorf("got %v\nwant %v", got, covered)
 		}
+	}
+}
+
+func TestLcovAcceptsU64WrappedCounts(t *testing.T) {
+	// llvm-cov (e.g. cargo-llvm-cov) can emit u64-wrapped negative execution
+	// counts when profile counters race; one such line must not reject the
+	// whole report, and the raw u64 value must survive parsing.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lcov.info")
+	content := `TN:
+SF:src/cache.rs
+DA:1,1
+DA:2,18446744073709551611
+DA:3,0
+LF:3
+LH:2
+end_of_record
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 3; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	// The wrapped counter still counts as executed.
+	if want := 2; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	if want := ExecCount(18446744073709551611); *got.Files[0].Blocks[1].Count != want {
+		t.Errorf("got %v\nwant %v", *got.Files[0].Blocks[1].Count, want)
 	}
 }
 

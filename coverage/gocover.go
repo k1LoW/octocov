@@ -44,7 +44,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 			el := b.EndLine
 			ec := b.EndCol
 			ns := b.NumStmt
-			c := b.Count
+			c := toExecCount(b.Count)
 			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 				Type:      TypeStmt,
 				StartLine: &sl,

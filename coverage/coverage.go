@@ -3,9 +3,12 @@ package coverage
 import (
 	"errors"
 	"fmt"
+	"math"
 	"path/filepath"
+	"strconv"
 	"strings"
 
+	"github.com/goccy/go-json"
 	"github.com/zhangyunhao116/skipmap"
 )
 
@@ -149,14 +152,101 @@ func splitPath(p string) []string {
 
 type FileCoverages []*FileCoverage
 
+// ExecCount is a block execution count. It is uint64 internally so that
+// u64-wrapped counters emitted by llvm-based tools (e.g. cargo-llvm-cov when
+// profile counters race) survive parsing without truncation.
+//
+// In stored report.json the canonical field is "count_u64", which always
+// carries the raw uint64 value; uint64-aware readers prefer it and fall back
+// to "count" for reports written before its introduction. "count" is kept as
+// a compatibility field, clamped to MaxInt64 via ExecCount.MarshalJSON,
+// because binaries that decode counts into int (upstream octocov, older
+// versions of this fork) fail the whole report on out-of-int64 number
+// literals; they ignore the unknown "count_u64". The final migration step is
+// to stop emitting "count".
+type ExecCount uint64
+
+func (c ExecCount) MarshalJSON() ([]byte, error) { //nostyle:recvtype
+	if c > math.MaxInt64 {
+		c = math.MaxInt64
+	}
+	return []byte(strconv.FormatUint(uint64(c), 10)), nil
+}
+
+// satAdd returns a+b, saturating at MaxUint64 instead of wrapping.
+func satAdd(a, b ExecCount) ExecCount {
+	if s := a + b; s >= a {
+		return s
+	}
+	return math.MaxUint64
+}
+
+// toExecCount converts a count parsed from a signed representation, treating
+// negative values as 0.
+func toExecCount(c int) ExecCount {
+	if c < 0 {
+		return 0
+	}
+	return ExecCount(c)
+}
+
 type BlockCoverage struct {
-	Type      Type `json:"type"`
-	StartLine *int `json:"start_line,omitempty"`
-	StartCol  *int `json:"start_col,omitempty"`
-	EndLine   *int `json:"end_line,omitempty"`
-	EndCol    *int `json:"end_col,omitempty"`
-	NumStmt   *int `json:"num_stmt,omitempty"`
-	Count     *int `json:"count,omitempty"`
+	Type      Type       `json:"type"`
+	StartLine *int       `json:"start_line,omitempty"`
+	StartCol  *int       `json:"start_col,omitempty"`
+	EndLine   *int       `json:"end_line,omitempty"`
+	EndCol    *int       `json:"end_col,omitempty"`
+	NumStmt   *int       `json:"num_stmt,omitempty"`
+	Count     *ExecCount `json:"count,omitempty"`
+}
+
+// blockCoverageJSON mirrors BlockCoverage with the canonical "count_u64"
+// field alongside the clamped compatibility "count" (see ExecCount).
+type blockCoverageJSON struct {
+	Type      Type       `json:"type"`
+	StartLine *int       `json:"start_line,omitempty"`
+	StartCol  *int       `json:"start_col,omitempty"`
+	EndLine   *int       `json:"end_line,omitempty"`
+	EndCol    *int       `json:"end_col,omitempty"`
+	NumStmt   *int       `json:"num_stmt,omitempty"`
+	Count     *ExecCount `json:"count,omitempty"`
+	CountU64  *uint64    `json:"count_u64,omitempty"`
+}
+
+func (bc *BlockCoverage) MarshalJSON() ([]byte, error) {
+	a := blockCoverageJSON{
+		Type:      bc.Type,
+		StartLine: bc.StartLine,
+		StartCol:  bc.StartCol,
+		EndLine:   bc.EndLine,
+		EndCol:    bc.EndCol,
+		NumStmt:   bc.NumStmt,
+		Count:     bc.Count,
+	}
+	if bc.Count != nil {
+		raw := uint64(*bc.Count)
+		a.CountU64 = &raw
+	}
+	return json.Marshal(a)
+}
+
+func (bc *BlockCoverage) UnmarshalJSON(data []byte) error {
+	var a blockCoverageJSON
+	if err := json.Unmarshal(data, &a); err != nil {
+		return err
+	}
+	bc.Type = a.Type
+	bc.StartLine = a.StartLine
+	bc.StartCol = a.StartCol
+	bc.EndLine = a.EndLine
+	bc.EndCol = a.EndCol
+	bc.NumStmt = a.NumStmt
+	bc.Count = a.Count
+	if a.CountU64 != nil {
+		c := ExecCount(*a.CountU64)
+		bc.Count = &c
+	}
+	return nil
 }
 
 type BlockCoverages []*BlockCoverage
@@ -260,8 +350,8 @@ func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, err
 	return nil, fmt.Errorf("file name not found: %s", file)
 }
 
-func (bc BlockCoverages) MaxCount() int { //nostyle:recvtype
-	counts := map[int]int{}
+func (bc BlockCoverages) MaxCount() ExecCount { //nostyle:recvtype
+	counts := map[int]ExecCount{}
 	for _, c := range bc {
 		sl := *c.StartLine
 		el := *c.EndLine
@@ -270,10 +360,10 @@ func (bc BlockCoverages) MaxCount() int { //nostyle:recvtype
 			if !ok {
 				counts[i] = 0
 			}
-			counts[i] += *c.Count
+			counts[i] = satAdd(counts[i], *c.Count)
 		}
 	}
-	max := 0
+	max := ExecCount(0)
 	for _, v := range counts {
 		if v > max {
 			max = v
@@ -289,12 +379,12 @@ const (
 
 type PosCoverage struct {
 	Pos   int
-	Count int
+	Count ExecCount
 }
 
 type PosCoverages []*PosCoverage
 
-func (pc PosCoverages) FindCountByPos(pos int) (int, error) { //nostyle:recvtype
+func (pc PosCoverages) FindCountByPos(pos int) (ExecCount, error) { //nostyle:recvtype
 	before := PosCoverages{}
 	after := PosCoverages{}
 	for _, c := range pc {
@@ -329,7 +419,7 @@ func (pc PosCoverages) FindCountByPos(pos int) (int, error) { //nostyle:recvtype
 
 type LineCoverage struct {
 	Line         int
-	Count        int
+	Count        ExecCount
 	PosCoverages PosCoverages
 }
 
@@ -359,23 +449,23 @@ func (lc LineCoverages) Covered() int { //nostyle:recvtype
 }
 
 func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
-	m := skipmap.NewInt[*skipmap.IntMap[int]]()
+	m := skipmap.NewInt[*skipmap.IntMap[ExecCount]]()
 
 	for _, c := range bc {
 		sl := *c.StartLine
 		el := *c.EndLine
 		for i := sl; i <= el; i++ {
-			var mm *skipmap.IntMap[int]
+			var mm *skipmap.IntMap[ExecCount]
 			mm, ok := m.Load(i)
 			if !ok {
-				mm = skipmap.NewInt[int]()
+				mm = skipmap.NewInt[ExecCount]()
 			}
 			m.Store(i, mm)
 
 			if c.Type == TypeLOC || (sl < i && i < el) {
 				// TypeLOC or TypeStmt
-				mm.Range(func(key int, v int) bool {
-					mm.Store(key, v+*c.Count)
+				mm.Range(func(key int, v ExecCount) bool {
+					mm.Store(key, satAdd(v, *c.Count))
 					return true
 				})
 				if _, ok := mm.Load(startPos); !ok {
@@ -388,15 +478,15 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 			}
 
 			// TypeStmt
-			startCount := 0
-			endCount := 0
+			startCount := ExecCount(0)
+			endCount := ExecCount(0)
 			startTo := startPos
 			endFrom := endPos
 			var (
 				pos    []int
-				counts []int
+				counts []ExecCount
 			)
-			mm.Range(func(key int, v int) bool {
+			mm.Range(func(key int, v ExecCount) bool {
 				pos = append(pos, key)
 				counts = append(counts, v)
 				return true
@@ -414,9 +504,9 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 
 			switch {
 			case i == sl && i != el:
-				mm.Range(func(key int, v int) bool {
+				mm.Range(func(key int, v ExecCount) bool {
 					if key >= *c.StartCol {
-						mm.Store(key, v+*c.Count)
+						mm.Store(key, satAdd(v, *c.Count))
 					}
 					return true
 				})
@@ -430,21 +520,21 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 				for j := *c.StartCol; j <= *c.EndCol; j++ {
 					v, ok := mm.Load(j)
 					if ok {
-						mm.Store(j, v+*c.Count)
+						mm.Store(j, satAdd(v, *c.Count))
 					} else {
 						if j <= startTo {
-							mm.Store(j, startCount+*c.Count)
+							mm.Store(j, satAdd(startCount, *c.Count))
 						} else if endFrom <= j {
-							mm.Store(j, endCount+*c.Count)
+							mm.Store(j, satAdd(endCount, *c.Count))
 						} else {
 							mm.Store(j, *c.Count)
 						}
 					}
 				}
 			case i != sl && i == el:
-				mm.Range(func(key int, v int) bool {
+				mm.Range(func(key int, v ExecCount) bool {
 					if key <= *c.EndCol {
-						mm.Store(key, v+*c.Count)
+						mm.Store(key, satAdd(v, *c.Count))
 					}
 					return true
 				})
@@ -459,13 +549,13 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 	}
 
 	lcs := LineCoverages{}
-	m.Range(func(line int, mm *skipmap.IntMap[int]) bool {
+	m.Range(func(line int, mm *skipmap.IntMap[ExecCount]) bool {
 		lc := &LineCoverage{
 			Line:         line,
 			Count:        0,
 			PosCoverages: PosCoverages{},
 		}
-		mm.Range(func(pos int, c int) bool {
+		mm.Range(func(pos int, c ExecCount) bool {
 			lc.PosCoverages = append(lc.PosCoverages, &PosCoverage{
 				Pos:   pos,
 				Count: c,
