@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.75.10](https://github.com/k1LoW/octocov/compare/v0.75.9...v0.75.10) - 2026-07-20
+
+### Fix bug 🐛
+- Handle execution counts as uint64 and tolerate u64-wrapped LCOV counts by @moznion in https://github.com/k1LoW/octocov/pull/688
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 11 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/690
+- chore(deps): bump the dependencies group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/689
+
 ## [v0.75.9](https://github.com/k1LoW/octocov/compare/v0.75.8...v0.75.9) - 2026-07-08
 
 ### Other Changes
