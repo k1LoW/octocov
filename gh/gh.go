@@ -402,7 +402,7 @@ var patchHunkHeaderRe = regexp.MustCompile(`^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @
 func parseChangedLinesFromPatch(patch string) []int {
 	var lines []int
 	newLine := 0
-	for _, l := range strings.Split(patch, "\n") {
+	for l := range strings.SplitSeq(patch, "\n") {
 		if m := patchHunkHeaderRe.FindStringSubmatch(l); m != nil {
 			newLine, _ = strconv.Atoi(m[1])
 			continue
