@@ -83,7 +83,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 				ll := l + 1
 				switch v := c.(type) {
 				case float64:
-					count := int(v)
+					count := toExecCount(int(v))
 					fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 						Type:      TypeLOC,
 						StartLine: &ll,

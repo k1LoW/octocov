@@ -137,7 +137,6 @@ func TestPathMatch(t *testing.T) {
 		},
 	}
 	for i, tt := range tests {
-		tt := tt
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			m, err := Measure(root, tt.code, tt.test)
 			if err != nil {

@@ -39,7 +39,7 @@ func (p *Printer) Print(src io.Reader, dest io.Writer) error {
 	c := bytes.Count(b, []byte{'\n'})
 
 	w := len(strconv.Itoa(c))
-	w2 := len(strconv.Itoa(p.fc.Blocks.MaxCount()))
+	w2 := len(strconv.FormatUint(uint64(p.fc.Blocks.MaxCount()), 10))
 
 	e, err := guess.EncodingBytes(b)
 	if err != nil {
@@ -75,13 +75,13 @@ const (
 	posRed   = "r"
 )
 
-func lineCovered(lcnt int, lc *LineCoverage) (int, []string) {
+func lineCovered(lcnt int, lc *LineCoverage) (ExecCount, []string) {
 	l := make([]string, lcnt)
 	if lc == nil {
 		return 0, l
 	}
 
-	for i := 0; i < lcnt; i++ {
+	for i := range lcnt {
 		c, err := lc.PosCoverages.FindCountByPos(i + 1)
 		if err != nil {
 			continue
@@ -105,7 +105,7 @@ func paintLine(n, w int, in string, lc *LineCoverage) (string, string) {
 	lcnt := len(in)
 	c, l := lineCovered(lcnt, lc)
 
-	out := ""
+	var out strings.Builder
 	pos := 0
 	current := ""
 	for i, cl := range l {
@@ -114,22 +114,22 @@ func paintLine(n, w int, in string, lc *LineCoverage) (string, string) {
 		}
 		switch current {
 		case "":
-			out += in[pos:i]
+			out.WriteString(in[pos:i])
 		case posGreen:
-			out += g.Sprint(in[pos:i])
+			out.WriteString(g.Sprint(in[pos:i]))
 		case posRed:
-			out += r.Sprint(in[pos:i])
+			out.WriteString(r.Sprint(in[pos:i]))
 		}
 		current = cl
 		pos = i
 	}
 	switch current {
 	case "":
-		out += in[pos:lcnt]
+		out.WriteString(in[pos:lcnt])
 	case posGreen:
-		out += g.Sprint(in[pos:lcnt])
+		out.WriteString(g.Sprint(in[pos:lcnt]))
 	case posRed:
-		out += r.Sprint(in[pos:lcnt])
+		out.WriteString(r.Sprint(in[pos:lcnt]))
 	}
 
 	s := strings.Repeat(" ", w)
@@ -139,5 +139,5 @@ func paintLine(n, w int, in string, lc *LineCoverage) (string, string) {
 		s = g.Sprintf(fmt.Sprintf("%%%dd", w), c)
 	}
 
-	return s, out
+	return s, out.String()
 }

@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -103,8 +104,8 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		}
 		for _, p := range code {
 			not := false
-			if strings.HasPrefix(p, "!") {
-				p = strings.TrimPrefix(p, "!")
+			if rest, found := strings.CutPrefix(p, "!"); found {
+				p = rest
 				not = true
 			}
 			match, err := doublestar.PathMatch(p, rel)
@@ -122,8 +123,8 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		// test
 		for _, p := range test {
 			not := false
-			if strings.HasPrefix(p, "!") {
-				p = strings.TrimPrefix(p, "!")
+			if rest, found := strings.CutPrefix(p, "!"); found {
+				p = rest
 				not = true
 			}
 			match, err := doublestar.PathMatch(p, rel)
@@ -198,10 +199,5 @@ func ignore(path string) bool {
 }
 
 func contains(s []string, e string) bool {
-	for _, v := range s {
-		if e == v {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(s, e)
 }

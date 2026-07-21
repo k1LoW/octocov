@@ -58,6 +58,46 @@ func TestCloverPackage(t *testing.T) {
 	}
 }
 
+func TestCloverPathAttribute(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "clover", "coverage_path.xml")
+	clover := NewClover()
+	got, _, err := clover.ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got.Files) != 3 {
+		t.Fatalf("got %d files, want 3", len(got.Files))
+	}
+
+	wantFiles := map[string]struct {
+		total   int
+		covered int
+	}{
+		"/src/components/utils.ts": {total: 10, covered: 8},
+		"/src/helpers/utils.ts":    {total: 10, covered: 6},
+		"/src/lib/utils.ts":        {total: 10, covered: 6},
+	}
+
+	for _, f := range got.Files {
+		want, ok := wantFiles[f.File]
+		if !ok {
+			t.Errorf("unexpected file: %s", f.File)
+			continue
+		}
+		if f.Total != want.total {
+			t.Errorf("%s: total got %d, want %d", f.File, f.Total, want.total)
+		}
+		if f.Covered != want.covered {
+			t.Errorf("%s: covered got %d, want %d", f.File, f.Covered, want.covered)
+		}
+		delete(wantFiles, f.File)
+	}
+	for f := range wantFiles {
+		t.Errorf("missing file: %s", f)
+	}
+}
+
 func TestCloverParseAllFormat(t *testing.T) {
 	tests := []struct {
 		path    string

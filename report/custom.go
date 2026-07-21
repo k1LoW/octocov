@@ -90,24 +90,6 @@ func (s *CustomMetricSet) Table() string {
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
 
-func (s *CustomMetricSet) tableSwaped() string {
-	buf := new(bytes.Buffer)
-	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
-	table := tablewriter.NewWriter(buf)
-	table.SetAutoFormatHeaders(false)
-	table.SetAutoWrapText(false)
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
-	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
-
-	report := s.report
-	for _, m := range s.Metrics {
-		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
-	}
-	table.Render()
-	return strings.Replace(buf.String(), "---|", "--:|", len(s.Metrics))
-}
-
 func (s *CustomMetricSet) MetadataTable() string {
 	if len(s.Metadata) == 0 {
 		return ""
@@ -191,15 +173,6 @@ func (s *CustomMetricSet) Compare(s2 *CustomMetricSet) *DiffCustomMetricSet {
 	return d
 }
 
-func (s *CustomMetricSet) findMetricByKey(key string) *CustomMetric {
-	for _, m := range s.Metrics {
-		if m.Key == key {
-			return m
-		}
-	}
-	return nil
-}
-
 func (m *CustomMetric) Compare(m2 *CustomMetric) *DiffCustomMetric {
 	d := &DiffCustomMetric{
 		Key:           m.Key,
@@ -248,6 +221,33 @@ func (s *CustomMetricSet) Validate() error {
 		}))
 	}
 
+	return nil
+}
+
+func (s *CustomMetricSet) tableSwaped() string {
+	buf := new(bytes.Buffer)
+	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
+	table := tablewriter.NewWriter(buf)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
+
+	report := s.report
+	for _, m := range s.Metrics {
+		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
+	}
+	table.Render()
+	return strings.Replace(buf.String(), "---|", "--:|", len(s.Metrics))
+}
+
+func (s *CustomMetricSet) findMetricByKey(key string) *CustomMetric {
+	for _, m := range s.Metrics {
+		if m.Key == key {
+			return m
+		}
+	}
 	return nil
 }
 

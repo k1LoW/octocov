@@ -106,7 +106,7 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 			for _, l := range s.Line {
 				sl := l.Nr
 				el := l.Nr
-				c := 0
+				c := ExecCount(0)
 				if l.Ci > 0 {
 					c = 1
 				}

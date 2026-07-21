@@ -1,5 +1,62 @@
 # Changelog
 
+## [v0.75.10](https://github.com/k1LoW/octocov/compare/v0.75.9...v0.75.10) - 2026-07-20
+
+### Fix bug 🐛
+- Handle execution counts as uint64 and tolerate u64-wrapped LCOV counts by @moznion in https://github.com/k1LoW/octocov/pull/688
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 11 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/690
+- chore(deps): bump the dependencies group across 1 directory with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/689
+
+## [v0.75.9](https://github.com/k1LoW/octocov/compare/v0.75.8...v0.75.9) - 2026-07-08
+
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/678
+- chore(deps): bump golang.org/x/image from 0.40.0 to 0.41.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/683
+- chore(deps): bump the dependencies group across 1 directory with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/682
+- chore(deps): bump the dependencies group across 1 directory with 12 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/684
+
+## [v0.75.8](https://github.com/k1LoW/octocov/compare/v0.75.7...v0.75.8) - 2026-05-20
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/663
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/664
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.18.0 to 5.19.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/669
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/670
+- chore(deps): bump Songmu/tagpr from 1.18.3 to 1.19.0 in the dependencies group across 1 directory by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/667
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.19.0 to 5.19.1 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/672
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/671
+
+## [v0.75.7](https://github.com/k1LoW/octocov/compare/v0.75.6...v0.75.7) - 2026-04-23
+### Other Changes
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/654
+- chore(deps): bump the dependencies group with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/655
+- chore(deps): bump go.opentelemetry.io/otel/sdk from 1.42.0 to 1.43.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/657
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/658
+- chore(deps): bump the dependencies group with 10 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/659
+- chore(deps): bump github.com/go-git/go-git/v5 from 5.17.2 to 5.18.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/660
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/661
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/662
+
+## [v0.75.6](https://github.com/k1LoW/octocov/compare/v0.75.5...v0.75.6) - 2026-04-03
+### Other Changes
+- chore(deps): bump the dependencies group with 4 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/649
+- Document comment.updatePrevious by @kitsuyui in https://github.com/k1LoW/octocov/pull/651
+- chore(deps): bump the dependencies group with 9 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/652
+- chore(deps): bump github.com/go-jose/go-jose/v4 from 4.1.3 to 4.1.4 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/653
+
+## [v0.75.5](https://github.com/k1LoW/octocov/compare/v0.75.4...v0.75.5) - 2026-03-19
+### Other Changes
+- refactor: fix modernize linter issues by @k1LoW in https://github.com/k1LoW/octocov/pull/645
+- refactor: fix funcorder linter issues by reordering methods by @k1LoW in https://github.com/k1LoW/octocov/pull/647
+- chore(deps): bump google.golang.org/grpc from 1.79.2 to 1.79.3 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/648
+
+## [v0.75.4](https://github.com/k1LoW/octocov/compare/v0.75.3...v0.75.4) - 2026-03-17
+### Fix bug 🐛
+- fix: prefer path attribute over name in Clover XML parser by @k1LoW in https://github.com/k1LoW/octocov/pull/644
+### Other Changes
+- chore(deps): bump the dependencies group across 1 directory with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/640
+- chore(deps): bump the dependencies group across 1 directory with 13 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/641
+
 ## [v0.75.3](https://github.com/k1LoW/octocov/compare/v0.75.2...v0.75.3) - 2026-03-03
 ### New Features 🎉
 - fix: support git worktree in GitRoot() and RootPath() by @k1LoW in https://github.com/k1LoW/octocov/pull/634

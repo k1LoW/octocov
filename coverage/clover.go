@@ -48,6 +48,7 @@ type CloverReportPackage struct {
 type CloverReportFile struct {
 	XMLName xml.Name `xml:"file"`
 	Name    string   `xml:"name,attr"`
+	Path    string   `xml:"path,attr"`
 	Metrics struct {
 		Loc                 int `xml:"loc,attr"`
 		Ncloc               int `xml:"ncloc,attr"`
@@ -136,7 +137,11 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 }
 
 func parseReportFile(f CloverReportFile) *FileCoverage {
-	fcov := NewFileCoverage(f.Name, TypeLOC)
+	identity := f.Name
+	if f.Path != "" && !filepath.IsAbs(f.Name) {
+		identity = f.Path
+	}
+	fcov := NewFileCoverage(identity, TypeLOC)
 	fcov.Covered = f.Metrics.Coveredstatements
 	fcov.Total = f.Metrics.Statements
 	for _, l := range f.Line {
@@ -145,7 +150,7 @@ func parseReportFile(f CloverReportFile) *FileCoverage {
 		}
 		sl := l.Num
 		el := l.Num
-		c := l.Count
+		c := toExecCount(l.Count)
 		fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
 			Type:      TypeLOC,
 			StartLine: &sl,
