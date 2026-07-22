@@ -6,10 +6,10 @@ func TestFileCoveragePatchCoverage(t *testing.T) {
 	fc := &FileCoverage{
 		File: "main.go",
 		Blocks: BlockCoverages{
-			&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: intPtr(1)},
-			&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: intPtr(0)},
-			&BlockCoverage{StartLine: intPtr(3), EndLine: intPtr(3), Count: intPtr(2)},
-			&BlockCoverage{StartLine: intPtr(4), EndLine: intPtr(4), Count: intPtr(0)},
+			&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: execCountPtr(1)},
+			&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: execCountPtr(0)},
+			&BlockCoverage{StartLine: intPtr(3), EndLine: intPtr(3), Count: execCountPtr(2)},
+			&BlockCoverage{StartLine: intPtr(4), EndLine: intPtr(4), Count: execCountPtr(0)},
 		},
 	}
 	got := fc.PatchCoverage([]int{1, 2, 3, 4})
@@ -38,15 +38,15 @@ func TestCoveragePatchCoverage(t *testing.T) {
 			&FileCoverage{
 				File: "a.go",
 				Blocks: BlockCoverages{
-					&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: intPtr(1)},
-					&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: intPtr(0)},
+					&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: execCountPtr(1)},
+					&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: execCountPtr(0)},
 				},
 			},
 			&FileCoverage{
 				File: "b.go",
 				Blocks: BlockCoverages{
-					&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: intPtr(0)},
-					&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: intPtr(0)},
+					&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: execCountPtr(0)},
+					&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: execCountPtr(0)},
 				},
 			},
 		},
@@ -72,4 +72,8 @@ func TestCoveragePatchCoverage(t *testing.T) {
 
 func intPtr(i int) *int {
 	return &i
+}
+
+func execCountPtr(c ExecCount) *ExecCount {
+	return &c
 }
