@@ -71,6 +71,7 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 		table, fileTable string
 		customTables     []string
 	)
+	patchTable := r.PatchCoverageTable(files)
 	if rPrev != nil {
 		d := r.Compare(rPrev)
 		table = d.Table()
@@ -102,7 +103,7 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if message != "" {
 		comment = append(comment, message)
 	}
-	if err := c.Acceptable(r, rPrev); err != nil {
+	if err := c.Acceptable(r, rPrev, gh.ChangedLinesByFile(files)); err != nil {
 		errs := errors.Errors(err)
 		var b strings.Builder
 		for _, e := range errs {
@@ -112,6 +113,9 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	}
 	if r.IsMeasuredCoverage() || r.IsMeasuredTestExecutionTime() || r.IsMeasuredCodeToTestRatio() {
 		comment = append(comment, table, "", fileTable)
+	}
+	if patchTable != "" {
+		comment = append(comment, patchTable)
 	}
 	comment = append(comment, customTables...)
 	comment = append(comment, "---", footer)

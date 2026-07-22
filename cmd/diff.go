@@ -22,12 +22,15 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
+
+var diffPatch bool
 
 // diffCmd represents the diff command.
 var diffCmd = &cobra.Command{
@@ -78,11 +81,27 @@ var diffCmd = &cobra.Command{
 			b.Timestamp = fi.ModTime()
 		}
 
-		a.Compare(b).Out(os.Stdout)
+		dr := a.Compare(b)
+		dr.Out(os.Stdout)
+
+		if diffPatch {
+			repository := a.Repository
+			if repository == "" {
+				repository = os.Getenv("GITHUB_REPOSITORY")
+			}
+			if repository != "" {
+				files := fetchPullRequestFilesForPatchCoverage(cmd.Context(), repository)
+				if patchTable := a.PatchCoverageTable(files); patchTable != "" {
+					fmt.Fprintln(os.Stdout, patchTable)
+				}
+			}
+		}
+
 		return nil
 	},
 }
 
 func init() {
+	diffCmd.Flags().BoolVarP(&diffPatch, "patch", "", false, "show patch coverage (coverage of changed lines) fetched via the GitHub API; requires pull request context")
 	rootCmd.AddCommand(diffCmd)
 }

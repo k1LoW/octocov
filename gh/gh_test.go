@@ -429,3 +429,61 @@ func TestIsSameRepo(t *testing.T) {
 		})
 	}
 }
+
+func TestParseChangedLinesFromPatch(t *testing.T) {
+	tests := []struct {
+		name  string
+		patch string
+		want  []int
+	}{
+		{
+			name:  "empty patch",
+			patch: "",
+			want:  nil,
+		},
+		{
+			name:  "single addition",
+			patch: "@@ -1,3 +1,4 @@\n unchanged\n-removed\n+added1\n+added2\n context",
+			want:  []int{2, 3},
+		},
+		{
+			name:  "pure deletion adds no lines",
+			patch: "@@ -1,3 +1,1 @@\n unchanged\n-removed1\n-removed2",
+			want:  nil,
+		},
+		{
+			name:  "multiple hunks",
+			patch: "@@ -1,2 +1,3 @@\n unchanged\n+added\n context\n@@ -10,2 +11,3 @@\n unchanged\n+added2\n context",
+			want:  []int{2, 12},
+		},
+		{
+			name:  "no newline at end of file marker is ignored",
+			patch: "@@ -1,1 +1,2 @@\n unchanged\n+added\n\\ No newline at end of file",
+			want:  []int{2},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := parseChangedLinesFromPatch(tt.patch)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+		})
+	}
+}
+
+func TestChangedLinesByFile(t *testing.T) {
+	files := []*PullRequestFile{
+		{Filename: "a.go", ChangedLines: []int{1, 2}},
+		{Filename: "b.go", ChangedLines: nil},
+		{Filename: "c.go", ChangedLines: []int{5}},
+	}
+	got := ChangedLinesByFile(files)
+	want := map[string][]int{
+		"a.go": {1, 2},
+		"c.go": {5},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Errorf("got diff (-got +want):\n%s", diff)
+	}
+}
