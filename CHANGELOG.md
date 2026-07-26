@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.75.11](https://github.com/k1LoW/octocov/compare/v0.75.10...v0.75.11) - 2026-07-26
+
+### Other Changes
+- chore(deps): bump google.golang.org/grpc from 1.82.0 to 1.82.1 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/691
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/692
+- chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/694
+
 ## [v0.75.10](https://github.com/k1LoW/octocov/compare/v0.75.9...v0.75.10) - 2026-07-20
 
 ### Fix bug 🐛
