@@ -170,6 +170,82 @@ func TestGenerateSig(t *testing.T) {
 		}
 	}
 }
+
+func TestInsertToBody(t *testing.T) {
+	const content = "## Code Metrics Report\n| | main | PR |\n|-|-|-|"
+	tests := []struct {
+		name    string
+		current string
+		sig     string
+		want    string
+	}{
+		{
+			"empty body",
+			"",
+			"<!-- octocov -->",
+			"<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"body without trailing newline",
+			"Some PR description.",
+			"<!-- octocov -->",
+			"Some PR description.\n\n<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"body ending with an unterminated HTML block",
+			"Some PR description.\n\n<a href=\"https://example.com\">\n  <img src=\"https://example.com/badge.svg\" alt=\"badge\">\n</a>\n",
+			"<!-- octocov -->",
+			"Some PR description.\n\n<a href=\"https://example.com\">\n  <img src=\"https://example.com/badge.svg\" alt=\"badge\">\n</a>\n\n<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"body already ending with a blank line",
+			"Some PR description.\n\n",
+			"<!-- octocov -->",
+			"Some PR description.\n\n<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"body with CRLF line endings",
+			"Some PR description.\r\n",
+			"<!-- octocov -->",
+			"Some PR description.\n\n<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"body with keyed sig",
+			"Some PR description.",
+			"<!-- octocov:foo -->",
+			"Some PR description.\n\n<!-- octocov:foo -->\n" + content + "\n<!-- octocov:foo -->\n",
+		},
+		{
+			"re-embed replaces the previously embedded content",
+			"Some PR description.\n\n<!-- octocov -->\n## Old Report\n<!-- octocov -->\n",
+			"<!-- octocov -->",
+			"Some PR description.\n\n<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"re-embed restores the blank line missing from an already embedded body",
+			"Some PR description.\n\n<a href=\"https://example.com\">\n</a>\n<!-- octocov -->\n## Old Report\n<!-- octocov -->\n",
+			"<!-- octocov -->",
+			"Some PR description.\n\n<a href=\"https://example.com\">\n</a>\n\n<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+		{
+			"body consisting only of the embedded content",
+			"<!-- octocov -->\n## Old Report\n<!-- octocov -->\n",
+			"<!-- octocov -->",
+			"<!-- octocov -->\n" + content + "\n<!-- octocov -->\n",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := insertToBody(tt.current, content, tt.sig)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
 func mockedGh(t *testing.T) *Gh {
 	t.Setenv("GITHUB_TOKEN", "dummy")
 	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
