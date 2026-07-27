@@ -403,8 +403,14 @@ func parseChangedLinesFromPatch(patch string) []int {
 	var lines []int
 	newLine := 0
 	for l := range strings.SplitSeq(patch, "\n") {
-		if m := patchHunkHeaderRe.FindStringSubmatch(l); m != nil {
-			newLine, _ = strconv.Atoi(m[1])
+		if m := patchHunkHeaderRe.FindStringSubmatch(l); len(m) > 1 {
+			n, err := strconv.Atoi(m[1])
+			if err != nil {
+				// The start line is out of range: skip the lines of this hunk.
+				newLine = 0
+				continue
+			}
+			newLine = n
 			continue
 		}
 		if newLine == 0 {
