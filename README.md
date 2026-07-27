@@ -345,6 +345,11 @@ coverage:
     - "octocov-1"
     - "octocov-2"
     - "octocov-3"
+testExecutionTime:
+  jobs:
+    # Glob pattern(s) matching the name of the matrix-generated test jobs
+    # (e.g. "test (1)", "test (2)", "test (3)").
+    - "test (*)"
 comment:
   if: is_pull_request
   hideFooterLink: true
@@ -359,6 +364,8 @@ diff:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
 ```
+
+Since the `coverage-aggregation` job has `actions: read`, octocov can look up the coverage-generating step in the `test` matrix jobs via [`testExecutionTime.jobs`](#testexecutiontimejobs) and merge their execution times.
 
 #### Supported datastores
 
@@ -602,6 +609,18 @@ testExecutionTime:
 ```
 
 If not specified, the step where the coverage report file is generated is used as the measurement target.
+
+### `testExecutionTime.jobs`
+
+By default, `testExecutionTime` only looks at the job `octocov` itself is running in. Set `jobs:` (glob patterns) to also measure steps that ran in other jobs of the same workflow run — for example, when tests are split across a GitHub Actions matrix (test sharding) and the reports are aggregated in a separate job.
+
+``` yaml
+testExecutionTime:
+  jobs:
+    - "test (*)"
+```
+
+Every job in the run whose name matches any of the patterns is searched, and the resulting execution times are merged (overlapping time ranges are counted only once). See [Merging reports from multiple GitHub Action jobs](#merging-reports-from-multiple-github-action-jobs).
 
 ### `testExecutionTime.badge`
 

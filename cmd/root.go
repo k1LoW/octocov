@@ -189,7 +189,7 @@ var rootCmd = &cobra.Command{
 			if len(c.TestExecutionTime.Steps) > 0 {
 				stepNames = c.TestExecutionTime.Steps
 			}
-			if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
+			if err := r.MeasureTestExecutionTime(ctx, stepNames, c.TestExecutionTime.Jobs); err != nil {
 				cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
 			}
 		}
@@ -540,7 +540,7 @@ func printMetrics(cmd *cobra.Command) error {
 		if len(c.TestExecutionTime.Steps) > 0 {
 			stepNames = c.TestExecutionTime.Steps
 		}
-		if err := r.MeasureTestExecutionTime(ctx, stepNames); err != nil {
+		if err := r.MeasureTestExecutionTime(ctx, stepNames, c.TestExecutionTime.Jobs); err != nil {
 			cmd.PrintErrf("Skip measuring test execution time: %v\n", err)
 		}
 	}

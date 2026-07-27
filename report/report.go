@@ -396,7 +396,7 @@ func (r *Report) MeasureCodeToTestRatio(root string, code, test []string) error 
 	return nil
 }
 
-func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []string) error {
+func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames, jobPatterns []string) error {
 	if r.Repository == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
@@ -408,10 +408,18 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 	if err != nil {
 		return err
 	}
+	// If jobPatterns is not set, this falls back to the single job octocov itself
+	// is running in. Set jobPatterns (glob) to search other jobs too, e.g. when
+	// test jobs are split by a GitHub Actions matrix and the coverage report is
+	// measured in a separate aggregation job.
+	jobIDs, err := g.ResolveJobIDs(ctx, repo.Owner, repo.Repo, jobPatterns)
+	if err != nil {
+		return err
+	}
 	if len(stepNames) > 0 {
 		var steps []gh.Step
 		for _, n := range stepNames {
-			s, err := g.FetchStepsByName(ctx, repo.Owner, repo.Repo, n)
+			s, err := g.FetchStepsByName(ctx, repo.Owner, repo.Repo, n, jobIDs)
 			if err != nil {
 				return err
 			}
@@ -429,11 +437,7 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames []strin
 		if err != nil {
 			return err
 		}
-		jobID, err := g.DetectCurrentJobID(ctx, repo.Owner, repo.Repo)
-		if err != nil {
-			return err
-		}
-		s, err := g.FetchStepByTime(ctx, repo.Owner, repo.Repo, jobID, fi.ModTime())
+		s, err := g.FetchStepByTimeAcrossJobs(ctx, repo.Owner, repo.Repo, fi.ModTime(), jobIDs)
 		if err != nil {
 			return err
 		}

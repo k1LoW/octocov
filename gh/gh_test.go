@@ -155,6 +155,158 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	}
 }
 
+func TestFetchStepByTimeAcrossJobs(t *testing.T) {
+	// Simulates a GitHub Actions matrix: the "test" step runs concurrently in
+	// three separate jobs (one per shard), each finishing at a different time.
+	job := func(id int64, name string, started, completed time.Time) *github.WorkflowJob {
+		return &github.WorkflowJob{
+			ID:   github.Int64(id),
+			Name: github.String(name),
+			Steps: []*github.TaskStep{
+				{
+					Name:        github.String("Run test"),
+					StartedAt:   &github.Timestamp{Time: started},
+					CompletedAt: &github.Timestamp{Time: completed},
+				},
+			},
+		}
+	}
+	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	jobs := []*github.WorkflowJob{
+		job(1, "test (1)", base, base.Add(10*time.Minute)),
+		job(2, "test (2)", base, base.Add(20*time.Minute)),
+		job(3, "test (3)", base, base.Add(30*time.Minute)),
+	}
+
+	tests := []struct {
+		name    string
+		t       time.Time
+		jobIDs  []int64
+		want    Step
+		wantErr bool
+	}{
+		{"matches step in first job", base.Add(5 * time.Minute), []int64{1, 2, 3}, Step{"Run test", base, base.Add(10 * time.Minute)}, false},
+		{"matches step in a later job", base.Add(25 * time.Minute), []int64{1, 2, 3}, Step{"Run test", base, base.Add(30 * time.Minute)}, false},
+		{"no step covers this time", base.Add(time.Hour), []int64{1, 2, 3}, Step{}, true},
+		{"job excluded from jobIDs is ignored", base.Add(25 * time.Minute), []int64{1, 2}, Step{}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_RUN_ID", "123")
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+					github.Jobs{Jobs: jobs},
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			got, err := g.FetchStepByTimeAcrossJobs(context.TODO(), "owner", "repo", tt.t, tt.jobIDs)
+			if err != nil {
+				if !tt.wantErr {
+					t.Fatalf("got err: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("want err")
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestFetchStepByTimeAcrossJobsRequiresRunID(t *testing.T) {
+	mg := mockedGh(t)
+	t.Setenv("GITHUB_RUN_ID", "")
+	if _, err := mg.FetchStepByTimeAcrossJobs(context.TODO(), "owner", "repo", time.Now(), []int64{1}); err == nil {
+		t.Error("want err")
+	}
+}
+
+func TestResolveJobIDs(t *testing.T) {
+	tests := []struct {
+		name        string
+		jobPatterns []string
+		jobs        []*github.WorkflowJob
+		want        []int64
+		wantErr     bool
+	}{
+		{
+			name:        "no patterns falls back to the single job in the run",
+			jobPatterns: nil,
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Name: github.String("test")},
+			},
+			want: []int64{1},
+		},
+		{
+			name:        "glob pattern matches every matrix job but not unrelated jobs",
+			jobPatterns: []string{"test (*)"},
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Name: github.String("test (1)")},
+				{ID: github.Int64(2), Name: github.String("test (2)")},
+				{ID: github.Int64(3), Name: github.String("lint")},
+			},
+			want: []int64{1, 2},
+		},
+		{
+			name:        "no job matches the pattern",
+			jobPatterns: []string{"nomatch"},
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Name: github.String("test")},
+			},
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_RUN_ID", "123")
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+					github.Jobs{Jobs: tt.jobs},
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			got, err := g.ResolveJobIDs(context.TODO(), "owner", "repo", tt.jobPatterns)
+			if err != nil {
+				if !tt.wantErr {
+					t.Fatalf("got err: %v", err)
+				}
+				return
+			}
+			if tt.wantErr {
+				t.Fatal("want err")
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
 func TestGenerateSig(t *testing.T) {
 	tests := []struct {
 		key  string

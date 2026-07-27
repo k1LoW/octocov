@@ -89,6 +89,7 @@ type TestExecutionTime struct {
 	Badge      TestExecutionTimeBadge `yaml:"badge,omitempty"`
 	Acceptable string                 `yaml:"acceptable,omitempty"`
 	Steps      []string               `yaml:"steps,omitempty"`
+	Jobs       []string               `yaml:"jobs,omitempty"`
 	If         string                 `yaml:"if,omitempty"`
 }
 

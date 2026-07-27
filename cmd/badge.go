@@ -128,7 +128,7 @@ var badgeTimeCmd = &cobra.Command{
 		if len(c.TestExecutionTime.Steps) > 0 {
 			stepNames = c.TestExecutionTime.Steps
 		}
-		if err := r.MeasureTestExecutionTime(context.Background(), stepNames); err != nil {
+		if err := r.MeasureTestExecutionTime(context.Background(), stepNames, c.TestExecutionTime.Jobs); err != nil {
 			return err
 		}
 		d := time.Duration(r.TestExecutionTimeNano())
