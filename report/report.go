@@ -409,17 +409,6 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames, jobPat
 		return err
 	}
 
-	var covModTimes []time.Time
-	if len(stepNames) == 0 {
-		for _, path := range r.covPaths {
-			fi, err := os.Stat(path)
-			if err != nil {
-				return err
-			}
-			covModTimes = append(covModTimes, fi.ModTime())
-		}
-	}
-
 	jobs, err := g.ListWorkflowJobs(ctx, repo.Owner, repo.Repo)
 	if err != nil {
 		return err
@@ -452,6 +441,15 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames, jobPat
 			steps = append(steps, s...)
 		}
 	} else {
+		var covModTimes []time.Time
+		for _, path := range r.covPaths {
+			fi, err := os.Stat(path)
+			if err != nil {
+				return err
+			}
+			covModTimes = append(covModTimes, fi.ModTime())
+		}
+
 		for _, t := range covModTimes {
 			s, ok := jobs.FindStepByTime(jobIDs, t)
 			if !ok {
