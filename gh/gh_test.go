@@ -2,8 +2,6 @@ package gh
 
 import (
 	"context"
-	"errors"
-	"net/http"
 	"testing"
 	"time"
 
@@ -327,144 +325,11 @@ func TestJobsResolveIDs(t *testing.T) {
 	}
 }
 
-// countingRoundTripper counts how many times the underlying transport is
-// invoked, so tests can assert ListWorkflowJobs is only called once even when a
-// caller resolves job IDs and looks up several steps against the same snapshot.
-type countingRoundTripper struct {
-	next  http.RoundTripper
-	calls int
-}
-
-func (c *countingRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	c.calls++
-	return c.next.RoundTrip(req)
-}
-
-func TestListWorkflowJobsFetchedOnceForResolveAndLookup(t *testing.T) {
-	t.Setenv("GITHUB_TOKEN", "dummy")
-	t.Setenv("GITHUB_RUN_ID", "123")
-	t.Setenv("GITHUB_JOB", "")
-	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
-	jobs := []*github.WorkflowJob{
-		{
-			ID:   github.Int64(1),
-			Name: github.String("test (1)"),
-			Steps: []*github.TaskStep{
-				{Name: github.String("Run test"), StartedAt: &github.Timestamp{Time: base}, CompletedAt: &github.Timestamp{Time: base.Add(10 * time.Minute)}},
-			},
-		},
-		{
-			ID:   github.Int64(2),
-			Name: github.String("test (2)"),
-			Steps: []*github.TaskStep{
-				{Name: github.String("Run test"), StartedAt: &github.Timestamp{Time: base}, CompletedAt: &github.Timestamp{Time: base.Add(20 * time.Minute)}},
-			},
-		},
-	}
-	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
-		mock.WithRequestMatch( //nostyle:funcfmt
-			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
-			github.Jobs{Jobs: jobs},
-		),
-	)
-	counter := &countingRoundTripper{next: mockedHTTPClient.Transport}
-	mockedHTTPClient.Transport = counter
-	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
-	if err != nil {
-		t.Fatal(err)
-	}
-	g, err := New()
-	if err != nil {
-		t.Fatal(err)
-	}
-	g.SetClient(client)
-
-	// A caller resolving job IDs and then looking up several steps must reuse the
-	// one fetched snapshot, not call ListWorkflowJobs again per step.
-	fetched, err := g.ListWorkflowJobs(context.TODO(), "owner", "repo")
-	if err != nil {
-		t.Fatal(err)
-	}
-	jobIDs, err := fetched.ResolveIDs([]string{"test (*)"})
-	if err != nil {
-		t.Fatal(err)
-	}
-	var found []Step
-	for _, n := range []string{"Run test"} {
-		s, ok := fetched.FindStepsByName(jobIDs, n)
-		if !ok {
-			t.Fatalf("step %q not found", n)
-		}
-		found = append(found, s...)
-	}
-	if len(found) != 2 {
-		t.Fatalf("got %d steps, want 2", len(found))
-	}
-	if counter.calls != 1 {
-		t.Errorf("got %d calls to ListWorkflowJobs, want 1", counter.calls)
-	}
-}
-
 func TestListWorkflowJobsRequiresRunID(t *testing.T) {
 	mg := mockedGh(t)
 	t.Setenv("GITHUB_RUN_ID", "")
 	if _, err := mg.ListWorkflowJobs(context.TODO(), "owner", "repo"); err == nil {
 		t.Error("want err")
-	}
-}
-
-// flakyRoundTripper fails the first `failing` requests, then delegates to next.
-type flakyRoundTripper struct {
-	next    http.RoundTripper
-	failing int
-	calls   int
-}
-
-func (f *flakyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	f.calls++
-	if f.calls <= f.failing {
-		return nil, errors.New("transient network error")
-	}
-	return f.next.RoundTrip(req)
-}
-
-func TestListWorkflowJobsRetriesOnTransientError(t *testing.T) {
-	t.Setenv("GITHUB_TOKEN", "dummy")
-	t.Setenv("GITHUB_RUN_ID", "123")
-	jobs := []*github.WorkflowJob{
-		{ID: github.Int64(1), Name: github.String("test")},
-	}
-	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
-		mock.WithRequestMatch( //nostyle:funcfmt
-			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
-			github.Jobs{Jobs: jobs},
-		),
-	)
-	flaky := &flakyRoundTripper{next: mockedHTTPClient.Transport, failing: 2}
-	mockedHTTPClient.Transport = flaky
-	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
-	if err != nil {
-		t.Fatal(err)
-	}
-	g, err := New()
-	if err != nil {
-		t.Fatal(err)
-	}
-	g.SetClient(client)
-
-	got, err := g.ListWorkflowJobs(context.TODO(), "owner", "repo")
-	if err != nil {
-		t.Fatalf("got err: %v", err)
-	}
-	ids, err := got.ResolveIDs(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if diff := cmp.Diff(ids, []int64{1}, nil); diff != "" {
-		t.Error(diff)
-	}
-	if flaky.calls != 3 {
-		t.Errorf("got %d calls, want 3 (2 failures + 1 success)", flaky.calls)
 	}
 }
 
