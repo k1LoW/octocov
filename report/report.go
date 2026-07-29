@@ -408,40 +408,57 @@ func (r *Report) MeasureTestExecutionTime(ctx context.Context, stepNames, jobPat
 	if err != nil {
 		return err
 	}
-	// If jobPatterns is not set, this falls back to the single job octocov itself
-	// is running in. Set jobPatterns (glob) to search other jobs too, e.g. when
-	// test jobs are split by a GitHub Actions matrix and the coverage report is
-	// measured in a separate aggregation job.
-	jobIDs, err := g.ResolveJobIDs(ctx, repo.Owner, repo.Repo, jobPatterns)
-	if err != nil {
-		return err
-	}
-	if len(stepNames) > 0 {
-		var steps []gh.Step
-		for _, n := range stepNames {
-			s, err := g.FetchStepsByName(ctx, repo.Owner, repo.Repo, n, jobIDs)
+
+	var covModTimes []time.Time
+	if len(stepNames) == 0 {
+		for _, path := range r.covPaths {
+			fi, err := os.Stat(path)
 			if err != nil {
 				return err
 			}
-			steps = append(steps, s...)
+			covModTimes = append(covModTimes, fi.ModTime())
 		}
-		d := mergeExecutionTimes(steps)
-		t := float64(d)
-		r.TestExecutionTime = &t
-		return nil
+	}
+
+	jobs, err := g.ListWorkflowJobs(ctx, repo.Owner, repo.Repo)
+	if err != nil {
+		return err
+	}
+
+	// If jobPatterns is not set, this falls back to the single job octocov itself
+	// is running in. Set jobPatterns (glob) to search other jobs too, e.g. when
+	// test jobs are split by a GitHub Actions matrix and the coverage report is
+	// measured in a separate aggregation job. The matched job(s) are expected to
+	// have already finished (e.g. via `needs:`), so this looks up steps in a
+	// single pass rather than waiting for them to complete.
+	jobIDs, err := jobs.ResolveIDs(jobPatterns)
+	if err != nil {
+		return err
+	}
+	if len(jobIDs) == 0 {
+		if len(jobPatterns) > 0 {
+			return fmt.Errorf("could not find any job matching %v", jobPatterns)
+		}
+		return errors.New("could not detect id of current job")
 	}
 
 	var steps []gh.Step
-	for _, path := range r.covPaths {
-		fi, err := os.Stat(path)
-		if err != nil {
-			return err
+	if len(stepNames) > 0 {
+		for _, n := range stepNames {
+			s, ok := jobs.FindStepsByName(jobIDs, n)
+			if !ok {
+				return fmt.Errorf("could not find completed step: %s", n)
+			}
+			steps = append(steps, s...)
 		}
-		s, err := g.FetchStepByTimeAcrossJobs(ctx, repo.Owner, repo.Repo, fi.ModTime(), jobIDs)
-		if err != nil {
-			return err
+	} else {
+		for _, t := range covModTimes {
+			s, ok := jobs.FindStepByTime(jobIDs, t)
+			if !ok {
+				return fmt.Errorf("could not find a step that ran at %v", t)
+			}
+			steps = append(steps, s)
 		}
-		steps = append(steps, s)
 	}
 
 	if len(steps) == 0 {

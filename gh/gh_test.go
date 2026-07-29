@@ -2,6 +2,8 @@ package gh
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"testing"
 	"time"
 
@@ -155,7 +157,7 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	}
 }
 
-func TestFetchStepByTimeAcrossJobs(t *testing.T) {
+func TestJobsFindStepByTime(t *testing.T) {
 	// Simulates a GitHub Actions matrix: the "test" step runs concurrently in
 	// three separate jobs (one per shard), each finishing at a different time.
 	job := func(id int64, name string, started, completed time.Time) *github.WorkflowJob {
@@ -172,53 +174,32 @@ func TestFetchStepByTimeAcrossJobs(t *testing.T) {
 		}
 	}
 	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
-	jobs := []*github.WorkflowJob{
+	jobs := &Jobs{jobs: &github.Jobs{Jobs: []*github.WorkflowJob{
 		job(1, "test (1)", base, base.Add(10*time.Minute)),
 		job(2, "test (2)", base, base.Add(20*time.Minute)),
 		job(3, "test (3)", base, base.Add(30*time.Minute)),
-	}
+	}}}
 
 	tests := []struct {
-		name    string
-		t       time.Time
-		jobIDs  []int64
-		want    Step
-		wantErr bool
+		name   string
+		t      time.Time
+		jobIDs []int64
+		want   Step
+		wantOk bool
 	}{
-		{"matches step in first job", base.Add(5 * time.Minute), []int64{1, 2, 3}, Step{"Run test", base, base.Add(10 * time.Minute)}, false},
-		{"matches step in a later job", base.Add(25 * time.Minute), []int64{1, 2, 3}, Step{"Run test", base, base.Add(30 * time.Minute)}, false},
-		{"no step covers this time", base.Add(time.Hour), []int64{1, 2, 3}, Step{}, true},
-		{"job excluded from jobIDs is ignored", base.Add(25 * time.Minute), []int64{1, 2}, Step{}, true},
+		{"matches step in first job", base.Add(5 * time.Minute), []int64{1, 2, 3}, Step{"Run test", base, base.Add(10 * time.Minute)}, true},
+		{"matches step in a later job", base.Add(25 * time.Minute), []int64{1, 2, 3}, Step{"Run test", base, base.Add(30 * time.Minute)}, true},
+		{"no step covers this time", base.Add(time.Hour), []int64{1, 2, 3}, Step{}, false},
+		{"job excluded from jobIDs is ignored", base.Add(25 * time.Minute), []int64{1, 2}, Step{}, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("GITHUB_TOKEN", "dummy")
-			t.Setenv("GITHUB_RUN_ID", "123")
-			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
-				mock.WithRequestMatch( //nostyle:funcfmt
-					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
-					github.Jobs{Jobs: jobs},
-				),
-			)
-			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
-			if err != nil {
-				t.Fatal(err)
+			got, ok := jobs.FindStepByTime(tt.jobIDs, tt.t)
+			if ok != tt.wantOk {
+				t.Fatalf("got ok=%v, want %v", ok, tt.wantOk)
 			}
-			g, err := New()
-			if err != nil {
-				t.Fatal(err)
-			}
-			g.SetClient(client)
-
-			got, err := g.FetchStepByTimeAcrossJobs(context.TODO(), "owner", "repo", tt.t, tt.jobIDs)
-			if err != nil {
-				if !tt.wantErr {
-					t.Fatalf("got err: %v", err)
-				}
+			if !ok {
 				return
-			}
-			if tt.wantErr {
-				t.Fatal("want err")
 			}
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
@@ -227,21 +208,83 @@ func TestFetchStepByTimeAcrossJobs(t *testing.T) {
 	}
 }
 
-func TestFetchStepByTimeAcrossJobsRequiresRunID(t *testing.T) {
-	mg := mockedGh(t)
-	t.Setenv("GITHUB_RUN_ID", "")
-	if _, err := mg.FetchStepByTimeAcrossJobs(context.TODO(), "owner", "repo", time.Now(), []int64{1}); err == nil {
-		t.Error("want err")
+func TestJobsFindStepsByName(t *testing.T) {
+	job := func(id int64, steps ...*github.TaskStep) *github.WorkflowJob {
+		return &github.WorkflowJob{ID: github.Int64(id), Steps: steps}
+	}
+	step := func(name string, started, completed *time.Time) *github.TaskStep {
+		s := &github.TaskStep{Name: github.String(name)}
+		if started != nil {
+			s.StartedAt = &github.Timestamp{Time: *started}
+		}
+		if completed != nil {
+			s.CompletedAt = &github.Timestamp{Time: *completed}
+		}
+		return s
+	}
+	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := base.Add(10 * time.Minute)
+
+	tests := []struct {
+		name   string
+		jobs   *Jobs
+		jobIDs []int64
+		step   string
+		want   []Step
+		wantOk bool
+	}{
+		{
+			name: "collects the named step across every matched job",
+			jobs: &Jobs{jobs: &github.Jobs{Jobs: []*github.WorkflowJob{
+				job(1, step("Run test", &base, &end)),
+				job(2, step("Run test", &base, &end)),
+			}}},
+			jobIDs: []int64{1, 2},
+			step:   "Run test",
+			want:   []Step{{"Run test", base, end}, {"Run test", base, end}},
+			wantOk: true,
+		},
+		{
+			name: "job excluded from jobIDs is ignored",
+			jobs: &Jobs{jobs: &github.Jobs{Jobs: []*github.WorkflowJob{
+				job(1, step("Run test", &base, &end)),
+			}}},
+			jobIDs: []int64{2},
+			step:   "Run test",
+			wantOk: false,
+		},
+		{
+			name: "step not yet completed is not ready",
+			jobs: &Jobs{jobs: &github.Jobs{Jobs: []*github.WorkflowJob{
+				job(1, step("Run test", &base, nil)),
+			}}},
+			jobIDs: []int64{1},
+			step:   "Run test",
+			wantOk: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := tt.jobs.FindStepsByName(tt.jobIDs, tt.step)
+			if ok != tt.wantOk {
+				t.Fatalf("got ok=%v, want %v", ok, tt.wantOk)
+			}
+			if !ok {
+				return
+			}
+			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }
 
-func TestResolveJobIDs(t *testing.T) {
+func TestJobsResolveIDs(t *testing.T) {
 	tests := []struct {
 		name        string
 		jobPatterns []string
 		jobs        []*github.WorkflowJob
 		want        []int64
-		wantErr     bool
 	}{
 		{
 			name:        "no patterns falls back to the single job in the run",
@@ -267,43 +310,161 @@ func TestResolveJobIDs(t *testing.T) {
 			jobs: []*github.WorkflowJob{
 				{ID: github.Int64(1), Name: github.String("test")},
 			},
-			wantErr: true,
+			want: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("GITHUB_TOKEN", "dummy")
-			t.Setenv("GITHUB_RUN_ID", "123")
-			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
-				mock.WithRequestMatch( //nostyle:funcfmt
-					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
-					github.Jobs{Jobs: tt.jobs},
-				),
-			)
-			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			js := &Jobs{jobs: &github.Jobs{Jobs: tt.jobs}}
+			got, err := js.ResolveIDs(tt.jobPatterns)
 			if err != nil {
-				t.Fatal(err)
-			}
-			g, err := New()
-			if err != nil {
-				t.Fatal(err)
-			}
-			g.SetClient(client)
-
-			got, err := g.ResolveJobIDs(context.TODO(), "owner", "repo", tt.jobPatterns)
-			if err != nil {
-				if !tt.wantErr {
-					t.Fatalf("got err: %v", err)
-				}
-				return
-			}
-			if tt.wantErr {
-				t.Fatal("want err")
+				t.Fatalf("got err: %v", err)
 			}
 			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
 				t.Error(diff)
 			}
 		})
+	}
+}
+
+// countingRoundTripper counts how many times the underlying transport is
+// invoked, so tests can assert ListWorkflowJobs is only called once even when a
+// caller resolves job IDs and looks up several steps against the same snapshot.
+type countingRoundTripper struct {
+	next  http.RoundTripper
+	calls int
+}
+
+func (c *countingRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	c.calls++
+	return c.next.RoundTrip(req)
+}
+
+func TestListWorkflowJobsFetchedOnceForResolveAndLookup(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	t.Setenv("GITHUB_RUN_ID", "123")
+	t.Setenv("GITHUB_JOB", "")
+	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	jobs := []*github.WorkflowJob{
+		{
+			ID:   github.Int64(1),
+			Name: github.String("test (1)"),
+			Steps: []*github.TaskStep{
+				{Name: github.String("Run test"), StartedAt: &github.Timestamp{Time: base}, CompletedAt: &github.Timestamp{Time: base.Add(10 * time.Minute)}},
+			},
+		},
+		{
+			ID:   github.Int64(2),
+			Name: github.String("test (2)"),
+			Steps: []*github.TaskStep{
+				{Name: github.String("Run test"), StartedAt: &github.Timestamp{Time: base}, CompletedAt: &github.Timestamp{Time: base.Add(20 * time.Minute)}},
+			},
+		},
+	}
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+			github.Jobs{Jobs: jobs},
+		),
+	)
+	counter := &countingRoundTripper{next: mockedHTTPClient.Transport}
+	mockedHTTPClient.Transport = counter
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	// A caller resolving job IDs and then looking up several steps must reuse the
+	// one fetched snapshot, not call ListWorkflowJobs again per step.
+	fetched, err := g.ListWorkflowJobs(context.TODO(), "owner", "repo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	jobIDs, err := fetched.ResolveIDs([]string{"test (*)"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var found []Step
+	for _, n := range []string{"Run test"} {
+		s, ok := fetched.FindStepsByName(jobIDs, n)
+		if !ok {
+			t.Fatalf("step %q not found", n)
+		}
+		found = append(found, s...)
+	}
+	if len(found) != 2 {
+		t.Fatalf("got %d steps, want 2", len(found))
+	}
+	if counter.calls != 1 {
+		t.Errorf("got %d calls to ListWorkflowJobs, want 1", counter.calls)
+	}
+}
+
+func TestListWorkflowJobsRequiresRunID(t *testing.T) {
+	mg := mockedGh(t)
+	t.Setenv("GITHUB_RUN_ID", "")
+	if _, err := mg.ListWorkflowJobs(context.TODO(), "owner", "repo"); err == nil {
+		t.Error("want err")
+	}
+}
+
+// flakyRoundTripper fails the first `failing` requests, then delegates to next.
+type flakyRoundTripper struct {
+	next    http.RoundTripper
+	failing int
+	calls   int
+}
+
+func (f *flakyRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	f.calls++
+	if f.calls <= f.failing {
+		return nil, errors.New("transient network error")
+	}
+	return f.next.RoundTrip(req)
+}
+
+func TestListWorkflowJobsRetriesOnTransientError(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	t.Setenv("GITHUB_RUN_ID", "123")
+	jobs := []*github.WorkflowJob{
+		{ID: github.Int64(1), Name: github.String("test")},
+	}
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+			github.Jobs{Jobs: jobs},
+		),
+	)
+	flaky := &flakyRoundTripper{next: mockedHTTPClient.Transport, failing: 2}
+	mockedHTTPClient.Transport = flaky
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	got, err := g.ListWorkflowJobs(context.TODO(), "owner", "repo")
+	if err != nil {
+		t.Fatalf("got err: %v", err)
+	}
+	ids, err := got.ResolveIDs(nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(ids, []int64{1}, nil); diff != "" {
+		t.Error(diff)
+	}
+	if flaky.calls != 3 {
+		t.Errorf("got %d calls, want 3 (2 failures + 1 success)", flaky.calls)
 	}
 }
 
