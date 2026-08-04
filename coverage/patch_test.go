@@ -24,6 +24,42 @@ func TestFileCoveragePatchCoverage(t *testing.T) {
 	}
 }
 
+func TestFileCoveragePatchCoverageExcludesUninstrumentedLines(t *testing.T) {
+	// The whole file is added by the pull request, and every statement is executed:
+	//  1 package / 2 blank / 3 comment / 4 func A() { / 5-6 stmts / 7 }
+	//  8 func B() { / 9-10 stmts / 11 } / 12 blank
+	fc := &FileCoverage{
+		File: "new.go",
+		Blocks: BlockCoverages{
+			&BlockCoverage{Type: TypeStmt, StartLine: intPtr(5), EndLine: intPtr(6), Count: execCountPtr(3)},
+			&BlockCoverage{Type: TypeStmt, StartLine: intPtr(9), EndLine: intPtr(10), Count: execCountPtr(3)},
+		},
+	}
+	got := fc.PatchCoverage([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12})
+	if got.Total != 4 {
+		t.Errorf("Total got %v want 4", got.Total)
+	}
+	if got.Covered != 4 {
+		t.Errorf("Covered got %v want 4", got.Covered)
+	}
+	if got.Rate() != 100.0 {
+		t.Errorf("Rate got %v want 100.0", got.Rate())
+	}
+}
+
+func TestFileCoveragePatchCoverageNoInstrumentedChangedLines(t *testing.T) {
+	fc := &FileCoverage{
+		File: "main.go",
+		Blocks: BlockCoverages{
+			&BlockCoverage{Type: TypeStmt, StartLine: intPtr(10), EndLine: intPtr(11), Count: execCountPtr(1)},
+		},
+	}
+	got := fc.PatchCoverage([]int{1, 2, 3})
+	if got.Total != 0 || got.Covered != 0 || got.Rate() != 0 {
+		t.Errorf("got %+v, want all zero", got)
+	}
+}
+
 func TestFileCoveragePatchCoverageNoChangedLines(t *testing.T) {
 	fc := &FileCoverage{File: "main.go"}
 	got := fc.PatchCoverage(nil)

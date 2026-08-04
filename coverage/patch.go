@@ -33,10 +33,18 @@ func (p *PatchCoverage) Rate() float64 {
 }
 
 // PatchCoverage calculates the coverage of the changed lines of a single file.
+// Changed lines that belong to no coverage block are not instrumented by the coverage format
+// (blank lines, comments, package/import declarations, closing braces, ...), and are excluded
+// from the total, as with the instrumented-line counts behind the current/prev metrics.
 func (fc *FileCoverage) PatchCoverage(changedLines []int) *PatchFileCoverage {
-	covered := 0
+	total, covered := 0, 0
 	for _, line := range changedLines {
-		for _, b := range fc.FindBlocksByLine(line) {
+		blocks := fc.FindBlocksByLine(line)
+		if len(blocks) == 0 {
+			continue
+		}
+		total++
+		for _, b := range blocks {
 			if b.Count != nil && *b.Count > 0 {
 				covered++
 				break
@@ -45,7 +53,7 @@ func (fc *FileCoverage) PatchCoverage(changedLines []int) *PatchFileCoverage {
 	}
 	return &PatchFileCoverage{
 		File:    fc.EffectivePath(),
-		Total:   len(changedLines),
+		Total:   total,
 		Covered: covered,
 	}
 }
