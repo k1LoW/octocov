@@ -448,31 +448,41 @@ coverage:
 
 The variables that can be used are as follows.
 
-| value           | description                                                                        |
-| --------------- | ----------------------------------------------------------------------------------- |
-| `current`       | Current code metrics value                                                           |
-| `prev`          | Previous value. This value is taken from `diff.datastores:`.                        |
-| `diff`          | The result of `current - prev`                                                      |
-| `patch_current` | Coverage of the lines changed in the current pull request ("patch coverage")        |
-| `patch_prev`    | `patch_current` computed against the previous report (`diff.datastores:`) instead   |
-| `patch_diff`    | The result of `patch_current - patch_prev`                                          |
+| value     | description                                                                  |
+| --------- | ---------------------------------------------------------------------------- |
+| `current` | Current code metrics value                                                   |
+| `prev`    | Previous value. This value is taken from `diff.datastores:`.                  |
+| `diff`    | The result of `current - prev`                                               |
+| `patch`   | Coverage of the lines changed in the current pull request ("patch coverage")  |
 
 ```yaml
 coverage:
-  acceptable: patch_current >= 80%
+  acceptable: patch >= 80%
 ```
 
-`patch_current`/`patch_prev`/`patch_diff` require pull request context: octocov fetches the list of
-changed files and lines for the current pull request via the GitHub API. If that context is not
-available (e.g. not running against a pull request, or the GitHub API is not accessible), the
-condition is skipped for that run rather than failing the build.
+`patch` is measured over the changed lines that the coverage report instruments, so changed lines
+that no coverage format instruments (blank lines, comments, declarations, ...) are not counted as
+uncovered.
+
+Since `patch` and `prev` are available in the same condition, "new code must be covered at least as
+well as the codebase overall" can be written as follows.
+
+```yaml
+coverage:
+  acceptable: patch >= prev
+```
+
+`patch` requires pull request context: octocov fetches the list of changed files and lines for the
+current pull request via the GitHub API. If that context is not available (e.g. not running against
+a pull request, or the GitHub API is not accessible), the condition is skipped for that run rather
+than failing the build.
 
 `coverage.acceptable:` is a single condition, so this "skip if unavailable" behavior applies to the
-condition as a whole. If you combine `patch_current`/`patch_prev`/`patch_diff` with `current`/`prev`/`diff`
-in one expression (e.g. `current >= 80% && patch_current >= 70%`), the entire condition — including
-the `current >= 80%` part — is skipped when pull request context is unavailable, not just the patch
-part. If you want an absolute/diff coverage floor to always be enforced regardless of pull request
-context, keep it as a condition that does not reference `patch_current`/`patch_prev`/`patch_diff`.
+condition as a whole. If you combine `patch` with `current`/`prev`/`diff` in one expression
+(e.g. `current >= 80% && patch >= 70%`), the entire condition — including the `current >= 80%`
+part — is skipped when pull request context is unavailable, not just the patch part. If you want an
+absolute/diff coverage floor to always be enforced regardless of pull request context, keep it as a
+condition that does not reference `patch`.
 
 `octocov diff [REPORT_A] [REPORT_B] --patch` also prints a patch coverage table for `REPORT_A`
 (fetching changed files/lines via the GitHub API), when the `--patch` flag is given and pull

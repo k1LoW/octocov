@@ -512,8 +512,8 @@ var rootCmd = &cobra.Command{
 
 // fetchPullRequestFilesForPatchCoverage returns the changed files of the current pull request
 // (or, if not running against a pull request, the files changed since the default branch), for
-// computing patch coverage (the `patch_current`/`patch_prev`/`patch_diff` acceptable variables,
-// or the patch coverage table). It returns nil if no pull request/GitHub context is available,
+// computing patch coverage (the `patch` acceptable variable, or the patch coverage table).
+// It returns nil if no pull request/GitHub context is available,
 // without failing the run.
 func fetchPullRequestFilesForPatchCoverage(ctx context.Context, repository string) []*gh.PullRequestFile {
 	repo, err := gh.Parse(repository)

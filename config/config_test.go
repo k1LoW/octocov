@@ -251,12 +251,12 @@ func TestCoverageAcceptableReferencesPatch(t *testing.T) {
 		{"", false},
 		{"80%", false},
 		{"current >= 80%", false},
-		{"patch_current >= 80%", true},
-		{"patch_prev >= 80%", true},
-		{"patch_diff >= 0", true},
-		{"current >= 80% && patch_current >= 70%", true},
-		{"mypatch_current >= 80%", false},
-		{"patch_currently >= 80%", false},
+		{"patch >= 80%", true},
+		{"patch >= prev", true},
+		{"current >= 80% && patch >= 70%", true},
+		{"mypatch >= 80%", false},
+		{"patched >= 80%", false},
+		{"patch_current >= 80%", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.cond, func(t *testing.T) {
@@ -275,20 +275,20 @@ func TestCoverageAcceptableReferencesPatch(t *testing.T) {
 func TestCoverageAcceptablePatchVariables(t *testing.T) {
 	tests := []struct {
 		cond    string
-		patch   *PatchAcceptableVars
+		patch   float64
 		wantErr bool
 	}{
-		{"patch_current >= 70%", &PatchAcceptableVars{Current: 80, Prev: 60}, false},
-		{"patch_current >= 70%", &PatchAcceptableVars{Current: 60, Prev: 60}, true},
-		{"patch_diff >= 0", &PatchAcceptableVars{Current: 80, Prev: 60}, false},
-		{"patch_diff >= 0", &PatchAcceptableVars{Current: 60, Prev: 80}, true},
-		{"patch_current >= patch_prev", &PatchAcceptableVars{Current: 80, Prev: 60}, false},
+		{"patch >= 70%", 80, false},
+		{"patch >= 70%", 60, true},
+		{"patch >= prev", 80, false},
+		{"patch >= prev", 60, true},
+		{"current >= 70% && patch >= 70%", 80, false},
 	}
 	cov := big.NewRat(800000, 10000)
 	prev := big.NewRat(800000, 10000)
 	for _, tt := range tests {
 		t.Run(tt.cond, func(t *testing.T) {
-			err := coverageAcceptable(cov, prev, tt.cond, tt.patch)
+			err := coverageAcceptable(cov, prev, tt.cond, &tt.patch)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
 			}

@@ -71,10 +71,10 @@ type Coverage struct {
 	If         string        `yaml:"if,omitempty"`
 }
 
-var patchVarRe = regexp.MustCompile(`\bpatch_(?:current|prev|diff)\b`)
+var patchVarRe = regexp.MustCompile(`\bpatch\b`)
 
 // AcceptableReferencesPatch reports whether the `coverage.acceptable:` condition
-// references any of the `patch_current`/`patch_prev`/`patch_diff` variables.
+// references the `patch` variable.
 func (c *Coverage) AcceptableReferencesPatch() bool {
 	if c == nil {
 		return false
@@ -222,26 +222,20 @@ type Reporter interface {
 	PatchCoverage(changedFiles map[string][]int) *cov.PatchCoverage
 }
 
-// PatchAcceptableVars holds the patch-coverage variables available to `coverage.acceptable:` expressions.
-type PatchAcceptableVars struct {
-	Current float64
-	Prev    float64
-}
-
 // Acceptable checks r (and rPrev, for comparison) against the configured acceptable conditions.
 // changedFiles maps a file path to the line numbers changed in that file (e.g. lines changed in a
-// pull request), and is used to compute the `patch_current`/`patch_prev`/`patch_diff` variables for
-// `coverage.acceptable:`. Pass nil if no pull request context is available; the patch coverage check
-// is then skipped for conditions that reference those variables.
+// pull request), and is used to compute the `patch` variable for `coverage.acceptable:`. Pass nil
+// if no pull request context is available; the patch coverage check is then skipped for conditions
+// that reference that variable.
 func (c *Config) Acceptable(r, rPrev Reporter, changedFiles map[string][]int) error {
 	var errs error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
 		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
 		needsPatch := c.Coverage.AcceptableReferencesPatch()
-		var patch *PatchAcceptableVars
+		var patch *float64
 		if needsPatch {
-			patch = buildPatchAcceptableVars(r, rPrev, changedFiles)
+			patch = buildPatchAcceptableVar(r, changedFiles)
 		}
 		if !needsPatch || patch != nil {
 			if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
@@ -289,25 +283,25 @@ var (
 	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
-// buildPatchAcceptableVars computes the patch-coverage variables for `coverage.acceptable:`.
+// buildPatchAcceptableVar computes the `patch` variable for `coverage.acceptable:`.
 // It returns nil if changedFiles is unavailable (no pull request context) or no changed lines
-// could be matched against the current coverage report, in which case the patch coverage check
+// could be matched against the coverage report, in which case the patch coverage check
 // should be skipped rather than evaluated against zero/undefined values.
-func buildPatchAcceptableVars(r, rPrev Reporter, changedFiles map[string][]int) *PatchAcceptableVars {
+func buildPatchAcceptableVar(r Reporter, changedFiles map[string][]int) *float64 {
 	if changedFiles == nil {
-		log.Println("coverage.acceptable references patch_* variables, but no pull request context is available: skipping patch coverage check")
+		log.Println("coverage.acceptable references the patch variable, but no pull request context is available: skipping patch coverage check")
 		return nil
 	}
-	currPatch := r.PatchCoverage(changedFiles)
-	if currPatch.Total == 0 {
-		log.Println("coverage.acceptable references patch_* variables, but no changed lines could be matched against the coverage report: skipping patch coverage check")
+	pc := r.PatchCoverage(changedFiles)
+	if pc.Total == 0 {
+		log.Println("coverage.acceptable references the patch variable, but no changed lines could be matched against the coverage report: skipping patch coverage check")
 		return nil
 	}
-	prevPatch := rPrev.PatchCoverage(changedFiles)
-	return &PatchAcceptableVars{Current: currPatch.Rate(), Prev: prevPatch.Rate()}
+	rate := pc.Rate()
+	return &rate
 }
 
-func coverageAcceptable(current, prev *big.Rat, cond string, patch *PatchAcceptableVars) error {
+func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) error {
 	if cond == "" {
 		return nil
 	}
@@ -331,9 +325,7 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *PatchAccepta
 		"diff":    diffF,
 	}
 	if patch != nil {
-		variables["patch_current"] = patch.Current
-		variables["patch_prev"] = patch.Prev
-		variables["patch_diff"] = patch.Current - patch.Prev
+		variables["patch"] = *patch
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
