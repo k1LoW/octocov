@@ -481,6 +481,14 @@ Only the `patch` part of the condition is relaxed this way. If you combine `patc
 `current`/`prev`/`diff` in one expression (e.g. `current >= 80% && patch >= 70%`), the
 `current >= 80%` part keeps being enforced even when patch coverage cannot be measured.
 
+Files that the GitHub API does not return a diff for are excluded from patch coverage, because the
+changed lines of those files cannot be determined. This happens for binary files, for files whose
+diff is too large for the API to include, and for files beyond the limit of the API response
+([up to 3000 files](https://docs.github.com/en/rest/pulls/pulls) for a pull request, and
+[up to 300 files](https://docs.github.com/en/rest/commits/commits) when comparing against the
+default branch outside of a pull request). Such files lower neither the covered lines nor the total
+lines of `patch`.
+
 `octocov diff [REPORT_A] [REPORT_B] --patch` also prints a patch coverage table for `REPORT_A`
 (fetching changed files/lines via the GitHub API), when the `--patch` flag is given and pull
 request context is available. Without `--patch`, `octocov diff` makes no GitHub API calls, as before.
