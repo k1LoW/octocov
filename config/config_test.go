@@ -296,6 +296,29 @@ func TestCoverageAcceptablePatchVariables(t *testing.T) {
 	}
 }
 
+func TestCoverageAcceptableUnavailablePatch(t *testing.T) {
+	tests := []struct {
+		cond    string
+		current *big.Rat
+		wantErr bool
+	}{
+		// The patch part falls back to defaultPatchCoverage instead of being skipped,
+		{"patch >= 70%", big.NewRat(800000, 10000), false},
+		// ... while the non-patch part keeps being enforced.
+		{"current >= 80% && patch >= 70%", big.NewRat(800000, 10000), false},
+		{"current >= 80% && patch >= 70%", big.NewRat(700000, 10000), true},
+	}
+	prev := big.NewRat(800000, 10000)
+	for _, tt := range tests {
+		t.Run(tt.cond, func(t *testing.T) {
+			err := coverageAcceptable(tt.current, prev, tt.cond, nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestCodeToTestRatioAcceptable(t *testing.T) {
 	// Pre-calculate special big.Rat values
 	// Value of 1/3

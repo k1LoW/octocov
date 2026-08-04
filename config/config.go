@@ -225,22 +225,19 @@ type Reporter interface {
 // Acceptable checks r (and rPrev, for comparison) against the configured acceptable conditions.
 // changedFiles maps a file path to the line numbers changed in that file (e.g. lines changed in a
 // pull request), and is used to compute the `patch` variable for `coverage.acceptable:`. Pass nil
-// if no pull request context is available; the patch coverage check is then skipped for conditions
-// that reference that variable.
+// if no pull request context is available; `patch` then falls back to defaultPatchCoverage, and
+// the condition is still evaluated.
 func (c *Config) Acceptable(r, rPrev Reporter, changedFiles map[string][]int) error {
 	var errs error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
 		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
-		needsPatch := c.Coverage.AcceptableReferencesPatch()
 		var patch *float64
-		if needsPatch {
+		if c.Coverage.AcceptableReferencesPatch() {
 			patch = buildPatchAcceptableVar(r, changedFiles)
 		}
-		if !needsPatch || patch != nil {
-			if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
-				errs = errors.Join(errs, err)
-			}
+		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
+			errs = errors.Join(errs, err)
 		}
 	}
 
@@ -283,18 +280,24 @@ var (
 	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
+// defaultPatchCoverage is substituted for the `patch` variable when patch coverage cannot be
+// measured. Missing patch data is a data-level gap, like a missing previous report, so the
+// condition is still evaluated with a permissive value rather than skipped: `patch >= 70%` passes,
+// and any non-patch part of the condition (e.g. `current >= 80%`) keeps being enforced.
+const defaultPatchCoverage = 100.0
+
 // buildPatchAcceptableVar computes the `patch` variable for `coverage.acceptable:`.
-// It returns nil if changedFiles is unavailable (no pull request context) or no changed lines
-// could be matched against the coverage report, in which case the patch coverage check
-// should be skipped rather than evaluated against zero/undefined values.
+// It returns nil if changedFiles is unavailable (no pull request context) or the pull request
+// changed no lines that the coverage report instruments, in which case defaultPatchCoverage
+// is used instead of a zero/undefined value.
 func buildPatchAcceptableVar(r Reporter, changedFiles map[string][]int) *float64 {
 	if changedFiles == nil {
-		log.Println("coverage.acceptable references the patch variable, but no pull request context is available: skipping patch coverage check")
+		log.Printf("coverage.acceptable references the patch variable, but no pull request context is available: patch is treated as %v%%", defaultPatchCoverage)
 		return nil
 	}
 	pc := r.PatchCoverage(changedFiles)
 	if pc.Total == 0 {
-		log.Println("coverage.acceptable references the patch variable, but no changed lines could be matched against the coverage report: skipping patch coverage check")
+		log.Printf("coverage.acceptable references the patch variable, but the pull request changed no lines that the coverage report instruments: patch is treated as %v%%", defaultPatchCoverage)
 		return nil
 	}
 	rate := pc.Rate()
@@ -319,13 +322,15 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) err
 	diffF, _ := diff.Float64()
 	currentF, _ := current.Float64()
 	prevF, _ := prev.Float64()
+	patchF := defaultPatchCoverage
+	if patch != nil {
+		patchF = *patch
+	}
 	variables := map[string]any{
 		"current": currentF,
 		"prev":    prevF,
 		"diff":    diffF,
-	}
-	if patch != nil {
-		variables["patch"] = *patch
+		"patch":   patchF,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
