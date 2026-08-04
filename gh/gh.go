@@ -280,19 +280,9 @@ func (g *Gh) ReplaceInsertToBody(ctx context.Context, owner, repo string, number
 	if err != nil {
 		return err
 	}
-	current := pr.GetBody()
-	var rep string
-	if strings.Count(current, sig) < 2 {
-		rep = fmt.Sprintf("%s\n%s\n%s\n%s\n", current, sig, content, sig)
-	} else {
-		buf := new(bytes.Buffer)
-		if !strings.HasSuffix(current, "\n") {
-			current += "\n"
-		}
-		if _, err := repin.Replace(strings.NewReader(current), strings.NewReader(content), sig, sig, false, buf); err != nil {
-			return err
-		}
-		rep = buf.String()
+	rep, err := insertToBody(pr.GetBody(), content, sig)
+	if err != nil {
+		return err
 	}
 	if _, _, err := g.client.PullRequests.Edit(ctx, owner, repo, number, &github.PullRequest{
 		Body: &rep,
@@ -972,4 +962,37 @@ func generateSig(key string) string {
 		return "<!-- octocov -->"
 	}
 	return fmt.Sprintf("<!-- octocov:%s -->", key)
+}
+
+// insertToBody embeds content delimited by sig into current, replacing the previously
+// embedded content when current already holds a pair of sig.
+func insertToBody(current, content, sig string) (string, error) {
+	if strings.Count(current, sig) < 2 {
+		return fmt.Sprintf("%s%s\n%s\n%s\n", terminateBeforeSig(current), sig, content, sig), nil
+	}
+	// repin.Replace copies everything preceding the opening sig verbatim, so bodies embedded
+	// by earlier versions keep their missing blank line unless it is restored here.
+	if i := strings.Index(current, sig); i > 0 {
+		current = terminateBeforeSig(current[:i]) + current[i:]
+	}
+	if !strings.HasSuffix(current, "\n") {
+		current += "\n"
+	}
+	buf := new(bytes.Buffer)
+	if _, err := repin.Replace(strings.NewReader(current), strings.NewReader(content), sig, sig, false, buf); err != nil {
+		return "", err
+	}
+	return buf.String(), nil
+}
+
+// terminateBeforeSig closes before with a blank line so that the sig following it starts a
+// fresh Markdown block. GitHub parses an unterminated HTML block, such as a badge <a> tag
+// appended by another GitHub App, as raw HTML up to the next blank line, which would
+// otherwise swallow the report heading and table and render them as literal text.
+func terminateBeforeSig(before string) string {
+	before = strings.TrimRight(before, "\r\n")
+	if before == "" {
+		return ""
+	}
+	return before + "\n\n"
 }

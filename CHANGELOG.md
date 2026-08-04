@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.75.12](https://github.com/k1LoW/octocov/compare/v0.75.11...v0.75.12) - 2026-07-27
+
+### Fix bug 🐛
+- fix: insert a blank line before the octocov marker in PR body embed by @k1LoW in https://github.com/k1LoW/octocov/pull/696
+
 ## [v0.75.11](https://github.com/k1LoW/octocov/compare/v0.75.10...v0.75.11) - 2026-07-26
 
 ### Other Changes
