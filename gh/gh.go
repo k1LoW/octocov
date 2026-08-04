@@ -323,6 +323,12 @@ type PullRequestFile struct {
 
 // ChangedLinesByFile converts a list of PullRequestFile into a map of filename to changed line numbers.
 func ChangedLinesByFile(files []*PullRequestFile) map[string][]int {
+	if len(files) == 0 {
+		// Distinguish "the changed files could not be fetched at all" from "they were fetched,
+		// but none of the changed lines are instrumented", so that the two can be reported
+		// differently.
+		return nil
+	}
 	m := make(map[string][]int, len(files))
 	for _, f := range files {
 		if len(f.ChangedLines) == 0 {

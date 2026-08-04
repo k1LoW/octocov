@@ -563,3 +563,12 @@ func TestChangedLinesByFile(t *testing.T) {
 		t.Errorf("got diff (-got +want):\n%s", diff)
 	}
 }
+
+func TestChangedLinesByFileNoFiles(t *testing.T) {
+	if got := ChangedLinesByFile(nil); got != nil {
+		t.Errorf("got %v, want nil", got)
+	}
+	if got := ChangedLinesByFile([]*PullRequestFile{}); got != nil {
+		t.Errorf("got %v, want nil", got)
+	}
+}
