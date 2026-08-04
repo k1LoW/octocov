@@ -277,12 +277,13 @@ func TestCoverageAcceptablePatchVariables(t *testing.T) {
 		cond    string
 		patch   float64
 		wantErr bool
+		errMsg  string
 	}{
-		{"patch >= 70%", 80, false},
-		{"patch >= 70%", 60, true},
-		{"patch >= prev", 80, false},
-		{"patch >= prev", 60, true},
-		{"current >= 70% && patch >= 70%", 80, false},
+		{"patch >= 70%", 80, false, ""},
+		{"patch >= 70%", 60, true, "code coverage is 80.0% and patch coverage is 60.0%. the condition in the `coverage.acceptable:` section is not met (`patch >= 70%`)"},
+		{"patch >= prev", 80, false, ""},
+		{"patch >= prev", 60, true, "code coverage is 80.0% and patch coverage is 60.0%. the condition in the `coverage.acceptable:` section is not met (`patch >= prev`)"},
+		{"current >= 70% && patch >= 70%", 80, false, ""},
 	}
 	cov := big.NewRat(800000, 10000)
 	prev := big.NewRat(800000, 10000)
@@ -291,6 +292,9 @@ func TestCoverageAcceptablePatchVariables(t *testing.T) {
 			err := coverageAcceptable(cov, prev, tt.cond, &tt.patch)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.errMsg != "" && err.Error() != tt.errMsg {
+				t.Errorf("got %v\nwant %v", err.Error(), tt.errMsg)
 			}
 		})
 	}

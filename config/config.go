@@ -342,6 +342,12 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) err
 		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
+		// Report the measured patch coverage as well, so that a condition failing on the `patch`
+		// term shows the value it failed against. patch == nil means it could not be measured
+		// (defaultPatchCoverage was substituted), in which case there is no value to report.
+		if patch != nil && patchVarRe.MatchString(org) {
+			return fmt.Errorf("code coverage is %.1f%% and patch coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), floor1(patchF), org)
+		}
 		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), org)
 	}
 	return nil
