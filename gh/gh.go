@@ -498,10 +498,9 @@ L:
 	if max == 0 {
 		return nil, fmt.Errorf("could not find any step named %q in the workflow run", name)
 	}
-	if max < len(steps) || len(steps) == 0 {
-		return nil, fmt.Errorf("could not get step times: %s", name)
-	}
-	return steps, nil
+	// A pass that collected every match returns inside the loop, so getting here
+	// means the backoff ran out while a matching step was still incomplete.
+	return nil, fmt.Errorf("could not get step times: %s", name)
 }
 
 func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment, key string) error {
