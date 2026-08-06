@@ -250,6 +250,79 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
 
+// PatchCoverageTable renders a table of the coverage of the changed lines of each file in files
+// (e.g. the files changed in a pull request). Returns "" if there is nothing to show.
+func (r *Report) PatchCoverageTable(files []*gh.PullRequestFile) string {
+	if r.Coverage == nil {
+		return ""
+	}
+	if len(files) == 0 {
+		return ""
+	}
+	var t, c int
+	exist := false
+	var rows [][]string
+	for _, f := range files {
+		if len(f.ChangedLines) == 0 {
+			continue
+		}
+		fc, err := r.Coverage.Files.FuzzyFindByFile(f.Filename)
+		if err != nil {
+			continue
+		}
+		pfc := fc.PatchCoverage(f.ChangedLines)
+		if pfc.Total == 0 {
+			continue
+		}
+		exist = true
+		c += pfc.Covered
+		t += pfc.Total
+		rows = append(rows, []string{
+			fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL),
+			fmt.Sprintf("%d/%d", pfc.Covered, pfc.Total),
+			fmt.Sprintf("%.1f%%", floor1(pfc.Rate())),
+		})
+	}
+	if !exist {
+		return ""
+	}
+	coverAll := float64(c) / float64(t) * 100
+	if t == 0 {
+		coverAll = 0.0
+	}
+	title := fmt.Sprintf("### Patch coverage of changed lines in pull request scope (%.1f%%)", floor1(coverAll))
+
+	buf := new(bytes.Buffer)
+	fmt.Fprintf(buf, "%s\n\n", title)
+
+	if len(rows) > filesSkipMax {
+		fmt.Fprintf(buf, "Skip file coverages because there are too many files (%d)\n", len(rows))
+		return buf.String()
+	}
+
+	if len(rows) > filesHideMin {
+		buf.WriteString("<details>\n\n")
+	}
+
+	table := tablewriter.NewWriter(buf)
+	h := []string{"Files", "Covered/Changed", "Patch Coverage"}
+	table.SetHeader(h)
+	table.SetAutoFormatHeaders(false)
+	table.SetAutoWrapText(false)
+	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
+	table.SetCenterSeparator("|")
+	for _, v := range rows {
+		table.Append(v)
+	}
+	table.Render()
+
+	if len(rows) > filesHideMin {
+		buf.WriteString("\n</details>\n")
+	}
+
+	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
+}
+
 func (r *Report) CountMeasured() int {
 	c := 0
 	if r.IsMeasuredCoverage() {
@@ -518,6 +591,15 @@ func (r *Report) CoveragePercent() float64 {
 		return 0.0
 	}
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+}
+
+// PatchCoverage calculates the coverage of the given changed lines (e.g. lines changed in a
+// pull request). changedFiles maps a file path to the line numbers changed in that file.
+func (r *Report) PatchCoverage(changedFiles map[string][]int) *coverage.PatchCoverage {
+	if r == nil || r.Coverage == nil {
+		return &coverage.PatchCoverage{}
+	}
+	return r.Coverage.PatchCoverage(changedFiles)
 }
 
 func (r *Report) CodeToTestRatioRatio() float64 {

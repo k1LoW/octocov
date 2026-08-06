@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"math/big"
 	"os"
@@ -17,6 +18,7 @@ import (
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/errors"
 	"github.com/k1LoW/expand"
+	cov "github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
 	"golang.org/x/text/language"
@@ -67,6 +69,17 @@ type Coverage struct {
 	Badge      CoverageBadge `yaml:"badge,omitempty"`
 	Acceptable string        `yaml:"acceptable,omitempty"`
 	If         string        `yaml:"if,omitempty"`
+}
+
+var patchVarRe = regexp.MustCompile(`\bpatch\b`)
+
+// AcceptableReferencesPatch reports whether the `coverage.acceptable:` condition
+// references the `patch` variable.
+func (c *Coverage) AcceptableReferencesPatch() bool {
+	if c == nil {
+		return false
+	}
+	return patchVarRe.MatchString(c.Acceptable)
 }
 
 type CoverageBadge struct {
@@ -206,14 +219,24 @@ type Reporter interface {
 	TestExecutionTimeNano() float64
 	IsMeasuredTestExecutionTime() bool
 	CustomMetricsAcceptable(Reporter) error
+	PatchCoverage(changedFiles map[string][]int) *cov.PatchCoverage
 }
 
-func (c *Config) Acceptable(r, rPrev Reporter) error {
+// Acceptable checks r (and rPrev, for comparison) against the configured acceptable conditions.
+// changedFiles maps a file path to the line numbers changed in that file (e.g. lines changed in a
+// pull request), and is used to compute the `patch` variable for `coverage.acceptable:`. Pass nil
+// if no pull request context is available; `patch` then falls back to defaultPatchCoverage, and
+// the condition is still evaluated.
+func (c *Config) Acceptable(r, rPrev Reporter, changedFiles map[string][]int) error {
 	var errs error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
 		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
-		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable); err != nil {
+		var patch *float64
+		if c.Coverage.AcceptableReferencesPatch() {
+			patch = buildPatchAcceptableVar(r, changedFiles)
+		}
+		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
 			errs = errors.Join(errs, err)
 		}
 	}
@@ -257,7 +280,31 @@ var (
 	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
-func coverageAcceptable(current, prev *big.Rat, cond string) error {
+// defaultPatchCoverage is substituted for the `patch` variable when patch coverage cannot be
+// measured. Missing patch data is a data-level gap, like a missing previous report, so the
+// condition is still evaluated with a permissive value rather than skipped: `patch >= 70%` passes,
+// and any non-patch part of the condition (e.g. `current >= 80%`) keeps being enforced.
+const defaultPatchCoverage = 100.0
+
+// buildPatchAcceptableVar computes the `patch` variable for `coverage.acceptable:`.
+// It returns nil if changedFiles is unavailable (no pull request context) or the pull request
+// changed no lines that the coverage report instruments, in which case defaultPatchCoverage
+// is used instead of a zero/undefined value.
+func buildPatchAcceptableVar(r Reporter, changedFiles map[string][]int) *float64 {
+	if changedFiles == nil {
+		log.Printf("coverage.acceptable references the patch variable, but no pull request context is available: patch is treated as %v%%", defaultPatchCoverage)
+		return nil
+	}
+	pc := r.PatchCoverage(changedFiles)
+	if pc.Total == 0 {
+		log.Printf("coverage.acceptable references the patch variable, but the pull request changed no lines that the coverage report instruments: patch is treated as %v%%", defaultPatchCoverage)
+		return nil
+	}
+	rate := pc.Rate()
+	return &rate
+}
+
+func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) error {
 	if cond == "" {
 		return nil
 	}
@@ -275,10 +322,15 @@ func coverageAcceptable(current, prev *big.Rat, cond string) error {
 	diffF, _ := diff.Float64()
 	currentF, _ := current.Float64()
 	prevF, _ := prev.Float64()
+	patchF := defaultPatchCoverage
+	if patch != nil {
+		patchF = *patch
+	}
 	variables := map[string]any{
 		"current": currentF,
 		"prev":    prevF,
 		"diff":    diffF,
+		"patch":   patchF,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -290,6 +342,12 @@ func coverageAcceptable(current, prev *big.Rat, cond string) error {
 		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
+		// Report the measured patch coverage as well, so that a condition failing on the `patch`
+		// term shows the value it failed against. patch == nil means it could not be measured
+		// (defaultPatchCoverage was substituted), in which case there is no value to report.
+		if patch != nil && patchVarRe.MatchString(org) {
+			return fmt.Errorf("code coverage is %.1f%% and patch coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), floor1(patchF), org)
+		}
 		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), org)
 	}
 	return nil
