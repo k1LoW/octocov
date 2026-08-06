@@ -429,6 +429,53 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 	}
 }
 
+func TestListWorkflowJobs(t *testing.T) {
+	// Every job of the run must be returned even when the run has more jobs
+	// than fit in a single page of the API response.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+			github.Jobs{
+				TotalCount: github.Int(3),
+				Jobs: []*github.WorkflowJob{
+					{ID: github.Int64(1), Name: github.String("test (1)")},
+					{ID: github.Int64(2), Name: github.String("test (2)")},
+				},
+			},
+			github.Jobs{
+				TotalCount: github.Int(3),
+				Jobs: []*github.WorkflowJob{
+					{ID: github.Int64(3), Name: github.String("test (3)")},
+				},
+			},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	jobs, err := g.listWorkflowJobs(context.TODO(), "owner", "repo", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []int64
+	for _, j := range jobs {
+		got = append(got, j.GetID())
+	}
+	want := []int64{1, 2, 3}
+	if diff := cmp.Diff(got, want, nil); diff != "" {
+		t.Error(diff)
+	}
+}
+
 func TestIsSameRepo(t *testing.T) {
 	tests := []struct {
 		name     string
