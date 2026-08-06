@@ -496,7 +496,7 @@ L:
 		}
 	}
 	if max == 0 {
-		return nil, fmt.Errorf("no step named %s exists in the workflow run", name)
+		return nil, fmt.Errorf("could not find any step named %q in the workflow run", name)
 	}
 	if max < len(steps) || len(steps) == 0 {
 		return nil, fmt.Errorf("could not get step times: %s", name)
