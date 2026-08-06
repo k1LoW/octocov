@@ -488,9 +488,15 @@ L:
 				}
 			}
 		}
-		if max == len(steps) {
+		// Keep retrying while nothing matched. The step may belong to a job that
+		// has not started yet, and returning the empty result as a success would
+		// silently measure a test execution time of zero.
+		if max > 0 && max == len(steps) {
 			return steps, nil
 		}
+	}
+	if max == 0 {
+		return nil, fmt.Errorf("no step named %s exists in the workflow run", name)
 	}
 	if max < len(steps) || len(steps) == 0 {
 		return nil, fmt.Errorf("could not get step times: %s", name)
