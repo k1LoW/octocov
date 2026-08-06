@@ -195,14 +195,14 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 	)
 	b := p.Start(ctx)
 	for backoff.Continue(b) {
-		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
+		jobs, err := g.listWorkflowJobs(ctx, owner, repo, runID)
 		if err != nil {
 			return 0, err
 		}
-		if len(jobs.Jobs) == 1 {
-			return jobs.Jobs[0].GetID(), nil
+		if len(jobs) == 1 {
+			return jobs[0].GetID(), nil
 		}
-		for _, j := range jobs.Jobs {
+		for _, j := range jobs {
 			if j.GetName() == os.Getenv("GITHUB_JOB") {
 				return j.GetID(), nil
 			}
@@ -465,11 +465,11 @@ func (g *Gh) FetchStepsByName(ctx context.Context, owner, repo string, name stri
 L:
 	for backoff.Continue(b) {
 		max = 0
-		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
+		jobs, err := g.listWorkflowJobs(ctx, owner, repo, runID)
 		if err != nil {
 			return nil, err
 		}
-		for _, j := range jobs.Jobs {
+		for _, j := range jobs {
 			log.Printf("search job: %d", j.GetID()) //nolint:gosec // format string uses %d, no injection risk
 			l := len(j.Steps)
 			for i, s := range j.Steps {
@@ -488,14 +488,19 @@ L:
 				}
 			}
 		}
-		if max == len(steps) {
+		// Keep retrying while nothing matched. The step may belong to a job that
+		// has not started yet, and returning the empty result as a success would
+		// silently measure a test execution time of zero.
+		if max > 0 && max == len(steps) {
 			return steps, nil
 		}
 	}
-	if max < len(steps) || len(steps) == 0 {
-		return nil, fmt.Errorf("could not get step times: %s", name)
+	if max == 0 {
+		return nil, fmt.Errorf("could not find any step named %q in the workflow run", name)
 	}
-	return steps, nil
+	// A pass that collected every match returns inside the loop, so getting here
+	// means the backoff ran out while a matching step was still incomplete.
+	return nil, fmt.Errorf("step named %q did not complete in time", name)
 }
 
 func (g *Gh) PutComment(ctx context.Context, owner, repo string, n int, comment, key string) error {
@@ -639,6 +644,27 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 		return false, err
 	}
 	return r.GetPrivate(), nil
+}
+
+// listWorkflowJobs returns every job of the workflow run, following pagination.
+// The API returns 30 jobs per page by default, so a run with a large matrix
+// would otherwise be silently truncated.
+func (g *Gh) listWorkflowJobs(ctx context.Context, owner, repo string, runID int64) ([]*github.WorkflowJob, error) {
+	opts := &github.ListWorkflowJobsOptions{
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+	var jobs []*github.WorkflowJob
+	for {
+		js, res, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
+		if err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, js.Jobs...)
+		if res.NextPage == 0 {
+			return jobs, nil
+		}
+		opts.Page = res.NextPage
+	}
 }
 
 type minimizeCommentMutation struct {
