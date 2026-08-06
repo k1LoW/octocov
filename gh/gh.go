@@ -195,14 +195,14 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 	)
 	b := p.Start(ctx)
 	for backoff.Continue(b) {
-		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
+		jobs, err := g.listWorkflowJobs(ctx, owner, repo, runID)
 		if err != nil {
 			return 0, err
 		}
-		if len(jobs.Jobs) == 1 {
-			return jobs.Jobs[0].GetID(), nil
+		if len(jobs) == 1 {
+			return jobs[0].GetID(), nil
 		}
-		for _, j := range jobs.Jobs {
+		for _, j := range jobs {
 			if j.GetName() == os.Getenv("GITHUB_JOB") {
 				return j.GetID(), nil
 			}
@@ -465,11 +465,11 @@ func (g *Gh) FetchStepsByName(ctx context.Context, owner, repo string, name stri
 L:
 	for backoff.Continue(b) {
 		max = 0
-		jobs, _, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, &github.ListWorkflowJobsOptions{})
+		jobs, err := g.listWorkflowJobs(ctx, owner, repo, runID)
 		if err != nil {
 			return nil, err
 		}
-		for _, j := range jobs.Jobs {
+		for _, j := range jobs {
 			log.Printf("search job: %d", j.GetID()) //nolint:gosec // format string uses %d, no injection risk
 			l := len(j.Steps)
 			for i, s := range j.Steps {
@@ -639,6 +639,27 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 		return false, err
 	}
 	return r.GetPrivate(), nil
+}
+
+// listWorkflowJobs returns every job of the workflow run, following pagination.
+// The API returns 30 jobs per page by default, so a run with a large matrix
+// would otherwise be silently truncated.
+func (g *Gh) listWorkflowJobs(ctx context.Context, owner, repo string, runID int64) ([]*github.WorkflowJob, error) {
+	opts := &github.ListWorkflowJobsOptions{
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+	var jobs []*github.WorkflowJob
+	for {
+		js, res, err := g.client.Actions.ListWorkflowJobs(ctx, owner, repo, runID, opts)
+		if err != nil {
+			return nil, err
+		}
+		jobs = append(jobs, js.Jobs...)
+		if res.NextPage == 0 {
+			return jobs, nil
+		}
+		opts.Page = res.NextPage
+	}
 }
 
 type minimizeCommentMutation struct {
