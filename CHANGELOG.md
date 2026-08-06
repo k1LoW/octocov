@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.75.13](https://github.com/k1LoW/octocov/compare/v0.75.12...v0.75.13) - 2026-08-06
+
+### Fix bug 🐛
+- fix: paginate ListWorkflowJobs so testExecutionTime.steps covers every job by @k1LoW in https://github.com/k1LoW/octocov/pull/701
+### Other Changes
+- chore(deps): bump docker/login-action from 4.5.1 to 4.6.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/699
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/700
+
 ## [v0.75.12](https://github.com/k1LoW/octocov/compare/v0.75.11...v0.75.12) - 2026-07-27
 
 ### Fix bug 🐛
