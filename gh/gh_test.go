@@ -476,6 +476,83 @@ func TestListWorkflowJobs(t *testing.T) {
 	}
 }
 
+func TestFetchStepsByNameErrors(t *testing.T) {
+	// Exhausting the retries must fail loudly. Reporting no steps as a success
+	// would measure a test execution time of zero for a step that was merely
+	// misspelled or still running.
+	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name    string
+		jobs    []*github.WorkflowJob
+		step    string
+		wantErr string
+	}{
+		{
+			name: "no job has a step with the given name",
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Steps: []*github.TaskStep{
+					{
+						Name:        github.String("Run test"),
+						StartedAt:   &github.Timestamp{Time: base},
+						CompletedAt: &github.Timestamp{Time: base.Add(time.Minute)},
+					},
+				}},
+			},
+			step:    "Run slow test",
+			wantErr: `could not find any step named "Run slow test" in the workflow run`,
+		},
+		{
+			name: "the named step never completes",
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Steps: []*github.TaskStep{
+					{
+						Name:      github.String("Run test"),
+						StartedAt: &github.Timestamp{Time: base},
+					},
+				}},
+			},
+			step:    "Run test",
+			wantErr: `step named "Run test" did not complete in time`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_RUN_ID", "1")
+
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+					github.Jobs{TotalCount: github.Int(len(tt.jobs)), Jobs: tt.jobs},
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			// The retry window spans tens of seconds, so end it through the context
+			// instead of waiting it out.
+			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			defer cancel()
+
+			got, err := g.FetchStepsByName(ctx, "owner", "repo", tt.step)
+			if err == nil {
+				t.Fatalf("want err, got steps: %v", got)
+			}
+			if err.Error() != tt.wantErr {
+				t.Errorf("got %v\nwant %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestIsSameRepo(t *testing.T) {
 	tests := []struct {
 		name     string
