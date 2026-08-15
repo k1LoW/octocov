@@ -375,6 +375,65 @@ func TestDiffCustomMetricSetTable(t *testing.T) {
 				},
 			},
 		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 9393.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+					{Key: "AllocsPerOp", Name: "Allocations per iteration", Value: 3.0, Unit: " allocs/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 456.0, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
+		{
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 9393.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 676.5, Unit: " ns/op"},
+					{Key: "AllocsPerOp", Name: "Allocations per iteration", Value: 3.0, Unit: " allocs/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "1234567890",
+					covPaths: []string{"testdata/cover.out"},
+					opts:     &Options{Locale: &language.Japanese},
+				},
+			},
+			&CustomMetricSet{
+				Key:  "benchmark_0",
+				Name: "Benchmark-0",
+				Metrics: []*CustomMetric{
+					{Key: "N", Name: "Number of iterations", Value: 1000.0, Unit: ""},
+					{Key: "NsPerOp", Name: "Nanoseconds per iteration", Value: 456.0, Unit: " ns/op"},
+				},
+				report: &Report{
+					Ref:      "main",
+					Commit:   "2345678901",
+					covPaths: []string{"testdata/cover.out"},
+				},
+			},
+		},
 	}
 
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")

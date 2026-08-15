@@ -280,19 +280,19 @@ func (d *DiffCustomMetricSet) Table() string {
 		case m.A != nil && m.B == nil:
 			vb = ""
 			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
-			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
+			diff = report.convertDiffFormat(m.Diff, m.customMetricA.Unit)
 		case m.A == nil && m.B != nil:
 			va = ""
 			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
-			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricB.Unit)
+			diff = report.convertDiffFormat(m.Diff, m.customMetricB.Unit)
 		case isInt(*m.A) && isInt(*m.B):
 			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
 			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
-			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
+			diff = report.convertDiffFormat(m.Diff, m.customMetricA.Unit)
 		default:
 			va = fmt.Sprintf("%s%s", report.convertFormat(*m.A), m.customMetricA.Unit)
 			vb = fmt.Sprintf("%s%s", report.convertFormat(*m.B), m.customMetricB.Unit)
-			diff = fmt.Sprintf("%s%s", report.convertFormat(m.Diff), m.customMetricA.Unit)
+			diff = report.convertDiffFormat(m.Diff, m.customMetricA.Unit)
 		}
 		if m.Name == "" {
 			m.Name = m.Key
