@@ -37,6 +37,9 @@ func (p *PatchCoverage) Rate() float64 {
 // (blank lines, comments, package/import declarations, closing braces, ...), and are excluded
 // from the total, as with the instrumented-line counts behind the current/prev metrics.
 func (fc *FileCoverage) PatchCoverage(changedLines []int) *PatchFileCoverage {
+	if fc == nil {
+		return &PatchFileCoverage{}
+	}
 	total, covered := 0, 0
 	for _, line := range changedLines {
 		blocks := fc.FindBlocksByLine(line)

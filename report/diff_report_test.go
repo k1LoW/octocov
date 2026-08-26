@@ -85,3 +85,33 @@ func TestDiffFileCoveragesTable(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestDiffFileCoveragesTableWithPatch(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+	a := &Report{}
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "octocov", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	b := &Report{}
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "octocov", "report1.json")); err != nil {
+		t.Fatal(err)
+	}
+
+	got := a.Compare(b).FileCoveragesTable([]*gh.PullRequestFile{ //nostyle:funcfmt
+		{Filename: "zcase/added.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/added.go", Status: "added", ChangedLines: []int{1, 2, 3, 4, 5, 6, 7, 8, 9}},
+		{Filename: "zcase/added_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/added_test.go", Status: "added"},
+		{Filename: "zcase/affected_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/affected.go", Status: "modified", ChangedLines: []int{9, 10, 11}},
+		{Filename: "zcase/removed.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed.go", Status: "removed"},
+		{Filename: "zcase/removed_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed_test.go", Status: "removed"},
+		{Filename: "zcase/rename_new.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/rename_new.go", Status: "renamed", ChangedLines: []int{5, 6, 9}},
+	}, "")
+	f := "diff_file_coverages_table_with_patch"
+	if os.Getenv("UPDATE_GOLDEN") != "" {
+		golden.Update(t, testdataDir(t), f, got)
+		return
+	}
+	if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+		t.Error(diff)
+	}
+}

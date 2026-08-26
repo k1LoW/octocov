@@ -91,8 +91,8 @@ var diffCmd = &cobra.Command{
 			}
 			if repository != "" {
 				files := fetchPullRequestFilesForPatchCoverage(cmd.Context(), repository)
-				if patchTable := a.PatchCoverageTable(files); patchTable != "" {
-					fmt.Fprintln(os.Stdout, patchTable)
+				if table := dr.FileCoveragesTable(files, ""); table != "" {
+					fmt.Fprintln(os.Stdout, table)
 				}
 			}
 		}

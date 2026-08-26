@@ -412,36 +412,13 @@ func TestFileCoveragesTable(t *testing.T) {
 | [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.6%    |
 `,
 		},
-	}
-	path := filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")
-	r := &Report{}
-	if err := r.Load(path); err != nil {
-		t.Fatal(err)
-	}
-	for _, tt := range tests {
-		if got := r.FileCoveragesTable(tt.files); got != tt.want {
-			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
-		}
-	}
-}
-
-func TestPatchCoverageTable(t *testing.T) {
-	tests := []struct {
-		files []*gh.PullRequestFile
-		want  string
-	}{
-		{[]*gh.PullRequestFile{}, ""},
-		{
-			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go"}},
-			"", // no ChangedLines: nothing to show
-		},
 		{
 			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go", ChangedLines: []int{7, 15}}},
-			`### Patch coverage of changed lines in pull request scope (50.0%)
+			`### Code coverage of files in pull request scope (41.6%, patch 50.0%)
 
-|                                  Files                                  | Covered/Changed | Patch Coverage |
-|-------------------------------------------------------------------------|----------------:|---------------:|
-| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 1/2             | 50.0%          |
+|                                  Files                                  | Coverage | Patch Coverage |
+|-------------------------------------------------------------------------|---------:|---------------:|
+| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.6%    | 50.0%          |
 `,
 		},
 	}
@@ -451,7 +428,7 @@ func TestPatchCoverageTable(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tt := range tests {
-		if got := r.PatchCoverageTable(tt.files); got != tt.want {
+		if got := r.FileCoveragesTable(tt.files); got != tt.want {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 	}
