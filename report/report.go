@@ -733,6 +733,15 @@ func (r *Report) convertFormat(v any) string {
 	}
 }
 
+// convertDiffFormat converts a diff value with its unit, prefixing it with "+" when it is positive.
+func (r *Report) convertDiffFormat(diff float64, unit string) string {
+	v := fmt.Sprintf("%s%s", r.convertFormat(diff), unit)
+	if diff > 0 {
+		return fmt.Sprintf("+%s", v)
+	}
+	return v
+}
+
 func makeHeadTitle(ref, commit string, covPaths []string) string {
 	ref = strings.TrimPrefix(ref, "refs/heads/")
 	if strings.HasPrefix(ref, "refs/pull/") {

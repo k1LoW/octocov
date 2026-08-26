@@ -634,6 +634,8 @@ testExecutionTime:
     - Run slow test
 ```
 
+Steps with a matching name are collected from **every job in the workflow run**, and their execution times are merged (overlapping time ranges are counted only once). This makes it possible to measure the total test execution time when the tests are split across multiple jobs, for example by a GitHub Actions matrix. See [Merging reports from multiple GitHub Action jobs](#merging-reports-from-multiple-github-action-jobs).
+
 If not specified, the step where the coverage report file is generated is used as the measurement target.
 
 ### `testExecutionTime.badge`

@@ -429,6 +429,130 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 	}
 }
 
+func TestListWorkflowJobs(t *testing.T) {
+	// Every job of the run must be returned even when the run has more jobs
+	// than fit in a single page of the API response.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+			github.Jobs{
+				TotalCount: github.Int(3),
+				Jobs: []*github.WorkflowJob{
+					{ID: github.Int64(1), Name: github.String("test (1)")},
+					{ID: github.Int64(2), Name: github.String("test (2)")},
+				},
+			},
+			github.Jobs{
+				TotalCount: github.Int(3),
+				Jobs: []*github.WorkflowJob{
+					{ID: github.Int64(3), Name: github.String("test (3)")},
+				},
+			},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	jobs, err := g.listWorkflowJobs(context.TODO(), "owner", "repo", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got []int64
+	for _, j := range jobs {
+		got = append(got, j.GetID())
+	}
+	want := []int64{1, 2, 3}
+	if diff := cmp.Diff(got, want, nil); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestFetchStepsByNameErrors(t *testing.T) {
+	// Exhausting the retries must fail loudly. Reporting no steps as a success
+	// would measure a test execution time of zero for a step that was merely
+	// misspelled or still running.
+	base := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name    string
+		jobs    []*github.WorkflowJob
+		step    string
+		wantErr string
+	}{
+		{
+			name: "no job has a step with the given name",
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Steps: []*github.TaskStep{
+					{
+						Name:        github.String("Run test"),
+						StartedAt:   &github.Timestamp{Time: base},
+						CompletedAt: &github.Timestamp{Time: base.Add(time.Minute)},
+					},
+				}},
+			},
+			step:    "Run slow test",
+			wantErr: `could not find any step named "Run slow test" in the workflow run`,
+		},
+		{
+			name: "the named step never completes",
+			jobs: []*github.WorkflowJob{
+				{ID: github.Int64(1), Steps: []*github.TaskStep{
+					{
+						Name:      github.String("Run test"),
+						StartedAt: &github.Timestamp{Time: base},
+					},
+				}},
+			},
+			step:    "Run test",
+			wantErr: `step named "Run test" did not complete in time`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_RUN_ID", "1")
+
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
+					github.Jobs{TotalCount: github.Int(len(tt.jobs)), Jobs: tt.jobs},
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			// The retry window spans tens of seconds, so end it through the context
+			// instead of waiting it out.
+			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			defer cancel()
+
+			got, err := g.FetchStepsByName(ctx, "owner", "repo", tt.step)
+			if err == nil {
+				t.Fatalf("want err, got steps: %v", got)
+			}
+			if err.Error() != tt.wantErr {
+				t.Errorf("got %v\nwant %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
 func TestIsSameRepo(t *testing.T) {
 	tests := []struct {
 		name     string
