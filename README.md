@@ -464,6 +464,11 @@ coverage:
 that no coverage format instruments (blank lines, comments, declarations, ...) are not counted as
 uncovered.
 
+`patch` is measured per changed line, while `current` and `prev` are measured in whatever unit the
+coverage format instruments. These coincide for line-based formats (LCOV, SimpleCov, Clover,
+Cobertura, JaCoCo), but not for Go coverage, which is statement-based. A single statement spanning
+several changed lines therefore weighs more in `patch` than it does in `current`/`prev`.
+
 Since `patch` and `prev` are available in the same condition, "new code must be covered at least as
 well as the codebase overall" can be written as follows.
 
