@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"math/big"
 	"os"
@@ -289,15 +288,14 @@ const defaultPatchCoverage = 100.0
 // buildPatchAcceptableVar computes the `patch` variable for `coverage.acceptable:`.
 // It returns nil if changedFiles is unavailable (no pull request context) or the pull request
 // changed no lines that the coverage report instruments, in which case defaultPatchCoverage
-// is used instead of a zero/undefined value.
+// is used instead of a zero/undefined value. Reporting why patch coverage was not measured is
+// left to the caller, as with the other metrics.
 func buildPatchAcceptableVar(r Reporter, changedFiles map[string][]int) *float64 {
 	if changedFiles == nil {
-		log.Printf("coverage.acceptable references the patch variable, but no pull request context is available: patch is treated as %v%%", defaultPatchCoverage)
 		return nil
 	}
 	pc := r.PatchCoverage(changedFiles)
 	if pc.Total == 0 {
-		log.Printf("coverage.acceptable references the patch variable, but the pull request changed no lines that the coverage report instruments: patch is treated as %v%%", defaultPatchCoverage)
 		return nil
 	}
 	rate := pc.Rate()

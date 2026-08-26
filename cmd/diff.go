@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/k1LoW/errors"
 	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
@@ -89,11 +90,15 @@ var diffCmd = &cobra.Command{
 			if repository == "" {
 				repository = os.Getenv("GITHUB_REPOSITORY")
 			}
-			if repository != "" {
-				files := fetchPullRequestFilesForPatchCoverage(cmd.Context(), repository)
-				if table := dr.FileCoveragesTable(files, ""); table != "" {
-					fmt.Fprintln(os.Stdout, table)
-				}
+			if repository == "" {
+				return errors.New("--patch requires a repository: set it in the report or env GITHUB_REPOSITORY")
+			}
+			files, err := fetchPullRequestFilesForPatchCoverage(cmd.Context(), repository)
+			if err != nil {
+				return err
+			}
+			if table := dr.FileCoveragesTable(files, ""); table != "" {
+				fmt.Fprintln(os.Stdout, table)
 			}
 		}
 
