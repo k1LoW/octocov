@@ -486,9 +486,10 @@ diff is too large for the API to include, and for files beyond the limit of the 
 default branch outside of a pull request). Such files lower neither the covered lines nor the total
 lines of `patch`.
 
-`octocov diff [REPORT_A] [REPORT_B] --patch` also prints a patch coverage table for `REPORT_A`
-(fetching changed files/lines via the GitHub API), when the `--patch` flag is given and pull
-request context is available. Without `--patch`, `octocov diff` makes no GitHub API calls, as before.
+`octocov diff [REPORT_A] [REPORT_B] --patch` also prints the file coverage table of the comparison,
+including its patch coverage column, fetching the changed files and lines via the GitHub API. Since
+`--patch` asks for that data explicitly, it fails rather than printing nothing when the data cannot
+be fetched. Without `--patch`, `octocov diff` makes no GitHub API calls, as before.
 
 It is also possible to omit the expression as follows
 
