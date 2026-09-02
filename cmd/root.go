@@ -36,6 +36,7 @@ import (
 	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
@@ -457,6 +458,31 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// Measure patch coverage before storing the report, because storing the report shrinks
+		// away the block coverages that patch coverage is derived from.
+		var patchCoverage *coverage.PatchCoverage
+		if c.Coverage.AcceptableReferencesPatch() {
+			if err := c.CoverageConfigReady(); err != nil {
+				cmd.PrintErrf("Skip measuring patch coverage: %v\n", err)
+			} else {
+				files, err := fetchPullRequestFilesForPatchCoverage(ctx, c.Repository)
+				changedFiles := gh.ChangedLinesByFile(files)
+				switch {
+				case err != nil:
+					cmd.PrintErrf("Skip measuring patch coverage: %v\n", err)
+				case len(files) == 0:
+					cmd.PrintErrln("Skip measuring patch coverage: no changed files were fetched")
+				case len(changedFiles) == 0:
+					cmd.PrintErrln("Skip measuring patch coverage: no changed lines were fetched")
+				default:
+					patchCoverage = r.PatchCoverage(changedFiles)
+					if patchCoverage.Total == 0 {
+						cmd.PrintErrln("Skip measuring patch coverage: no changed line is instrumented by the coverage report")
+					}
+				}
+			}
+		}
+
 		// Store report
 		if err := c.ReportConfigReady(); err != nil {
 			cmd.PrintErrf("Skip storing report: %v\n", err)
@@ -498,19 +524,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check for acceptable code metrics
-		var changedFiles map[string][]int
-		if c.Coverage.AcceptableReferencesPatch() {
-			files, err := fetchPullRequestFilesForPatchCoverage(ctx, c.Repository)
-			switch {
-			case err != nil:
-				cmd.PrintErrf("Skip measuring patch coverage: %v\n", err)
-			case len(files) == 0:
-				cmd.PrintErrln("Skip measuring patch coverage: no changed files were fetched")
-			default:
-				changedFiles = gh.ChangedLinesByFile(files)
-			}
-		}
-		if err := c.Acceptable(r, rPrev, changedFiles); err != nil {
+		if err := c.Acceptable(r, rPrev, patchCoverage); err != nil {
 			return err
 		}
 
@@ -536,6 +550,7 @@ func fetchPullRequestFilesForPatchCoverage(ctx context.Context, repository strin
 	}
 	return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 }
+
 func printMetrics(cmd *cobra.Command) error {
 	ctx := context.Background()
 	c := config.New()

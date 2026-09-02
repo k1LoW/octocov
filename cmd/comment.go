@@ -102,7 +102,7 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if message != "" {
 		comment = append(comment, message)
 	}
-	if err := c.Acceptable(r, rPrev, gh.ChangedLinesByFile(files)); err != nil {
+	if err := c.Acceptable(r, rPrev, r.PatchCoverage(gh.ChangedLinesByFile(files))); err != nil {
 		errs := errors.Errors(err)
 		var b strings.Builder
 		for _, e := range errs {

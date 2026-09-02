@@ -218,22 +218,23 @@ type Reporter interface {
 	TestExecutionTimeNano() float64
 	IsMeasuredTestExecutionTime() bool
 	CustomMetricsAcceptable(Reporter) error
-	PatchCoverage(changedFiles map[string][]int) *cov.PatchCoverage
 }
 
 // Acceptable checks r (and rPrev, for comparison) against the configured acceptable conditions.
-// changedFiles maps a file path to the line numbers changed in that file (e.g. lines changed in a
-// pull request), and is used to compute the `patch` variable for `coverage.acceptable:`. Pass nil
-// if no pull request context is available; `patch` then falls back to defaultPatchCoverage, and
-// the condition is still evaluated.
-func (c *Config) Acceptable(r, rPrev Reporter, changedFiles map[string][]int) error {
+// pc is the already measured patch coverage, used for the `patch` variable of
+// `coverage.acceptable:`. Pass nil if it could not be measured; `patch` then falls back to
+// defaultPatchCoverage, and the condition is still evaluated.
+//
+// Patch coverage is passed in already measured rather than computed here, because it is derived
+// from the block coverages, which the caller shrinks away once the report has been stored.
+func (c *Config) Acceptable(r, rPrev Reporter, pc *cov.PatchCoverage) error {
 	var errs error
 	if err := c.CoverageConfigReady(); err == nil {
 		prev := big.NewRat(int64(rPrev.CoveragePercent()*10000), 10000)
 		curr := big.NewRat(int64(r.CoveragePercent()*10000), 10000)
 		var patch *float64
 		if c.Coverage.AcceptableReferencesPatch() {
-			patch = buildPatchAcceptableVar(r, changedFiles)
+			patch = buildPatchAcceptableVar(pc)
 		}
 		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
 			errs = errors.Join(errs, err)
@@ -286,16 +287,12 @@ var (
 const defaultPatchCoverage = 100.0
 
 // buildPatchAcceptableVar computes the `patch` variable for `coverage.acceptable:`.
-// It returns nil if changedFiles is unavailable (no pull request context) or the pull request
-// changed no lines that the coverage report instruments, in which case defaultPatchCoverage
-// is used instead of a zero/undefined value. Reporting why patch coverage was not measured is
-// left to the caller, as with the other metrics.
-func buildPatchAcceptableVar(r Reporter, changedFiles map[string][]int) *float64 {
-	if changedFiles == nil {
-		return nil
-	}
-	pc := r.PatchCoverage(changedFiles)
-	if pc.Total == 0 {
+// It returns nil if patch coverage could not be measured (no pull request context, or the pull
+// request changed no line that the coverage report instruments), in which case
+// defaultPatchCoverage is used instead of a zero/undefined value. Reporting why patch coverage
+// was not measured is left to the caller, as with the other metrics.
+func buildPatchAcceptableVar(pc *cov.PatchCoverage) *float64 {
+	if pc == nil || pc.Total == 0 {
 		return nil
 	}
 	rate := pc.Rate()
