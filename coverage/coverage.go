@@ -265,6 +265,9 @@ func New() *Coverage {
 func (c *Coverage) DeleteBlockCoverages() {
 	for _, f := range c.Files {
 		f.Blocks = BlockCoverages{}
+		// Drop the line cache too. Leaving it would keep FindBlocksByLine answering from
+		// blocks that no longer exist.
+		f.cache = nil
 	}
 }
 
