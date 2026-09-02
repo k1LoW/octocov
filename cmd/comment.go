@@ -8,6 +8,7 @@ import (
 
 	"github.com/k1LoW/errors"
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
@@ -102,7 +103,13 @@ func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report
 	if message != "" {
 		comment = append(comment, message)
 	}
-	if err := c.Acceptable(r, rPrev, r.PatchCoverage(gh.ChangedLinesByFile(files))); err != nil {
+	// Measure patch coverage only when the condition can read it, so a configuration that
+	// never references `patch` does not pay for the lookup over every changed file.
+	var pc *coverage.PatchCoverage
+	if c.Coverage.AcceptableReferencesPatch() && c.CoverageConfigReady() == nil {
+		pc = r.PatchCoverage(gh.ChangedLinesByFile(files))
+	}
+	if err := c.Acceptable(r, rPrev, pc); err != nil {
 		errs := errors.Errors(err)
 		var b strings.Builder
 		for _, e := range errs {
