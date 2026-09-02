@@ -113,3 +113,49 @@ func intPtr(i int) *int {
 func execCountPtr(c ExecCount) *ExecCount {
 	return &c
 }
+
+func TestPatchCoverageAfterDeleteBlockCoverages(t *testing.T) {
+	// Storing a report shrinks away the block coverages, and patch coverage is derived from
+	// them. Once shrunk, patch coverage reads as unmeasurable (Total 0) rather than being
+	// answered from the line cache built before the shrink.
+	c := &Coverage{
+		Files: FileCoverages{
+			&FileCoverage{
+				File: "a.go",
+				Blocks: BlockCoverages{
+					&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(2), Count: execCountPtr(1)},
+				},
+			},
+		},
+	}
+	changedFiles := map[string][]int{"a.go": {1, 2}}
+
+	if got := c.PatchCoverage(changedFiles); got.Total != 2 {
+		t.Fatalf("Total before shrink got %v want 2", got.Total)
+	}
+
+	c.DeleteBlockCoverages()
+
+	if got := c.PatchCoverage(changedFiles); got.Total != 0 {
+		t.Errorf("Total after shrink got %v want 0", got.Total)
+	}
+}
+
+func TestPatchCoverageWithBlockMissingLineRange(t *testing.T) {
+	// A report unmarshaled from a datastore can carry a block whose line range was omitted.
+	// Such a block instruments no line, and must not take the whole measurement down with it.
+	fc := &FileCoverage{
+		File: "a.go",
+		Blocks: BlockCoverages{
+			&BlockCoverage{Count: execCountPtr(1)},
+			&BlockCoverage{StartLine: intPtr(3), EndLine: intPtr(3), Count: execCountPtr(1)},
+		},
+	}
+	got := fc.PatchCoverage([]int{1, 2, 3})
+	if got.Total != 1 {
+		t.Errorf("Total got %v want 1", got.Total)
+	}
+	if got.Covered != 1 {
+		t.Errorf("Covered got %v want 1", got.Covered)
+	}
+}
