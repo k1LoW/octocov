@@ -388,7 +388,7 @@ var rootCmd = &cobra.Command{
 		// changed file list, and each fetch is paginated over up to 3000 files. Fetch it at
 		// most once, and only if one of them actually asks for it.
 		pullRequestFiles := sync.OnceValues(func() ([]*gh.PullRequestFile, error) {
-			return fetchPullRequestFiles(ctx, c.Repository)
+			return fetchPullRequestFiles(ctx, cmd, c.Repository)
 		})
 
 		// Comment report to pull request
@@ -556,7 +556,7 @@ var rootCmd = &cobra.Command{
 // is not against a pull request, the files changed since the default branch. Both the patch
 // coverage column of the file coverage tables and the `patch` acceptable variable are measured
 // over the changed lines it carries.
-func fetchPullRequestFiles(ctx context.Context, repository string) ([]*gh.PullRequestFile, error) {
+func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository string) ([]*gh.PullRequestFile, error) {
 	repo, err := gh.Parse(repository)
 	if err != nil {
 		return nil, err
@@ -565,10 +565,16 @@ func fetchPullRequestFiles(ctx context.Context, repository string) ([]*gh.PullRe
 	if err != nil {
 		return nil, err
 	}
-	if n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
-		return g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
+	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
+	if err != nil {
+		// Not being on a pull request is the ordinary case here, but a token without access,
+		// a rate limit, or two branches resolving to the same head fail the same way, and the
+		// default branch comparison then measures a different set of changed lines. Report
+		// which of the two was used rather than letting the difference go unseen.
+		cmd.PrintErrf("Could not detect the current pull request, comparing against the default branch instead: %v\n", err)
+		return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 	}
-	return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
+	return g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
 }
 
 func printMetrics(cmd *cobra.Command) error {

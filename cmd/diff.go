@@ -93,7 +93,7 @@ var diffCmd = &cobra.Command{
 			if repository == "" {
 				return errors.New("--patch requires a repository: set it in the report or env GITHUB_REPOSITORY")
 			}
-			files, err := fetchPullRequestFiles(cmd.Context(), repository)
+			files, err := fetchPullRequestFiles(cmd.Context(), cmd, repository)
 			if err != nil {
 				return err
 			}
