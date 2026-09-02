@@ -498,7 +498,19 @@ var rootCmd = &cobra.Command{
 		}
 
 		// Check for acceptable code metrics
-		if err := c.Acceptable(r, rPrev); err != nil {
+		var changedFiles map[string][]int
+		if c.Coverage.AcceptableReferencesPatch() {
+			files, err := fetchPullRequestFilesForPatchCoverage(ctx, c.Repository)
+			switch {
+			case err != nil:
+				cmd.PrintErrf("Skip measuring patch coverage: %v\n", err)
+			case len(files) == 0:
+				cmd.PrintErrln("Skip measuring patch coverage: no changed files were fetched")
+			default:
+				changedFiles = gh.ChangedLinesByFile(files)
+			}
+		}
+		if err := c.Acceptable(r, rPrev, changedFiles); err != nil {
 			return err
 		}
 
@@ -506,6 +518,24 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+// fetchPullRequestFilesForPatchCoverage returns the changed files of the current pull request
+// (or, if not running against a pull request, the files changed since the default branch), for
+// computing patch coverage (the `patch` acceptable variable, or the patch coverage column of the
+// file coverage table).
+func fetchPullRequestFilesForPatchCoverage(ctx context.Context, repository string) ([]*gh.PullRequestFile, error) {
+	repo, err := gh.Parse(repository)
+	if err != nil {
+		return nil, err
+	}
+	g, err := gh.New()
+	if err != nil {
+		return nil, err
+	}
+	if n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo); err == nil {
+		return g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
+	}
+	return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
+}
 func printMetrics(cmd *cobra.Command) error {
 	ctx := context.Background()
 	c := config.New()

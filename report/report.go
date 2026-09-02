@@ -193,7 +193,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if len(files) == 0 {
 		return ""
 	}
-	var t, c int
+	var t, c, pt, pc int
 	exist := false
 	var rows [][]string
 	for _, f := range files {
@@ -208,7 +208,10 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 		if fc.Total == 0 {
 			cover = 0.0
 		}
-		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", floor1(cover))})
+		pfc := fc.PatchCoverage(f.ChangedLines)
+		pc += pfc.Covered
+		pt += pfc.Total
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", floor1(cover)), patchCell(pfc)})
 	}
 	if !exist {
 		return ""
@@ -217,7 +220,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if t == 0 {
 		coverAll = 0.0
 	}
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%)", floor1(coverAll))
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%%s)", floor1(coverAll), patchTitleSuffix(pc, pt))
 
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, "%s\n\n", title)
@@ -232,7 +235,13 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	}
 
 	table := tablewriter.NewWriter(buf)
-	h := []string{"Files", "Coverage"}
+	h := []string{"Files", "Coverage", "Patch Coverage"}
+	if pt == 0 {
+		// No changed line of any file is instrumented: drop the column instead of
+		// rendering it as '-' for every row.
+		h = []string{"Files", "Coverage"}
+		rows = dropColumn(rows, 2)
+	}
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
@@ -250,6 +259,34 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
 
+// patchCell renders the patch coverage cell of a file coverage table. Files with no instrumented
+// changed lines (unchanged files listed as affected, or changes that touch no instrumented line)
+// have no patch coverage to show.
+func patchCell(pfc *coverage.PatchFileCoverage) string {
+	if pfc == nil || pfc.Total == 0 {
+		return "-"
+	}
+	return fmt.Sprintf("%.1f%%", floor1(pfc.Rate()))
+}
+
+// patchTitleSuffix renders the overall patch coverage part of a file coverage table heading.
+// The heading is kept when the table itself is dropped for having too many files, so the number
+// that gates CI stays visible.
+func patchTitleSuffix(covered, total int) string {
+	if total == 0 {
+		return ""
+	}
+	return fmt.Sprintf(", patch %.1f%%", floor1(float64(covered)/float64(total)*100))
+}
+
+// dropColumn removes the i-th cell of every row.
+func dropColumn(rows [][]string, i int) [][]string {
+	dropped := make([][]string, 0, len(rows))
+	for _, r := range rows {
+		dropped = append(dropped, append(append([]string{}, r[:i]...), r[i+1:]...))
+	}
+	return dropped
+}
 func (r *Report) CountMeasured() int {
 	c := 0
 	if r.IsMeasuredCoverage() {
@@ -518,6 +555,15 @@ func (r *Report) CoveragePercent() float64 {
 		return 0.0
 	}
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+}
+
+// PatchCoverage calculates the coverage of the given changed lines (e.g. lines changed in a
+// pull request). changedFiles maps a file path to the line numbers changed in that file.
+func (r *Report) PatchCoverage(changedFiles map[string][]int) *coverage.PatchCoverage {
+	if r == nil || r.Coverage == nil {
+		return &coverage.PatchCoverage{}
+	}
+	return r.Coverage.PatchCoverage(changedFiles)
 }
 
 func (r *Report) CodeToTestRatioRatio() float64 {

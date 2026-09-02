@@ -315,9 +315,28 @@ func (g *Gh) FetchPullRequest(ctx context.Context, owner, repo string, number in
 }
 
 type PullRequestFile struct {
-	Filename string
-	BlobURL  string
-	Status   string
+	Filename     string
+	BlobURL      string
+	Status       string
+	ChangedLines []int // line numbers added or modified in the file (new-file line numbers)
+}
+
+// ChangedLinesByFile converts a list of PullRequestFile into a map of filename to changed line numbers.
+func ChangedLinesByFile(files []*PullRequestFile) map[string][]int {
+	if len(files) == 0 {
+		// Distinguish "the changed files could not be fetched at all" from "they were fetched,
+		// but none of the changed lines are instrumented", so that the two can be reported
+		// differently.
+		return nil
+	}
+	m := make(map[string][]int, len(files))
+	for _, f := range files {
+		if len(f.ChangedLines) == 0 {
+			continue
+		}
+		m[f.Filename] = f.ChangedLines
+	}
+	return m
 }
 
 func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]*PullRequestFile, error) {
@@ -336,9 +355,10 @@ func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, numb
 		}
 		for _, f := range commitFiles {
 			files = append(files, &PullRequestFile{
-				Filename: f.GetFilename(),
-				BlobURL:  f.GetBlobURL(),
-				Status:   f.GetStatus(),
+				Filename:     f.GetFilename(),
+				BlobURL:      f.GetBlobURL(),
+				Status:       f.GetStatus(),
+				ChangedLines: parseChangedLinesFromPatch(f.GetPatch()),
 			})
 		}
 		page += 1
@@ -362,11 +382,50 @@ func (g *Gh) FetchChangedFiles(ctx context.Context, owner, repo string) ([]*Pull
 	var files []*PullRequestFile
 	for _, f := range compare.Files {
 		files = append(files, &PullRequestFile{
-			Filename: f.GetFilename(),
-			BlobURL:  f.GetBlobURL(),
+			Filename:     f.GetFilename(),
+			BlobURL:      f.GetBlobURL(),
+			ChangedLines: parseChangedLinesFromPatch(f.GetPatch()),
 		})
 	}
 	return files, nil
+}
+
+var patchHunkHeaderRe = regexp.MustCompile(`^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@`)
+
+// parseChangedLinesFromPatch parses a unified diff hunk (as returned by the
+// GitHub API for a pull request file) and returns the line numbers, in the
+// new version of the file, that were added or modified.
+func parseChangedLinesFromPatch(patch string) []int {
+	var lines []int
+	newLine := 0
+	for l := range strings.SplitSeq(patch, "\n") {
+		if m := patchHunkHeaderRe.FindStringSubmatch(l); len(m) > 1 {
+			n, err := strconv.Atoi(m[1])
+			if err != nil {
+				// The start line is out of range: skip the lines of this hunk.
+				newLine = 0
+				continue
+			}
+			newLine = n
+			continue
+		}
+		if newLine == 0 {
+			continue
+		}
+		switch {
+		case strings.HasPrefix(l, "+"):
+			lines = append(lines, newLine)
+			newLine++
+		case strings.HasPrefix(l, "-"):
+			// Removed line: does not exist in the new file.
+		case strings.HasPrefix(l, `\`):
+			// e.g. "\ No newline at end of file": not an actual line.
+		default:
+			// Context line: exists in both old and new files.
+			newLine++
+		}
+	}
+	return lines
 }
 
 func (g *Gh) FetchStepExecutionTimeByTime(ctx context.Context, owner, repo string, jobID int64, t time.Time) (time.Duration, error) {

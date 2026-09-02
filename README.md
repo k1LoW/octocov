@@ -24,20 +24,20 @@ First, run test with [coverage report output](#supported-coverage-report-formats
 
 For example, in case of Go language, add `-coverprofile=coverage.out` option as follows
 
-``` console
+```console
 $ go test ./... -coverprofile=coverage.out
 ```
 
 And generete `.octocov.yml` to your repository.
 
-``` console
+```console
 $ octocov init
 .octocov.yml is generated
 ```
 
 And set up a workflow file as follows and run octocov on GitHub Actions.
 
-``` yaml
+```yaml
 # .github/workflows/ci.yml
 name: Test
 
@@ -48,17 +48,13 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      -
-        uses: actions/checkout@v3
-      -
-        uses: actions/setup-go@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
-      -
-        name: Run tests with coverage report output
+      - name: Run tests with coverage report output
         run: go test ./... -coverprofile=coverage.out
-      -
-        uses: k1LoW/octocov-action@v1
+      - uses: k1LoW/octocov-action@v1
 ```
 
 Then, octocov comment the report of the code metrics to the pull request.
@@ -81,7 +77,7 @@ octocov acts as a code metrics viewer on the terminal.
 
 For example, in case of Go language, add `-coverprofile=coverage.out` option as follows
 
-``` console
+```console
 $ go test ./... -coverprofile=coverage.out
 ```
 
@@ -97,7 +93,7 @@ By setting `comment:`, [comment the reports to pull request](https://github.com/
 
 ![comment](docs/comment.png)
 
-``` yaml
+```yaml
 # .octocov.yml
 comment:
   hideFooterLink: false # hide octocov link
@@ -107,19 +103,19 @@ octocov checks for **"Code Coverage"** by default. If it is running on GitHub Ac
 
 If you want to measure **"Code to Test Ratio"**, set `codeToTestRatio:`.
 
-``` yaml
+```yaml
 comment:
 codeToTestRatio:
   code:
-    - '**/*.go'
-    - '!**/*_test.go'
+    - "**/*.go"
+    - "!**/*_test.go"
   test:
-    - '**/*_test.go'
+    - "**/*_test.go"
 ```
 
-By setting `report:` ( `report.path:`  or `report.datastores` ) and `diff:` ( `diff.path:`  or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
+By setting `report:` ( `report.path:` or `report.datastores` ) and `diff:` ( `diff.path:` or `diff.datastores` ) additionally, it is possible to show differences from previous reports as well.
 
-``` yaml
+```yaml
 comment:
   updatePrevious: true
 report:
@@ -138,13 +134,13 @@ By setting `coverage.acceptable:`, the condition of acceptable coverage is speci
 
 If this condition is not met, the command will exit with exit status `1`.
 
-``` yaml
+```yaml
 # .octocov.yml
 coverage:
   acceptable: 60%
 ```
 
-``` console
+```console
 $ octocov
 Error: code coverage is 54.9%. the condition in the `coverage.acceptable:` section is not met (`60%`)
 ```
@@ -153,18 +149,18 @@ By setting `codeToTestRatio.acceptable:`, the condition of acceptable "Code to T
 
 If this condition is not met, the command will exit with exit status `1`.
 
-``` yaml
+```yaml
 # .octocov.yml
 codeToTestRatio:
   acceptable: 1:1.2
   code:
-    - '**/*.go'
-    - '!**/*_test.go'
+    - "**/*.go"
+    - "!**/*_test.go"
   test:
-    - '**/*_test.go'
+    - "**/*_test.go"
 ```
 
-``` console
+```console
 $ octocov
 Error: code to test ratio is 1:1.1, the condition in the `codeToTestRatio.acceptable:` section is not met (`1:1.2`)
 ```
@@ -173,13 +169,13 @@ By setting `testExecutionTime.acceptable:`, the condition of acceptable "Test Ex
 
 If this condition is not met, the command will exit with exit status `1`.
 
-``` yaml
+```yaml
 # .octocov.yml
 testExecutionTime:
   acceptable: 1 min
 ```
 
-``` console
+```console
 $ octocov
 Error: test execution time is 1m15s, the condition in the `testExecutionTime.acceptable:` section is not met (`1 min`)
 ```
@@ -188,21 +184,21 @@ Error: test execution time is 1m15s, the condition in the `testExecutionTime.acc
 
 By setting `*.badge.path:`, generate badges self.
 
-``` yaml
+```yaml
 # .octocov.yml
 coverage:
   badge:
     path: docs/coverage.svg
 ```
 
-``` yaml
+```yaml
 # .octocov.yml
 codeToTestRatio:
   badge:
     path: docs/ratio.svg
 ```
 
-``` yaml
+```yaml
 # .octocov.yml
 testExecutionTime:
   badge:
@@ -211,7 +207,7 @@ testExecutionTime:
 
 You can display the coverage badge without external communication by setting a link to this badge image in README.md, etc.
 
-``` markdown
+```markdown
 # mytool
 
 ![coverage](docs/coverage.svg) ![coverage](docs/ratio.svg) ![coverage](docs/time.svg)
@@ -223,7 +219,7 @@ You can display the coverage badge without external communication by setting a l
 
 By setting `push:`, git push report badges self.
 
-``` yaml
+```yaml
 # .octocov.yml
 coverage:
   badge:
@@ -235,7 +231,7 @@ push:
 
 By setting `report:`, store the reports to datastores and local path.
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   datastores:
@@ -243,7 +239,7 @@ report:
     - s3://bucket/reports
 ```
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   path: path/to/report.json
@@ -262,17 +258,17 @@ report:
 
 By enabling `central:`, `octocov` acts as a central repository for collecting reports ( [example](example/central/README.md) ).
 
-``` yaml
+```yaml
 # .octocov.yml for central mode
 central:
-  root: .                                  # root directory or index file path of collected coverage reports pages. default: .
+  root: . # root directory or index file path of collected coverage reports pages. default: .
   reports:
     datastores:
       - bq://my-project/my-dataset/reports # datastore paths (URLs) where reports are stored. default: local://reports
   badges:
     datastores:
-      - local://badges                     # directory where badges are generated.
-  push:                                    # enable self git push
+      - local://badges # directory where badges are generated.
+  push: # enable self git push
 ```
 
 ### Merging reports from multiple GitHub Action jobs
@@ -334,10 +330,10 @@ jobs:
 # .octocov.yml
 codeToTestRatio:
   code:
-    - '**/*.go'
-    - '!**/*_test.go'
+    - "**/*.go"
+    - "!**/*_test.go"
   test:
-    - '**/*_test.go'
+    - "**/*_test.go"
 coverage:
   paths:
     # Name of artifacts uploaded by the test-running jobs.
@@ -389,7 +385,7 @@ By default, the value of the environment variable `GITHUB_REPOSITORY` is set.
 
 In case of monorepo, code metrics can be reported to datastore separately by specifying `owner/repo/project-a` or `owner/repo@project-a`.
 
-``` yaml
+```yaml
 repository: k1LoW/octocov
 ```
 
@@ -397,7 +393,7 @@ repository: k1LoW/octocov
 
 Timeout for octocov execution. (default: `30sec`)
 
-``` yaml
+```yaml
 timeout: 5min
 ```
 
@@ -415,7 +411,7 @@ The path to the coverage report file.
 
 If no path is specified, the default path for each coverage format will be scanned.
 
-``` yaml
+```yaml
 coverage:
   paths:
     - tests/coverage.xml
@@ -427,11 +423,11 @@ Exclude files from the coverage report. Patterns are matched using [doublestar](
 
 octocov normalizes coverage file paths to **git-root-relative paths** before matching, so you can write patterns based on the repository directory structure regardless of coverage format.
 
-``` yaml
+```yaml
 coverage:
   exclude:
-    - 'internal/database/db/*.go'
-    - 'proto/**/*.pb.ts'
+    - "internal/database/db/*.go"
+    - "proto/**/*.pb.ts"
 ```
 
 For backward compatibility, patterns are also matched against the original paths produced by the coverage tool (e.g., Go module paths like `github.com/owner/repo/pkg/*.go`).
@@ -440,30 +436,67 @@ For backward compatibility, patterns are also matched against the original paths
 
 acceptable coverage condition.
 
-``` yaml
+```yaml
 coverage:
   acceptable: 60%
 ```
 
-``` yaml
+```yaml
 coverage:
   acceptable: current >= 60% && diff >= 0.5%
 ```
 
 The variables that can be used are as follows.
 
-| value | description |
-| --- | --- |
-| `current` | Current code metrics value |
-| `prev` | Previous value. This value is taken from `diff.datastores:`. |
-| `diff` | The result of `current - prev` |
+| value     | description                                                                  |
+| --------- | ---------------------------------------------------------------------------- |
+| `current` | Current code metrics value                                                   |
+| `prev`    | Previous value. This value is taken from `diff.datastores:`.                  |
+| `diff`    | The result of `current - prev`                                               |
+| `patch`   | Coverage of the lines changed in the current pull request ("patch coverage")  |
+
+```yaml
+coverage:
+  acceptable: patch >= 80%
+```
+
+`patch` is measured over the changed lines that the coverage report instruments, so changed lines
+that no coverage format instruments (blank lines, comments, declarations, ...) are not counted as
+uncovered.
+
+`patch` is measured per changed line, while `current` and `prev` are measured in whatever unit the
+coverage format instruments. These coincide for line-based formats (LCOV, SimpleCov, Clover,
+Cobertura, JaCoCo), but not for Go coverage, which is statement-based. A single statement spanning
+several changed lines therefore weighs more in `patch` than it does in `current`/`prev`.
+
+`patch` requires pull request context: octocov fetches the list of changed files and lines for the
+current pull request via the GitHub API. If that context is not available (e.g. not running against
+a pull request, or the GitHub API is not accessible), or if the pull request changed no lines that
+the coverage report instruments, `patch` is treated as `100%` rather than failing the build.
+
+Only the `patch` part of the condition is relaxed this way. If you combine `patch` with
+`current`/`prev`/`diff` in one expression (e.g. `current >= 80% && patch >= 70%`), the
+`current >= 80%` part keeps being enforced even when patch coverage cannot be measured.
+
+Files that the GitHub API does not return a diff for are excluded from patch coverage, because the
+changed lines of those files cannot be determined. This happens for binary files, for files whose
+diff is too large for the API to include, and for files beyond the limit of the API response
+([up to 3000 files](https://docs.github.com/en/rest/pulls/pulls) for a pull request, and
+[up to 300 files](https://docs.github.com/en/rest/commits/commits) when comparing against the
+default branch outside of a pull request). Such files lower neither the covered lines nor the total
+lines of `patch`.
+
+`octocov diff [REPORT_A] [REPORT_B] --patch` also prints the file coverage table of the comparison,
+including its patch coverage column, fetching the changed files and lines via the GitHub API. Since
+`--patch` asks for that data explicitly, it fails rather than printing nothing when the data cannot
+be fetched. Without `--patch`, `octocov diff` makes no GitHub API calls, as before.
 
 It is also possible to omit the expression as follows
 
 | Omitted expression | Expanded expression |
-| --- | --- |
-| `60%` | `current >= 60%` |
-| `> 60%` | `current > 60%` |
+| ------------------ | ------------------- |
+| `60%`              | `current >= 60%`    |
+| `> 60%`            | `current > 60%`     |
 
 ### `coverage.badge:`
 
@@ -473,7 +506,7 @@ Set this if want to generate the badge self.
 
 The path to the badge.
 
-``` yaml
+```yaml
 coverage:
   badge:
     path: docs/coverage.svg
@@ -483,7 +516,7 @@ coverage:
 
 Conditions for measuring code coverage.
 
-``` yaml
+```yaml
 coverage:
   if: is_default_branch
 ```
@@ -496,43 +529,43 @@ Configuration for code to test ratio.
 
 Files to count.
 
-``` yaml
+```yaml
 codeToTestRatio:
-  code:                  # files to count as "Code"
-    - '**/*.go'
-    - '!**/*_test.go'
-  test:                  # files to count as "Test"
-    - '**/*_test.go'
+  code: # files to count as "Code"
+    - "**/*.go"
+    - "!**/*_test.go"
+  test: # files to count as "Test"
+    - "**/*_test.go"
 ```
 
 ### `codeToTestRatio.acceptable:`
 
 acceptable ratio condition.
 
-``` yaml
+```yaml
 codeToTestRatio:
   acceptable: 1:1.2
 ```
 
-``` yaml
+```yaml
 codeToTestRatio:
   acceptable: current >= 1.2 && diff >= 0.0
 ```
 
 The variables that can be used are as follows.
 
-| value | description |
-| --- | --- |
-| `current` | Current code metrics value |
-| `prev` | Previous value. This value is taken from `diff.datastores:`. |
-| `diff` | The result of `current - prev` |
+| value     | description                                                  |
+| --------- | ------------------------------------------------------------ |
+| `current` | Current code metrics value                                   |
+| `prev`    | Previous value. This value is taken from `diff.datastores:`. |
+| `diff`    | The result of `current - prev`                               |
 
 It is also possible to omit the expression as follows
 
 | Omitted expression | Expanded expression |
-| --- | --- |
-| `1:1.2` | `current >= 1.2` |
-| `> 1:1.2` | `current > 1.2` |
+| ------------------ | ------------------- |
+| `1:1.2`            | `current >= 1.2`    |
+| `> 1:1.2`          | `current > 1.2`     |
 
 ### `codeToTestRatio.badge:`
 
@@ -542,7 +575,7 @@ Set this if want to generate the badge self.
 
 The path to the badge.
 
-``` yaml
+```yaml
 codeToTestRatio:
   badge:
     path: docs/ratio.svg
@@ -552,7 +585,7 @@ codeToTestRatio:
 
 Conditions for measuring code to test ratio.
 
-``` yaml
+```yaml
 codeToTestRatio:
   if: is_default_branch
 ```
@@ -565,36 +598,36 @@ Configuration for test execution time.
 
 acceptable time condition.
 
-``` yaml
+```yaml
 testExecutionTime:
   acceptable: 1min
 ```
 
-``` yaml
+```yaml
 testExecutionTime:
   acceptable: current <= 1min && diff <= 1sec
 ```
 
 The variables that can be used are as follows.
 
-| value | description |
-| --- | --- |
-| `current` | Current code metrics value |
-| `prev` | Previous value. This value is taken from `diff.datastores:`. |
-| `diff` | The result of `current - prev` |
+| value     | description                                                  |
+| --------- | ------------------------------------------------------------ |
+| `current` | Current code metrics value                                   |
+| `prev`    | Previous value. This value is taken from `diff.datastores:`. |
+| `diff`    | The result of `current - prev`                               |
 
 It is also possible to omit the expression as follows
 
 | Omitted expression | Expanded expression |
-| --- | --- |
-| `1min` | `current <= 1min` |
-| `< 1min` | `current < 1min` |
+| ------------------ | ------------------- |
+| `1min`             | `current <= 1min`   |
+| `< 1min`           | `current < 1min`    |
 
 ### `testExecutionTime.steps`
 
 The name of the step to measure the execution time.
 
-``` yaml
+```yaml
 testExecutionTime:
   steps:
     - Run test
@@ -613,7 +646,7 @@ Set this if want to generate the badge self.
 
 The path to the badge.
 
-``` yaml
+```yaml
 testExecutionTime:
   badge:
     path: docs/time.svg
@@ -623,7 +656,7 @@ testExecutionTime:
 
 Conditions for measuring test execution time.
 
-``` yaml
+```yaml
 testExecutionTime:
   if: is_pull_request
 ```
@@ -636,7 +669,7 @@ Configuration for `git push` files self.
 
 Conditions for pushing files.
 
-``` yaml
+```yaml
 # .octocov.yml
 push:
   if: is_default_branch
@@ -648,7 +681,7 @@ The variables available in the `if` section are [here](https://github.com/k1LoW/
 
 message for commit.
 
-``` yaml
+```yaml
 # .octocov.yml
 push:
   message: Update by octocov [skip ci]
@@ -662,7 +695,7 @@ Set this if want to comment report to pull request
 
 Hide footer [octocov](https://github.com/k1LoW/octocov) link.
 
-``` yaml
+```yaml
 comment:
   hideFooterLink: true
 ```
@@ -671,7 +704,7 @@ comment:
 
 Delete previous code metrics report comments instead of hiding them
 
-``` yaml
+```yaml
 comment:
   deletePrevious: true
 ```
@@ -701,7 +734,7 @@ comment:
 
 Conditions for commenting report.
 
-``` yaml
+```yaml
 # .octocov.yml
 comment:
   if: is_pull_request
@@ -717,7 +750,7 @@ Set this if want to add report to [job summary page](https://docs.github.com/en/
 
 Hide footer [octocov](https://github.com/k1LoW/octocov) link.
 
-``` yaml
+```yaml
 summary:
   hideFooterLink: true
 ```
@@ -735,7 +768,7 @@ summary:
 
 Conditions for adding report to job summary page.
 
-``` yaml
+```yaml
 # .octocov.yml
 summary:
   if: true
@@ -751,7 +784,7 @@ Set this if want to insert report to body of pull request.
 
 Hide footer [octocov](https://github.com/k1LoW/octocov) link.
 
-``` yaml
+```yaml
 body:
   hideFooterLink: true
 ```
@@ -769,7 +802,7 @@ body:
 
 Conditions for inserting report body of pull request.
 
-``` yaml
+```yaml
 # .octocov.yml
 body:
   if: is_pull_request
@@ -785,12 +818,12 @@ Configuration for comparing reports.
 
 Path of the report to compare.
 
-``` yaml
+```yaml
 diff:
   path: path/to/coverage.yml
 ```
 
-``` yaml
+```yaml
 diff:
   path: path/to/report.json
 ```
@@ -799,10 +832,10 @@ diff:
 
 Datastores where the report to be compared is stored.
 
-``` yaml
+```yaml
 diff:
   datastores:
-    - local://.octocov       # Use .octocov/owner/repo/report.json
+    - local://.octocov # Use .octocov/owner/repo/report.json
     - s3://my-bucket/reports # Use s3://my-bucket/reports/owner/repo/report.json
 ```
 
@@ -810,7 +843,7 @@ diff:
 
 Conditions for comparing reports
 
-``` yaml
+```yaml
 # .octocov.yml
 diff:
   if: is_pull_request
@@ -827,7 +860,7 @@ Configuration for reporting to datastores.
 
 Path to save the report.
 
-``` yaml
+```yaml
 report:
   path: path/to/report.json
 ```
@@ -836,7 +869,7 @@ report:
 
 Datastores where the reports are stored.
 
-``` yaml
+```yaml
 report:
   datastores:
     - github://owner/coverages/reports
@@ -867,7 +900,6 @@ artifact://[owner]/[repo]/[artifactName]
 
 - `artifact://[owner]/[repo]/[artifactName]`
 - `artifact://[owner]/[repo]` ( default artifactName: `octocov-report` )
-
 
 > **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
@@ -936,7 +968,7 @@ bq://[project ID]/[dataset ID]/[table]
 
 If you want to create a table, execute the following command ( require `bigquery.datasets.create` ).
 
-``` console
+```console
 $ octocov migrate-bq-table
 ```
 
@@ -980,7 +1012,7 @@ If the absolute path of `.octocov.yml` is `/path/to/.octocov.yml`
 
 Conditions for storing a report.
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   if: env.GITHUB_REF == 'refs/heads/main'
@@ -996,20 +1028,20 @@ The variables available in the `if` section are [here](https://github.com/k1LoW/
 
 The variables available in the `if` section are as follows
 
-| Variable name | Type | Description |
-| --- | --- | --- |
-| `year` | `int` | Year of current time (UTC) |
-| `month` | `int` | Month of current time (UTC) |
-| `day` | `int` | Day of current time (UTC) |
-| `hour` | `int` | Hour of current time (UTC) |
-| `weekday` | `int` | Weekday of current time (UTC) (Sunday = 0, ...) |
-| `github.event_name` | `string` | Event name of GitHub Actions ( ex. `issues`, `pull_request` )|
-| `github.event` | `object` | Detailed data for each event of GitHub Actions (ex. `github.event.action`, `github.event.label.name` ) |
-| `env.<env_name>` | `string` | The value of a specific environment variable |
-| `is_pull_request` | `boolean` | Whether the job is related to an pull request (ex. a job fired by `on.push` will be true if it is related to a pull request) |
-| `is_draft` | `boolean` | Whether the job is related to a draft pull request |
-| `labels` | `array` | Labels that are set for the pull request |
-| `is_default_branch` | `boolean` | Whether the job is related to default branch of repository |
+| Variable name       | Type      | Description                                                                                                                  |
+| ------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `year`              | `int`     | Year of current time (UTC)                                                                                                   |
+| `month`             | `int`     | Month of current time (UTC)                                                                                                  |
+| `day`               | `int`     | Day of current time (UTC)                                                                                                    |
+| `hour`              | `int`     | Hour of current time (UTC)                                                                                                   |
+| `weekday`           | `int`     | Weekday of current time (UTC) (Sunday = 0, ...)                                                                              |
+| `github.event_name` | `string`  | Event name of GitHub Actions ( ex. `issues`, `pull_request` )                                                                |
+| `github.event`      | `object`  | Detailed data for each event of GitHub Actions (ex. `github.event.action`, `github.event.label.name` )                       |
+| `env.<env_name>`    | `string`  | The value of a specific environment variable                                                                                 |
+| `is_pull_request`   | `boolean` | Whether the job is related to an pull request (ex. a job fired by `on.push` will be true if it is related to a pull request) |
+| `is_draft`          | `boolean` | Whether the job is related to a draft pull request                                                                           |
+| `labels`            | `array`   | Labels that are set for the pull request                                                                                     |
+| `is_default_branch` | `boolean` | Whether the job is related to default branch of repository                                                                   |
 
 ### `central:`
 
@@ -1019,7 +1051,7 @@ The variables available in the `if` section are as follows
 
 The root directory or index file ( [index file example](example/central/README.md) ) path of collected coverage reports pages. default: `.`
 
-``` yaml
+```yaml
 central:
   root: path/to
 ```
@@ -1030,7 +1062,7 @@ central:
 
 Datastore paths (URLs) where reports are stored. default: `local://reports`
 
-``` yaml
+```yaml
 central:
   reports:
     datastores:
@@ -1044,14 +1076,14 @@ When using [GitHub Actions Artifacts](https://docs.github.com/en/rest/actions/ar
 
 ![github](docs/artifacts.svg)
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
 ```
 
-``` yaml
+```yaml
 # .octocov.yml for central repo
 central:
   reports:
@@ -1073,14 +1105,14 @@ When using the central repository as a datastore, perform badge generation via o
 
 ![github](docs/github.svg)
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   datastores:
     - github://owner/central-repo/reports
 ```
 
-``` yaml
+```yaml
 # .octocov.yml for central repo
 central:
   reports:
@@ -1091,7 +1123,7 @@ central:
 
 or
 
-``` yaml
+```yaml
 # .octocov.yml for central repo
 central:
   reports:
@@ -1106,14 +1138,14 @@ When using the S3 bucket as a datastore, perform badge generation via on.schedul
 
 ![s3](docs/s3.svg)
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   datastores:
     - s3://my-s3-bucket/reports
 ```
 
-``` yaml
+```yaml
 # .octocov.yml for central repo
 central:
   reports:
@@ -1139,14 +1171,14 @@ central:
 
 When using the GCS bucket as a datastore, perform badge generation via on.schedule.
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   datastores:
     - gs://my-gcs-bucket/reports
 ```
 
-``` yaml
+```yaml
 # .octocov.yml for central repo
 central:
   reports:
@@ -1171,14 +1203,14 @@ central:
 
 When using the BigQuery table as a datastore, perform badge generation via on.schedule.
 
-``` yaml
+```yaml
 # .octocov.yml
 report:
   datastores:
     - bq://my-project/my-dataset/reports
 ```
 
-``` yaml
+```yaml
 # .octocov.yml for central repo
 central:
   reports:
@@ -1202,7 +1234,7 @@ central:
 
 Datastore paths (URLs) where badges are generated. default: `local://badges`
 
-``` yaml
+```yaml
 central:
   badges:
     datastores:
@@ -1218,7 +1250,7 @@ Configuration for `git push` index file and badges self.
 
 Conditions for central mode.
 
-``` yaml
+```yaml
 # .octocov.yml
 central:
   if: env.GITHUB_REF == 'refs/heads/main'
@@ -1249,7 +1281,7 @@ And octocov searches for the default path for each format.
 
 If you want to specify the path of the report file, set `coverage.path`
 
-``` yaml
+```yaml
 coverage:
   paths:
     - /path/to/coverage.txt
@@ -1305,7 +1337,7 @@ You can set acceptable conditions for custom metrics using the `acceptables` arr
 
 **JSON file format with acceptables:**
 
-``` json
+```json
 {
   "key": "performance_metrics",
   "name": "Performance Metrics",
@@ -1340,15 +1372,15 @@ You can set acceptable conditions for custom metrics using the `acceptables` arr
 
 **Available variables in acceptables conditions:**
 
-| Variable | Description |
-| --- | --- |
-| `current.{metric_key}` | Current metric value for the specified key |
-| `prev.{metric_key}` | Previous metric value. This value is taken from `diff.datastores:` |
-| `diff.{metric_key}` | The result of `current.{metric_key} - prev.{metric_key}` |
+| Variable               | Description                                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| `current.{metric_key}` | Current metric value for the specified key                         |
+| `prev.{metric_key}`    | Previous metric value. This value is taken from `diff.datastores:` |
+| `diff.{metric_key}`    | The result of `current.{metric_key} - prev.{metric_key}`           |
 
 If conditions are not met:
 
-``` console
+```console
 $ octocov
 Error: custom metrics "performance_metrics" not acceptable condition (`current.response_time < 300`)
 ```
@@ -1373,7 +1405,7 @@ This feature allows [environment variables that cannot normally be overridden](h
 
 **deb:**
 
-``` console
+```console
 $ export OCTOCOV_VERSION=X.X.X
 $ curl -o octocov.deb -L https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.deb
 $ dpkg -i octocov.deb
@@ -1381,14 +1413,14 @@ $ dpkg -i octocov.deb
 
 **RPM:**
 
-``` console
+```console
 $ export OCTOCOV_VERSION=X.X.X
 $ yum install https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.rpm
 ```
 
 **apk:**
 
-``` console
+```console
 $ export OCTOCOV_VERSION=X.X.X
 $ curl -o octocov.apk -L https://github.com/k1LoW/octocov/releases/download/v$OCTOCOV_VERSION/octocov_$OCTOCOV_VERSION-1_amd64.apk
 $ apk add octocov.apk
@@ -1421,3 +1453,5 @@ $ go install github.com/k1LoW/octocov@latest
 ```console
 $ docker pull ghcr.io/k1low/octocov:latest
 ```
+
+---

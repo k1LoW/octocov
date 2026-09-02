@@ -227,7 +227,7 @@ func TestCoverageAcceptable(t *testing.T) {
 				prevRat = big.NewRat(int64(tt.prev*10000), 10000)
 			}
 
-			if err := coverageAcceptable(covRat, prevRat, tt.cond); err != nil {
+			if err := coverageAcceptable(covRat, prevRat, tt.cond, nil); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 				}
@@ -238,6 +238,86 @@ func TestCoverageAcceptable(t *testing.T) {
 				if tt.wantErr {
 					t.Errorf("got %v\nwantErr %v", nil, tt.wantErr)
 				}
+			}
+		})
+	}
+}
+
+func TestCoverageAcceptableReferencesPatch(t *testing.T) {
+	tests := []struct {
+		cond string
+		want bool
+	}{
+		{"", false},
+		{"80%", false},
+		{"current >= 80%", false},
+		{"patch >= 80%", true},
+		{"patch >= prev", true},
+		{"current >= 80% && patch >= 70%", true},
+		{"mypatch >= 80%", false},
+		{"patched >= 80%", false},
+		{"patch_current >= 80%", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.cond, func(t *testing.T) {
+			c := &Coverage{Acceptable: tt.cond}
+			if got := c.AcceptableReferencesPatch(); got != tt.want {
+				t.Errorf("got %v, want %v", got, tt.want)
+			}
+		})
+	}
+	var nilCov *Coverage
+	if nilCov.AcceptableReferencesPatch() {
+		t.Error("nil *Coverage should not reference patch")
+	}
+}
+
+func TestCoverageAcceptablePatchVariables(t *testing.T) {
+	tests := []struct {
+		cond    string
+		patch   float64
+		wantErr bool
+		errMsg  string
+	}{
+		{"patch >= 70%", 80, false, ""},
+		{"patch >= 70%", 60, true, "code coverage is 80.0% and patch coverage is 60.0%. the condition in the `coverage.acceptable:` section is not met (`patch >= 70%`)"},
+		{"patch >= prev", 80, false, ""},
+		{"patch >= prev", 60, true, "code coverage is 80.0% and patch coverage is 60.0%. the condition in the `coverage.acceptable:` section is not met (`patch >= prev`)"},
+		{"current >= 70% && patch >= 70%", 80, false, ""},
+	}
+	cov := big.NewRat(800000, 10000)
+	prev := big.NewRat(800000, 10000)
+	for _, tt := range tests {
+		t.Run(tt.cond, func(t *testing.T) {
+			err := coverageAcceptable(cov, prev, tt.cond, &tt.patch)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.errMsg != "" && err.Error() != tt.errMsg {
+				t.Errorf("got %v\nwant %v", err.Error(), tt.errMsg)
+			}
+		})
+	}
+}
+
+func TestCoverageAcceptableUnavailablePatch(t *testing.T) {
+	tests := []struct {
+		cond    string
+		current *big.Rat
+		wantErr bool
+	}{
+		// The patch part falls back to defaultPatchCoverage instead of being skipped,
+		{"patch >= 70%", big.NewRat(800000, 10000), false},
+		// ... while the non-patch part keeps being enforced.
+		{"current >= 80% && patch >= 70%", big.NewRat(800000, 10000), false},
+		{"current >= 80% && patch >= 70%", big.NewRat(700000, 10000), true},
+	}
+	prev := big.NewRat(800000, 10000)
+	for _, tt := range tests {
+		t.Run(tt.cond, func(t *testing.T) {
+			err := coverageAcceptable(tt.current, prev, tt.cond, nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

@@ -412,6 +412,15 @@ func TestFileCoveragesTable(t *testing.T) {
 | [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.6%    |
 `,
 		},
+		{
+			[]*gh.PullRequestFile{&gh.PullRequestFile{Filename: "config/yaml.go", BlobURL: "https://github.com/owner/repo/blob/xxx/config/yaml.go", ChangedLines: []int{7, 15}}},
+			`### Code coverage of files in pull request scope (41.6%, patch 50.0%)
+
+|                                  Files                                  | Coverage | Patch Coverage |
+|-------------------------------------------------------------------------|---------:|---------------:|
+| [config/yaml.go](https://github.com/owner/repo/blob/xxx/config/yaml.go) | 41.6%    | 50.0%          |
+`,
+		},
 	}
 	path := filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")
 	r := &Report{}

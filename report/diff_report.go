@@ -136,8 +136,9 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 		return ""
 	}
 	var t, c, pt, pc int
+	var patchT, patchC int
 	var rows [][]string
-	createRow := func(name string, fc *coverage.DiffFileCoverage, status string) []string {
+	createRow := func(name string, fc *coverage.DiffFileCoverage, status string, changedLines []int) []string {
 		diff := fmt.Sprintf("%.1f%%", floor1(fc.Diff))
 		if fc.Diff > 0 {
 			diff = fmt.Sprintf("+%s", diff)
@@ -150,7 +151,11 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 			pc += fc.FileCoverageB.Covered
 			pt += fc.FileCoverageB.Total
 		}
-		return []string{name, fmt.Sprintf("%.1f%%", floor1(fc.A)), diff, status}
+		// Patch coverage is a property of the current side only.
+		pfc := fc.FileCoverageA.PatchCoverage(changedLines)
+		patchC += pfc.Covered
+		patchT += pfc.Total
+		return []string{name, fmt.Sprintf("%.1f%%", floor1(fc.A)), diff, patchCell(pfc), status}
 	}
 
 	prFiles := map[string]*gh.PullRequestFile{}
@@ -165,7 +170,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	for _, fc := range d.Coverage.Files {
 		if prf, ok := prFiles[fc.File]; ok {
 			name := fmt.Sprintf("[%s](%s)", prf.Filename, prf.BlobURL)
-			rows = append(rows, createRow(name, fc, prf.Status))
+			rows = append(rows, createRow(name, fc, prf.Status, prf.ChangedLines))
 			continue
 		}
 		if fc.Diff == 0 {
@@ -190,7 +195,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {
 			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", filePath, repoURL, commit, filePath)
 		}
-		rows = append(rows, createRow(name, fc, "affected"))
+		rows = append(rows, createRow(name, fc, "affected", nil))
 	}
 	if len(rows) == 0 {
 		return ""
@@ -204,7 +209,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 		prevAll = 0.0
 	}
 	arrow := "→"
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%)", floor1(prevAll), arrow, floor1(coverAll))
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%% %s %.1f%%%s)", floor1(prevAll), arrow, floor1(coverAll), patchTitleSuffix(patchC, patchT))
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, "%s\n\n", title)
 
@@ -218,7 +223,13 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	}
 
 	table := tablewriter.NewWriter(buf)
-	h := []string{"Files", "Coverage", "+/-", "Status"}
+	h := []string{"Files", "Coverage", "+/-", "Patch Coverage", "Status"}
+	if patchT == 0 {
+		// No changed line of any file is instrumented: drop the column instead of
+		// rendering it as '-' for every row.
+		h = []string{"Files", "Coverage", "+/-", "Status"}
+		rows = dropColumn(rows, 3)
+	}
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
