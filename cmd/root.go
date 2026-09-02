@@ -31,6 +31,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/k1LoW/octocov/badge"
@@ -383,6 +384,13 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
+		// The three pull request outputs and the patch coverage measurement all read the same
+		// changed file list, and each fetch is paginated over up to 3000 files. Fetch it at
+		// most once, and only if one of them actually asks for it.
+		pullRequestFiles := sync.OnceValues(func() ([]*gh.PullRequestFile, error) {
+			return fetchPullRequestFiles(ctx, c.Repository)
+		})
+
 		// Comment report to pull request
 		if err := c.CommentConfigReady(); err != nil {
 			cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
@@ -395,7 +403,11 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				content, err := createReportContent(ctx, c, r, rPrev, c.Comment.Message, c.Comment.HideFooterLink)
+				files, err := pullRequestFiles()
+				if err != nil {
+					return err
+				}
+				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink)
 				if err != nil {
 					return err
 				}
@@ -420,7 +432,11 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				content, err := createReportContent(ctx, c, r, rPrev, c.Summary.Message, c.Summary.HideFooterLink)
+				files, err := pullRequestFiles()
+				if err != nil {
+					return err
+				}
+				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink)
 				if err != nil {
 					return err
 				}
@@ -445,7 +461,11 @@ var rootCmd = &cobra.Command{
 				if err := c.DiffConfigReady(); err != nil {
 					cmd.PrintErrf("Skip comparing reports: %v\n", err)
 				}
-				content, err := createReportContent(ctx, c, r, rPrev, c.Body.Message, c.Body.HideFooterLink)
+				files, err := pullRequestFiles()
+				if err != nil {
+					return err
+				}
+				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink)
 				if err != nil {
 					return err
 				}
@@ -465,7 +485,7 @@ var rootCmd = &cobra.Command{
 			if err := c.CoverageConfigReady(); err != nil {
 				cmd.PrintErrf("Skip measuring patch coverage: %v\n", err)
 			} else {
-				files, err := fetchPullRequestFilesForPatchCoverage(ctx, c.Repository)
+				files, err := pullRequestFiles()
 				changedFiles := gh.ChangedLinesByFile(files)
 				switch {
 				case err != nil:
@@ -532,11 +552,11 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// fetchPullRequestFilesForPatchCoverage returns the changed files of the current pull request
-// (or, if not running against a pull request, the files changed since the default branch), for
-// computing patch coverage (the `patch` acceptable variable, or the patch coverage column of the
-// file coverage table).
-func fetchPullRequestFilesForPatchCoverage(ctx context.Context, repository string) ([]*gh.PullRequestFile, error) {
+// fetchPullRequestFiles returns the changed files of the current pull request, or, when the run
+// is not against a pull request, the files changed since the default branch. Both the patch
+// coverage column of the file coverage tables and the `patch` acceptable variable are measured
+// over the changed lines it carries.
+func fetchPullRequestFiles(ctx context.Context, repository string) ([]*gh.PullRequestFile, error) {
 	repo, err := gh.Parse(repository)
 	if err != nil {
 		return nil, err

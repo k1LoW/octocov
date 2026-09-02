@@ -42,28 +42,10 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 	return nil
 }
 
-func createReportContent(ctx context.Context, c *config.Config, r, rPrev *report.Report, message string, hideFooterLink bool) (string, error) {
-	repo, err := gh.Parse(c.Repository)
-	if err != nil {
-		return "", err
-	}
-	g, err := gh.New()
-	if err != nil {
-		return "", err
-	}
-	var files []*gh.PullRequestFile
-	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
-	if err == nil {
-		files, err = g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		files, err = g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
-		if err != nil {
-			return "", err
-		}
-	}
+// createReportContent renders the report for one of the pull request outputs. files is the
+// changed file list, fetched by the caller so that the three outputs and the patch coverage
+// measurement share one paginated fetch instead of repeating it.
+func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.PullRequestFile, message string, hideFooterLink bool) (string, error) {
 	footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
 	if hideFooterLink {
 		footer = "Reported by octocov"
