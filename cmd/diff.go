@@ -97,9 +97,13 @@ var diffCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if table := dr.FileCoveragesTable(files, ""); table != "" {
-				fmt.Fprintln(os.Stdout, table)
+			table := dr.FileCoveragesTable(files, "")
+			if table == "" {
+				// --patch asks for this table explicitly, so printing nothing and exiting 0
+				// would report success for output the user never got.
+				return errors.New("no changed file of the pull request matched the compared reports")
 			}
+			fmt.Fprintln(os.Stdout, table)
 		}
 
 		return nil
