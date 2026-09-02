@@ -101,7 +101,7 @@ func TestDiffFileCoveragesTableWithPatch(t *testing.T) {
 	got := a.Compare(b).FileCoveragesTable([]*gh.PullRequestFile{ //nostyle:funcfmt
 		{Filename: "zcase/added.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/added.go", Status: "added", ChangedLines: []int{1, 2, 3, 4, 5, 6, 7, 8, 9}},
 		{Filename: "zcase/added_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/added_test.go", Status: "added"},
-		{Filename: "zcase/affected_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/affected.go", Status: "modified", ChangedLines: []int{9, 10, 11}},
+		{Filename: "zcase/affected.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/affected.go", Status: "modified", ChangedLines: []int{9, 10, 11}},
 		{Filename: "zcase/removed.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed.go", Status: "removed"},
 		{Filename: "zcase/removed_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed_test.go", Status: "removed"},
 		{Filename: "zcase/rename_new.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/rename_new.go", Status: "renamed", ChangedLines: []int{5, 6, 9}},

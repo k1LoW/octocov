@@ -265,6 +265,9 @@ func New() *Coverage {
 func (c *Coverage) DeleteBlockCoverages() {
 	for _, f := range c.Files {
 		f.Blocks = BlockCoverages{}
+		// Drop the line cache too. Leaving it would keep FindBlocksByLine answering from
+		// blocks that no longer exist.
+		f.cache = nil
 	}
 }
 
@@ -309,6 +312,11 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 	if len(fc.cache) == 0 {
 		fc.cache = map[int]BlockCoverages{}
 		for _, b := range fc.Blocks {
+			// A stored report can omit the line range, since both fields are omitempty.
+			// Such a block contributes no lines rather than being assumed to start at 0.
+			if b.StartLine == nil || b.EndLine == nil {
+				continue
+			}
 			for i := *b.StartLine; i <= *b.EndLine; i++ {
 				_, ok := fc.cache[i]
 				if !ok {

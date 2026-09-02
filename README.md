@@ -486,6 +486,13 @@ diff is too large for the API to include, and for files beyond the limit of the 
 default branch outside of a pull request). Such files lower neither the covered lines nor the total
 lines of `patch`.
 
+The file coverage table that octocov reports for a pull request (in the pull request comment, the
+job summary, and the pull request body) includes a **Patch Coverage** column, and its heading shows
+the overall patch coverage. This needs no configuration and is independent of
+`coverage.acceptable:`, so the column appears even when the condition does not reference `patch`.
+When the pull request changed no line that the coverage report instruments, the column is dropped
+instead of showing `-` for every file.
+
 `octocov diff [REPORT_A] [REPORT_B] --patch` also prints the file coverage table of the comparison,
 including its patch coverage column, fetching the changed files and lines via the GitHub API. Since
 `--patch` asks for that data explicitly, it fails rather than printing nothing when the data cannot
