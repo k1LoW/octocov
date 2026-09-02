@@ -135,7 +135,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	if len(files) == 0 {
 		return ""
 	}
-	var t, c, pt, pc int
+	var t, c, prevT, prevC int
 	var patchT, patchC int
 	var rows [][]string
 	createRow := func(name string, fc *coverage.DiffFileCoverage, status string, changedLines []int) []string {
@@ -148,8 +148,8 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 			t += fc.FileCoverageA.Total
 		}
 		if fc.FileCoverageB != nil {
-			pc += fc.FileCoverageB.Covered
-			pt += fc.FileCoverageB.Total
+			prevC += fc.FileCoverageB.Covered
+			prevT += fc.FileCoverageB.Total
 		}
 		// Patch coverage is a property of the current side only.
 		pfc := fc.FileCoverageA.PatchCoverage(changedLines)
@@ -204,8 +204,8 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	if t == 0 {
 		coverAll = 0.0
 	}
-	prevAll := float64(pc) / float64(pt) * 100
-	if pt == 0 {
+	prevAll := float64(prevC) / float64(prevT) * 100
+	if prevT == 0 {
 		prevAll = 0.0
 	}
 	arrow := "→"
