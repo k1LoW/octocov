@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	cov "github.com/k1LoW/octocov/coverage"
 	"golang.org/x/text/language"
 )
 
@@ -520,4 +521,67 @@ func rootTestdataDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return dir
+}
+
+func TestBuildPatchAcceptableVar(t *testing.T) {
+	tests := []struct {
+		name string
+		pc   *cov.PatchCoverage
+		want *float64
+	}{
+		{"not measured", nil, nil},
+		{"no changed line is instrumented", &cov.PatchCoverage{}, nil},
+		{"measured", &cov.PatchCoverage{Total: 4, Covered: 3}, float64Ptr(75.0)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if diff := cmp.Diff(buildPatchAcceptableVar(tt.pc), tt.want, nil); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+// TestAcceptablePatchCoverage pins how `coverage.acceptable:` treats the `patch` variable.
+// A measured patch coverage is enforced as a threshold. An unmeasurable one falls back to a
+// permissive value, while any non-patch term of the condition keeps being enforced.
+func TestAcceptablePatchCoverage(t *testing.T) {
+	tests := []struct {
+		name    string
+		cond    string
+		pc      *cov.PatchCoverage
+		wantErr bool
+	}{
+		{"measured, above the threshold", "patch >= 70%", &cov.PatchCoverage{Total: 4, Covered: 3}, false},
+		{"measured, below the threshold", "patch >= 80%", &cov.PatchCoverage{Total: 4, Covered: 3}, true},
+		{"not measured", "patch >= 80%", nil, false},
+		{"measured, but no changed line is instrumented", "patch >= 80%", &cov.PatchCoverage{}, false},
+		{"not measured, non-patch term still enforced", "current >= 90% && patch >= 80%", nil, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{Coverage: &Coverage{Paths: []string{"."}, Acceptable: tt.cond}}
+			err := c.Acceptable(&patchReporter{coverage: 85.0}, &patchReporter{}, tt.pc)
+			if tt.wantErr && err == nil {
+				t.Error("got nil, want error")
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("got %v, want nil", err)
+			}
+		})
+	}
+}
+
+type patchReporter struct {
+	coverage float64
+}
+
+func (r *patchReporter) CoveragePercent() float64               { return r.coverage }
+func (r *patchReporter) CodeToTestRatioRatio() float64          { return 0 }
+func (r *patchReporter) TestExecutionTimeNano() float64         { return 0 }
+func (r *patchReporter) IsMeasuredTestExecutionTime() bool      { return false }
+func (r *patchReporter) CustomMetricsAcceptable(Reporter) error { return nil }
+
+func float64Ptr(f float64) *float64 {
+	return &f
 }
