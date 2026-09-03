@@ -235,7 +235,7 @@ func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
 // is not against a pull request, as opposed to a lookup that could not be completed. Callers that
 // fall back to comparing against the default branch use it to tell the ordinary case from one
 // worth reporting, because the two measure different sets of changed lines.
-var ErrNotPullRequest = errors.New("could not detect number of pull request")
+var ErrNotPullRequest = errors.New("not running against a pull request")
 
 func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo string) (int, error) {
 	if os.Getenv("GITHUB_PULL_REQUEST_NUMBER") != "" {
@@ -243,7 +243,9 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 	}
 	splitted := strings.Split(os.Getenv("GITHUB_REF"), "/") // refs/pull/8/head or refs/heads/branch/branch/name
 	if len(splitted) < 3 {
-		return 0, fmt.Errorf("env %s is not set: %w", "GITHUB_REF", ErrNotPullRequest)
+		// Reached both when the variable is unset and when it holds something that is not a
+		// ref path, so report what was seen rather than asserting which of the two it was.
+		return 0, fmt.Errorf("env %s does not hold a ref path (%q): %w", "GITHUB_REF", os.Getenv("GITHUB_REF"), ErrNotPullRequest)
 	}
 	if strings.Contains(os.Getenv("GITHUB_REF"), "refs/pull/") {
 		prNumber := splitted[2]
