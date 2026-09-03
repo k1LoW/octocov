@@ -567,11 +567,13 @@ func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository s
 	}
 	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
 	if err != nil {
-		// Not being on a pull request is the ordinary case here, but a token without access,
-		// a rate limit, or two branches resolving to the same head fail the same way, and the
-		// default branch comparison then measures a different set of changed lines. Report
-		// which of the two was used rather than letting the difference go unseen.
-		cmd.PrintErrf("Could not detect the current pull request, comparing against the default branch instead: %v\n", err)
+		if !errors.Is(err, gh.ErrNotPullRequest) {
+			// A token without access to the pull request, a rate limit, or an ambiguous head
+			// fail here just like a plain push does, and the default branch comparison then
+			// measures a different set of changed lines. Say so, but stay quiet for a run that
+			// simply is not a pull request, which is the ordinary way to reach this.
+			cmd.PrintErrf("Could not look up the current pull request, comparing against the default branch instead: %v\n", err)
+		}
 		return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 	}
 	return g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
