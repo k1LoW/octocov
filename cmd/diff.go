@@ -93,12 +93,23 @@ var diffCmd = &cobra.Command{
 			if repository == "" {
 				return errors.New("--patch requires a repository: set it in the report or env GITHUB_REPOSITORY")
 			}
-			files, err := fetchPullRequestFilesForPatchCoverage(cmd.Context(), repository)
+			files, err := fetchPullRequestFiles(cmd.Context(), cmd, repository)
 			if err != nil {
 				return err
 			}
-			if table := dr.FileCoveragesTable(files, ""); table != "" {
+			// An empty table is an outcome rather than a failure, so say which of the three
+			// ways it can be empty was hit instead of leaving --patch looking silently broken.
+			// None of the wordings names a pull request, since the changed files can equally
+			// have come from the default branch comparison fetchPullRequestFiles falls back to.
+			switch table := dr.FileCoveragesTable(files, ""); {
+			case table != "":
 				fmt.Fprintln(os.Stdout, table)
+			case dr.Coverage == nil:
+				cmd.PrintErrln("The compared reports carry no coverage, so there is no patch coverage to show")
+			case len(files) == 0:
+				cmd.PrintErrln("No changed file was fetched, so there is no patch coverage to show")
+			default:
+				cmd.PrintErrln("No changed file is instrumented by the compared reports")
 			}
 		}
 

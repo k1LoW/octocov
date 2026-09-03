@@ -2,6 +2,7 @@ package gh
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -695,4 +696,45 @@ func TestChangedLinesByFileNoFiles(t *testing.T) {
 	if got := ChangedLinesByFile([]*PullRequestFile{}); got != nil {
 		t.Errorf("got %v, want nil", got)
 	}
+}
+
+func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
+	// Callers fall back to a default branch comparison when detection fails, and only report
+	// the failures that are not simply "this run is not a pull request". The two must stay
+	// distinguishable, because the fallback measures a different set of changed lines.
+	tests := []struct {
+		name               string
+		GITHUB_REF         string
+		wantNotPullRequest bool
+	}{
+		{"env is not set", "", true},
+		{"pushed to a branch with no open pull request", "refs/heads/no-such-branch", true},
+	}
+	ctx := context.TODO()
+	mg := mockedGh(t)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "")
+			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			_, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
+			if err == nil {
+				t.Fatal("want err")
+			}
+			if got := errors.Is(err, ErrNotPullRequest); got != tt.wantNotPullRequest {
+				t.Errorf("errors.Is(err, ErrNotPullRequest) got %v, want %v (err: %v)", got, tt.wantNotPullRequest, err)
+			}
+		})
+	}
+
+	t.Run("a malformed pull request number is a real failure", func(t *testing.T) {
+		t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "not-a-number")
+		t.Setenv("GITHUB_REF", "")
+		_, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
+		if err == nil {
+			t.Fatal("want err")
+		}
+		if errors.Is(err, ErrNotPullRequest) {
+			t.Errorf("a malformed number must not read as an absent pull request (err: %v)", err)
+		}
+	})
 }

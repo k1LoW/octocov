@@ -193,7 +193,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if len(files) == 0 {
 		return ""
 	}
-	var t, c, pt, pc int
+	var t, c, patchT, patchC int
 	exist := false
 	var rows [][]string
 	for _, f := range files {
@@ -209,8 +209,8 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 			cover = 0.0
 		}
 		pfc := fc.PatchCoverage(f.ChangedLines)
-		pc += pfc.Covered
-		pt += pfc.Total
+		patchC += pfc.Covered
+		patchT += pfc.Total
 		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", floor1(cover)), patchCell(pfc)})
 	}
 	if !exist {
@@ -220,7 +220,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 	if t == 0 {
 		coverAll = 0.0
 	}
-	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%%s)", floor1(coverAll), patchTitleSuffix(pc, pt))
+	title := fmt.Sprintf("### Code coverage of files in pull request scope (%.1f%%%s)", floor1(coverAll), patchTitleSuffix(patchC, patchT))
 
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, "%s\n\n", title)
@@ -236,7 +236,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 
 	table := tablewriter.NewWriter(buf)
 	h := []string{"Files", "Coverage", "Patch Coverage"}
-	if pt == 0 {
+	if patchT == 0 {
 		// No changed line of any file is instrumented: drop the column instead of
 		// rendering it as '-' for every row.
 		h = []string{"Files", "Coverage"}
@@ -276,7 +276,8 @@ func patchTitleSuffix(covered, total int) string {
 	if total == 0 {
 		return ""
 	}
-	return fmt.Sprintf(", patch %.1f%%", floor1(float64(covered)/float64(total)*100))
+	pc := &coverage.PatchCoverage{Total: total, Covered: covered}
+	return fmt.Sprintf(", patch %.1f%%", floor1(pc.Rate()))
 }
 
 // dropColumn removes the i-th cell of every row.

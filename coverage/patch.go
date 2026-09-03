@@ -41,7 +41,14 @@ func (fc *FileCoverage) PatchCoverage(changedLines []int) *PatchFileCoverage {
 		return &PatchFileCoverage{}
 	}
 	total, covered := 0, 0
+	seen := make(map[int]struct{}, len(changedLines))
 	for _, line := range changedLines {
+		// The same line can arrive more than once when several changed paths resolve to this
+		// file, and counting it twice would weigh it double in the rate.
+		if _, ok := seen[line]; ok {
+			continue
+		}
+		seen[line] = struct{}{}
 		blocks := fc.FindBlocksByLine(line)
 		if len(blocks) == 0 {
 			continue
@@ -66,6 +73,12 @@ func (fc *FileCoverage) PatchCoverage(changedLines []int) *PatchFileCoverage {
 // Files that cannot be matched against this Coverage are skipped.
 func (c *Coverage) PatchCoverage(changedFiles map[string][]int) *PatchCoverage {
 	pc := &PatchCoverage{}
+	// FuzzyFindByFile matches on a path suffix, so two changed paths can resolve to one
+	// coverage entry (`bar.go` and `foo/bar.go`, or a rename reported under both names).
+	// Merge their changed lines and measure the entry once, rather than adding its lines to
+	// the total for each path that happened to match.
+	merged := map[*FileCoverage][]int{}
+	var order []*FileCoverage
 	for file, changedLines := range changedFiles {
 		if len(changedLines) == 0 {
 			continue
@@ -74,7 +87,13 @@ func (c *Coverage) PatchCoverage(changedFiles map[string][]int) *PatchCoverage {
 		if err != nil || fc == nil {
 			continue
 		}
-		fpc := fc.PatchCoverage(changedLines)
+		if _, ok := merged[fc]; !ok {
+			order = append(order, fc)
+		}
+		merged[fc] = append(merged[fc], changedLines...)
+	}
+	for _, fc := range order {
+		fpc := fc.PatchCoverage(merged[fc])
 		if fpc.Total == 0 {
 			continue
 		}

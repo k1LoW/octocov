@@ -495,8 +495,10 @@ instead of showing `-` for every file.
 
 `octocov diff [REPORT_A] [REPORT_B] --patch` also prints the file coverage table of the comparison,
 including its patch coverage column, fetching the changed files and lines via the GitHub API. Since
-`--patch` asks for that data explicitly, it fails rather than printing nothing when the data cannot
-be fetched. Without `--patch`, `octocov diff` makes no GitHub API calls, as before.
+`--patch` asks for that data explicitly, it fails when the data cannot be fetched. A pull request
+that touches no instrumented file is not a failure, so that case reports why the table is missing
+and still exits successfully. Without `--patch`, `octocov diff` makes no GitHub API calls, as
+before.
 
 It is also possible to omit the expression as follows
 

@@ -159,3 +159,50 @@ func TestPatchCoverageWithBlockMissingLineRange(t *testing.T) {
 		t.Errorf("Covered got %v want 1", got.Covered)
 	}
 }
+
+func TestCoveragePatchCoverageMergesPathsMatchingOneFile(t *testing.T) {
+	// FuzzyFindByFile matches on a path suffix, so two changed paths can resolve to the same
+	// coverage entry. The entry is measured once over the union of their changed lines, rather
+	// than contributing its lines again for every path that matched.
+	c := &Coverage{
+		Files: FileCoverages{
+			&FileCoverage{
+				File: "foo/bar.go",
+				Blocks: BlockCoverages{
+					&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: execCountPtr(1)},
+					&BlockCoverage{StartLine: intPtr(2), EndLine: intPtr(2), Count: execCountPtr(0)},
+				},
+			},
+		},
+	}
+	got := c.PatchCoverage(map[string][]int{
+		"foo/bar.go": {1, 2},
+		"bar.go":     {1, 2},
+	})
+	if got.Total != 2 {
+		t.Errorf("Total got %v want 2", got.Total)
+	}
+	if got.Covered != 1 {
+		t.Errorf("Covered got %v want 1", got.Covered)
+	}
+	if len(got.Files) != 1 {
+		t.Errorf("len(Files) got %v want 1", len(got.Files))
+	}
+}
+
+func TestFileCoveragePatchCoverageCountsEachLineOnce(t *testing.T) {
+	// A repeated changed line is one line of the patch, whatever produced the repeat.
+	fc := &FileCoverage{
+		File: "a.go",
+		Blocks: BlockCoverages{
+			&BlockCoverage{StartLine: intPtr(1), EndLine: intPtr(1), Count: execCountPtr(1)},
+		},
+	}
+	got := fc.PatchCoverage([]int{1, 1, 1})
+	if got.Total != 1 {
+		t.Errorf("Total got %v want 1", got.Total)
+	}
+	if got.Covered != 1 {
+		t.Errorf("Covered got %v want 1", got.Covered)
+	}
+}
