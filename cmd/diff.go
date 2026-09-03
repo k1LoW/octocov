@@ -97,16 +97,19 @@ var diffCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			table := dr.FileCoveragesTable(files, "")
-			if table == "" {
-				// Nothing instrumented among the changed files means there is no patch coverage
-				// to show, which is an outcome rather than a failure. Say why the table is
-				// missing instead of leaving --patch looking silently broken. The wording
-				// avoids naming a pull request, since the changed files can equally have come
-				// from the default branch comparison that fetchPullRequestFiles falls back to.
-				cmd.PrintErrln("No changed file is instrumented by the compared reports")
-			} else {
+			// An empty table is an outcome rather than a failure, so say which of the three
+			// ways it can be empty was hit instead of leaving --patch looking silently broken.
+			// None of the wordings names a pull request, since the changed files can equally
+			// have come from the default branch comparison fetchPullRequestFiles falls back to.
+			switch table := dr.FileCoveragesTable(files, ""); {
+			case table != "":
 				fmt.Fprintln(os.Stdout, table)
+			case dr.Coverage == nil:
+				cmd.PrintErrln("The compared reports carry no coverage, so there is no patch coverage to show")
+			case len(files) == 0:
+				cmd.PrintErrln("No changed file was fetched, so there is no patch coverage to show")
+			default:
+				cmd.PrintErrln("No changed file is instrumented by the compared reports")
 			}
 		}
 
