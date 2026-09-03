@@ -703,9 +703,9 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 	// the failures that are not simply "this run is not a pull request". The two must stay
 	// distinguishable, because the fallback measures a different set of changed lines.
 	tests := []struct {
-		name              string
-		GITHUB_REF        string
-		wantNotPullReqest bool
+		name               string
+		GITHUB_REF         string
+		wantNotPullRequest bool
 	}{
 		{"env is not set", "", true},
 		{"pushed to a branch with no open pull request", "refs/heads/no-such-branch", true},
@@ -720,8 +720,8 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 			if err == nil {
 				t.Fatal("want err")
 			}
-			if got := errors.Is(err, ErrNotPullRequest); got != tt.wantNotPullReqest {
-				t.Errorf("errors.Is(err, ErrNotPullRequest) got %v, want %v (err: %v)", got, tt.wantNotPullReqest, err)
+			if got := errors.Is(err, ErrNotPullRequest); got != tt.wantNotPullRequest {
+				t.Errorf("errors.Is(err, ErrNotPullRequest) got %v, want %v (err: %v)", got, tt.wantNotPullRequest, err)
 			}
 		})
 	}

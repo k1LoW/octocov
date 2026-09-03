@@ -99,10 +99,12 @@ var diffCmd = &cobra.Command{
 			}
 			table := dr.FileCoveragesTable(files, "")
 			if table == "" {
-				// A pull request that touches no instrumented file has no patch coverage to
-				// show, which is an outcome rather than a failure. Say why the table is
-				// missing instead of leaving --patch looking silently broken.
-				cmd.PrintErrln("No changed file of the pull request is instrumented by the compared reports")
+				// Nothing instrumented among the changed files means there is no patch coverage
+				// to show, which is an outcome rather than a failure. Say why the table is
+				// missing instead of leaving --patch looking silently broken. The wording
+				// avoids naming a pull request, since the changed files can equally have come
+				// from the default branch comparison that fetchPullRequestFiles falls back to.
+				cmd.PrintErrln("No changed file is instrumented by the compared reports")
 			} else {
 				fmt.Fprintln(os.Stdout, table)
 			}
