@@ -22,6 +22,11 @@ func TestCredentialsFromJSON(t *testing.T) {
 			"",
 		},
 		{
+			"missing type",
+			`{"client_id":"c","client_secret":"s","refresh_token":"r"}`,
+			"unsupported unidentified file type",
+		},
+		{
 			"unknown type",
 			`{"type":"unknown"}`,
 			"unsupported filetype",
