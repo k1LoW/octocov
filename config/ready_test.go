@@ -727,14 +727,14 @@ func mockedGh(t *testing.T) *gh.Gh {
 		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposByOwnerByRepo,
 			github.Repository{
-				DefaultBranch: github.String("main"),
+				DefaultBranch: new("main"),
 			},
 		),
 		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposPullsByOwnerByRepoByPullNumber,
 			github.PullRequest{
-				Number: github.Int(13),
-				Draft:  github.Bool(true),
+				Number: new(13),
+				Draft:  new(true),
 			},
 		),
 	)

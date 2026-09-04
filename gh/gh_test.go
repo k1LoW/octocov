@@ -253,7 +253,7 @@ func mockedGh(t *testing.T) *Gh {
 		mock.WithRequestMatch( //nostyle:funcfmt
 			mock.GetReposByOwnerByRepo,
 			github.Repository{
-				DefaultBranch: github.String("main"),
+				DefaultBranch: new("main"),
 			},
 		),
 		mock.WithRequestMatch( //nostyle:funcfmt
@@ -261,13 +261,13 @@ func mockedGh(t *testing.T) *Gh {
 			[]*github.PullRequest{
 				{
 					Head: &github.PullRequestBranch{
-						Ref: github.String("branch/branch/name"),
+						Ref: new("branch/branch/name"),
 						Repo: &github.Repository{
-							Owner: &github.User{Login: github.String("owner")},
-							Name:  github.String("repo"),
+							Owner: &github.User{Login: new("owner")},
+							Name:  new("repo"),
 						},
 					},
-					Number: github.Int(13),
+					Number: new(13),
 				},
 			},
 		),
@@ -297,12 +297,12 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			GITHUB_REF: "refs/heads/feature-branch",
 			prs: []*github.PullRequest{
 				{
-					Number: github.Int(10),
+					Number: new(10),
 					Head: &github.PullRequestBranch{
-						Ref: github.String("feature-branch"),
+						Ref: new("feature-branch"),
 						Repo: &github.Repository{
-							Owner: &github.User{Login: github.String("owner")},
-							Name:  github.String("repo"),
+							Owner: &github.User{Login: new("owner")},
+							Name:  new("repo"),
 						},
 					},
 				},
@@ -315,12 +315,12 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			GITHUB_REF: "refs/heads/main",
 			prs: []*github.PullRequest{
 				{
-					Number: github.Int(20),
+					Number: new(20),
 					Head: &github.PullRequestBranch{
-						Ref: github.String("main"),
+						Ref: new("main"),
 						Repo: &github.Repository{
-							Owner: &github.User{Login: github.String("forked-user")},
-							Name:  github.String("repo"),
+							Owner: &github.User{Login: new("forked-user")},
+							Name:  new("repo"),
 						},
 					},
 				},
@@ -333,22 +333,22 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			GITHUB_REF: "refs/heads/main",
 			prs: []*github.PullRequest{
 				{
-					Number: github.Int(20),
+					Number: new(20),
 					Head: &github.PullRequestBranch{
-						Ref: github.String("main"),
+						Ref: new("main"),
 						Repo: &github.Repository{
-							Owner: &github.User{Login: github.String("forked-user")},
-							Name:  github.String("repo"),
+							Owner: &github.User{Login: new("forked-user")},
+							Name:  new("repo"),
 						},
 					},
 				},
 				{
-					Number: github.Int(30),
+					Number: new(30),
 					Head: &github.PullRequestBranch{
-						Ref: github.String("main"),
+						Ref: new("main"),
 						Repo: &github.Repository{
-							Owner: &github.User{Login: github.String("owner")},
-							Name:  github.String("repo"),
+							Owner: &github.User{Login: new("owner")},
+							Name:  new("repo"),
 						},
 					},
 				},
@@ -361,12 +361,12 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			GITHUB_REF: "refs/heads/feature",
 			prs: []*github.PullRequest{
 				{
-					Number: github.Int(25),
+					Number: new(25),
 					Head: &github.PullRequestBranch{
-						Ref: github.String("feature"),
+						Ref: new("feature"),
 						Repo: &github.Repository{
-							Owner: &github.User{Login: github.String("Owner")},
-							Name:  github.String("repo"),
+							Owner: &github.User{Login: new("Owner")},
+							Name:  new("repo"),
 						},
 					},
 				},
@@ -379,9 +379,9 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			GITHUB_REF: "refs/heads/feature",
 			prs: []*github.PullRequest{
 				{
-					Number: github.Int(35),
+					Number: new(35),
 					Head: &github.PullRequestBranch{
-						Ref:  github.String("feature"),
+						Ref:  new("feature"),
 						Repo: nil,
 					},
 				},
@@ -439,16 +439,16 @@ func TestListWorkflowJobs(t *testing.T) {
 		mock.WithRequestMatchPages( //nostyle:funcfmt
 			mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
 			github.Jobs{
-				TotalCount: github.Int(3),
+				TotalCount: new(3),
 				Jobs: []*github.WorkflowJob{
-					{ID: github.Int64(1), Name: github.String("test (1)")},
-					{ID: github.Int64(2), Name: github.String("test (2)")},
+					{ID: github.Int64(1), Name: new("test (1)")},
+					{ID: github.Int64(2), Name: new("test (2)")},
 				},
 			},
 			github.Jobs{
-				TotalCount: github.Int(3),
+				TotalCount: new(3),
 				Jobs: []*github.WorkflowJob{
-					{ID: github.Int64(3), Name: github.String("test (3)")},
+					{ID: github.Int64(3), Name: new("test (3)")},
 				},
 			},
 		),
@@ -494,7 +494,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 			jobs: []*github.WorkflowJob{
 				{ID: github.Int64(1), Steps: []*github.TaskStep{
 					{
-						Name:        github.String("Run test"),
+						Name:        new("Run test"),
 						StartedAt:   &github.Timestamp{Time: base},
 						CompletedAt: &github.Timestamp{Time: base.Add(time.Minute)},
 					},
@@ -508,7 +508,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 			jobs: []*github.WorkflowJob{
 				{ID: github.Int64(1), Steps: []*github.TaskStep{
 					{
-						Name:      github.String("Run test"),
+						Name:      new("Run test"),
 						StartedAt: &github.Timestamp{Time: base},
 					},
 				}},
@@ -525,7 +525,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
 				mock.WithRequestMatch( //nostyle:funcfmt
 					mock.GetReposActionsRunsJobsByOwnerByRepoByRunId,
-					github.Jobs{TotalCount: github.Int(len(tt.jobs)), Jobs: tt.jobs},
+					github.Jobs{TotalCount: new(len(tt.jobs)), Jobs: tt.jobs},
 				),
 			)
 			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
@@ -565,8 +565,8 @@ func TestIsSameRepo(t *testing.T) {
 		{
 			name: "exact match",
 			headRepo: &github.Repository{
-				Owner: &github.User{Login: github.String("owner")},
-				Name:  github.String("repo"),
+				Owner: &github.User{Login: new("owner")},
+				Name:  new("repo"),
 			},
 			owner: "owner",
 			repo:  "repo",
@@ -575,8 +575,8 @@ func TestIsSameRepo(t *testing.T) {
 		{
 			name: "owner case insensitive",
 			headRepo: &github.Repository{
-				Owner: &github.User{Login: github.String("Owner")},
-				Name:  github.String("repo"),
+				Owner: &github.User{Login: new("Owner")},
+				Name:  new("repo"),
 			},
 			owner: "owner",
 			repo:  "repo",
@@ -585,8 +585,8 @@ func TestIsSameRepo(t *testing.T) {
 		{
 			name: "different owner",
 			headRepo: &github.Repository{
-				Owner: &github.User{Login: github.String("forked-user")},
-				Name:  github.String("repo"),
+				Owner: &github.User{Login: new("forked-user")},
+				Name:  new("repo"),
 			},
 			owner: "owner",
 			repo:  "repo",
@@ -595,8 +595,8 @@ func TestIsSameRepo(t *testing.T) {
 		{
 			name: "different repo name",
 			headRepo: &github.Repository{
-				Owner: &github.User{Login: github.String("owner")},
-				Name:  github.String("other-repo"),
+				Owner: &github.User{Login: new("owner")},
+				Name:  new("other-repo"),
 			},
 			owner: "owner",
 			repo:  "repo",
@@ -613,7 +613,7 @@ func TestIsSameRepo(t *testing.T) {
 			name: "nil owner in headRepo",
 			headRepo: &github.Repository{
 				Owner: nil,
-				Name:  github.String("repo"),
+				Name:  new("repo"),
 			},
 			owner: "owner",
 			repo:  "repo",
