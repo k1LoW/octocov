@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.76.1](https://github.com/k1LoW/octocov/compare/v0.76.0...v0.76.1) - 2026-09-04
+
+### Other Changes
+- refactor: fix the lint failures that came with Go 1.26 by @k1LoW in https://github.com/k1LoW/octocov/pull/715
+
 ## [v0.76.0](https://github.com/k1LoW/octocov/compare/v0.75.12...v0.76.0) - 2026-09-03
 
 ### Breaking Changes 🛠
