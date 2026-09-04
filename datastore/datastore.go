@@ -259,13 +259,13 @@ func credentialsFromJSON(b []byte, scopes []string) (*auth.Credentials, error) {
 		Type string `json:"type"`
 	}
 	if err := json.Unmarshal(b, &f); err != nil {
-		return nil, fmt.Errorf("GOOGLE_APPLICATION_CREDENTIALS_JSON: %w", err)
+		return nil, fmt.Errorf("env %s: %w", "GOOGLE_APPLICATION_CREDENTIALS_JSON", err)
 	}
 	creds, err := credentials.NewCredentialsFromJSON(credentials.CredType(f.Type), b, &credentials.DetectOptions{
 		Scopes: scopes,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("GOOGLE_APPLICATION_CREDENTIALS_JSON: %w", err)
+		return nil, fmt.Errorf("env %s: %w", "GOOGLE_APPLICATION_CREDENTIALS_JSON", err)
 	}
 	return creds, nil
 }
