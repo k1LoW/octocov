@@ -80,9 +80,9 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 
 	if cp != "" {
 		blob := &github.Blob{
-			Content:  github.String(content),
-			Encoding: github.String("utf-8"),
-			Size:     github.Int(len(content)),
+			Content:  new(content),
+			Encoding: new("utf-8"),
+			Size:     new(len(content)),
 		}
 
 		resB, _, err := srv.CreateBlob(ctx, owner, repo, blob)
@@ -91,9 +91,9 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 		}
 
 		entry := &github.TreeEntry{
-			Path: github.String(cp),
-			Mode: github.String("100644"),
-			Type: github.String("blob"),
+			Path: new(cp),
+			Mode: new("100644"),
+			Type: new("blob"),
 			SHA:  resB.SHA,
 		}
 
@@ -111,7 +111,7 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 	}
 
 	commit := &github.Commit{
-		Message: github.String(message),
+		Message: new(message),
 		Tree:    tree,
 		Parents: []*github.Commit{parent},
 	}
@@ -121,9 +121,9 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 	}
 
 	nref := &github.Reference{
-		Ref: github.String(path.Join("refs", "heads", branch)),
+		Ref: new(path.Join("refs", "heads", branch)),
 		Object: &github.GitObject{
-			Type: github.String("commit"),
+			Type: new("commit"),
 			SHA:  resC.SHA,
 		},
 	}

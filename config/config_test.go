@@ -531,7 +531,7 @@ func TestBuildPatchAcceptableVar(t *testing.T) {
 	}{
 		{"not measured", nil, nil},
 		{"no changed line is instrumented", &cov.PatchCoverage{}, nil},
-		{"measured", &cov.PatchCoverage{Total: 4, Covered: 3}, float64Ptr(75.0)},
+		{"measured", &cov.PatchCoverage{Total: 4, Covered: 3}, new(75.0)},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -581,7 +581,3 @@ func (r *patchReporter) CodeToTestRatioRatio() float64          { return 0 }
 func (r *patchReporter) TestExecutionTimeNano() float64         { return 0 }
 func (r *patchReporter) IsMeasuredTestExecutionTime() bool      { return false }
 func (r *patchReporter) CustomMetricsAcceptable(Reporter) error { return nil }
-
-func float64Ptr(f float64) *float64 {
-	return &f
-}
