@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"runtime"
 	"strings"
 
+	"cloud.google.com/go/auth"
 	"cloud.google.com/go/auth/credentials"
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
@@ -116,10 +118,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		prefix := args[1]
 		var client *storage.Client
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
-			creds, err := credentials.DetectDefault(&credentials.DetectOptions{
-				Scopes:          []string{storage.ScopeFullControl},
-				CredentialsJSON: []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")),
-			})
+			creds, err := credentialsFromJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")), []string{storage.ScopeFullControl})
 			if err != nil {
 				return nil, err
 			}
@@ -140,10 +139,7 @@ func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {
 		table := args[2]
 		var client *bigquery.Client
 		if os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON") != "" {
-			creds, err := credentials.DetectDefault(&credentials.DetectOptions{
-				Scopes:          []string{bigquery.Scope},
-				CredentialsJSON: []byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")),
-			})
+			creds, err := credentialsFromJSON([]byte(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")), []string{bigquery.Scope})
 			if err != nil {
 				return nil, err
 			}
@@ -252,4 +248,20 @@ func parse(u, root string) (Type, []string, error) {
 
 func NeedToShrink(u string) bool {
 	return strings.HasPrefix(u, "bq://")
+}
+
+// credentialsFromJSON builds credentials from the JSON in GOOGLE_APPLICATION_CREDENTIALS_JSON.
+// The credential type is read from the JSON itself instead of being fixed to one CredType.
+// octocov has never restricted which type users supply here, and the JSON is the user's own
+// secret rather than an externally sourced configuration.
+func credentialsFromJSON(b []byte, scopes []string) (*auth.Credentials, error) {
+	var f struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(b, &f); err != nil {
+		return nil, err
+	}
+	return credentials.NewCredentialsFromJSON(credentials.CredType(f.Type), b, &credentials.DetectOptions{
+		Scopes: scopes,
+	})
 }
