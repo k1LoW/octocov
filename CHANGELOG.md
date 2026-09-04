@@ -1,5 +1,21 @@
 # Changelog
 
+## [v0.76.0](https://github.com/k1LoW/octocov/compare/v0.75.12...v0.76.0) - 2026-09-03
+
+### Breaking Changes 🛠
+- fix: prefix positive custom metric diffs with "+" by @a-vasyukov in https://github.com/k1LoW/octocov/pull/705
+- patchThreshold and patchFailUnder for PR diff coverage threshold control by @Yasu-umi in https://github.com/k1LoW/octocov/pull/636
+### Fix bug 🐛
+- fix: paginate ListWorkflowJobs so testExecutionTime.steps covers every job by @k1LoW in https://github.com/k1LoW/octocov/pull/701
+- fix: measure patch coverage before the report is shrunk by @k1LoW in https://github.com/k1LoW/octocov/pull/712
+- fix: follow-ups to the patch coverage measurement by @k1LoW in https://github.com/k1LoW/octocov/pull/713
+### Other Changes
+- chore(deps): bump docker/login-action from 4.5.1 to 4.6.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/699
+- chore(deps): bump the dependencies group with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/700
+- chore(deps): bump the dependencies group across 1 directory with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/709
+- chore(deps): bump the dependencies group across 1 directory with 14 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/710
+- chore: bump crypto to clear govulncheck, moving to Go 1.26 by @k1LoW in https://github.com/k1LoW/octocov/pull/714
+
 ## [v0.75.12](https://github.com/k1LoW/octocov/compare/v0.75.11...v0.75.12) - 2026-07-27
 
 ### Fix bug 🐛
