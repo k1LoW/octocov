@@ -7,8 +7,10 @@ import (
 	"testing"
 
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/local"
+	"github.com/k1LoW/octocov/report"
 )
 
 func TestCollectReports(t *testing.T) {
@@ -39,6 +41,63 @@ func TestCollectReports(t *testing.T) {
 	got := ctr.reports
 	if want := 6; len(got) != want {
 		t.Errorf("got %v\nwant %v", len(got), want)
+	}
+}
+
+func TestCollectReportsSkipsReportsOfOtherRefs(t *testing.T) {
+	c := config.New()
+	root := t.TempDir()
+	for path, r := range map[string]*report.Report{
+		filepath.Join("owner", "repo", "report.json"): {
+			Repository: "owner/repo",
+			Ref:        "refs/heads/main",
+			BaseRef:    "refs/heads/main",
+			Coverage:   &coverage.Coverage{Total: 100, Covered: 50},
+		},
+		filepath.Join("owner", "repo", "refs", "pull", "123", "report.json"): {
+			Repository:  "owner/repo",
+			Ref:         "refs/pull/123/merge",
+			BaseRef:     "refs/heads/main",
+			PullRequest: 123,
+			Coverage:    &coverage.Coverage{Total: 100, Covered: 99},
+		},
+	} {
+		p := filepath.Join(root, path)
+		if err := os.MkdirAll(filepath.Dir(p), 0o750); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(p, r.Bytes(), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	rd, err := local.New(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bd, err := local.New(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctr := New(&Config{
+		Repository:             "owner/repo",
+		Index:                  ".",
+		Wd:                     c.Wd(),
+		Badges:                 []datastore.Datastore{bd},
+		Reports:                []datastore.Datastore{rd},
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
+
+	if err := ctr.collectReports(); err != nil {
+		t.Fatal(err)
+	}
+
+	if want := 1; len(ctr.reports) != want {
+		t.Fatalf("got %v\nwant %v", len(ctr.reports), want)
+	}
+	if got, want := ctr.reports[0].Ref, "refs/heads/main"; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
 

@@ -29,7 +29,7 @@ func New(gh *gh.Gh, r, b, prefix string) (*Github, error) {
 }
 
 func (g *Github) StoreReport(ctx context.Context, r *report.Report) error {
-	path := fmt.Sprintf("%s/report.json", r.Repository)
+	path := r.StorePath()
 	g.from = r.Repository
 	return g.Put(ctx, path, r.Bytes())
 }

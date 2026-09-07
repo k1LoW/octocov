@@ -2,7 +2,6 @@ package gcs
 
 import (
 	"context"
-	"fmt"
 	"io/fs"
 	"path/filepath"
 
@@ -26,7 +25,7 @@ func New(client *storage.Client, bucket, prefix string) (*GCS, error) {
 }
 
 func (g *GCS) StoreReport(ctx context.Context, r *report.Report) error {
-	path := fmt.Sprintf("%s/report.json", r.Repository)
+	path := r.StorePath()
 	return g.Put(ctx, path, r.Bytes())
 }
 

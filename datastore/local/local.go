@@ -36,7 +36,7 @@ func (l *Local) Root() string {
 }
 
 func (l *Local) StoreReport(ctx context.Context, r *report.Report) error {
-	path := fmt.Sprintf("%s/report.json", r.Repository)
+	path := r.StorePath()
 	return l.Put(ctx, path, r.Bytes())
 }
 

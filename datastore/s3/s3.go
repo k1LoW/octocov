@@ -3,7 +3,6 @@ package s3
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/fs"
 	"path/filepath"
 
@@ -38,7 +37,7 @@ func New(client Client, bucket, prefix string) (*S3, error) {
 }
 
 func (s *S3) StoreReport(ctx context.Context, r *report.Report) error {
-	path := fmt.Sprintf("%s/report.json", r.Repository)
+	path := r.StorePath()
 	return s.Put(ctx, path, r.Bytes())
 }
 
