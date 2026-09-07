@@ -397,6 +397,18 @@ var rootCmd = &cobra.Command{
 			return fetchPullRequestFiles(ctx, cmd, c.Repository)
 		})
 
+		// Resolved at most once, since the readiness check inside reaches the API and the
+		// three outputs share the answer.
+		storedArtifact := sync.OnceValue(func() *report.Viewer {
+			return storedArtifactViewer(c, r)
+		})
+		coverageViewer := func(hide bool) *report.Viewer {
+			if hide {
+				return nil
+			}
+			return storedArtifact()
+		}
+
 		// Comment report to pull request
 		if err := c.CommentConfigReady(); err != nil {
 			cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
@@ -413,7 +425,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, coverageViewer(c, r, c.Comment.HideCoverageLink))
+				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, coverageViewer(c.Comment.HideCoverageLink))
 				if err != nil {
 					return err
 				}
@@ -442,7 +454,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, coverageViewer(c, r, c.Summary.HideCoverageLink))
+				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, coverageViewer(c.Summary.HideCoverageLink))
 				if err != nil {
 					return err
 				}
@@ -471,7 +483,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, coverageViewer(c, r, c.Body.HideCoverageLink))
+				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, coverageViewer(c.Body.HideCoverageLink))
 				if err != nil {
 					return err
 				}
@@ -647,14 +659,14 @@ func init() {
 	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
 }
 
-// coverageViewer returns the viewer the coverage cells of one output link to. The pages it
-// points at read the report out of a GitHub Actions artifact, so a configuration storing
-// the report anywhere else, or none at all, gets no links rather than dead ones.
-func coverageViewer(c *config.Config, r *report.Report, hide bool) *report.Viewer {
-	if hide {
-		return nil
-	}
-	if err := c.ReportConfigTargetReady(); err != nil {
+// storedArtifactViewer returns the viewer for the artifact this run stores its report in,
+// and nil when it stores none. The pages the coverage cells link to read the report out of
+// a GitHub Actions artifact, so the links have to be gated on the same readiness that
+// decides whether the report is stored at all. Gating on the configured datastores alone
+// would keep linking on a run whose report.if: holds the storing back, at an artifact
+// nothing ever writes.
+func storedArtifactViewer(c *config.Config, r *report.Report) *report.Viewer {
+	if err := c.ReportConfigReady(); err != nil {
 		return nil
 	}
 	name, ok := datastore.ArtifactName(c.Report.Datastores, r)
