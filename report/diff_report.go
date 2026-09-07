@@ -190,7 +190,9 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 
 		filePath := name
 		if relWd != "" && !strings.HasPrefix(filePath, relWd+"/") && !filepath.IsAbs(filePath) {
-			filePath = filepath.Clean(filepath.Join(relWd, filePath))
+			// ToSlash, since what comes out is a path inside a URL rather than one on the
+			// running OS, and filepath.Join separates with a backslash on Windows.
+			filePath = filepath.ToSlash(filepath.Clean(filepath.Join(relWd, filePath)))
 		}
 
 		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {

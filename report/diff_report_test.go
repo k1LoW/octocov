@@ -154,3 +154,34 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 		t.Error("a nil viewer must not link to the viewer")
 	}
 }
+
+func TestDiffFileCoveragesTablePathsAreSlashSeparated(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+	a := &Report{}
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "octocov", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	b := &Report{}
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "octocov", "report1.json")); err != nil {
+		t.Fatal(err)
+	}
+	a.Repository = "k1LoW/octocov"
+	a.Commit = "0123456789abcdef"
+
+	// relWd is joined onto the files that the pull request did not report, with
+	// filepath.Join, which separates with a backslash on Windows. Both the source link and
+	// the viewer link built from the result are URLs.
+	got := a.Compare(b).FileCoveragesTable([]*gh.PullRequestFile{ //nostyle:funcfmt
+		{Filename: "no-such-file.go", BlobURL: "https://github.com/k1LoW/octocov/blob/0123456789abcdef/no-such-file.go"},
+	}, "sub", NewViewer("octocov-report"))
+	if got == "" {
+		t.Fatal("got an empty table, so nothing was checked")
+	}
+	if strings.Contains(got, `\`) {
+		t.Errorf("got\n%v\nwant no backslash", got)
+	}
+	if !strings.Contains(got, "sub/") {
+		t.Errorf("got\n%v\nwant it to carry the joined prefix", got)
+	}
+}
