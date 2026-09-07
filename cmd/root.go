@@ -168,8 +168,8 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
-		// Not fatal: without it the report is stored where the reports of the default
-		// branch go, which is where every report went before refs were separated.
+		// Not fatal, since without it the report is stored where the reports of the
+		// default branch go, which is where every report went before refs were separated.
 		if err := r.DetectRef(ctx); err != nil {
 			cmd.PrintErrf("Skip detecting the ref of the report: %v\n", err)
 		}

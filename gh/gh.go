@@ -234,8 +234,8 @@ func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
 	return "", fmt.Errorf("env %s is not set", "GITHUB_HEAD_REF")
 }
 
-// DetectCurrentBaseRef returns the ref the current run is to be compared against: the
-// base branch of the pull request when the run is on one, and the default branch
+// DetectCurrentBaseRef returns the ref the current run is to be compared against, which
+// is the base branch of the pull request when the run is on one, and the default branch
 // otherwise.
 func (g *Gh) DetectCurrentBaseRef(ctx context.Context, owner, repo string) (string, error) {
 	if b := os.Getenv("GITHUB_BASE_REF"); b != "" {

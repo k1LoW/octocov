@@ -93,8 +93,8 @@ func TestDetectCurrentBranch(t *testing.T) {
 		wantErr         bool
 	}{
 		{"refs/pull/8/head", "", "", true},
-		// The shape of a pull_request_target run: GITHUB_REF names the base branch and
-		// only GITHUB_HEAD_REF names the branch being built.
+		// The shape of a pull_request_target run, where GITHUB_REF names the base branch
+		// and only GITHUB_HEAD_REF names the branch being built.
 		{"refs/heads/name", "mybranch", "mybranch", false},
 		{"refs/heads/branch/branch/name", "", "branch/branch/name", false},
 		{"refs/pull/8/head", "mybranch", "mybranch", false},
@@ -143,8 +143,8 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	ctx := context.TODO()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Per case: the mock serves each matched request once, and more than one case
-			// now reaches the pull request listing.
+			// Per case, since the mock serves each matched request once and more than one
+			// case now reaches the pull request listing.
 			mg := mockedGh(t)
 			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.GITHUB_PULL_REQUEST_NUMBER)
 			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
