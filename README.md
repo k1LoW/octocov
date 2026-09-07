@@ -128,6 +128,8 @@ diff:
 
 ![img](docs/comment_with_diff.png)
 
+When the report is stored in a GitHub Actions artifact, the coverage values of the comment link to [octocov.dev](https://octocov.dev/), where the stored report can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The file names keep pointing at the source on GitHub. Set `comment.hideCoverageLink:` ( or the same key under `summary:` or `body:` ) to render them as plain values again.
+
 ### Check for acceptable score
 
 By setting `coverage.acceptable:`, the condition of acceptable coverage is specified.
@@ -718,6 +720,15 @@ comment:
   hideFooterLink: true
 ```
 
+### `comment.hideCoverageLink:`
+
+Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
+
+```yaml
+comment:
+  hideCoverageLink: true
+```
+
 ### `comment.deletePrevious:`
 
 Delete previous code metrics report comments instead of hiding them
@@ -773,6 +784,15 @@ summary:
   hideFooterLink: true
 ```
 
+### `summary.hideCoverageLink:`
+
+Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
+
+```yaml
+summary:
+  hideCoverageLink: true
+```
+
 ### `summary.message:`
 
 Add message to report.
@@ -805,6 +825,15 @@ Hide footer [octocov](https://github.com/k1LoW/octocov) link.
 ```yaml
 body:
   hideFooterLink: true
+```
+
+### `body.hideCoverageLink:`
+
+Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
+
+```yaml
+body:
+  hideCoverageLink: true
 ```
 
 ### `body.message:`

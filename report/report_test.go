@@ -354,7 +354,7 @@ func TestTable(t *testing.T) {
 		if err := r.Load(tt.path); err != nil {
 			t.Fatal(err)
 		}
-		if got := r.Table(); got != tt.want {
+		if got := r.Table(nil); got != tt.want {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 		orig := r.String()
@@ -429,7 +429,7 @@ func TestFileCoveragesTable(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, tt := range tests {
-		if got := r.FileCoveragesTable(tt.files); got != tt.want {
+		if got := r.FileCoveragesTable(tt.files, nil); got != tt.want {
 			t.Errorf("got\n%v\nwant\n%v", got, tt.want)
 		}
 	}
@@ -736,5 +736,49 @@ func TestBytesOmitsUnsetRefFields(t *testing.T) {
 		if strings.Contains(got, k) {
 			t.Errorf("got %v\nwant no %s", got, k)
 		}
+	}
+}
+
+func TestTableLinksCoverageToTheViewer(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	r := &Report{}
+	if err := r.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	r.Repository = "k1LoW/tbls"
+	r.PullRequest = 722
+
+	if got, want := r.Table(NewViewer("octocov-report@refs_pull_722")), "[68.4%](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
+		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+	}
+	// The same table without a viewer keeps the cell as it has always been rendered.
+	if got, want := r.Table(nil), "| 68.4%    |"; !strings.Contains(got, want) {
+		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+	}
+}
+
+func TestFileCoveragesTableLinksCoverageToTheViewer(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	r := &Report{}
+	if err := r.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	r.Repository = "k1LoW/tbls"
+	r.Commit = "0123456789abcdef"
+	files := []*gh.PullRequestFile{
+		{Filename: r.Coverage.Files[0].File, BlobURL: "https://github.com/k1LoW/tbls/blob/0123456789abcdef/f"},
+	}
+
+	got := r.FileCoveragesTable(files, NewViewer("octocov-report@refs_pull_722"))
+	want := "?artifact_name=octocov-report%40refs_pull_722)"
+	if !strings.Contains(got, want) {
+		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+	}
+	// The file name keeps pointing at the source on GitHub.
+	if !strings.Contains(got, "https://github.com/k1LoW/tbls/blob/0123456789abcdef/f") {
+		t.Errorf("got\n%v\nwant it to keep the blob link", got)
+	}
+	if strings.Contains(r.FileCoveragesTable(files, nil), "octocov.dev") {
+		t.Error("a nil viewer must not link to the viewer")
 	}
 }

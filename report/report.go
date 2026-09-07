@@ -202,14 +202,14 @@ func (r *Report) Bytes() []byte {
 	return b
 }
 
-func (r *Report) Table() string {
+func (r *Report) Table(v *Viewer) string {
 	var (
 		h []string
 		m []string
 	)
 	if r.IsMeasuredCoverage() {
 		h = append(h, "Coverage")
-		m = append(m, fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent())))
+		m = append(m, linkCell(fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent())), v.reportURL(r)))
 	}
 	if r.IsMeasuredCodeToTestRatio() {
 		h = append(h, "Code to Test Ratio")
@@ -272,7 +272,7 @@ func (r *Report) Out(w io.Writer) error {
 	return nil
 }
 
-func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
+func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile, v *Viewer) string {
 	if r.Coverage == nil {
 		return ""
 	}
@@ -297,7 +297,7 @@ func (r *Report) FileCoveragesTable(files []*gh.PullRequestFile) string {
 		pfc := fc.PatchCoverage(f.ChangedLines)
 		patchC += pfc.Covered
 		patchT += pfc.Total
-		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), fmt.Sprintf("%.1f%%", floor1(cover)), patchCell(pfc)})
+		rows = append(rows, []string{fmt.Sprintf("[%s](%s)", f.Filename, f.BlobURL), linkCell(fmt.Sprintf("%.1f%%", floor1(cover)), v.fileURL(r, f.Filename)), patchCell(pfc)})
 	}
 	if !exist {
 		return ""

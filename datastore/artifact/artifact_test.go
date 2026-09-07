@@ -34,7 +34,7 @@ func TestStoreName(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			got, err := a.storeName(&report.Report{
+			got, err := a.StoreName(&report.Report{
 				Repository:  tt.repository,
 				Ref:         tt.ref,
 				BaseRef:     tt.baseRef,
@@ -63,7 +63,7 @@ func TestStoreNameHasNoInvalidCharacter(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	got, err := a.storeName(&report.Report{
+	got, err := a.StoreName(&report.Report{
 		Repository: "owner/repo",
 		Ref:        `refs/heads/feat/"a:b<c>d|e*f?g\h`,
 		BaseRef:    "refs/heads/main",

@@ -246,6 +246,32 @@ func parse(u, root string) (Type, []string, error) {
 	}
 }
 
+// ArtifactName returns the name that the first artifact:// entry of datastores stores the
+// report under, and reports whether there is such an entry. The pages that browse a stored
+// report read it out of the artifacts, so a configuration that stores anywhere else leaves
+// them no name to look one up by.
+func ArtifactName(datastores []string, r *report.Report) (string, bool) {
+	if r == nil {
+		return "", false
+	}
+	for _, u := range datastores {
+		d, args, err := parse(u, "")
+		if err != nil || d != Artifact {
+			continue
+		}
+		a, err := artifact.New(nil, args[0], args[1], r)
+		if err != nil {
+			continue
+		}
+		n, err := a.StoreName(r)
+		if err != nil {
+			continue
+		}
+		return n, true
+	}
+	return "", false
+}
+
 func NeedToShrink(u string) bool {
 	return strings.HasPrefix(u, "bq://")
 }
