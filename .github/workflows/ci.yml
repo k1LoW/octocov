@@ -70,7 +70,12 @@ jobs:
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_0: ./testdata/custom_metrics/benchmark_0.json
           GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
 
+      # Storing the report twice in one run makes octocov delete the artifact it wrote
+      # first, which needs the actions write permission. A fork's token is read-only, so
+      # this check only runs where that write is available, which is where it has always
+      # run, since a pull request stored nothing at all while report.if held it back.
       - name: 'RE: Build octocov and run as a action' # for checking re-upload artifact
+        if: ${{ github.event_name != 'pull_request' }}
         uses: ./testdata/actions/coverage
         env:
           MACKEREL_API_KEY: ${{ secrets.MACKEREL_API_KEY }}
