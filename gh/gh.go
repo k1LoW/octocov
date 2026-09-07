@@ -218,6 +218,12 @@ func (g *Gh) DetectCurrentJobID(ctx context.Context, owner, repo string) (int64,
 }
 
 func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
+	// GITHUB_HEAD_REF is set only for the pull request events, and on pull_request_target
+	// GITHUB_REF names the base branch rather than the merge ref, so reading GITHUB_REF
+	// first would report the base branch as the branch being built.
+	if h := os.Getenv("GITHUB_HEAD_REF"); h != "" {
+		return h, nil
+	}
 	splitted := strings.SplitN(os.Getenv("GITHUB_REF"), "/", 3) // refs/pull/8/head or refs/heads/branch/branch/name
 	if len(splitted) < 3 {
 		return "", fmt.Errorf("env %s is not set", "GITHUB_REF")
@@ -225,10 +231,21 @@ func (g *Gh) DetectCurrentBranch(ctx context.Context) (string, error) {
 	if strings.Contains(os.Getenv("GITHUB_REF"), "refs/heads/") {
 		return splitted[2], nil
 	}
-	if os.Getenv("GITHUB_HEAD_REF") == "" {
-		return "", fmt.Errorf("env %s is not set", "GITHUB_HEAD_REF")
+	return "", fmt.Errorf("env %s is not set", "GITHUB_HEAD_REF")
+}
+
+// DetectCurrentBaseRef returns the ref the current run is to be compared against: the
+// base branch of the pull request when the run is on one, and the default branch
+// otherwise.
+func (g *Gh) DetectCurrentBaseRef(ctx context.Context, owner, repo string) (string, error) {
+	if b := os.Getenv("GITHUB_BASE_REF"); b != "" {
+		return fmt.Sprintf("refs/heads/%s", b), nil
 	}
-	return os.Getenv("GITHUB_HEAD_REF"), nil
+	b, err := g.FetchDefaultBranch(ctx, owner, repo)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("refs/heads/%s", b), nil
 }
 
 // ErrNotPullRequest marks the failures of DetectCurrentPullRequestNumber that only mean the run
@@ -251,7 +268,12 @@ func (g *Gh) DetectCurrentPullRequestNumber(ctx context.Context, owner, repo str
 		prNumber := splitted[2]
 		return strconv.Atoi(prNumber)
 	}
-	b := strings.Join(splitted[2:], "/")
+	// Not GITHUB_REF, which on pull_request_target holds the base branch and would send
+	// the search after whichever pull request has the base branch as its head.
+	b, err := g.DetectCurrentBranch(ctx)
+	if err != nil {
+		return 0, fmt.Errorf("%w: %w", ErrNotPullRequest, err)
+	}
 	l, _, err := g.client.PullRequests.List(ctx, owner, repo, &github.PullRequestListOptions{
 		State: "open",
 	})

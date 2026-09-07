@@ -93,7 +93,9 @@ func TestDetectCurrentBranch(t *testing.T) {
 		wantErr         bool
 	}{
 		{"refs/pull/8/head", "", "", true},
-		{"refs/heads/name", "mybranch", "name", false},
+		// The shape of a pull_request_target run: GITHUB_REF names the base branch and
+		// only GITHUB_HEAD_REF names the branch being built.
+		{"refs/heads/name", "mybranch", "mybranch", false},
 		{"refs/heads/branch/branch/name", "", "branch/branch/name", false},
 		{"refs/pull/8/head", "mybranch", "mybranch", false},
 	}
@@ -122,23 +124,31 @@ func TestDetectCurrentBranch(t *testing.T) {
 
 func TestDetectCurrentPullRequestNumber(t *testing.T) {
 	tests := []struct {
+		name                       string
 		GITHUB_PULL_REQUEST_NUMBER string
 		GITHUB_REF                 string
+		GITHUB_HEAD_REF            string
 		want                       int
 		wantErr                    bool
 	}{
-		{"", "refs/pull/8/head", 8, false},
-		{"", "refs/heads/branch/branch/name", 13, false},
-		{"", "refs/8", 0, true},
-		{"8", "", 8, false},
-		{"str", "", 0, true},
+		{"pull request ref", "", "refs/pull/8/head", "", 8, false},
+		{"branch ref", "", "refs/heads/branch/branch/name", "", 13, false},
+		{"malformed ref", "", "refs/8", "", 0, true},
+		{"number from the environment", "8", "", "", 8, false},
+		{"unparsable number", "str", "", "", 0, true},
+		// On pull_request_target GITHUB_REF names the base branch, so the search has to
+		// go after the head ref rather than after whatever GITHUB_REF holds.
+		{"base branch ref with a head ref", "", "refs/heads/main", "branch/branch/name", 13, false},
 	}
 	ctx := context.TODO()
-	mg := mockedGh(t)
 	for _, tt := range tests {
-		t.Run(tt.GITHUB_REF, func(t *testing.T) {
+		t.Run(tt.name, func(t *testing.T) {
+			// Per case: the mock serves each matched request once, and more than one case
+			// now reaches the pull request listing.
+			mg := mockedGh(t)
 			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.GITHUB_PULL_REQUEST_NUMBER)
 			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			t.Setenv("GITHUB_HEAD_REF", tt.GITHUB_HEAD_REF)
 			got, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
 			if err != nil {
 				if !tt.wantErr {
@@ -395,6 +405,7 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "")
 			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			t.Setenv("GITHUB_HEAD_REF", "")
 			t.Setenv("GITHUB_TOKEN", "dummy")
 
 			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
@@ -716,6 +727,7 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "")
 			t.Setenv("GITHUB_REF", tt.GITHUB_REF)
+			t.Setenv("GITHUB_HEAD_REF", "")
 			_, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
 			if err == nil {
 				t.Fatal("want err")
@@ -729,6 +741,7 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 	t.Run("a malformed pull request number is a real failure", func(t *testing.T) {
 		t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "not-a-number")
 		t.Setenv("GITHUB_REF", "")
+		t.Setenv("GITHUB_HEAD_REF", "")
 		_, err := mg.DetectCurrentPullRequestNumber(ctx, "owner", "repo")
 		if err == nil {
 			t.Fatal("want err")
