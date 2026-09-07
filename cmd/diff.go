@@ -101,7 +101,9 @@ var diffCmd = &cobra.Command{
 			// ways it can be empty was hit instead of leaving --patch looking silently broken.
 			// None of the wordings names a pull request, since the changed files can equally
 			// have come from the default branch comparison fetchPullRequestFiles falls back to.
-			switch table := dr.FileCoveragesTable(files, ""); {
+			// No viewer, since this table is printed to a terminal, where a markdown link
+			// is noise.
+			switch table := dr.FileCoveragesTable(files, "", nil); {
 			case table != "":
 				fmt.Fprintln(os.Stdout, table)
 			case dr.Coverage == nil:

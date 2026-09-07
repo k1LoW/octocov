@@ -131,23 +131,26 @@ type Push struct {
 }
 
 type Comment struct {
-	HideFooterLink bool   `yaml:"hideFooterLink"`
-	DeletePrevious bool   `yaml:"deletePrevious"`
-	UpdatePrevious bool   `yaml:"updatePrevious"`
-	Message        string `yaml:"message,omitempty"`
-	If             string `yaml:"if,omitempty"`
+	HideFooterLink   bool   `yaml:"hideFooterLink"`
+	HideCoverageLink bool   `yaml:"hideCoverageLink"`
+	DeletePrevious   bool   `yaml:"deletePrevious"`
+	UpdatePrevious   bool   `yaml:"updatePrevious"`
+	Message          string `yaml:"message,omitempty"`
+	If               string `yaml:"if,omitempty"`
 }
 
 type Summary struct {
-	HideFooterLink bool   `yaml:"hideFooterLink"`
-	Message        string `yaml:"message,omitempty"`
-	If             string `yaml:"if,omitempty"`
+	HideFooterLink   bool   `yaml:"hideFooterLink"`
+	HideCoverageLink bool   `yaml:"hideCoverageLink"`
+	Message          string `yaml:"message,omitempty"`
+	If               string `yaml:"if,omitempty"`
 }
 
 type Body struct {
-	HideFooterLink bool   `yaml:"hideFooterLink"`
-	Message        string `yaml:"message,omitempty"`
-	If             string `yaml:"if,omitempty"`
+	HideFooterLink   bool   `yaml:"hideFooterLink"`
+	HideCoverageLink bool   `yaml:"hideCoverageLink"`
+	Message          string `yaml:"message,omitempty"`
+	If               string `yaml:"if,omitempty"`
 }
 
 type Diff struct {

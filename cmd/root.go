@@ -413,7 +413,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink)
+				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, coverageViewer(c, r, c.Comment.HideCoverageLink))
 				if err != nil {
 					return err
 				}
@@ -442,7 +442,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink)
+				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, coverageViewer(c, r, c.Summary.HideCoverageLink))
 				if err != nil {
 					return err
 				}
@@ -471,7 +471,7 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink)
+				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, coverageViewer(c, r, c.Body.HideCoverageLink))
 				if err != nil {
 					return err
 				}
@@ -645,6 +645,23 @@ func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	rootCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
+}
+
+// coverageViewer returns the viewer the coverage cells of one output link to. The pages it
+// points at read the report out of a GitHub Actions artifact, so a configuration storing
+// the report anywhere else, or none at all, gets no links rather than dead ones.
+func coverageViewer(c *config.Config, r *report.Report, hide bool) *report.Viewer {
+	if hide {
+		return nil
+	}
+	if err := c.ReportConfigTargetReady(); err != nil {
+		return nil
+	}
+	name, ok := datastore.ArtifactName(c.Report.Datastores, r)
+	if !ok {
+		return nil
+	}
+	return report.NewViewer(name)
 }
 
 func reportToDatastores(ctx context.Context, c *config.Config, datastores []string, r *report.Report) error {
