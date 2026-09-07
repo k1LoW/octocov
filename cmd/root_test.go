@@ -48,15 +48,14 @@ func TestStoredArtifactViewer(t *testing.T) {
 			// The viewer is observable only through what it renders, which is the thing the
 			// gating is actually about.
 			table := r.Table(v)
-			switch {
-			case tt.want == "":
+			if tt.want == "" {
 				if strings.Contains(table, "octocov.dev") {
 					t.Errorf("got\n%v\nwant no link", table)
 				}
-			default:
-				if !strings.Contains(table, tt.want) {
-					t.Errorf("got\n%v\nwant it to contain\n%v", table, tt.want)
-				}
+				return
+			}
+			if !strings.Contains(table, tt.want) {
+				t.Errorf("got\n%v\nwant it to contain\n%v", table, tt.want)
 			}
 		})
 	}
