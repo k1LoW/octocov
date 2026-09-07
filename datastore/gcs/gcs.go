@@ -3,7 +3,7 @@ package gcs
 import (
 	"context"
 	"io/fs"
-	"path/filepath"
+	"path"
 
 	"cloud.google.com/go/storage"
 	"github.com/k1LoW/octocov/report"
@@ -29,8 +29,11 @@ func (g *GCS) StoreReport(ctx context.Context, r *report.Report) error {
 	return g.Put(ctx, path, r.Bytes())
 }
 
-func (g *GCS) Put(ctx context.Context, path string, content []byte) error {
-	o := filepath.Join(g.prefix, path)
+func (g *GCS) Put(ctx context.Context, p string, content []byte) error {
+	// path.Join rather than filepath.Join, since an object name is slash separated on
+	// every OS, and the separator filepath would pick on Windows would store the report
+	// under a name nothing reads back.
+	o := path.Join(g.prefix, p)
 	w := g.client.Bucket(g.bucket).Object(o).NewWriter(ctx)
 	if _, err := w.Write(content); err != nil {
 		return err
@@ -47,7 +50,7 @@ type FS struct {
 }
 
 func (fsys *FS) Open(name string) (fs.File, error) { //nostyle:recvnames
-	return fsys.gscfs.Open(filepath.Join(fsys.prefix, name))
+	return fsys.gscfs.Open(path.Join(fsys.prefix, name))
 }
 
 func (g *GCS) FS() (fs.FS, error) {

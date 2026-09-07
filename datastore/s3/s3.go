@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"io/fs"
-	"path/filepath"
+	"path"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -41,8 +41,11 @@ func (s *S3) StoreReport(ctx context.Context, r *report.Report) error {
 	return s.Put(ctx, path, r.Bytes())
 }
 
-func (s *S3) Put(ctx context.Context, path string, content []byte) error {
-	key := filepath.Join(s.prefix, path)
+func (s *S3) Put(ctx context.Context, p string, content []byte) error {
+	// path.Join rather than filepath.Join, since an object key is slash separated on
+	// every OS, and the separator filepath would pick on Windows would store the report
+	// under a key nothing reads back.
+	key := path.Join(s.prefix, p)
 	_, err := s.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket:        &s.bucket,
 		Key:           &key,
