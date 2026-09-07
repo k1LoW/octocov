@@ -23,6 +23,8 @@ func TestViewerReportURL(t *testing.T) {
 		{"a report stored in no artifact links nowhere", "", "", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
 		{"a GitHub Enterprise Server run links nowhere", "octocov-report@refs_pull_722", "https://github.example.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
 		{"github.com stated explicitly is served", "octocov-report@refs_pull_722", "https://github.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		// The same server either way, so the slash must not read as another host.
+		{"github.com with a trailing slash is served", "octocov-report@refs_pull_722", "https://github.com/", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -78,7 +78,9 @@ func (v *Viewer) fileURL(r *Report, path string) string {
 // run is one they can serve at all. They read the artifacts through the github.com API, so
 // a GitHub Enterprise Server run has nothing there for them to show.
 func viewerRepo(r *Report) (*gh.Repository, bool) {
-	if s := os.Getenv("GITHUB_SERVER_URL"); s != "" && s != "https://github.com" {
+	// Trailing slashes trimmed, since the same server can be named with or without one and
+	// only a different host means the artifacts are somewhere the pages cannot reach.
+	if s := strings.TrimRight(os.Getenv("GITHUB_SERVER_URL"), "/"); s != "" && s != gh.DefaultGithubServerURL {
 		return nil, false
 	}
 	repo, err := gh.Parse(r.Repository)
