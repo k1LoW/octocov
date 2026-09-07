@@ -94,6 +94,13 @@ func TestArtifactName(t *testing.T) {
 		{"no datastore at all leaves no name", nil, "", false},
 		{"an unparsable datastore is passed over", []string{"artifact://k1LoW"}, "", false},
 	}
+	t.Run("a report that is not there leaves no name", func(t *testing.T) {
+		t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+		got, ok := ArtifactName([]string{"artifact://k1LoW/octocov"}, nil)
+		if ok || got != "" {
+			t.Errorf("got %q %v\nwant an empty name", got, ok)
+		}
+	})
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")

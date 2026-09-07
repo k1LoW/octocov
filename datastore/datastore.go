@@ -246,12 +246,15 @@ func parse(u, root string) (Type, []string, error) {
 	}
 }
 
-// ArtifactName returns the name of the artifact the report is stored under by the first
-// artifact:// datastore of us, and reports whether there is one. The pages that browse a
-// stored report read it out of the artifacts, so a configuration that stores anywhere else
-// leaves them no name to look one up by.
-func ArtifactName(us []string, r *report.Report) (string, bool) {
-	for _, u := range us {
+// ArtifactName returns the name that the first artifact:// entry of datastores stores the
+// report under, and reports whether there is such an entry. The pages that browse a stored
+// report read it out of the artifacts, so a configuration that stores anywhere else leaves
+// them no name to look one up by.
+func ArtifactName(datastores []string, r *report.Report) (string, bool) {
+	if r == nil {
+		return "", false
+	}
+	for _, u := range datastores {
 		d, args, err := parse(u, "")
 		if err != nil || d != Artifact {
 			continue
