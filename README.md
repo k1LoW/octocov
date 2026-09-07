@@ -358,7 +358,6 @@ comment:
 summary:
   if: true
 report:
-  if: is_default_branch
   datastores:
     - artifact://${GITHUB_REPOSITORY}
 diff:
