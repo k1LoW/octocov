@@ -41,22 +41,21 @@ func TestViewerFileURL(t *testing.T) {
 		name         string
 		artifactName string
 		serverURL    string
-		commit       string
 		path         string
 		want         string
 	}{
-		{"a file is named by the artifact holding its report", "octocov-report@refs_pull_722", "", "0123456789abcdef", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?artifact_name=octocov-report%40refs_pull_722&commit=0123456789abcdef"},
-		{"the default branch is addressed the same way", "octocov-report", "", "0123456789abcdef", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?artifact_name=octocov-report&commit=0123456789abcdef"},
-		{"a separator inside a name does not end the path", "octocov-report", "", "0123456789abcdef", "some dir/a#b.go", "https://octocov.dev/k1LoW/octocov/file/some%20dir/a%23b.go?artifact_name=octocov-report&commit=0123456789abcdef"},
-		{"a report of no commit links nowhere", "octocov-report", "", "", "report/report.go", ""},
-		{"a report stored in no artifact links nowhere", "", "", "0123456789abcdef", "report/report.go", ""},
-		{"a GitHub Enterprise Server run links nowhere", "octocov-report", "https://github.example.com", "0123456789abcdef", "report/report.go", ""},
+		{"a file is named by the artifact holding its report", "octocov-report@refs_pull_722", "", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?artifact_name=octocov-report%40refs_pull_722"},
+		{"the default branch is addressed the same way", "octocov-report", "", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?artifact_name=octocov-report"},
+		{"a separator inside a name does not end the path", "octocov-report", "", "some dir/a#b.go", "https://octocov.dev/k1LoW/octocov/file/some%20dir/a%23b.go?artifact_name=octocov-report"},
+		{"an empty path links nowhere", "octocov-report", "", "", ""},
+		{"a report stored in no artifact links nowhere", "", "", "report/report.go", ""},
+		{"a GitHub Enterprise Server run links nowhere", "octocov-report", "https://github.example.com", "report/report.go", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
 			v := NewViewer(tt.artifactName)
-			got := v.fileURL(&Report{Repository: "k1LoW/octocov", Commit: tt.commit}, tt.path)
+			got := v.fileURL(&Report{Repository: "k1LoW/octocov", Commit: "0123456789abcdef"}, tt.path)
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}

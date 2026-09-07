@@ -58,9 +58,11 @@ func (v *Viewer) reportURL(r *Report) string {
 }
 
 // fileURL returns the page of one file's coverage. The pull request path carries no
-// per-file page, so the report is named by its artifact in the query instead.
+// per-file page, so the report is named by its artifact in the query instead. The artifact
+// name is the whole of what the page needs to find the report, since the commit only ever
+// reaches a cache keyed by an artifact id this side has no way to know.
 func (v *Viewer) fileURL(r *Report, path string) string {
-	if v == nil || r == nil || r.Commit == "" || path == "" {
+	if v == nil || r == nil || path == "" {
 		return ""
 	}
 	repo, ok := viewerRepo(r)
@@ -69,7 +71,6 @@ func (v *Viewer) fileURL(r *Report, path string) string {
 	}
 	q := url.Values{}
 	q.Set("artifact_name", v.artifactName)
-	q.Set("commit", r.Commit)
 	return fmt.Sprintf("%s/%s/%s/file/%s?%s", viewerBaseURL, repo.Owner, repo.Repo, escapePath(path), q.Encode())
 }
 

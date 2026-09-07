@@ -770,7 +770,7 @@ func TestFileCoveragesTableLinksCoverageToTheViewer(t *testing.T) {
 	}
 
 	got := r.FileCoveragesTable(files, NewViewer("octocov-report@refs_pull_722"))
-	want := "?artifact_name=octocov-report%40refs_pull_722&commit=0123456789abcdef)"
+	want := "?artifact_name=octocov-report%40refs_pull_722)"
 	if !strings.Contains(got, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
 	}
