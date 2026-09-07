@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/octocov/report"
 )
 
 func TestParse(t *testing.T) {
@@ -76,4 +77,39 @@ func testdataDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return dir
+}
+
+func TestArtifactName(t *testing.T) {
+	tests := []struct {
+		name       string
+		datastores []string
+		want       string
+		wantOK     bool
+	}{
+		{"the default artifact name of a pull request", []string{"artifact://k1LoW/octocov"}, "octocov-report@refs_pull_722", true},
+		{"a configured artifact name", []string{"artifact://k1LoW/octocov/mine"}, "mine@refs_pull_722", true},
+		{"the artifacts scheme spelled in the plural", []string{"artifacts://k1LoW/octocov"}, "octocov-report@refs_pull_722", true},
+		{"the first artifact datastore wins", []string{"s3://bucket/prefix", "artifact://k1LoW/octocov", "artifact://k1LoW/octocov/other"}, "octocov-report@refs_pull_722", true},
+		{"no artifact datastore leaves no name", []string{"s3://bucket/prefix", "bq://project/dataset/table"}, "", false},
+		{"no datastore at all leaves no name", nil, "", false},
+		{"an unparsable datastore is passed over", []string{"artifact://k1LoW"}, "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+			r := &report.Report{
+				Repository:  "k1LoW/octocov",
+				Ref:         "refs/pull/722/merge",
+				BaseRef:     "refs/heads/main",
+				PullRequest: 722,
+			}
+			got, ok := ArtifactName(tt.datastores, r)
+			if ok != tt.wantOK {
+				t.Fatalf("got ok %v\nwant %v", ok, tt.wantOK)
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
 }

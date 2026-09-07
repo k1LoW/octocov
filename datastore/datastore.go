@@ -246,6 +246,29 @@ func parse(u, root string) (Type, []string, error) {
 	}
 }
 
+// ArtifactName returns the name of the artifact the report is stored under by the first
+// artifact:// datastore of us, and reports whether there is one. The pages that browse a
+// stored report read it out of the artifacts, so a configuration that stores anywhere else
+// leaves them no name to look one up by.
+func ArtifactName(us []string, r *report.Report) (string, bool) {
+	for _, u := range us {
+		d, args, err := parse(u, "")
+		if err != nil || d != Artifact {
+			continue
+		}
+		a, err := artifact.New(nil, args[0], args[1], r)
+		if err != nil {
+			continue
+		}
+		n, err := a.StoreName(r)
+		if err != nil {
+			continue
+		}
+		return n, true
+	}
+	return "", false
+}
+
 func NeedToShrink(u string) bool {
 	return strings.HasPrefix(u, "bq://")
 }

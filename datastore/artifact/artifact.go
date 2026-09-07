@@ -46,7 +46,7 @@ func New(gh *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
 }
 
 func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
-	name, err := a.storeName(r)
+	name, err := a.StoreName(r)
 	if err != nil {
 		return err
 	}
@@ -97,10 +97,10 @@ func (a *Artifact) FS() (fs.FS, error) {
 	return &fsys, nil
 }
 
-// storeName returns the artifact name the report is stored under. The report of the
+// StoreName returns the artifact name the report is stored under. The report of the
 // default branch keeps the configured name, which is the one FS() looks up, so a
 // comparison and the central mode keep reading the branch they are meant to describe.
-func (a *Artifact) storeName(r *report.Report) (string, error) {
+func (a *Artifact) StoreName(r *report.Report) (string, error) {
 	name := a.name
 	switch {
 	case a.repository == r.Repository:
