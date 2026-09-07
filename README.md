@@ -239,6 +239,16 @@ report:
     - s3://bucket/reports
 ```
 
+The report of the default branch is stored under the repository itself, and the report of any other ref is stored beside it under a key naming that ref.
+
+```
+owner/repo/report.json                  # the default branch
+owner/repo/refs/pull/123/report.json    # pull request #123
+owner/repo/refs/heads/feat/x/report.json
+```
+
+`diff.datastores:` reads the report of the default branch, so the comparison shown on a pull request is against the default branch whether or not the pull requests report as well. Reporting from every run is therefore the default, and `report.if: is_default_branch` is only needed to keep the reports of the other refs out of a datastore, which is worth doing for `github://`, where each report is a commit that stays.
+
 ```yaml
 # .octocov.yml
 report:
@@ -909,6 +919,8 @@ artifact://[owner]/[repo]/[artifactName]
 
 - `artifact://[owner]/[repo]/[artifactName]`
 - `artifact://[owner]/[repo]` ( default artifactName: `octocov-report` )
+
+The report of a ref other than the default branch is stored under an artifact of its own, named by appending `@` and the ref to the artifact name, with the characters an artifact name may not hold replaced by `_` ( e.g. `octocov-report@refs_pull_123`, `octocov-report@refs_heads_feat_x` ).
 
 > **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 

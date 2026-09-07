@@ -41,19 +41,37 @@ func TestRoot(t *testing.T) {
 
 func TestStoreReport(t *testing.T) {
 	ctx := context.Background()
-	root := t.TempDir()
-	l, err := New(root)
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name        string
+		ref         string
+		baseRef     string
+		pullRequest int
+		want        []string
+	}{
+		{"the default branch is stored where comparisons read it", "refs/heads/main", "refs/heads/main", 0, []string{"owner", "repo", "report.json"}},
+		{"a report without a base ref is stored there too", "", "", 0, []string{"owner", "repo", "report.json"}},
+		{"a pull request is stored beside it", "refs/pull/123/merge", "refs/heads/main", 123, []string{"owner", "repo", "refs", "pull", "123", "report.json"}},
+		{"a branch is stored beside it", "refs/heads/feat/x", "refs/heads/main", 0, []string{"owner", "repo", "refs", "heads", "feat", "x", "report.json"}},
 	}
-	r := &report.Report{
-		Repository: "owner/repo",
-	}
-	if err := l.StoreReport(ctx, r); err != nil {
-		t.Fatal(err)
-	}
-	want := filepath.Join(l.Root(), "owner", "repo", "report.json")
-	if _, err := os.Lstat(want); err != nil {
-		t.Errorf("%s does not exist", want)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			l, err := New(t.TempDir())
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := &report.Report{
+				Repository:  "owner/repo",
+				Ref:         tt.ref,
+				BaseRef:     tt.baseRef,
+				PullRequest: tt.pullRequest,
+			}
+			if err := l.StoreReport(ctx, r); err != nil {
+				t.Fatal(err)
+			}
+			want := filepath.Join(append([]string{l.Root()}, tt.want...)...)
+			if _, err := os.Lstat(want); err != nil {
+				t.Errorf("%s does not exist", want)
+			}
+		})
 	}
 }

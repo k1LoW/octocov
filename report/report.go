@@ -29,6 +29,9 @@ import (
 	"golang.org/x/text/number"
 )
 
+// Filename is the name the report is stored under in every datastore.
+const Filename = "report.json"
+
 const filesHideMin = 30
 const filesSkipMax = 100
 
@@ -40,6 +43,8 @@ type Report struct {
 	Repository        string             `json:"repository"`
 	Ref               string             `json:"ref"`
 	Commit            string             `json:"commit"`
+	PullRequest       int                `json:"pull_request,omitempty"`
+	BaseRef           string             `json:"base_ref,omitempty"`
 	Coverage          *coverage.Coverage `json:"coverage,omitempty"`
 	CodeToTestRatio   *ratio.Ratio       `json:"code_to_test_ratio,omitempty"`
 	TestExecutionTime *float64           `json:"test_execution_time,omitempty"`
@@ -83,6 +88,87 @@ func New(ownerrepo string, opts ...Option) (*Report, error) {
 		Timestamp:  time.Now().UTC(),
 		opts:       o,
 	}, nil
+}
+
+// DetectRef fills in the pull request number and the base ref of the current run.
+// Both are recorded in the report and decide where it is stored, so that a report of
+// a ref other than the default branch does not overwrite the one that comparisons and
+// the central mode read.
+func (r *Report) DetectRef(ctx context.Context) error {
+	if r.Repository == "" {
+		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+	}
+	repo, err := gh.Parse(r.Repository)
+	if err != nil {
+		return err
+	}
+	g, err := gh.New()
+	if err != nil {
+		return err
+	}
+	// Before the pull request number, so that a run whose pull request cannot be resolved
+	// still knows its ref is not the default branch and keeps its report off the one the
+	// comparisons read.
+	base, err := g.DetectCurrentBaseRef(ctx, repo.Owner, repo.Repo)
+	if err != nil {
+		return err
+	}
+	r.BaseRef = base
+	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
+	switch {
+	case err == nil:
+		r.PullRequest = n
+	case errors.Is(err, gh.ErrNotPullRequest):
+	default:
+		return err
+	}
+	return nil
+}
+
+// RefKey returns the key that separates this report from the reports of other refs in
+// a datastore. The default branch keeps the empty key, which is the single location
+// every report was stored at before refs were separated, so reports already stored
+// there stay the ones that comparisons are made against. A report that predates
+// BaseRef carries no way to tell its ref apart from the default branch, so it keeps
+// the empty key too rather than being moved somewhere its readers do not look.
+func (r *Report) RefKey() string {
+	if r.PullRequest > 0 {
+		return fmt.Sprintf("refs/pull/%d", r.PullRequest)
+	}
+	ref := NormalizeRef(r.Ref)
+	base := NormalizeRef(r.BaseRef)
+	if ref == "" || base == "" || ref == base {
+		return ""
+	}
+	return ref
+}
+
+// StorePath returns the path of the report file within a datastore.
+func (r *Report) StorePath() string {
+	if k := r.RefKey(); k != "" {
+		return fmt.Sprintf("%s/%s/%s", r.Repository, k, Filename)
+	}
+	return fmt.Sprintf("%s/%s", r.Repository, Filename)
+}
+
+// NormalizeRef expands a bare branch name to its full ref path and drops the /merge
+// and /head suffixes GITHUB_REF carries on pull request events, neither of which
+// identifies a ref of its own.
+func NormalizeRef(ref string) string {
+	if ref == "" {
+		return ""
+	}
+	if !strings.HasPrefix(ref, "refs/") {
+		return fmt.Sprintf("refs/heads/%s", ref)
+	}
+	if rest, ok := strings.CutPrefix(ref, "refs/pull/"); ok {
+		n, _, _ := strings.Cut(rest, "/")
+		if n == "" {
+			return ""
+		}
+		return fmt.Sprintf("refs/pull/%s", n)
+	}
+	return ref
 }
 
 func (r *Report) Title() string {

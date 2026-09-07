@@ -112,6 +112,12 @@ func (c *Central) collectReports() error {
 			if err := json.Unmarshal(b, r); err != nil {
 				return nil
 			}
+			// The datastore also holds the reports of the pull requests and the branches
+			// of each repository. The index describes the state of the default branch, so
+			// only the reports stored under its key belong in it.
+			if r.RefKey() != "" {
+				return nil
+			}
 			current, ok := rsMap[r.Repository]
 			if !ok {
 				if _, err := fmt.Fprintf(os.Stderr, "Collect report of %s\n", r.Repository); err != nil {

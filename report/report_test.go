@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -631,5 +632,109 @@ func TestConvertFormat(t *testing.T) {
 				t.Error(diff)
 			}
 		})
+	}
+}
+
+func TestNormalizeRef(t *testing.T) {
+	tests := []struct {
+		ref  string
+		want string
+	}{
+		{"", ""},
+		{"refs/heads/main", "refs/heads/main"},
+		{"refs/heads/feat/x", "refs/heads/feat/x"},
+		{"refs/tags/v1.0.0", "refs/tags/v1.0.0"},
+		{"main", "refs/heads/main"},
+		{"feat/x", "refs/heads/feat/x"},
+		{"refs/pull/123/merge", "refs/pull/123"},
+		{"refs/pull/123/head", "refs/pull/123"},
+		{"refs/pull/123", "refs/pull/123"},
+		{"refs/pull/", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.ref, func(t *testing.T) {
+			got := NormalizeRef(tt.ref)
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestRefKey(t *testing.T) {
+	tests := []struct {
+		name        string
+		ref         string
+		baseRef     string
+		pullRequest int
+		want        string
+	}{
+		{"the default branch keeps the key every report was stored under", "refs/heads/main", "refs/heads/main", 0, ""},
+		{"a branch of its own is separated", "refs/heads/feat/x", "refs/heads/main", 0, "refs/heads/feat/x"},
+		{"a tag is separated", "refs/tags/v1.0.0", "refs/heads/main", 0, "refs/tags/v1.0.0"},
+		{"a pull request is keyed by its number", "refs/pull/123/merge", "refs/heads/main", 123, "refs/pull/123"},
+		{"a pull request outranks a ref naming the base branch", "refs/heads/main", "refs/heads/main", 123, "refs/pull/123"},
+		{"a pull request ref is read when the number was not detected", "refs/pull/123/merge", "refs/heads/main", 0, "refs/pull/123"},
+		{"a report predating the base ref stays where its readers look", "refs/heads/feat/x", "", 0, ""},
+		{"a bare branch name is compared against the base branch", "main", "refs/heads/main", 0, ""},
+		{"a report without a ref stays where its readers look", "", "refs/heads/main", 0, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Report{
+				Repository:  "owner/repo",
+				Ref:         tt.ref,
+				BaseRef:     tt.baseRef,
+				PullRequest: tt.pullRequest,
+			}
+			got := r.RefKey()
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStorePath(t *testing.T) {
+	tests := []struct {
+		name        string
+		repository  string
+		ref         string
+		baseRef     string
+		pullRequest int
+		want        string
+	}{
+		{"default branch", "owner/repo", "refs/heads/main", "refs/heads/main", 0, "owner/repo/report.json"},
+		{"pull request", "owner/repo", "refs/pull/123/merge", "refs/heads/main", 123, "owner/repo/refs/pull/123/report.json"},
+		{"branch", "owner/repo", "refs/heads/feat/x", "refs/heads/main", 0, "owner/repo/refs/heads/feat/x/report.json"},
+		{"sub directory of a repository", "owner/repo/sub", "refs/pull/123/merge", "refs/heads/main", 123, "owner/repo/sub/refs/pull/123/report.json"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Report{
+				Repository:  tt.repository,
+				Ref:         tt.ref,
+				BaseRef:     tt.baseRef,
+				PullRequest: tt.pullRequest,
+			}
+			got := r.StorePath()
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBytesOmitsUnsetRefFields(t *testing.T) {
+	r := &Report{
+		Repository: "owner/repo",
+		Ref:        "refs/heads/main",
+		Commit:     "1234567890",
+	}
+	got := string(r.Bytes())
+	for _, k := range []string{"pull_request", "base_ref"} {
+		if strings.Contains(got, k) {
+			t.Errorf("got %v\nwant no %s", got, k)
+		}
 	}
 }

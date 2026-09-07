@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigquery"
+	"github.com/goccy/go-json"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 	"github.com/oklog/ulid/v2"
@@ -128,11 +129,19 @@ func (b *BQ) FS() (fs.FS, error) {
 	ctx := context.Background()
 	fsys := fstest.MapFS{}
 	t := fmt.Sprintf("`%s.%s`", b.dataset, b.table)
+	// Grouped by the pull request as well as by the ref, which together are as fine a key
+	// as the one the rows are laid out under below. Grouping by repository alone would let
+	// the newest row of any ref answer for the default branch, and grouping by ref alone
+	// would still collapse a pull_request_target run, where GITHUB_REF holds the base
+	// branch and a pull request shares its ref with the default branch.
 	stmt := `SELECT r.owner, r.repo, r.timestamp, r.raw FROM %s AS r
 INNER JOIN (
-    SELECT owner, repo, MAX(timestamp) AS timestamp FROM %s GROUP BY owner, repo
-) AS l ON r.owner = l.owner AND r.repo = l.repo AND l.timestamp = r.timestamp
-ORDER BY r.owner, r.repo`
+    SELECT owner, repo, ref, COALESCE(JSON_VALUE(raw, '$.pull_request'), '') AS pull_request, MAX(timestamp) AS timestamp
+    FROM %s GROUP BY owner, repo, ref, pull_request
+) AS l ON r.owner = l.owner AND r.repo = l.repo AND r.ref = l.ref
+    AND COALESCE(JSON_VALUE(r.raw, '$.pull_request'), '') = l.pull_request
+    AND l.timestamp = r.timestamp
+ORDER BY r.owner, r.repo, r.ref`
 	q := b.client.Query(fmt.Sprintf(stmt, t, t)) //nolint:nosec
 	it, err := q.Read(ctx)
 	if err != nil {
@@ -147,7 +156,19 @@ ORDER BY r.owner, r.repo`
 		if err != nil {
 			return nil, err
 		}
-		path := fmt.Sprintf("%s/%s/report.json", rr.Owner, rr.Repo)
+		path := fmt.Sprintf("%s/%s/%s", rr.Owner, rr.Repo, report.Filename)
+		rt := &report.Report{}
+		if err := json.Unmarshal([]byte(rr.Raw), rt); err == nil {
+			if k := rt.RefKey(); k != "" {
+				path = fmt.Sprintf("%s/%s/%s/%s", rr.Owner, rr.Repo, k, report.Filename)
+			}
+		}
+		// Rows written before the ref was recorded all resolve to the same path, so the
+		// newest of them is the one kept, as it was when the query returned only one row
+		// per repository.
+		if e, ok := fsys[path]; ok && e.ModTime.After(rr.Timestamp) {
+			continue
+		}
 		fsys[path] = &fstest.MapFile{
 			Data:    []byte(rr.Raw),
 			Mode:    fs.ModePerm,

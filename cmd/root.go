@@ -168,6 +168,12 @@ var rootCmd = &cobra.Command{
 			return err
 		}
 
+		// Not fatal, since without it the report is stored where the reports of the
+		// default branch go, which is where every report went before refs were separated.
+		if err := r.DetectRef(ctx); err != nil {
+			cmd.PrintErrf("Skip detecting the ref of the report: %v\n", err)
+		}
+
 		if err := c.CoverageConfigReady(); err != nil {
 			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
 		} else {
@@ -323,7 +329,7 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			path := fmt.Sprintf("%s/%s/report.json", repo.Owner, repo.Reponame())
+			path := fmt.Sprintf("%s/%s/%s", repo.Owner, repo.Reponame(), report.Filename)
 
 			// Collect filesystem files once for normalizing all loaded reports
 			var gitRoot string

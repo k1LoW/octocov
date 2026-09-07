@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io/fs"
-	"path/filepath"
+	"path"
 
 	"github.com/k1LoW/ghfs"
 	"github.com/k1LoW/octocov/gh"
@@ -29,19 +29,22 @@ func New(gh *gh.Gh, r, b, prefix string) (*Github, error) {
 }
 
 func (g *Github) StoreReport(ctx context.Context, r *report.Report) error {
-	path := fmt.Sprintf("%s/report.json", r.Repository)
+	path := r.StorePath()
 	g.from = r.Repository
 	return g.Put(ctx, path, r.Bytes())
 }
 
-func (g *Github) Put(ctx context.Context, path string, content []byte) error {
+func (g *Github) Put(ctx context.Context, p string, content []byte) error {
 	branch := g.branch
 	message := fmt.Sprintf("Store coverage report of %s", g.from)
 	repo, err := gh.Parse(g.repository)
 	if err != nil {
 		return err
 	}
-	cp := filepath.Join(g.prefix, path)
+	// path.Join rather than filepath.Join, since a path inside a git repository is slash
+	// separated on every OS, and the separator filepath would pick on Windows would commit
+	// the report under a name nothing reads back.
+	cp := path.Join(g.prefix, p)
 	return g.gh.PushContent(ctx, repo.Owner, repo.Repo, branch, string(content), cp, message)
 }
 
