@@ -129,13 +129,18 @@ func (b *BQ) FS() (fs.FS, error) {
 	ctx := context.Background()
 	fsys := fstest.MapFS{}
 	t := fmt.Sprintf("`%s.%s`", b.dataset, b.table)
-	// Grouped by ref as well as by repository: without it the newest row of any ref wins,
-	// and a repository that reports from its pull requests would answer a comparison
-	// against its default branch with whichever branch happened to run last.
+	// Grouped by the pull request as well as by the ref, which together are as fine a key
+	// as the one the rows are laid out under below. Grouping by repository alone would let
+	// the newest row of any ref answer for the default branch, and grouping by ref alone
+	// would still collapse a pull_request_target run, where GITHUB_REF holds the base
+	// branch and a pull request shares its ref with the default branch.
 	stmt := `SELECT r.owner, r.repo, r.timestamp, r.raw FROM %s AS r
 INNER JOIN (
-    SELECT owner, repo, ref, MAX(timestamp) AS timestamp FROM %s GROUP BY owner, repo, ref
-) AS l ON r.owner = l.owner AND r.repo = l.repo AND r.ref = l.ref AND l.timestamp = r.timestamp
+    SELECT owner, repo, ref, COALESCE(JSON_VALUE(raw, '$.pull_request'), '') AS pull_request, MAX(timestamp) AS timestamp
+    FROM %s GROUP BY owner, repo, ref, pull_request
+) AS l ON r.owner = l.owner AND r.repo = l.repo AND r.ref = l.ref
+    AND COALESCE(JSON_VALUE(r.raw, '$.pull_request'), '') = l.pull_request
+    AND l.timestamp = r.timestamp
 ORDER BY r.owner, r.repo, r.ref`
 	q := b.client.Query(fmt.Sprintf(stmt, t, t)) //nolint:nosec
 	it, err := q.Read(ctx)
