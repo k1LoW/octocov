@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/k1LoW/octocov/gh"
@@ -45,7 +46,7 @@ func TestDiffTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := a.Compare(b).Table()
+	got := a.Compare(b).Table(nil)
 	f := "diff_table"
 	if os.Getenv("UPDATE_GOLDEN") != "" {
 		golden.Update(t, testdataDir(t), f, got)
@@ -75,7 +76,7 @@ func TestDiffFileCoveragesTable(t *testing.T) {
 		{Filename: "zcase/removed.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed.go", Status: "removed"},
 		{Filename: "zcase/removed_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed_test.go", Status: "removed"},
 		{Filename: "zcase/rename_new.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/rename_new.go", Status: "renamed"},
-	}, "")
+	}, "", nil)
 	f := "diff_file_coverages_table"
 	if os.Getenv("UPDATE_GOLDEN") != "" {
 		golden.Update(t, testdataDir(t), f, got)
@@ -105,7 +106,7 @@ func TestDiffFileCoveragesTableWithPatch(t *testing.T) {
 		{Filename: "zcase/removed.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed.go", Status: "removed"},
 		{Filename: "zcase/removed_test.go", BlobURL: "https://github.com/k1LoW/octocov/blob/beforehash/zcase/removed_test.go", Status: "removed"},
 		{Filename: "zcase/rename_new.go", BlobURL: "https://github.com/k1LoW/octocov/blob/afterhash/zcase/rename_new.go", Status: "renamed", ChangedLines: []int{5, 6, 9}},
-	}, "")
+	}, "", nil)
 	f := "diff_file_coverages_table_with_patch"
 	if os.Getenv("UPDATE_GOLDEN") != "" {
 		golden.Update(t, testdataDir(t), f, got)
@@ -113,5 +114,32 @@ func TestDiffFileCoveragesTableWithPatch(t *testing.T) {
 	}
 	if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
 		t.Error(diff)
+	}
+}
+
+func TestDiffTableLinksCurrentCoverageToTheViewer(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	a := &Report{}
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	b := &Report{}
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	a.Repository = "k1LoW/tbls"
+	a.PullRequest = 722
+
+	got := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"))
+	if want := "](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
+		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+	}
+	// One cell only, since the compared side names a commit whose report lives in an
+	// artifact of its own, and the diff code block is not markdown.
+	if n := strings.Count(got, "octocov.dev"); n != 1 {
+		t.Errorf("got %d links\nwant 1\n%v", n, got)
+	}
+	if strings.Contains(a.Compare(b).Table(nil), "octocov.dev") {
+		t.Error("a nil viewer must not link to the viewer")
 	}
 }

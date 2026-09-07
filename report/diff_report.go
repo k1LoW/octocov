@@ -56,14 +56,15 @@ func (d *DiffReport) Out(w io.Writer) {
 	r := tablewriter.Colors{tablewriter.Bold, tablewriter.FgRedColor}
 	b := tablewriter.Colors{tablewriter.Bold}
 
-	d.renderTable(table, g, r, b, true, false)
+	// No viewer, since this is the terminal output, where a markdown link is noise.
+	d.renderTable(table, g, r, b, true, false, nil)
 
 	table.Render()
 }
 
 var leftSepRe = regexp.MustCompile(`(?m)^\|`)
 
-func (d *DiffReport) Table() string {
+func (d *DiffReport) Table(v *Viewer) string {
 	var out []string
 
 	// Markdown table
@@ -74,7 +75,7 @@ func (d *DiffReport) Table() string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false, true)
+	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false, true, v)
 	table.Render()
 	out = append(out, strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1))
 
@@ -85,7 +86,7 @@ func (d *DiffReport) Table() string {
 	table2.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table2.SetCenterSeparator("|")
 	table2.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true, false)
+	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true, false, nil)
 	table2.Render()
 	t2 := leftSepRe.ReplaceAllString(buf2.String(), "  |")
 	if d.Coverage != nil {
@@ -128,7 +129,7 @@ func (d *DiffReport) Table() string {
 	return strings.Join(out, "\n")
 }
 
-func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd string) string {
+func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd string, v *Viewer) string {
 	if d.Coverage == nil {
 		return ""
 	}
@@ -138,7 +139,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	var t, c, prevT, prevC int
 	var patchT, patchC int
 	var rows [][]string
-	createRow := func(name string, fc *coverage.DiffFileCoverage, status string, changedLines []int) []string {
+	createRow := func(name, path string, fc *coverage.DiffFileCoverage, status string, changedLines []int) []string {
 		diff := fmt.Sprintf("%.1f%%", floor1(fc.Diff))
 		if fc.Diff > 0 {
 			diff = fmt.Sprintf("+%s", diff)
@@ -155,7 +156,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 		pfc := fc.FileCoverageA.PatchCoverage(changedLines)
 		patchC += pfc.Covered
 		patchT += pfc.Total
-		return []string{name, fmt.Sprintf("%.1f%%", floor1(fc.A)), diff, patchCell(pfc), status}
+		return []string{name, linkCell(fmt.Sprintf("%.1f%%", floor1(fc.A)), v.fileURL(d.ReportA, path)), diff, patchCell(pfc), status}
 	}
 
 	prFiles := map[string]*gh.PullRequestFile{}
@@ -170,7 +171,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	for _, fc := range d.Coverage.Files {
 		if prf, ok := prFiles[fc.File]; ok {
 			name := fmt.Sprintf("[%s](%s)", prf.Filename, prf.BlobURL)
-			rows = append(rows, createRow(name, fc, prf.Status, prf.ChangedLines))
+			rows = append(rows, createRow(name, prf.Filename, fc, prf.Status, prf.ChangedLines))
 			continue
 		}
 		if fc.Diff == 0 {
@@ -195,7 +196,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 		if repoURL != "/" && commit != "" && !filepath.IsAbs(filePath) {
 			name = fmt.Sprintf("[%s](%s/blob/%s/%s)", filePath, repoURL, commit, filePath)
 		}
-		rows = append(rows, createRow(name, fc, "affected", nil))
+		rows = append(rows, createRow(name, filePath, fc, "affected", nil))
 	}
 	if len(rows) == 0 {
 		return ""
@@ -249,7 +250,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
 
-func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool) {
+func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool, v *Viewer) {
 	if withLink {
 		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
 	} else {
@@ -271,7 +272,10 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			if !detail {
 				t = "**Coverage**"
 			}
-			table.Rich([]string{t, fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+			// The current side only, since the compared one names a commit whose report
+			// lives in an artifact of its own.
+			a := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), v.reportURL(d.ReportA))
+			table.Rich([]string{t, fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), a, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
