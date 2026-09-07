@@ -8,21 +8,27 @@ func TestViewerReportURL(t *testing.T) {
 		artifactName string
 		serverURL    string
 		repository   string
+		ref          string
+		baseRef      string
 		pullRequest  int
 		want         string
 	}{
-		{"a pull request has a page of its own", "octocov-report@refs_pull_722", "", "k1LoW/octocov", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
-		{"a run that is not on a pull request has none", "octocov-report", "", "k1LoW/octocov", 0, ""},
-		{"a report of a sub directory is served under its repository", "octocov-report-sub@refs_pull_722", "", "k1LoW/octocov/sub", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
-		{"a report stored in no artifact links nowhere", "", "", "k1LoW/octocov", 722, ""},
-		{"a GitHub Enterprise Server run links nowhere", "octocov-report@refs_pull_722", "https://github.example.com", "k1LoW/octocov", 722, ""},
-		{"github.com stated explicitly is served", "octocov-report@refs_pull_722", "https://github.com", "k1LoW/octocov", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"a pull request has a page of its own", "octocov-report@refs_pull_722", "", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"the default branch is the repository itself", "octocov-report", "", "k1LoW/octocov", "refs/heads/main", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov"},
+		{"a branch has a tree page", "octocov-report@refs_heads_feat_x", "", "k1LoW/octocov", "refs/heads/feat/x", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov/tree/feat/x"},
+		{"a branch name is escaped segment by segment", "octocov-report", "", "k1LoW/octocov", "refs/heads/feat/a b", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov/tree/feat/a%20b"},
+		{"a tag has no page of its own", "octocov-report", "", "k1LoW/octocov", "refs/tags/v1.0.0", "refs/heads/main", 0, ""},
+		{"a report predating the base ref is read as the repository", "octocov-report", "", "k1LoW/octocov", "refs/heads/whatever", "", 0, "https://octocov.dev/k1LoW/octocov"},
+		{"a report of a sub directory is served under its repository", "octocov-report-sub@refs_pull_722", "", "k1LoW/octocov/sub", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"a report stored in no artifact links nowhere", "", "", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
+		{"a GitHub Enterprise Server run links nowhere", "octocov-report@refs_pull_722", "https://github.example.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
+		{"github.com stated explicitly is served", "octocov-report@refs_pull_722", "https://github.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
 			v := NewViewer(tt.artifactName)
-			got := v.reportURL(&Report{Repository: tt.repository, PullRequest: tt.pullRequest, Commit: "0123456789abcdef"})
+			got := v.reportURL(&Report{Repository: tt.repository, Ref: tt.ref, BaseRef: tt.baseRef, PullRequest: tt.pullRequest, Commit: "0123456789abcdef"})
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}

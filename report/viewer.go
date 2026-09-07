@@ -31,17 +31,30 @@ func NewViewer(artifactName string) *Viewer {
 	return &Viewer{artifactName: artifactName}
 }
 
-// reportURL returns the page of the report as a whole. Only a pull request has one, since
-// that page is reached by the pull request number rather than by the artifact name.
+// reportURL returns the page of the report as a whole. That page is routed by the ref
+// rather than by the artifact name, and the ref key is what says which one, so the report
+// of the default branch is the repository itself and every other ref has a page beside it.
 func (v *Viewer) reportURL(r *Report) string {
-	if v == nil || r == nil || r.PullRequest <= 0 {
+	if v == nil || r == nil {
 		return ""
 	}
 	repo, ok := viewerRepo(r)
 	if !ok {
 		return ""
 	}
-	return fmt.Sprintf("%s/%s/%s/pull/%d", viewerBaseURL, repo.Owner, repo.Repo, r.PullRequest)
+	base := fmt.Sprintf("%s/%s/%s", viewerBaseURL, repo.Owner, repo.Repo)
+	key := r.RefKey()
+	switch {
+	case key == "":
+		return base
+	case strings.HasPrefix(key, "refs/pull/"):
+		return fmt.Sprintf("%s/pull/%s", base, strings.TrimPrefix(key, "refs/pull/"))
+	case strings.HasPrefix(key, "refs/heads/"):
+		return fmt.Sprintf("%s/tree/%s", base, escapePath(strings.TrimPrefix(key, "refs/heads/")))
+	default:
+		// A tag, which has no page of its own.
+		return ""
+	}
 }
 
 // fileURL returns the page of one file's coverage. The pull request path carries no

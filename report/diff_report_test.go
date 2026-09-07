@@ -117,7 +117,7 @@ func TestDiffFileCoveragesTableWithPatch(t *testing.T) {
 	}
 }
 
-func TestDiffTableLinksCurrentCoverageToTheViewer(t *testing.T) {
+func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	a := &Report{}
 	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
@@ -128,16 +128,27 @@ func TestDiffTableLinksCurrentCoverageToTheViewer(t *testing.T) {
 		t.Fatal(err)
 	}
 	a.Repository = "k1LoW/tbls"
+	a.Ref = "refs/pull/722/merge"
+	a.BaseRef = "refs/heads/main"
 	a.PullRequest = 722
+	// The compared side is the report of the default branch, which the viewer serves as the
+	// repository itself.
+	b.Repository = "k1LoW/tbls"
+	b.Ref = "refs/heads/main"
+	b.BaseRef = "refs/heads/main"
 
 	got := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"))
-	if want := "](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
-		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+	for _, want := range []string{
+		"](https://octocov.dev/k1LoW/tbls/pull/722)",
+		"](https://octocov.dev/k1LoW/tbls)",
+	} {
+		if !strings.Contains(got, want) {
+			t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+		}
 	}
-	// One cell only, since the compared side names a commit whose report lives in an
-	// artifact of its own, and the diff code block is not markdown.
-	if n := strings.Count(got, "octocov.dev"); n != 1 {
-		t.Errorf("got %d links\nwant 1\n%v", n, got)
+	// The two coverage cells only, since the diff code block is not markdown.
+	if n := strings.Count(got, "octocov.dev"); n != 2 {
+		t.Errorf("got %d links\nwant 2\n%v", n, got)
 	}
 	if strings.Contains(a.Compare(b).Table(nil), "octocov.dev") {
 		t.Error("a nil viewer must not link to the viewer")

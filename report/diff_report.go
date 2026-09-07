@@ -272,10 +272,10 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			if !detail {
 				t = "**Coverage**"
 			}
-			// The current side only, since the compared one names a commit whose report
-			// lives in an artifact of its own.
-			a := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), v.reportURL(d.ReportA))
-			table.Rich([]string{t, fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), a, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+			// Both sides, since each report names the ref its own page is routed by.
+			prev := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), v.reportURL(d.ReportB))
+			cur := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), v.reportURL(d.ReportA))
+			table.Rich([]string{t, prev, cur, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
