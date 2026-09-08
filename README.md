@@ -128,7 +128,7 @@ diff:
 
 ![img](docs/comment_with_diff.png)
 
-When the report is stored in a GitHub Actions artifact, the coverage values of the comment link to [octocov.dev](https://octocov.dev/), where the stored report can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The file names keep pointing at the source on GitHub. Set `comment.hideCoverageLink:` ( or the same key under `summary:` or `body:` ) to render them as plain values again.
+When the report is stored in a GitHub Actions artifact, the coverage values of the comment link to [octocov.dev](https://octocov.dev/), where the stored report can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The compared column is linked only when `diff.datastores:` read it out of an artifact, since that is what the page it would open serves. The file names keep pointing at the source on GitHub. Set `comment.hideCoverageLink:` ( or the same key under `summary:` or `body:` ) to render them as plain values again.
 
 ### Check for acceptable score
 
