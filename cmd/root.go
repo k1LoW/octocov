@@ -323,6 +323,10 @@ var rootCmd = &cobra.Command{
 
 		// Get previous report for comparing reports
 		var rPrev *report.Report
+		// comparedArtifact names the artifact rPrev was read out of, and stays empty when it
+		// was read from anywhere else. The pages serve what an artifact holds, so a
+		// comparison that did not come from one has no page describing it to link at.
+		var comparedArtifact string
 		if err := c.DiffConfigReady(); err == nil {
 			log.Println("Get previous report for comparing reports")
 			repo, err := gh.Parse(c.Repository)
@@ -375,6 +379,7 @@ var rootCmd = &cobra.Command{
 				// Select latest report
 				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 					rPrev = rt
+					comparedArtifact, _ = datastore.ArtifactName([]string{s}, rt)
 				}
 			}
 			if c.Diff.Path != "" {
@@ -385,6 +390,9 @@ var rootCmd = &cobra.Command{
 				if err := rt.MeasureCoverage([]string{c.Diff.Path}, c.Coverage.Exclude); err == nil {
 					if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 						rPrev = rt
+						// Measured here rather than read out of an artifact, and it wins on
+						// timestamp whenever both are configured.
+						comparedArtifact = ""
 					}
 				}
 			}
@@ -402,11 +410,11 @@ var rootCmd = &cobra.Command{
 		storedArtifact := sync.OnceValue(func() *report.Viewer {
 			return storedArtifactViewer(c, r)
 		})
-		coverageViewer := func(hide bool) *report.Viewer {
+		coverageViewers := func(hide bool) (cur, prev *report.Viewer) {
 			if hide {
-				return nil
+				return nil, nil
 			}
-			return storedArtifact()
+			return storedArtifact(), report.NewViewer(comparedArtifact)
 		}
 
 		// Comment report to pull request
@@ -425,7 +433,8 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, coverageViewer(c.Comment.HideCoverageLink))
+				cur, prev := coverageViewers(c.Comment.HideCoverageLink)
+				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, cur, prev)
 				if err != nil {
 					return err
 				}
@@ -454,7 +463,8 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, coverageViewer(c.Summary.HideCoverageLink))
+				cur, prev := coverageViewers(c.Summary.HideCoverageLink)
+				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, cur, prev)
 				if err != nil {
 					return err
 				}
@@ -483,7 +493,8 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, coverageViewer(c.Body.HideCoverageLink))
+				cur, prev := coverageViewers(c.Body.HideCoverageLink)
+				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, cur, prev)
 				if err != nil {
 					return err
 				}

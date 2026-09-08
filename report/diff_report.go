@@ -57,14 +57,17 @@ func (d *DiffReport) Out(w io.Writer) {
 	b := tablewriter.Colors{tablewriter.Bold}
 
 	// No viewer, since this is the terminal output, where a markdown link is noise.
-	d.renderTable(table, g, r, b, true, false, nil)
+	d.renderTable(table, g, r, b, true, false, nil, nil)
 
 	table.Render()
 }
 
 var leftSepRe = regexp.MustCompile(`(?m)^\|`)
 
-func (d *DiffReport) Table(v *Viewer) string {
+// Table renders the comparison. cur views the report being described and prev the one it
+// is compared against, which is a viewer of its own because a comparison can be read from
+// somewhere the pages do not serve.
+func (d *DiffReport) Table(cur, prev *Viewer) string {
 	var out []string
 
 	// Markdown table
@@ -75,7 +78,7 @@ func (d *DiffReport) Table(v *Viewer) string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false, true, v)
+	d.renderTable(table, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, false, true, cur, prev)
 	table.Render()
 	out = append(out, strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1))
 
@@ -86,7 +89,7 @@ func (d *DiffReport) Table(v *Viewer) string {
 	table2.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table2.SetCenterSeparator("|")
 	table2.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true, false, nil)
+	d.renderTable(table2, tablewriter.Colors{}, tablewriter.Colors{}, tablewriter.Colors{}, true, false, nil, nil)
 	table2.Render()
 	t2 := leftSepRe.ReplaceAllString(buf2.String(), "  |")
 	if d.Coverage != nil {
@@ -252,7 +255,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", len(h)), "--:|", "---|", 1)
 }
 
-func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool, v *Viewer) {
+func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool, cur, prev *Viewer) {
 	if withLink {
 		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
 	} else {
@@ -274,10 +277,12 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			if !detail {
 				t = "**Coverage**"
 			}
-			// Both sides, since each report names the ref its own page is routed by.
-			prev := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), v.reportURL(d.ReportB))
-			cur := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), v.reportURL(d.ReportA))
-			table.Rich([]string{t, prev, cur, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+			// Each side by its own viewer, since each report names the ref its page is
+			// routed by, and only the compared side can have been read from somewhere the
+			// pages do not serve.
+			bc := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), prev.reportURL(d.ReportB))
+			ac := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), cur.reportURL(d.ReportA))
+			table.Rich([]string{t, bc, ac, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
 			{
