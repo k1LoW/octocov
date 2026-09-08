@@ -45,8 +45,9 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 // createReportContent renders the report for one of the pull request outputs. files is the
 // changed file list, fetched by the caller so that the three outputs and the patch coverage
 // measurement share one paginated fetch instead of repeating it. v links the coverage cells
-// to the pages that browse the stored report, and is nil when there are none to link to.
-func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.PullRequestFile, message string, hideFooterLink bool, v *report.Viewer) (string, error) {
+// to the pages that browse the stored report, vPrev does the same for the report being
+// compared against, and either is nil when there is no page to link at.
+func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.PullRequestFile, message string, hideFooterLink bool, v, vPrev *report.Viewer) (string, error) {
 	footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
 	if hideFooterLink {
 		footer = "Reported by octocov"
@@ -57,7 +58,7 @@ func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.
 	)
 	if rPrev != nil {
 		d := r.Compare(rPrev)
-		table = d.Table(v)
+		table = d.Table(v, vPrev)
 		relWd := c.Root()
 		if c.GitRoot != "" {
 			if rw, err := filepath.Rel(c.GitRoot, c.Root()); err == nil {

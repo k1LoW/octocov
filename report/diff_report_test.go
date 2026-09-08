@@ -46,7 +46,7 @@ func TestDiffTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := a.Compare(b).Table(nil)
+	got := a.Compare(b).Table(nil, nil)
 	f := "diff_table"
 	if os.Getenv("UPDATE_GOLDEN") != "" {
 		golden.Update(t, testdataDir(t), f, got)
@@ -137,7 +137,7 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 	b.Ref = "refs/heads/main"
 	b.BaseRef = "refs/heads/main"
 
-	got := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"))
+	got := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"), NewViewer("octocov-report"))
 	for _, want := range []string{
 		"](https://octocov.dev/k1LoW/tbls/pull/722)",
 		"](https://octocov.dev/k1LoW/tbls)",
@@ -150,8 +150,18 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 	if n := strings.Count(got, "octocov.dev"); n != 2 {
 		t.Errorf("got %d links\nwant 2\n%v", n, got)
 	}
-	if strings.Contains(a.Compare(b).Table(nil), "octocov.dev") {
+	if strings.Contains(a.Compare(b).Table(nil, nil), "octocov.dev") {
 		t.Error("a nil viewer must not link to the viewer")
+	}
+
+	// The compared report can have been read from somewhere the pages do not serve, and
+	// then only the side that was stored in an artifact is linked.
+	only := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"), nil)
+	if want := "](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(only, want) {
+		t.Errorf("got\n%v\nwant it to contain\n%v", only, want)
+	}
+	if n := strings.Count(only, "octocov.dev"); n != 1 {
+		t.Errorf("got %d links\nwant 1\n%v", n, only)
 	}
 }
 
