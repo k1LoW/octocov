@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.77.0](https://github.com/k1LoW/octocov/compare/v0.76.0...v0.77.0) - 2026-09-08
+
+### Breaking Changes 🛠
+- feat: store the report of a ref under a key of its own by @k1LoW in https://github.com/k1LoW/octocov/pull/720
+- fix: let the generated config report from every run by @k1LoW in https://github.com/k1LoW/octocov/pull/721
+- feat: link the coverage values to octocov.dev by @k1LoW in https://github.com/k1LoW/octocov/pull/722
+### Fix bug 🐛
+- fix: link the compared coverage only when it came from an artifact by @k1LoW in https://github.com/k1LoW/octocov/pull/723
+### Other Changes
+- refactor: fix the lint failures that came with Go 1.26 by @k1LoW in https://github.com/k1LoW/octocov/pull/715
+- chore(deps): bump the dependencies group with 7 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/718
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/717
+
 ## [v0.76.0](https://github.com/k1LoW/octocov/compare/v0.75.12...v0.76.0) - 2026-09-03
 
 ### Breaking Changes 🛠
