@@ -414,7 +414,7 @@ var rootCmd = &cobra.Command{
 			if hide {
 				return nil, nil
 			}
-			return storedArtifact(), report.NewViewer(comparedArtifact)
+			return viewersFor(storedArtifact(), comparedArtifact)
 		}
 
 		// Comment report to pull request
@@ -685,6 +685,17 @@ func storedArtifactViewer(c *config.Config, r *report.Report) *report.Viewer {
 		return nil
 	}
 	return report.NewViewer(name)
+}
+
+// viewersFor pairs the viewer of the report being described with the one of the report it
+// is compared against. The compared side follows the current one, so that a link appears
+// only on a run that stores a report in an artifact of its own, and then only when the
+// comparison was read out of an artifact too.
+func viewersFor(stored *report.Viewer, comparedArtifact string) (cur, prev *report.Viewer) {
+	if stored == nil {
+		return nil, nil
+	}
+	return stored, report.NewViewer(comparedArtifact)
 }
 
 func reportToDatastores(ctx context.Context, c *config.Config, datastores []string, r *report.Report) error {
