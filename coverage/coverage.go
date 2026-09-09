@@ -294,29 +294,34 @@ func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //
 // with it (a report recording package paths, ex. org/repo/package/path/to/Target.kt). Either
 // way the match has to end at a path segment, since a bare strings.HasSuffix let domain.go stand
 // in for main.go and a bare Foo.java for MyFoo.java, and made an entry with no name a suffix of
-// everything.
+// everything. A leading ./ on either side is ignored and nothing else is, so a dotfile keeps its
+// dot.
 //
-// Among the matches the one sharing the longest portion of the file wins, and on a tie the one
-// with fewer unmatched segments. The shortest candidate used to win outright, which is the right
-// call when candidates are absolute paths all ending in the file, but the wrong one when they
-// are package paths the file ends in, where com/example/Foo.java is more specific than Foo.java
-// and yet shorter candidates always won.
+// Among the matches the one sharing the longest portion of the file wins, on a tie the shorter
+// candidate, and between candidates of equal length the first listed. The shortest candidate
+// used to win outright, which is the right call when candidates are absolute paths all ending
+// in the file, but the wrong one when they are package paths the file ends in, where
+// com/example/Foo.java is more specific than Foo.java and yet shorter candidates always won.
 func fuzzyMatch(file string, n int, path func(int) string) int {
-	f := strings.TrimLeft(file, "./")
+	f := trimDotSlash(file)
 	if f == "" {
 		return -1
 	}
+	sf := "/" + f
 	best, bestShared, bestLen := -1, 0, 0
 	for i := range n {
 		p := path(i)
-		e := strings.TrimLeft(p, "./")
+		e := trimDotSlash(p)
+		if e == "" {
+			continue
+		}
 		var shared int
 		switch {
 		case e == f:
 			shared = len(f)
-		case strings.HasSuffix(e, "/"+f):
+		case strings.HasSuffix(e, sf):
 			shared = len(f)
-		case !filepath.IsAbs(p) && strings.HasSuffix(f, "/"+e):
+		case !filepath.IsAbs(p) && len(f) > len(e) && f[len(f)-len(e)-1] == '/' && strings.HasSuffix(f, e):
 			shared = len(e)
 		default:
 			continue
@@ -326,6 +331,17 @@ func fuzzyMatch(file string, n int, path func(int) string) int {
 		}
 	}
 	return best
+}
+
+// trimDotSlash strips a leading "./" as often as it appears and nothing else. strings.TrimLeft
+// with the cutset "./" also stripped the dot of a dotfile or a dot directory, which a bare suffix
+// match tolerated and a match anchored on a separator did not, since ".eslintrc.js" then had to
+// end in "/eslintrc.js".
+func trimDotSlash(p string) string {
+	for strings.HasPrefix(p, "./") {
+		p = p[2:]
+	}
+	return p
 }
 
 func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
