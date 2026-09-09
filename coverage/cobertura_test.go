@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -99,5 +100,48 @@ func TestCoberturaFilesOrder(t *testing.T) {
 		if diff := cmp.Diff(got, first); diff != "" {
 			t.Error(diff)
 		}
+	}
+}
+
+func TestCoberturaMergesClassesOfSameFile(t *testing.T) {
+	// A file split over several <class> elements (one per inner class, say) appears once, at
+	// the position of its first element, with the lines of every element behind it.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "coverage.xml")
+	content := `<?xml version="1.0" ?>
+<coverage>
+  <packages>
+    <package name="pkg">
+      <classes>
+        <class filename="a.py">
+          <lines><line number="1" hits="1"/></lines>
+        </class>
+        <class filename="b.py">
+          <lines><line number="1" hits="0"/></lines>
+        </class>
+        <class filename="a.py">
+          <lines><line number="2" hits="3"/></lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewCobertura().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var files []string
+	for _, f := range got.Files {
+		files = append(files, f.File)
+	}
+	if diff := cmp.Diff(files, []string{"a.py", "b.py"}); diff != "" {
+		t.Fatal(diff)
+	}
+	if want := 2; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }

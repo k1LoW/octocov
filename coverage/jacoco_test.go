@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -95,5 +96,47 @@ func TestJacocoFilesOrder(t *testing.T) {
 		if diff := cmp.Diff(got, first); diff != "" {
 			t.Error(diff)
 		}
+	}
+}
+
+func TestJacocoMergesPackagesOfSameName(t *testing.T) {
+	// A report aggregated from several modules can carry the same <package> name twice. The
+	// files it names appear once, at the position of their first element, with the lines of
+	// every element behind them.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "jacocoTestReport.xml")
+	content := `<?xml version="1.0" ?>
+<report name="agg">
+  <package name="org/example">
+    <sourcefile name="A.kt">
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+    <sourcefile name="B.kt">
+      <line nr="1" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+  <package name="org/example">
+    <sourcefile name="A.kt">
+      <line nr="2" mi="0" ci="3"/>
+    </sourcefile>
+  </package>
+</report>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewJacoco().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var files []string
+	for _, f := range got.Files {
+		files = append(files, f.File)
+	}
+	if diff := cmp.Diff(files, []string{"org/example/A.kt", "org/example/B.kt"}); diff != "" {
+		t.Fatal(diff)
+	}
+	if want := 2; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }
