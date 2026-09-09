@@ -96,9 +96,10 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = c.Name()
 
 	flm := map[string]BlockCoverages{}
-	// The same source file can be listed by more than one <package> element, so keep the order
-	// of first appearance instead of ranging over flm, whose iteration order Go randomizes and
-	// which would churn the files array of a stored report on every run.
+	// The package name is part of the key, so a key repeats only when the same <package> name
+	// appears more than once, as in a report aggregated from several modules. Keep the order of
+	// first appearance instead of ranging over flm, whose iteration order Go randomizes, which
+	// would churn the files array of a stored report on every run.
 	var order []string
 	for _, p := range r.Package {
 		for _, s := range p.Sourcefile {
