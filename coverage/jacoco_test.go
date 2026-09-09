@@ -191,3 +191,65 @@ func TestJacocoCountsSharedLineOnce(t *testing.T) {
 		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }
+
+func TestJacocoNamesDefaultPackageFileRelative(t *testing.T) {
+	// A class in the default package has <package name="">. Its file must be named without a
+	// leading slash, so that FuzzyFindByFile, whose package-path branch is gated on
+	// !filepath.IsAbs, can still resolve it from the path it lives at in the repository.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "jacocoTestReport.xml")
+	content := `<?xml version="1.0" ?>
+<report name="t">
+  <package name="">
+    <sourcefile name="Foo.java">
+      <line nr="1" mi="0" ci="1"/>
+      <line nr="2" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+  <package name="com/example">
+    <sourcefile name="Bar.java">
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+  </package>
+</report>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewJacoco().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 2; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := "Foo.java"; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
+	}
+	if want := "com/example/Bar.java"; got.Files[1].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[1].File, want)
+	}
+	for _, f := range got.Files {
+		if filepath.IsAbs(f.File) {
+			t.Errorf("got absolute path %v", f.File)
+		}
+	}
+	// Both files resolve from the path they live at, which is what the pull request scope
+	// table looks them up by.
+	for _, tt := range []struct {
+		file string
+		want string
+	}{
+		{"src/main/java/Foo.java", "Foo.java"},
+		{"src/main/java/com/example/Bar.java", "com/example/Bar.java"},
+	} {
+		f, err := got.Files.FuzzyFindByFile(tt.file)
+		if err != nil {
+			t.Errorf("%s: %v", tt.file, err)
+			continue
+		}
+		if f.File != tt.want {
+			t.Errorf("got %v\nwant %v", f.File, tt.want)
+		}
+	}
+}

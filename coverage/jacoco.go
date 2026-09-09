@@ -105,7 +105,15 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	var order []string
 	for _, p := range r.Package {
 		for _, s := range p.Sourcefile {
-			n := fmt.Sprintf("%s/%s", p.Name, s.Name)
+			// A class in the default package has <package name="">, and joining that with a
+			// separator unconditionally yields "/Foo.java", which filepath.IsAbs reports as
+			// absolute. FuzzyFindByFile gates its package-path branch on !filepath.IsAbs, so
+			// such a name matches neither branch and the file goes missing from the pull
+			// request scope table.
+			n := s.Name
+			if p.Name != "" {
+				n = fmt.Sprintf("%s/%s", p.Name, s.Name)
+			}
 			f, ok := flm[n]
 			if !ok {
 				f = BlockCoverages{}
