@@ -50,15 +50,11 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			}
 			// The same source file can appear in several records (e.g. .info files of
 			// separate test runs concatenated together), and a single record can list the
-			// same line more than once. Stack the blocks and fold them per line the way
-			// Coverage.reCalc does, instead of replacing the earlier record or counting one
-			// line per DA:.
+			// same line more than once. Stack the blocks on the file already found rather
+			// than listing it twice, then fold them per line once after EOF the way
+			// Coverage.reCalc and the other LOC parsers do, rather than re-folding the
+			// blocks accumulated so far on every record.
 			fcov.Blocks = append(fcov.Blocks, blocks...)
-			lcs := fcov.Blocks.ToLineCoverages()
-			cov.Total += lcs.Total() - fcov.Total
-			cov.Covered += lcs.Covered() - fcov.Covered
-			fcov.Total = lcs.Total()
-			fcov.Covered = lcs.Covered()
 			parsed = true
 			blocks = BlockCoverages{}
 			continue
@@ -110,6 +106,13 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	}
 	if !parsed {
 		return nil, "", errors.New("can not parse")
+	}
+	for _, fcov := range cov.Files {
+		lcs := fcov.Blocks.ToLineCoverages()
+		fcov.Total = lcs.Total()
+		fcov.Covered = lcs.Covered()
+		cov.Total += fcov.Total
+		cov.Covered += fcov.Covered
 	}
 	return cov, rp, nil
 }
