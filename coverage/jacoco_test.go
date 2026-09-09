@@ -185,4 +185,9 @@ func TestJacocoCountsSharedLineOnce(t *testing.T) {
 	if want := 2; got.Files[0].Covered != want {
 		t.Errorf("got %v\nwant %v", got.Files[0].Covered, want)
 	}
+	// The blocks keep every listed line, so the totals came from folding them rather than
+	// from an append that dropped the repeat.
+	if want := 4; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
+	}
 }
