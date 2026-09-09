@@ -136,9 +136,7 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 		// lambda shows up under its outer class and under a synthetic one), so fold the
 		// blocks per line the way Coverage.reCalc does. Counting one line per block would
 		// count such a line twice and return a total the blocks do not support.
-		lcs := blocks.ToLineCoverages()
-		fcov.Total = lcs.Total()
-		fcov.Covered = lcs.Covered()
+		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 		cov.Files = append(cov.Files, fcov)

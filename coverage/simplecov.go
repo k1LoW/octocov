@@ -117,9 +117,7 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 			fcov.Blocks = append(fcov.Blocks, b)
 		}
 
-		lcs := fcov.Blocks.ToLineCoverages()
-		fcov.Total = lcs.Total()
-		fcov.Covered = lcs.Covered()
+		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 	}

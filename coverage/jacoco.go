@@ -151,9 +151,7 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 		// A <sourcefile> lists each line once, but a repeated <package> name brings the same
 		// file back with lines that may repeat, so fold the blocks per line the way
 		// Coverage.reCalc does rather than counting one line per block.
-		lcs := blocks.ToLineCoverages()
-		fcov.Total = lcs.Total()
-		fcov.Covered = lcs.Covered()
+		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 		cov.Files = append(cov.Files, fcov)

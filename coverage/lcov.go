@@ -111,9 +111,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	// than on every end_of_record keeps a file named by R records from being re-folded R
 	// times.
 	for _, fcov := range cov.Files {
-		lcs := fcov.Blocks.ToLineCoverages()
-		fcov.Total = lcs.Total()
-		fcov.Covered = lcs.Covered()
+		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 	}

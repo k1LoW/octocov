@@ -159,9 +159,7 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 		// The report's own statement count is the more authoritative number in principle, but
 		// every path that shows a number recounts from the blocks, so a total taken from
 		// <metrics> was one no consumer saw.
-		lcs := fcov.Blocks.ToLineCoverages()
-		fcov.Total = lcs.Total()
-		fcov.Covered = lcs.Covered()
+		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 	}
