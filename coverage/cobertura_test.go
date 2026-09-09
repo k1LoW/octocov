@@ -66,10 +66,18 @@ func TestCoberturaParseAllFormat(t *testing.T) {
 func TestCoberturaFilesOrder(t *testing.T) {
 	path := filepath.Join(testdataDir(t), "cobertura")
 	// The files of a parsed report follow the order the report lists them in, and stay in that
-	// order however many times the same report is parsed.
-	head := []string{"__init__.py", "applications.py", "background.py"}
+	// order however many times the same report is parsed. Sorted order would put
+	// dependencies/__init__.py sixth, so the sixth name is what tells the two apart.
+	head := []string{
+		"__init__.py",
+		"applications.py",
+		"background.py",
+		"concurrency.py",
+		"datastructures.py",
+		"encoders.py",
+	}
 	var first []string
-	for range 10 {
+	for i := range 10 {
 		cov, _, err := NewCobertura().ParseReport(path)
 		if err != nil {
 			t.Fatal(err)
@@ -78,10 +86,13 @@ func TestCoberturaFilesOrder(t *testing.T) {
 		for _, f := range cov.Files {
 			got = append(got, f.File)
 		}
+		if len(got) < len(head) {
+			t.Fatalf("got %v files\nwant at least %v", len(got), len(head))
+		}
 		if diff := cmp.Diff(got[:len(head)], head); diff != "" {
 			t.Error(diff)
 		}
-		if len(first) == 0 {
+		if i == 0 {
 			first = got
 			continue
 		}
