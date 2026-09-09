@@ -215,3 +215,56 @@ end_of_record
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
 }
+
+func TestLcovCountsRepeatedLineInOneRecordOnce(t *testing.T) {
+	// A single record listing the same line twice (e.g. a hand-assembled or
+	// concatenated .info) must count that line once, and a line hit by any of
+	// its DA: entries must read as covered.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lcov.info")
+	content := `TN:
+SF:src/a.ts
+DA:1,1
+DA:1,0
+DA:2,1
+end_of_record
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	f := got.Files[0]
+	if want := 2; f.Total != want {
+		t.Errorf("got %v\nwant %v", f.Total, want)
+	}
+	if want := 2; f.Covered != want {
+		t.Errorf("got %v\nwant %v", f.Covered, want)
+	}
+	// The blocks keep every listed line, so the totals came from folding them rather than
+	// from an append that dropped the repeat.
+	if want := 3; len(f.Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(f.Blocks), want)
+	}
+	if want := 2; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 2; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	// Exclude() recalculates from blocks; the totals must not change.
+	if err := got.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := 2; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 2; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+}
