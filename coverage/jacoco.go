@@ -96,12 +96,20 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = c.Name()
 
 	flm := map[string]BlockCoverages{}
+	// The package name is part of the key, so a key repeats only when the same <package> name
+	// appears more than once, as in a report aggregated from several modules. Keep the order of
+	// first appearance instead of ranging over flm, whose iteration order Go randomizes, which
+	// would churn the files array of a stored report on every run. Merging through
+	// Files.FindByFile in one pass, the way lcov.go does, would drop the map, but it rescans
+	// the slice once per <sourcefile> element.
+	var order []string
 	for _, p := range r.Package {
 		for _, s := range p.Sourcefile {
 			n := fmt.Sprintf("%s/%s", p.Name, s.Name)
 			f, ok := flm[n]
 			if !ok {
 				f = BlockCoverages{}
+				order = append(order, n)
 			}
 			for _, l := range s.Line {
 				sl := l.Nr
@@ -121,7 +129,8 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 		}
 	}
 
-	for f, blocks := range flm {
+	for _, f := range order {
+		blocks := flm[f]
 		fcov := NewFileCoverage(f, TypeLOC)
 		for _, b := range blocks {
 			fcov.Total += 1

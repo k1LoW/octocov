@@ -2,8 +2,10 @@ package coverage
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 
 	"github.com/goccy/go-json"
 )
@@ -71,8 +73,14 @@ func (s *Simplecov) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = s.Name()
 	fcovs := map[string]*FileCoverage{}
 	sls := skipLines{}
-	for _, c := range r {
-		for fn, fc := range c.Coverage {
+	// The report is a JSON object, so both the suites and the files reach us as maps and have
+	// no order of their own for Files to follow. Walk them by name, since Go randomizes map
+	// iteration and the resulting order is stored as is in report.json, reordering the whole
+	// array on every run of a byte-identical report.
+	for _, sn := range slices.Sorted(maps.Keys(r)) {
+		c := r[sn]
+		for _, fn := range slices.Sorted(maps.Keys(c.Coverage)) {
+			fc := c.Coverage[fn]
 			fcov, ok := fcovs[fn]
 			if !ok {
 				fcov = NewFileCoverage(fn, TypeLOC)

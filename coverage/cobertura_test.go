@@ -1,8 +1,11 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestCobertura(t *testing.T) {
@@ -58,5 +61,87 @@ func TestCoberturaParseAllFormat(t *testing.T) {
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 		}
+	}
+}
+
+func TestCoberturaFilesOrder(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "cobertura")
+	// The files of a parsed report follow the order the report lists them in, and stay in that
+	// order however many times the same report is parsed. Sorted order would put
+	// dependencies/__init__.py sixth, so the sixth name is what tells the two apart.
+	head := []string{
+		"__init__.py",
+		"applications.py",
+		"background.py",
+		"concurrency.py",
+		"datastructures.py",
+		"encoders.py",
+	}
+	var first []string
+	for i := range 10 {
+		cov, _, err := NewCobertura().ParseReport(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []string
+		for _, f := range cov.Files {
+			got = append(got, f.File)
+		}
+		if len(got) < len(head) {
+			t.Fatalf("got %v files\nwant at least %v", len(got), len(head))
+		}
+		if diff := cmp.Diff(got[:len(head)], head); diff != "" {
+			t.Error(diff)
+		}
+		if i == 0 {
+			first = got
+			continue
+		}
+		if diff := cmp.Diff(got, first); diff != "" {
+			t.Error(diff)
+		}
+	}
+}
+
+func TestCoberturaMergesClassesOfSameFile(t *testing.T) {
+	// A file split over several <class> elements (one per inner class, say) appears once, at
+	// the position of its first element, with the lines of every element behind it.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "coverage.xml")
+	content := `<?xml version="1.0" ?>
+<coverage>
+  <packages>
+    <package name="pkg">
+      <classes>
+        <class filename="a.py">
+          <lines><line number="1" hits="1"/></lines>
+        </class>
+        <class filename="b.py">
+          <lines><line number="1" hits="0"/></lines>
+        </class>
+        <class filename="a.py">
+          <lines><line number="2" hits="3"/></lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewCobertura().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var files []string
+	for _, f := range got.Files {
+		files = append(files, f.File)
+	}
+	if diff := cmp.Diff(files, []string{"a.py", "b.py"}); diff != "" {
+		t.Fatal(diff)
+	}
+	if want := 2; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }

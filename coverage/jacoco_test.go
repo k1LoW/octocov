@@ -1,8 +1,11 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestJacoco(t *testing.T) {
@@ -58,5 +61,82 @@ func TestJacocoParseAllFormat(t *testing.T) {
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 		}
+	}
+}
+
+func TestJacocoFilesOrder(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "jacoco")
+	// The files of a parsed report follow the order the report lists them in, and stay in that
+	// order however many times the same report is parsed. Sorted order would start at
+	// io/cloudevents/cloudEventsExtensions.kt, so these two names rule sorting out.
+	head := []string{
+		"org/http4k/security/oauth/server/accesstoken/GenerateAccessTokenForGrantType.kt",
+		"org/http4k/security/oauth/server/accesstoken/GrantConfiguration.kt",
+	}
+	var first []string
+	for i := range 10 {
+		cov, _, err := NewJacoco().ParseReport(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []string
+		for _, f := range cov.Files {
+			got = append(got, f.File)
+		}
+		if len(got) < len(head) {
+			t.Fatalf("got %v files\nwant at least %v", len(got), len(head))
+		}
+		if diff := cmp.Diff(got[:len(head)], head); diff != "" {
+			t.Error(diff)
+		}
+		if i == 0 {
+			first = got
+			continue
+		}
+		if diff := cmp.Diff(got, first); diff != "" {
+			t.Error(diff)
+		}
+	}
+}
+
+func TestJacocoMergesPackagesOfSameName(t *testing.T) {
+	// A report aggregated from several modules can carry the same <package> name twice. The
+	// files it names appear once, at the position of their first element, with the lines of
+	// every element behind them.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "jacocoTestReport.xml")
+	content := `<?xml version="1.0" ?>
+<report name="agg">
+  <package name="org/example">
+    <sourcefile name="A.kt">
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+    <sourcefile name="B.kt">
+      <line nr="1" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+  <package name="org/example">
+    <sourcefile name="A.kt">
+      <line nr="2" mi="0" ci="3"/>
+    </sourcefile>
+  </package>
+</report>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewJacoco().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var files []string
+	for _, f := range got.Files {
+		files = append(files, f.File)
+	}
+	if diff := cmp.Diff(files, []string{"org/example/A.kt", "org/example/B.kt"}); diff != "" {
+		t.Fatal(diff)
+	}
+	if want := 2; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }

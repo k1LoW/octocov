@@ -99,12 +99,19 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = c.Name()
 
 	flm := map[string]BlockCoverages{}
+	// A file can be split over several <class> elements (e.g. one class per inner class), so
+	// keep the order of first appearance instead of ranging over flm, whose iteration order Go
+	// randomizes and which would churn the files array of a stored report on every run.
+	// Merging through Files.FindByFile in one pass, the way lcov.go does, would drop the map,
+	// but it rescans the slice once per <class> element and this format has one per class.
+	var order []string
 	for _, p := range r.Packages.Package {
 		for _, c := range p.Classes.Class {
 			n := c.Filename
 			f, ok := flm[n]
 			if !ok {
 				f = BlockCoverages{}
+				order = append(order, n)
 			}
 			for _, l := range c.Lines.Line {
 				sl := l.Number
@@ -121,7 +128,8 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 		}
 	}
 
-	for f, blocks := range flm {
+	for _, f := range order {
+		blocks := flm[f]
 		fcov := NewFileCoverage(f, TypeLOC)
 		for _, b := range blocks {
 			fcov.Total += 1
