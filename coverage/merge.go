@@ -52,6 +52,12 @@ func (c *Coverage) reCalc() error {
 
 		case TypeStmt: // Coverage of a single unmerged TypeStmt.
 			for _, b := range f.Blocks {
+				// Both fields are omitempty, so a stored report can leave either out. Skip such a
+				// block so it contributes no statements, the same choice the line walks make for a
+				// block they cannot dereference, rather than rejecting the report at load time.
+				if b.NumStmt == nil || b.Count == nil {
+					continue
+				}
 				fileTotal += *b.NumStmt
 				if *b.Count > 0 {
 					fileCovered += *b.NumStmt
