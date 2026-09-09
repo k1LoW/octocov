@@ -191,3 +191,108 @@ func TestJacocoCountsSharedLineOnce(t *testing.T) {
 		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }
+
+func TestJacocoNamesDefaultPackageFileRelative(t *testing.T) {
+	// A class in the default package has <package name="">. Its file must be named without a
+	// leading slash, so that FuzzyFindByFile can resolve it from the path it lives at in the
+	// repository, which is the lookup the pull request scope table performs.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "jacocoTestReport.xml")
+	content := `<?xml version="1.0" ?>
+<report name="t">
+  <package name="">
+    <sourcefile name="Foo.java">
+      <line nr="1" mi="0" ci="1"/>
+      <line nr="2" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+  <package name="com/example">
+    <sourcefile name="Bar.java">
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+    <sourcefile name="Foo.java">
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+  </package>
+</report>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewJacoco().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 3; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := "Foo.java"; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
+	}
+	for _, f := range got.Files {
+		if filepath.IsAbs(f.File) {
+			t.Errorf("got absolute path %v", f.File)
+		}
+	}
+	// Each file resolves from the path it lives at, and the same basename in the default
+	// package and in a named package go to their own files.
+	tests := []struct {
+		file string
+		want string
+	}{
+		{"src/main/java/Foo.java", "Foo.java"},
+		{"src/main/java/com/example/Bar.java", "com/example/Bar.java"},
+		{"src/main/java/com/example/Foo.java", "com/example/Foo.java"},
+	}
+	for _, tt := range tests {
+		f, err := got.Files.FuzzyFindByFile(tt.file)
+		if err != nil {
+			t.Errorf("%s: %v", tt.file, err)
+			continue
+		}
+		if f.File != tt.want {
+			t.Errorf("got %v\nwant %v", f.File, tt.want)
+		}
+	}
+}
+
+func TestJacocoSkipsSourcefileWithoutName(t *testing.T) {
+	// A <sourcefile> with no name would key an entry on "" in the default package and on
+	// "pkg/" in a named one. Neither can resolve a changed path, so none is made and the named
+	// file beside them is unaffected.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "jacocoTestReport.xml")
+	content := `<?xml version="1.0" ?>
+<report name="t">
+  <package name="">
+    <sourcefile>
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+    <sourcefile name="Foo.java">
+      <line nr="1" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+  <package name="com/example">
+    <sourcefile>
+      <line nr="1" mi="0" ci="1"/>
+    </sourcefile>
+  </package>
+</report>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewJacoco().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := "Foo.java"; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
+	}
+	if want := 0; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+}

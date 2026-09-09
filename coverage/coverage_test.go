@@ -302,6 +302,31 @@ func TestFuzzyFindByFile(t *testing.T) {
 			"/path/to/owner/repo/target.go",
 			false,
 		},
+		// The whole path outranks any suffix of it.
+		{[]string{"a/target.go", "src/a/target.go"}, "src/a/target.go", "src/a/target.go", false},
+		// A package path outranks a bare filename for a lookup that contains both, since it
+		// shares more of the path, whichever order the report lists them in. A JaCoCo default
+		// package produces the bare filename.
+		{[]string{"Foo.java", "com/example/Foo.java"}, "src/main/java/com/example/Foo.java", "com/example/Foo.java", false},
+		{[]string{"com/example/Foo.java", "Foo.java"}, "src/main/java/com/example/Foo.java", "com/example/Foo.java", false},
+		// The bare filename still resolves from its own path, which the package path does not
+		// match.
+		{[]string{"Foo.java", "com/example/Foo.java"}, "src/main/java/Foo.java", "Foo.java", false},
+		// A match has to end at a path segment, in either direction.
+		{[]string{"Foo.java"}, "src/main/java/MyFoo.java", "", true},
+		{[]string{"/path/to/repo/domain.go"}, "main.go", "", true},
+		// An entry with no name is a suffix of nothing rather than of everything, even of a
+		// lookup that ends in a separator.
+		{[]string{"", "src/a/target.go"}, "src/a/target.go", "src/a/target.go", false},
+		{[]string{""}, "src/a/target.go", "", true},
+		{[]string{""}, "a/", "", true},
+		// A leading ./ is ignored on either side and nothing else is, so a dotfile keeps its dot
+		// and resolves from an absolute or a nested path, and a dot directory is not the
+		// directory without the dot.
+		{[]string{"/home/runner/work/repo/repo/.eslintrc.js"}, ".eslintrc.js", "/home/runner/work/repo/repo/.eslintrc.js", false},
+		{[]string{".storybook/preview.ts"}, "frontend/.storybook/preview.ts", ".storybook/preview.ts", false},
+		{[]string{"./lib/x.rb"}, "src/lib/x.rb", "./lib/x.rb", false},
+		{[]string{".config/x.go"}, "src/config/x.go", "", true},
 	}
 	for _, tt := range tests {
 		fcs := FileCoverages{}

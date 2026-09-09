@@ -298,28 +298,67 @@ func (fc FileCoverages) FindByFile(file string) (*FileCoverage, error) { //nosty
 }
 
 func (fc FileCoverages) FuzzyFindByFile(file string) (*FileCoverage, error) { //nostyle:recvtype
-	var match *FileCoverage
-	for _, c := range fc {
-		ep := c.EffectivePath()
-		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
-		if strings.HasSuffix(strings.TrimLeft(ep, "./"), strings.TrimLeft(file, "./")) {
-			if match == nil || len(match.EffectivePath()) > len(ep) {
-				match = c
-			}
+	i := fuzzyMatch(file, len(fc), func(i int) string { return fc[i].EffectivePath() })
+	if i < 0 {
+		return nil, fmt.Errorf("file name not found: %s", file)
+	}
+	return fc[i], nil
+}
+
+// fuzzyMatch picks, among n candidate paths, the one that best resolves a changed file, and
+// returns its index or -1. A candidate matches when it is the file, when it ends with the file
+// (a report recording absolute paths, ex. /path/to/owner/repo/target.go), or when the file ends
+// with it (a report recording package paths, ex. org/repo/package/path/to/Target.kt). Either
+// way the match has to end at a path segment, since a bare strings.HasSuffix let domain.go stand
+// in for main.go and a bare Foo.java for MyFoo.java, and made an entry with no name a suffix of
+// everything. A leading ./ on either side is ignored and nothing else is, so a dotfile keeps its
+// dot.
+//
+// Among the matches the one sharing the longest portion of the file wins, on a tie the shorter
+// candidate, and between candidates of equal length the first listed. The shortest candidate
+// used to win outright, which is the right call when candidates are absolute paths all ending
+// in the file, but the wrong one when they are package paths the file ends in, where
+// com/example/Foo.java is more specific than Foo.java and yet shorter candidates always won.
+func fuzzyMatch(file string, n int, path func(int) string) int {
+	f := trimDotSlash(file)
+	if f == "" {
+		return -1
+	}
+	sf := "/" + f
+	best, bestShared, bestLen := -1, 0, 0
+	for i := range n {
+		p := path(i)
+		e := trimDotSlash(p)
+		if e == "" {
 			continue
 		}
-		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !filepath.IsAbs(ep) && strings.HasSuffix(file, ep) {
-			if match == nil || len(match.EffectivePath()) > len(ep) {
-				match = c
-			}
+		var shared int
+		switch {
+		case e == f:
+			shared = len(f)
+		case strings.HasSuffix(e, sf):
+			shared = len(f)
+		case !filepath.IsAbs(p) && len(f) > len(e) && f[len(f)-len(e)-1] == '/' && strings.HasSuffix(f, e):
+			shared = len(e)
+		default:
 			continue
 		}
+		if best < 0 || shared > bestShared || (shared == bestShared && len(e) < bestLen) {
+			best, bestShared, bestLen = i, shared, len(e)
+		}
 	}
-	if match != nil {
-		return match, nil
+	return best
+}
+
+// trimDotSlash strips a leading "./" as often as it appears and nothing else. strings.TrimLeft
+// with the cutset "./" also stripped the dot of a dotfile or a dot directory, which a bare suffix
+// match tolerated and a match anchored on a separator did not, since ".eslintrc.js" then had to
+// end in "/eslintrc.js".
+func trimDotSlash(p string) string {
+	for strings.HasPrefix(p, "./") {
+		p = p[2:]
 	}
-	return nil, fmt.Errorf("file name not found: %s", file)
+	return p
 }
 
 func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
@@ -354,27 +393,11 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 }
 
 func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, error) { //nostyle:recvtype
-	var match *DiffFileCoverage
-	for _, c := range dc {
-		// When coverages are recorded with absolute path. ( ex. /path/to/owner/repo/target.go
-		if strings.HasSuffix(strings.TrimLeft(c.File, "./"), strings.TrimLeft(file, "./")) {
-			if match == nil || len(match.File) > len(c.File) {
-				match = c
-			}
-			continue
-		}
-		// When coverages are recorded in the package path. ( ex. org/repo/package/path/to/Target.kt
-		if !filepath.IsAbs(c.File) && strings.HasSuffix(file, c.File) {
-			if match == nil || len(match.File) > len(c.File) {
-				match = c
-			}
-			continue
-		}
+	i := fuzzyMatch(file, len(dc), func(i int) string { return dc[i].File })
+	if i < 0 {
+		return nil, fmt.Errorf("file name not found: %s", file)
 	}
-	if match != nil {
-		return match, nil
-	}
-	return nil, fmt.Errorf("file name not found: %s", file)
+	return dc[i], nil
 }
 
 // inclusiveRange yields every value from start to end inclusive. It stops at end instead of
