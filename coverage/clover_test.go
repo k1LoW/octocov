@@ -274,3 +274,28 @@ func TestCloverKeepsSameNamedFilesWithoutPathApart(t *testing.T) {
 		t.Errorf("got %d/%d\nwant 4/2", got.Total, got.Covered)
 	}
 }
+
+func TestIsAbsReportPath(t *testing.T) {
+	// The answer must not depend on the host octocov runs on, since the path describes the host
+	// that produced the report.
+	tests := []struct {
+		path string
+		want bool
+	}{
+		{"/src/a.php", true},
+		{`C:\src\a.php`, true},
+		{"c:/src/a.php", true},
+		{"src/a.php", false},
+		{"a.php", false},
+		{"./a.php", false},
+		{"", false},
+		{"C:", false},
+		{`:\a.php`, false},
+		{`1:\a.php`, false},
+	}
+	for _, tt := range tests {
+		if got := isAbsReportPath(tt.path); got != tt.want {
+			t.Errorf("%q: got %v\nwant %v", tt.path, got, tt.want)
+		}
+	}
+}

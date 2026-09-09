@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 var _ Processor = (*Clover)(nil)
@@ -171,10 +172,23 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 // basename (#639), so path wins when it is given and name is relative. An absolute name is a
 // real location too. A bare relative name is not, since files in different directories share it.
 func cloverIdentity(f CloverReportFile) (string, bool) {
-	if f.Path != "" && !filepath.IsAbs(f.Name) {
+	if f.Path != "" && !isAbsReportPath(f.Name) {
 		return f.Path, true
 	}
-	return f.Name, filepath.IsAbs(f.Name)
+	return f.Name, isAbsReportPath(f.Name)
+}
+
+// isAbsReportPath reports whether a path a report recorded is absolute on the host that produced
+// the report. filepath.IsAbs answers for the host octocov runs on, so a Unix path read on Windows,
+// or a Windows path read on Unix, came out relative there, and a file was filed under the wrong
+// identity or refused a merge depending on the runner rather than on the report.
+func isAbsReportPath(p string) bool {
+	if filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
+		return true
+	}
+	// A drive letter and a separator, the volume shape filepath recognizes on Windows only.
+	return len(p) >= 3 && p[1] == ':' && (p[2] == '\\' || p[2] == '/') &&
+		(('a' <= p[0] && p[0] <= 'z') || ('A' <= p[0] && p[0] <= 'Z'))
 }
 
 func parseReportLines(f CloverReportFile) BlockCoverages {
