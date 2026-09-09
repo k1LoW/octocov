@@ -249,6 +249,22 @@ func (bc *BlockCoverage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// walkable reports whether MaxCount and ToLineCoverages can dereference the block. Every field
+// but Type is omitempty, so a stored report can leave the range, the count or the columns out,
+// and those two walks panicked on such a block while FindBlocksByLine skipped it. They now skip
+// it too, so it contributes no lines rather than being assumed to start at 0. FindBlocksByLine
+// keeps its own narrower check on the range alone, because PatchCoverage reads a block whose
+// count is missing as an uncovered line and needs it returned.
+func (bc *BlockCoverage) walkable() bool {
+	if bc.StartLine == nil || bc.EndLine == nil || bc.Count == nil {
+		return false
+	}
+	if bc.Type != TypeLOC && (bc.StartCol == nil || bc.EndCol == nil) {
+		return false
+	}
+	return true
+}
+
 type BlockCoverages []*BlockCoverage
 
 type Processor interface {
@@ -380,6 +396,9 @@ func inclusiveRange(start, end int) func(func(int) bool) {
 func (bc BlockCoverages) MaxCount() ExecCount { //nostyle:recvtype
 	counts := map[int]ExecCount{}
 	for _, c := range bc {
+		if !c.walkable() {
+			continue
+		}
 		sl := *c.StartLine
 		el := *c.EndLine
 		for i := range inclusiveRange(sl, el) {
@@ -479,6 +498,9 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 	m := skipmap.NewInt[*skipmap.IntMap[ExecCount]]()
 
 	for _, c := range bc {
+		if !c.walkable() {
+			continue
+		}
 		sl := *c.StartLine
 		el := *c.EndLine
 		for i := range inclusiveRange(sl, el) {

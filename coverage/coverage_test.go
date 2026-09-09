@@ -499,3 +499,44 @@ func TestLineRangeWalksTerminateAtMaxInt(t *testing.T) {
 		}
 	})
 }
+
+func TestBlockWalksSkipIncompleteBlocks(t *testing.T) {
+	// Every field of a stored block but its type is omitempty, so a report can come back with
+	// the line range, the columns or the count missing. Each walk must treat such a block as
+	// contributing nothing, the way FindBlocksByLine already did, instead of dereferencing nil.
+	// The complete block beside it must still be counted.
+	complete := &BlockCoverage{Type: TypeLOC, StartLine: new(4), EndLine: new(4), Count: new(ExecCount(2))}
+	tests := []struct {
+		name  string
+		block *BlockCoverage
+	}{
+		{"no line range", &BlockCoverage{Type: TypeLOC, Count: new(ExecCount(1))}},
+		{"no start line", &BlockCoverage{Type: TypeLOC, EndLine: new(1), Count: new(ExecCount(1))}},
+		{"no count", &BlockCoverage{Type: TypeLOC, StartLine: new(1), EndLine: new(1)}},
+		{"statement block without columns", &BlockCoverage{Type: TypeStmt, StartLine: new(1), EndLine: new(1), Count: new(ExecCount(1))}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			blocks := BlockCoverages{tt.block, complete}
+			lcs := blocks.ToLineCoverages()
+			if want := 1; lcs.Total() != want {
+				t.Errorf("got %v\nwant %v", lcs.Total(), want)
+			}
+			if want := 4; lcs[0].Line != want {
+				t.Errorf("got %v\nwant %v", lcs[0].Line, want)
+			}
+			if want := ExecCount(2); blocks.MaxCount() != want {
+				t.Errorf("got %v\nwant %v", blocks.MaxCount(), want)
+			}
+		})
+	}
+	// FindBlocksByLine keeps a block whose count is missing, since PatchCoverage reads it as an
+	// uncovered line, and skips only a block with no line range.
+	fc := &FileCoverage{File: "a.go", Blocks: BlockCoverages{
+		&BlockCoverage{Type: TypeLOC, StartLine: new(1), EndLine: new(1)},
+		&BlockCoverage{Type: TypeLOC, Count: new(ExecCount(1))},
+	}}
+	if want := 1; len(fc.FindBlocksByLine(1)) != want {
+		t.Errorf("got %v\nwant %v", len(fc.FindBlocksByLine(1)), want)
+	}
+}
