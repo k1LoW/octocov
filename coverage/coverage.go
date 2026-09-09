@@ -317,7 +317,7 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 			if b.StartLine == nil || b.EndLine == nil {
 				continue
 			}
-			for i := *b.StartLine; i <= *b.EndLine; i++ {
+			for i := range inclusiveRange(*b.StartLine, *b.EndLine) {
 				_, ok := fc.cache[i]
 				if !ok {
 					fc.cache[i] = BlockCoverages{}
@@ -358,12 +358,31 @@ func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, err
 	return nil, fmt.Errorf("file name not found: %s", file)
 }
 
+// inclusiveRange yields every value from start to end inclusive. It stops at end instead of
+// incrementing past it, so a report naming line or column math.MaxInt does not wrap the
+// counter round to math.MinInt and spin forever while the caller allocates per value. A start
+// above end yields nothing, as the plain loops this replaces did. Its four callers, in
+// FindBlocksByLine, MaxCount and twice in ToLineCoverages, each held an independent copy of
+// the same shape, so a fix in one of them did not cover the others.
+func inclusiveRange(start, end int) func(func(int) bool) {
+	return func(yield func(int) bool) {
+		for i := start; i <= end; i++ {
+			if !yield(i) {
+				return
+			}
+			if i == end {
+				return
+			}
+		}
+	}
+}
+
 func (bc BlockCoverages) MaxCount() ExecCount { //nostyle:recvtype
 	counts := map[int]ExecCount{}
 	for _, c := range bc {
 		sl := *c.StartLine
 		el := *c.EndLine
-		for i := sl; i <= el; i++ {
+		for i := range inclusiveRange(sl, el) {
 			_, ok := counts[i]
 			if !ok {
 				counts[i] = 0
@@ -462,7 +481,7 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 	for _, c := range bc {
 		sl := *c.StartLine
 		el := *c.EndLine
-		for i := sl; i <= el; i++ {
+		for i := range inclusiveRange(sl, el) {
 			var mm *skipmap.IntMap[ExecCount]
 			mm, ok := m.Load(i)
 			if !ok {
@@ -525,7 +544,7 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 					mm.Store(endPos, *c.Count)
 				}
 			case i == sl && i == el:
-				for j := *c.StartCol; j <= *c.EndCol; j++ {
+				for j := range inclusiveRange(*c.StartCol, *c.EndCol) {
 					v, ok := mm.Load(j)
 					if ok {
 						mm.Store(j, satAdd(v, *c.Count))
