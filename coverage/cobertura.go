@@ -102,7 +102,7 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	// A file can be split over several <class> elements (e.g. one class per inner class), so
 	// keep the order of first appearance instead of ranging over flm, whose iteration order Go
 	// randomizes and which would churn the files array of a stored report on every run.
-	order := []string{}
+	var order []string
 	for _, p := range r.Packages.Package {
 		for _, c := range p.Classes.Class {
 			n := c.Filename

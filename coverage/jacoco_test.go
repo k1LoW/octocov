@@ -84,7 +84,7 @@ func TestJacocoFilesOrder(t *testing.T) {
 		if diff := cmp.Diff(got[:len(head)], head); diff != "" {
 			t.Error(diff)
 		}
-		if first == nil {
+		if len(first) == 0 {
 			first = got
 			continue
 		}

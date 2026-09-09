@@ -99,7 +99,7 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	// The same source file can be listed by more than one <package> element, so keep the order
 	// of first appearance instead of ranging over flm, whose iteration order Go randomizes and
 	// which would churn the files array of a stored report on every run.
-	order := []string{}
+	var order []string
 	for _, p := range r.Package {
 		for _, s := range p.Sourcefile {
 			n := fmt.Sprintf("%s/%s", p.Name, s.Name)
