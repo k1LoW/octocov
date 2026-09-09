@@ -160,3 +160,58 @@ end_of_record
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
 }
+
+func TestLcovMergesRecordsOfSameFile(t *testing.T) {
+	// Concatenated .info files (e.g. one per test run) repeat SF for the same
+	// source file. The file must appear once, with counts stacked per line.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lcov.info")
+	content := `TN:
+SF:src/a.ts
+DA:1,1
+DA:2,0
+end_of_record
+TN:
+SF:src/a.ts
+DA:1,0
+DA:2,3
+DA:3,1
+end_of_record
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	f := got.Files[0]
+	if want := 3; f.Total != want {
+		t.Errorf("got %v\nwant %v", f.Total, want)
+	}
+	if want := 3; f.Covered != want {
+		t.Errorf("got %v\nwant %v", f.Covered, want)
+	}
+	if want := 5; len(f.Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(f.Blocks), want)
+	}
+	if want := 3; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 3; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	// Exclude() recalculates from blocks; the totals must not change.
+	if err := got.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if want := 3; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 3; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+}
