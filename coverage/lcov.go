@@ -49,20 +49,32 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			fcov, err := cov.Files.FindByFile(fileName)
 			if err != nil {
 				fcov = NewFileCoverage(fileName, TypeLOC)
+				fcov.Total = total
+				fcov.Covered = covered
+				fcov.Blocks = blocks
+				cov.Total += total
+				cov.Covered += covered
+				cov.Files = append(cov.Files, fcov)
+			} else {
+				// The same source file can appear in several records (e.g. .info files of
+				// separate test runs concatenated together). Stack the blocks and count lines
+				// once, the same way Coverage.Merge does, instead of replacing the earlier
+				// record and listing the file twice.
+				fcov.Blocks = append(fcov.Blocks, blocks...)
+				lcs := fcov.Blocks.ToLineCoverages()
+				cov.Total += lcs.Total() - fcov.Total
+				cov.Covered += lcs.Covered() - fcov.Covered
+				fcov.Total = lcs.Total()
+				fcov.Covered = lcs.Covered()
 			}
-			fcov.Total += total
-			fcov.Covered += covered
-			fcov.Blocks = blocks
-			cov.Total += total
-			cov.Covered += covered
-			cov.Files = append(cov.Files, fcov)
 			total = 0
 			covered = 0
 			parsed = true
 			blocks = BlockCoverages{}
 			continue
 		}
-		splitted := strings.Split(l, ":")
+		// The value may itself contain ':' (e.g. SF:C:\path\to\file), so split only once.
+		splitted := strings.SplitN(l, ":", 2)
 		if len(splitted) != 2 {
 			continue
 		}
@@ -71,8 +83,9 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			fileName = splitted[1]
 		case "DA":
 			total += 1
+			// DA:<line>,<count>[,<checksum>]
 			nums := strings.Split(splitted[1], ",")
-			if len(nums) != 2 {
+			if len(nums) != 2 && len(nums) != 3 {
 				_ = r.Close() //nostyle:handlerrors
 				return nil, "", fmt.Errorf("can not parse: %s", l)
 			}
