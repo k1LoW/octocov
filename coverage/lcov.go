@@ -62,7 +62,8 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			blocks = BlockCoverages{}
 			continue
 		}
-		splitted := strings.Split(l, ":")
+		// The value may itself contain ':' (e.g. SF:C:\path\to\file), so split only once.
+		splitted := strings.SplitN(l, ":", 2)
 		if len(splitted) != 2 {
 			continue
 		}

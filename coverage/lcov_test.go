@@ -98,3 +98,40 @@ func TestLcovParseAllFormat(t *testing.T) {
 		}
 	}
 }
+
+func TestLcovAcceptsPathContainingColon(t *testing.T) {
+	// Windows drive letters put a ':' inside the SF value.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lcov.info")
+	content := `TN:
+SF:C:\proj\src\a.ts
+DA:1,1
+end_of_record
+TN:
+SF:C:\proj\src\b.ts
+DA:1,0
+end_of_record
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 2; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := `C:\proj\src\a.ts`; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
+	}
+	if want := `C:\proj\src\b.ts`; got.Files[1].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[1].File, want)
+	}
+	if want := 2; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 1; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+}
