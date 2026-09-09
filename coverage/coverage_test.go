@@ -431,7 +431,8 @@ func newBlockCoverage(t Type, sl, sc, el, ec, ns, c int) *BlockCoverage {
 func TestLineRangeWalksTerminateAtMaxInt(t *testing.T) {
 	// A line or column number of math.MaxInt used to wrap the loop counter to math.MinInt, so
 	// the walk never ended and ToLineCoverages grew a nested map per key while it spun. Every
-	// walk must instead treat such a block as the single line or column it describes.
+	// walk must instead treat such a block as the single line or column it describes, and a
+	// block whose start is above its end must still yield nothing.
 	t.Run("ToLineCoverages", func(t *testing.T) {
 		blocks := BlockCoverages{
 			&BlockCoverage{Type: TypeLOC, StartLine: new(math.MaxInt), EndLine: new(math.MaxInt), Count: new(ExecCount(1))},

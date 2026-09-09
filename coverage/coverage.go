@@ -361,8 +361,9 @@ func (dc DiffFileCoverages) FuzzyFindByFile(file string) (*DiffFileCoverage, err
 // inclusiveRange yields every value from start to end inclusive. It stops at end instead of
 // incrementing past it, so a report naming line or column math.MaxInt does not wrap the
 // counter round to math.MinInt and spin forever while the caller allocates per value. A start
-// above end yields nothing, as the plain loops this replaces did. The line and column walks
-// below were independent copies of the same shape, so a fix in one did not cover the others.
+// above end yields nothing, as the plain loops this replaces did. Its four callers, in
+// FindBlocksByLine, MaxCount and twice in ToLineCoverages, each held an independent copy of
+// the same shape, so a fix in one of them did not cover the others.
 func inclusiveRange(start, end int) func(func(int) bool) {
 	return func(yield func(int) bool) {
 		for i := start; i <= end; i++ {
