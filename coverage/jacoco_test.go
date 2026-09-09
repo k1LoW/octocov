@@ -3,6 +3,8 @@ package coverage
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestJacoco(t *testing.T) {
@@ -57,6 +59,37 @@ func TestJacocoParseAllFormat(t *testing.T) {
 		_, _, err := NewJacoco().ParseReport(tt.path)
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+		}
+	}
+}
+
+func TestJacocoFilesOrder(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "jacoco")
+	// The files of a parsed report follow the order the report lists them in, and stay in that
+	// order however many times the same report is parsed.
+	head := []string{
+		"org/http4k/security/oauth/server/accesstoken/GenerateAccessTokenForGrantType.kt",
+		"org/http4k/security/oauth/server/accesstoken/GrantConfiguration.kt",
+	}
+	var first []string
+	for i := 0; i < 10; i++ {
+		cov, _, err := NewJacoco().ParseReport(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []string
+		for _, f := range cov.Files {
+			got = append(got, f.File)
+		}
+		if diff := cmp.Diff(got[:len(head)], head); diff != "" {
+			t.Error(diff)
+		}
+		if first == nil {
+			first = got
+			continue
+		}
+		if diff := cmp.Diff(got, first); diff != "" {
+			t.Error(diff)
 		}
 	}
 }

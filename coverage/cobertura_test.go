@@ -3,6 +3,8 @@ package coverage
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestCobertura(t *testing.T) {
@@ -57,6 +59,34 @@ func TestCoberturaParseAllFormat(t *testing.T) {
 		_, _, err := NewCobertura().ParseReport(tt.path)
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+		}
+	}
+}
+
+func TestCoberturaFilesOrder(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "cobertura")
+	// The files of a parsed report follow the order the report lists them in, and stay in that
+	// order however many times the same report is parsed.
+	head := []string{"__init__.py", "applications.py", "background.py"}
+	var first []string
+	for i := 0; i < 10; i++ {
+		cov, _, err := NewCobertura().ParseReport(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []string
+		for _, f := range cov.Files {
+			got = append(got, f.File)
+		}
+		if diff := cmp.Diff(got[:len(head)], head); diff != "" {
+			t.Error(diff)
+		}
+		if first == nil {
+			first = got
+			continue
+		}
+		if diff := cmp.Diff(got, first); diff != "" {
+			t.Error(diff)
 		}
 	}
 }

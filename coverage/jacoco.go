@@ -96,12 +96,17 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = c.Name()
 
 	flm := map[string]BlockCoverages{}
+	// The same source file can be listed by more than one <package> element, so keep the order
+	// of first appearance instead of ranging over flm, whose iteration order Go randomizes and
+	// which would churn the files array of a stored report on every run.
+	order := []string{}
 	for _, p := range r.Package {
 		for _, s := range p.Sourcefile {
 			n := fmt.Sprintf("%s/%s", p.Name, s.Name)
 			f, ok := flm[n]
 			if !ok {
 				f = BlockCoverages{}
+				order = append(order, n)
 			}
 			for _, l := range s.Line {
 				sl := l.Nr
@@ -121,7 +126,8 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 		}
 	}
 
-	for f, blocks := range flm {
+	for _, f := range order {
+		blocks := flm[f]
 		fcov := NewFileCoverage(f, TypeLOC)
 		for _, b := range blocks {
 			fcov.Total += 1
