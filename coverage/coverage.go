@@ -190,6 +190,17 @@ func toExecCount(c int) ExecCount {
 	return ExecCount(c)
 }
 
+// maxBlockSpan bounds the line, or column, a block may reach. ToLineCoverages builds a nested
+// map per value it walks, measured in #744 at roughly 600MB per million, so a file whose blocks
+// reach past this exhausts a CI runner long before the walk finishes, and no source file is a
+// million lines long. Bounding the position rather than the width caps what a file's blocks can
+// walk in total at the constant however many there are, where a width bound let ten blocks
+// placed end to end walk ten times as far. What stays proportional to the input is the number
+// of files, each of which can reach the bound. #741 stopped the walk's counter wrapping at
+// math.MaxInt; a range that merely ends at a huge line still walks it one value at a time, and
+// this is what bounds that.
+const maxBlockSpan = 1_000_000
+
 type BlockCoverage struct {
 	Type      Type       `json:"type"`
 	StartLine *int       `json:"start_line,omitempty"`
@@ -245,6 +256,41 @@ func (bc *BlockCoverage) UnmarshalJSON(data []byte) error {
 	if a.CountU64 != nil {
 		c := ExecCount(*a.CountU64)
 		bc.Count = &c
+	}
+	// Every path that reads a stored report, whether a local file, a datastore, BigQuery or the
+	// central index, comes through here, so this is the one place a stored block is checked.
+	return bc.validateSpan()
+}
+
+// validateSpan rejects a block whose range cannot describe real source, so the walks never see
+// one. A missing range is not rejected, since the fields are omitempty and a stored report can
+// legitimately leave them out; what the walks do with one is #745's concern.
+func (bc *BlockCoverage) validateSpan() error {
+	if err := checkSpan(bc.StartLine, bc.EndLine, "line"); err != nil {
+		return err
+	}
+	// The columns of a block that spans lines sit on different lines, so the end column is
+	// routinely below the start column and their distance means nothing. Only the walk over a
+	// single line's columns can run away, so only that shape has its columns checked.
+	if bc.StartLine == nil || bc.EndLine == nil || *bc.StartLine != *bc.EndLine {
+		return nil
+	}
+	return checkSpan(bc.StartCol, bc.EndCol, "column")
+}
+
+// checkSpan rejects a negative start, an end below the start, and an end past maxBlockSpan. With
+// the start at zero or more and the end no further than the constant, the width is bounded too.
+func checkSpan(start, end *int, what string) error {
+	if start == nil || end == nil {
+		return nil
+	}
+	switch {
+	case *start < 0:
+		return fmt.Errorf("negative %s number: %d", what, *start)
+	case *end < *start:
+		return fmt.Errorf("block ends before it starts: %s %d..%d", what, *start, *end)
+	case *end > maxBlockSpan:
+		return fmt.Errorf("block reaches %s %d, past the %d octocov accepts", what, *end, maxBlockSpan)
 	}
 	return nil
 }

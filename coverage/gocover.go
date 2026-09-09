@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -45,7 +46,7 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 			ec := b.EndCol
 			ns := b.NumStmt
 			c := toExecCount(b.Count)
-			fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
+			blk := &BlockCoverage{
 				Type:      TypeStmt,
 				StartLine: &sl,
 				StartCol:  &sc,
@@ -53,7 +54,14 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 				EndCol:    &ec,
 				NumStmt:   &ns,
 				Count:     &c,
-			})
+			}
+			// x/tools/cover rejects nothing here but a negative position, and this is the one
+			// format whose blocks span lines, since the others set StartLine equal to EndLine.
+			// So it is the one parser that can hand the walks a range no source file has.
+			if err := blk.validateSpan(); err != nil {
+				return nil, "", fmt.Errorf("%s: %s: %w", rp, p.FileName, err)
+			}
+			fcov.Blocks = append(fcov.Blocks, blk)
 		}
 		cov.Total += total
 		cov.Covered += covered

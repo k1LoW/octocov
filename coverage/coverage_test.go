@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"encoding/json"
 	"math"
 	"testing"
 
@@ -566,5 +567,40 @@ func TestBlockWalksSkipIncompleteBlocks(t *testing.T) {
 	}}
 	if want := 2; len(fc.FindBlocksByLine(1)) != want {
 		t.Errorf("got %v\nwant %v", len(fc.FindBlocksByLine(1)), want)
+	}
+}
+
+func TestBlockCoverageRejectsImplausibleSpan(t *testing.T) {
+	// A stored report is the one ingestion path every parser shares, so a block whose range
+	// cannot describe real source must fail to load rather than reach a walk that allocates per
+	// line. A missing range stays legitimate, since the fields are omitempty.
+	tests := []struct {
+		name    string
+		json    string
+		wantErr bool
+	}{
+		{"one line", `{"type":"loc","start_line":3,"end_line":3,"count":1}`, false},
+		{"furthest line accepted", `{"type":"stmt","start_line":1,"end_line":1000000,"start_col":1,"end_col":1,"count":1}`, false},
+		{"one line past it", `{"type":"stmt","start_line":1,"end_line":1000001,"start_col":1,"end_col":1,"count":1}`, true},
+		// The bound is on where a block ends, not how wide it is, so narrow blocks placed far
+		// out are rejected too.
+		{"narrow block past the bound", `{"type":"loc","start_line":1000005,"end_line":1000006,"count":1}`, true},
+		{"no range", `{"type":"loc","count":1}`, false},
+		{"ends before it starts", `{"type":"loc","start_line":5,"end_line":3,"count":1}`, true},
+		{"negative line", `{"type":"loc","start_line":-1,"end_line":1,"count":1}`, true},
+		{"wide line span", `{"type":"stmt","start_line":1,"end_line":9223372036854775806,"start_col":1,"end_col":1,"count":1}`, true},
+		{"wide column span", `{"type":"stmt","start_line":1,"end_line":1,"start_col":1,"end_col":9223372036854775806,"count":1}`, true},
+		// A block spanning lines ends at a column below the one it started at, as in a stored Go
+		// cover report, and that is not an inverted range.
+		{"end column below start column across lines", `{"type":"stmt","start_line":10,"end_line":12,"start_col":66,"end_col":25,"count":1}`, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var b BlockCoverage
+			err := json.Unmarshal([]byte(tt.json), &b)
+			if tt.wantErr != (err != nil) {
+				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }
