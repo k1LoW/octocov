@@ -2,7 +2,10 @@ package coverage
 
 import (
 	"path/filepath"
+	"slices"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestSimplecov(t *testing.T) {
@@ -87,6 +90,33 @@ func TestSimplecovParseAllFormat(t *testing.T) {
 		_, _, err := NewSimplecov().ParseReport(tt.path)
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+		}
+	}
+}
+
+func TestSimplecovFilesOrder(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "simplecov")
+	// A .resultset.json is a JSON object, so it fixes no order for its files. They come out
+	// sorted by name, the same order however many times the same report is parsed.
+	var first []string
+	for i := range 10 {
+		cov, _, err := NewSimplecov().ParseReport(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var got []string
+		for _, f := range cov.Files {
+			got = append(got, f.File)
+		}
+		if diff := cmp.Diff(got, slices.Sorted(slices.Values(got))); diff != "" {
+			t.Error(diff)
+		}
+		if i == 0 {
+			first = got
+			continue
+		}
+		if diff := cmp.Diff(got, first); diff != "" {
+			t.Error(diff)
 		}
 	}
 }
