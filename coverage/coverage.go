@@ -249,12 +249,13 @@ func (bc *BlockCoverage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// walkable reports whether MaxCount and ToLineCoverages can dereference the block. Every field
-// but Type is omitempty, so a stored report can leave the range, the count or the columns out,
-// and those two walks panicked on such a block while FindBlocksByLine skipped it. They now skip
-// it too, so it contributes no lines rather than being assumed to start at 0. FindBlocksByLine
-// keeps its own narrower check on the range alone, because PatchCoverage reads a block whose
-// count is missing as an uncovered line and needs it returned.
+// walkable reports whether the two line walks, MaxCount and ToLineCoverages, can dereference
+// the block. Every field but Type is omitempty, so a stored report can leave the range, the
+// count or the columns out. Such a block contributes no lines rather than being assumed to
+// start at 0, the reading FindBlocksByLine already had for a missing range. The predicate is
+// the union of what both walks read, so a statement block with no columns is skipped by
+// MaxCount as well, though only ToLineCoverages reads them. FindBlocksByLine does not use it;
+// see the note on its guard.
 func (bc *BlockCoverage) walkable() bool {
 	if bc.StartLine == nil || bc.EndLine == nil || bc.Count == nil {
 		return false
@@ -330,6 +331,8 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 		for _, b := range fc.Blocks {
 			// A stored report can omit the line range, since both fields are omitempty.
 			// Such a block contributes no lines rather than being assumed to start at 0.
+			// Deliberately narrower than walkable, since PatchCoverage reads a block whose
+			// count is missing as an uncovered line and needs it returned.
 			if b.StartLine == nil || b.EndLine == nil {
 				continue
 			}
