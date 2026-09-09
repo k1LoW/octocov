@@ -34,10 +34,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 		return nil, "", err
 	}
 	scanner := bufio.NewScanner(r)
-	var (
-		fileName       string
-		total, covered int
-	)
+	var fileName string
 	cov := New()
 	cov.Type = TypeLOC
 	cov.Format = l.Name()
@@ -49,26 +46,19 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			fcov, err := cov.Files.FindByFile(fileName)
 			if err != nil {
 				fcov = NewFileCoverage(fileName, TypeLOC)
-				fcov.Total = total
-				fcov.Covered = covered
-				fcov.Blocks = blocks
-				cov.Total += total
-				cov.Covered += covered
 				cov.Files = append(cov.Files, fcov)
-			} else {
-				// The same source file can appear in several records (e.g. .info files of
-				// separate test runs concatenated together). Stack the blocks and count lines
-				// once, the same way Coverage.Merge does, instead of replacing the earlier
-				// record and listing the file twice.
-				fcov.Blocks = append(fcov.Blocks, blocks...)
-				lcs := fcov.Blocks.ToLineCoverages()
-				cov.Total += lcs.Total() - fcov.Total
-				cov.Covered += lcs.Covered() - fcov.Covered
-				fcov.Total = lcs.Total()
-				fcov.Covered = lcs.Covered()
 			}
-			total = 0
-			covered = 0
+			// The same source file can appear in several records (e.g. .info files of
+			// separate test runs concatenated together), and a single record can list the
+			// same line more than once. Stack the blocks and fold them per line the way
+			// Coverage.reCalc does, instead of replacing the earlier record or counting one
+			// line per DA:.
+			fcov.Blocks = append(fcov.Blocks, blocks...)
+			lcs := fcov.Blocks.ToLineCoverages()
+			cov.Total += lcs.Total() - fcov.Total
+			cov.Covered += lcs.Covered() - fcov.Covered
+			fcov.Total = lcs.Total()
+			fcov.Covered = lcs.Covered()
 			parsed = true
 			blocks = BlockCoverages{}
 			continue
@@ -82,7 +72,6 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 		case "SF":
 			fileName = splitted[1]
 		case "DA":
-			total += 1
 			// DA:<line>,<count>[,<checksum>]
 			nums := strings.Split(splitted[1], ",")
 			if len(nums) != 2 && len(nums) != 3 {
@@ -104,9 +93,6 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			if err != nil && !errors.Is(err, strconv.ErrRange) {
 				_ = r.Close() //nostyle:handlerrors
 				return nil, "", err
-			}
-			if count > 0 {
-				covered += 1
 			}
 			c := ExecCount(count)
 			blocks = append(blocks, &BlockCoverage{
