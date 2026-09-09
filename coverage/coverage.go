@@ -190,11 +190,15 @@ func toExecCount(c int) ExecCount {
 	return ExecCount(c)
 }
 
-// maxBlockSpan bounds how many lines, or columns, one block may cover. ToLineCoverages builds a
-// nested map per value it walks, at roughly 600MB per million, so a block wider than this
-// exhausts a CI runner long before the walk finishes, and no coverage tool describes a run of
-// source that long. #741 stopped the walk's counter wrapping at math.MaxInt; a range that merely
-// ends at a huge line still walks it one value at a time, and this is what bounds that.
+// maxBlockSpan bounds the line, or column, a block may reach. ToLineCoverages builds a nested
+// map per value it walks, measured in #744 at roughly 600MB per million, so a file whose blocks
+// reach past this exhausts a CI runner long before the walk finishes, and no source file is a
+// million lines long. Bounding the position rather than the width caps what a file's blocks can
+// walk in total at the constant however many there are, where a width bound let ten blocks
+// placed end to end walk ten times as far. What stays proportional to the input is the number
+// of files, each of which can reach the bound. #741 stopped the walk's counter wrapping at
+// math.MaxInt; a range that merely ends at a huge line still walks it one value at a time, and
+// this is what bounds that.
 const maxBlockSpan = 1_000_000
 
 type BlockCoverage struct {
@@ -259,8 +263,8 @@ func (bc *BlockCoverage) UnmarshalJSON(data []byte) error {
 }
 
 // validateSpan rejects a block whose range cannot describe real source, so the walks never see
-// one. A missing range is legitimate, since the fields are omitempty, and is left to the walks
-// to skip rather than rejected here.
+// one. A missing range is not rejected, since the fields are omitempty and a stored report can
+// legitimately leave them out; what the walks do with one is #745's concern.
 func (bc *BlockCoverage) validateSpan() error {
 	if err := checkSpan(bc.StartLine, bc.EndLine, "line"); err != nil {
 		return err
@@ -274,8 +278,8 @@ func (bc *BlockCoverage) validateSpan() error {
 	return checkSpan(bc.StartCol, bc.EndCol, "column")
 }
 
-// checkSpan orders its tests so the subtraction cannot overflow. Once start is non-negative and
-// end is not below it, end minus start lies within int.
+// checkSpan rejects a negative start, an end below the start, and an end past maxBlockSpan. With
+// the start at zero or more and the end no further than the constant, the width is bounded too.
 func checkSpan(start, end *int, what string) error {
 	if start == nil || end == nil {
 		return nil
@@ -285,8 +289,8 @@ func checkSpan(start, end *int, what string) error {
 		return fmt.Errorf("negative %s number: %d", what, *start)
 	case *end < *start:
 		return fmt.Errorf("block ends before it starts: %s %d..%d", what, *start, *end)
-	case *end-*start > maxBlockSpan:
-		return fmt.Errorf("block spans %d %ss, more than the %d octocov accepts", *end-*start, what, maxBlockSpan)
+	case *end > maxBlockSpan:
+		return fmt.Errorf("block reaches %s %d, past the %d octocov accepts", what, *end, maxBlockSpan)
 	}
 	return nil
 }

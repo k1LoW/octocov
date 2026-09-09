@@ -86,6 +86,8 @@ func TestGocoverRejectsImplausibleBlock(t *testing.T) {
 		{"wide line span", "x.go:1.1,9223372036854775806.1 1 1", true},
 		{"wide column span", "x.go:1.1,1.9223372036854775806 1 1", true},
 		{"ends before it starts", "x.go:9.1,3.1 1 1", true},
+		{"furthest line accepted", "x.go:1.1,1000000.1 1 1", false},
+		{"narrow block past the bound", "x.go:1000001.1,1000002.1 1 1", true},
 		// The usual shape of a block that spans lines, ending at a column below where it began.
 		{"spans lines", "x.go:10.66,12.25 1 1", false},
 	}

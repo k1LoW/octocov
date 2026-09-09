@@ -417,8 +417,10 @@ func (r *Report) Load(path string) error {
 	if err != nil {
 		return err
 	}
+	// BlockCoverage.UnmarshalJSON can reject a block and knows nothing about which report it
+	// is decoding, and a datastore holds many, so the path goes on the error here.
 	if err := json.Unmarshal(b, r); err != nil {
-		return err
+		return fmt.Errorf("%s: %w", path, err)
 	}
 	r.covPaths = append(r.covPaths, path)
 	return nil

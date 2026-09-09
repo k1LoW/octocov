@@ -55,11 +55,11 @@ func (g *Gocover) ParseReport(path string) (*Coverage, string, error) {
 				NumStmt:   &ns,
 				Count:     &c,
 			}
-			// x/tools/cover accepts any integer here, and this is the one format whose blocks
-			// span lines, since the others set StartLine equal to EndLine. So it is the one
-			// parser that can hand the walks a range no source file has.
+			// x/tools/cover rejects nothing here but a negative position, and this is the one
+			// format whose blocks span lines, since the others set StartLine equal to EndLine.
+			// So it is the one parser that can hand the walks a range no source file has.
 			if err := blk.validateSpan(); err != nil {
-				return nil, "", fmt.Errorf("%s: %w", rp, err)
+				return nil, "", fmt.Errorf("%s: %s: %w", rp, p.FileName, err)
 			}
 			fcov.Blocks = append(fcov.Blocks, blk)
 		}

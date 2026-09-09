@@ -555,7 +555,11 @@ func TestBlockCoverageRejectsImplausibleSpan(t *testing.T) {
 		wantErr bool
 	}{
 		{"one line", `{"type":"loc","start_line":3,"end_line":3,"count":1}`, false},
-		{"widest span accepted", `{"type":"stmt","start_line":1,"end_line":1000001,"start_col":1,"end_col":1,"count":1}`, false},
+		{"furthest line accepted", `{"type":"stmt","start_line":1,"end_line":1000000,"start_col":1,"end_col":1,"count":1}`, false},
+		{"one line past it", `{"type":"stmt","start_line":1,"end_line":1000001,"start_col":1,"end_col":1,"count":1}`, true},
+		// The bound is on where a block ends, not how wide it is, so narrow blocks placed far
+		// out are rejected too.
+		{"narrow block past the bound", `{"type":"loc","start_line":1000005,"end_line":1000006,"count":1}`, true},
 		{"no range", `{"type":"loc","count":1}`, false},
 		{"ends before it starts", `{"type":"loc","start_line":5,"end_line":3,"count":1}`, true},
 		{"negative line", `{"type":"loc","start_line":-1,"end_line":1,"count":1}`, true},
