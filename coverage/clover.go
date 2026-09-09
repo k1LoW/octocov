@@ -120,20 +120,35 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	cov.Type = TypeLOC
 	cov.Format = c.Name()
 	for _, f := range r.Project.File {
-		fcov := parseReportFile(f)
-		cov.Total += fcov.Total
-		cov.Covered += fcov.Covered
-		cov.Files = append(cov.Files, fcov)
+		mergeReportFile(cov, f)
 	}
 	for _, p := range r.Project.Package {
 		for _, f := range p.File {
-			fcov := parseReportFile(f)
-			cov.Total += fcov.Total
-			cov.Covered += fcov.Covered
-			cov.Files = append(cov.Files, fcov)
+			mergeReportFile(cov, f)
 		}
 	}
+	for _, fcov := range cov.Files {
+		cov.Total += fcov.Total
+		cov.Covered += fcov.Covered
+	}
 	return cov, rp, nil
+}
+
+// mergeReportFile adds one <file> element to cov, stacking it onto the entry already there
+// when the element names a file that has been seen. A report can describe a file at the
+// project level and again inside a <package>, and appending unconditionally listed it twice
+// and counted its statements twice with it.
+func mergeReportFile(cov *Coverage, f CloverReportFile) {
+	fcov := parseReportFile(f)
+	existing, err := cov.Files.FindByFile(fcov.File)
+	if err != nil {
+		cov.Files = append(cov.Files, fcov)
+		return
+	}
+	// Only the blocks stack, the way Coverage.Merge does. The two elements describe the same
+	// file, so their <metrics> say the same thing and the reading already taken stands rather
+	// than being added to.
+	existing.Blocks = append(existing.Blocks, fcov.Blocks...)
 }
 
 func parseReportFile(f CloverReportFile) *FileCoverage {

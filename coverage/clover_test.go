@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -115,5 +116,63 @@ func TestCloverParseAllFormat(t *testing.T) {
 		if tt.wantErr != (err != nil) {
 			t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 		}
+	}
+}
+
+func TestCloverMergesFileNamedTwice(t *testing.T) {
+	// A report describes a file at the project level and again inside a <package>. The file
+	// must be listed once and its statements counted once. The report below describes one
+	// file with 5 statements, of which 4 were executed.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "coverage.xml")
+	content := `<?xml version="1.0" ?>
+<coverage generated="1">
+  <project timestamp="1">
+    <file name="a.php" path="/src/a.php">
+      <metrics statements="5" coveredstatements="4"/>
+      <line num="1" type="stmt" count="1"/>
+    </file>
+    <package name="pkg">
+      <file name="a.php" path="/src/a.php">
+        <metrics statements="5" coveredstatements="4"/>
+        <line num="1" type="stmt" count="1"/>
+      </file>
+    </package>
+  </project>
+</coverage>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewClover().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := "/src/a.php"; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
+	}
+	if want := 5; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 4; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	if want := 5; got.Files[0].Total != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Total, want)
+	}
+	if want := 4; got.Files[0].Covered != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Covered, want)
+	}
+	// The blocks of both elements are kept, so the merge stacked them rather than dropping
+	// the second element outright. Both name line 1, so they fold to the one line the file
+	// enumerates.
+	if want := 2; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
+	}
+	if want := 1; got.Files[0].Blocks.ToLineCoverages().Total() != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Blocks.ToLineCoverages().Total(), want)
 	}
 }
