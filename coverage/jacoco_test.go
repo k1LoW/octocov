@@ -257,9 +257,9 @@ func TestJacocoNamesDefaultPackageFileRelative(t *testing.T) {
 }
 
 func TestJacocoSkipsSourcefileWithoutName(t *testing.T) {
-	// A <sourcefile> with no name in the default package would key an entry on "". Such an
-	// entry resolves nothing and only clutters the file list, so none is made and the named
-	// file beside it is unaffected.
+	// A <sourcefile> with no name would key an entry on "" in the default package and on
+	// "pkg/" in a named one. Neither can resolve a changed path, so none is made and the named
+	// file beside them is unaffected.
 	dir := t.TempDir()
 	path := filepath.Join(dir, "jacocoTestReport.xml")
 	content := `<?xml version="1.0" ?>
@@ -270,6 +270,11 @@ func TestJacocoSkipsSourcefileWithoutName(t *testing.T) {
     </sourcefile>
     <sourcefile name="Foo.java">
       <line nr="1" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+  <package name="com/example">
+    <sourcefile>
+      <line nr="1" mi="0" ci="1"/>
     </sourcefile>
   </package>
 </report>
