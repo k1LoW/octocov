@@ -102,6 +102,8 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	// A file can be split over several <class> elements (e.g. one class per inner class), so
 	// keep the order of first appearance instead of ranging over flm, whose iteration order Go
 	// randomizes and which would churn the files array of a stored report on every run.
+	// Merging through Files.FindByFile in one pass, the way lcov.go does, would drop the map,
+	// but it rescans the slice once per <class> element and this format has one per class.
 	var order []string
 	for _, p := range r.Packages.Package {
 		for _, c := range p.Classes.Class {
