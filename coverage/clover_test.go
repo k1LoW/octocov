@@ -117,3 +117,47 @@ func TestCloverParseAllFormat(t *testing.T) {
 		}
 	}
 }
+
+func TestCloverCountsFromLines(t *testing.T) {
+	// The totals come from the <line type="stmt"> elements, folded per line, and not from the
+	// <metrics> attributes, so what ParseReport returns is what its blocks support and what
+	// Exclude recounts to. The fixture declares statements="36" coveredstatements="28" for a
+	// file listing ten executed statement lines, and statements="0" for one listing a single
+	// executed line.
+	path := filepath.Join(testdataDir(t), "clover", "coverage_package.xml")
+	got, _, err := NewClover().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	tests := []struct {
+		file    string
+		total   int
+		covered int
+	}{
+		{"/path/to/src/Framework/Exception.php", 0, 0},
+		{"/path/to/src/Framework/Assert.php", 10, 10},
+		{"/path/to/src/app/libs/Util.php", 1, 1},
+	}
+	for _, tt := range tests {
+		f, err := got.Files.FindByFile(tt.file)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if f.Total != tt.total || f.Covered != tt.covered {
+			t.Errorf("%s: got %d/%d\nwant %d/%d", tt.file, f.Total, f.Covered, tt.total, tt.covered)
+		}
+	}
+	if want := 11; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 11; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	// Exclude() recalculates from blocks; the totals must not change.
+	if err := got.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got.Total != 11 || got.Covered != 11 {
+		t.Errorf("got %d/%d\nwant 11/11", got.Total, got.Covered)
+	}
+}

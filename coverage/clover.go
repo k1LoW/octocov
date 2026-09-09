@@ -120,18 +120,24 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	cov.Type = TypeLOC
 	cov.Format = c.Name()
 	for _, f := range r.Project.File {
-		fcov := parseReportFile(f)
-		cov.Total += fcov.Total
-		cov.Covered += fcov.Covered
-		cov.Files = append(cov.Files, fcov)
+		cov.Files = append(cov.Files, parseReportFile(f))
 	}
 	for _, p := range r.Project.Package {
 		for _, f := range p.File {
-			fcov := parseReportFile(f)
-			cov.Total += fcov.Total
-			cov.Covered += fcov.Covered
-			cov.Files = append(cov.Files, fcov)
+			cov.Files = append(cov.Files, parseReportFile(f))
 		}
+	}
+	for _, fcov := range cov.Files {
+		// Fold per line the way Coverage.reCalc does rather than trusting the <metrics>
+		// attributes. The report's own statement count is the more authoritative number in
+		// principle, but every path that shows a number already recounts from the blocks, so a
+		// total taken from <metrics> was one no consumer saw, and it could disagree with the
+		// blocks returned beside it, which no other LOC parser allows.
+		lcs := fcov.Blocks.ToLineCoverages()
+		fcov.Total = lcs.Total()
+		fcov.Covered = lcs.Covered()
+		cov.Total += fcov.Total
+		cov.Covered += fcov.Covered
 	}
 	return cov, rp, nil
 }
@@ -142,8 +148,6 @@ func parseReportFile(f CloverReportFile) *FileCoverage {
 		identity = f.Path
 	}
 	fcov := NewFileCoverage(identity, TypeLOC)
-	fcov.Covered = f.Metrics.Coveredstatements
-	fcov.Total = f.Metrics.Statements
 	for _, l := range f.Line {
 		if l.Type != "stmt" {
 			continue
