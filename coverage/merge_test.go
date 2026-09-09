@@ -752,3 +752,37 @@ func TestMerge(t *testing.T) {
 		})
 	}
 }
+
+func TestReCalcSkipsStatementBlockWithoutCountOrNumStmt(t *testing.T) {
+	// A statement block's count and statement number are both omitempty, so a stored report
+	// can come back without either. Recalculating from such a block must count nothing for it
+	// instead of dereferencing nil, and the complete block beside it must still be counted.
+	complete := newBlockCoverage(TypeStmt, 3, 1, 3, 5, 2, 1)
+	tests := []struct {
+		name  string
+		block *BlockCoverage
+	}{
+		{"no count", &BlockCoverage{Type: TypeStmt, StartLine: new(1), StartCol: new(1), EndLine: new(1), EndCol: new(5), NumStmt: new(1)}},
+		{"no num_stmt", &BlockCoverage{Type: TypeStmt, StartLine: new(1), StartCol: new(1), EndLine: new(1), EndCol: new(5), Count: new(ExecCount(1))}},
+		{"neither", &BlockCoverage{Type: TypeStmt}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Coverage{
+				Type: TypeStmt,
+				Files: FileCoverages{
+					&FileCoverage{File: "a.go", Type: TypeStmt, Blocks: BlockCoverages{tt.block, complete}},
+				},
+			}
+			if err := c.Exclude(nil); err != nil {
+				t.Fatal(err)
+			}
+			if want := 2; c.Total != want {
+				t.Errorf("got %v\nwant %v", c.Total, want)
+			}
+			if want := 2; c.Covered != want {
+				t.Errorf("got %v\nwant %v", c.Covered, want)
+			}
+		})
+	}
+}
