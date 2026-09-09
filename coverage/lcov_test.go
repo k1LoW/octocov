@@ -246,7 +246,8 @@ end_of_record
 	if want := 2; f.Covered != want {
 		t.Errorf("got %v\nwant %v", f.Covered, want)
 	}
-	// The blocks are left as read, so all three DA: entries remain.
+	// The blocks keep every listed line, so the totals came from folding them rather than
+	// from an append that dropped the repeat.
 	if want := 3; len(f.Blocks) != want {
 		t.Errorf("got %v\nwant %v", len(f.Blocks), want)
 	}
