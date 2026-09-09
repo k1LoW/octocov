@@ -119,12 +119,36 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	// > Therefore, Clover offers a Statement Coverage metric, which is similar to a Line Coverage metric in terms of it's granularity and precision.
 	cov.Type = TypeLOC
 	cov.Format = c.Name()
+	// A file can be described at the project level and again inside a <package>, so elements
+	// naming the same file stack onto one entry rather than being listed and counted twice, the
+	// shape #724 described for LCOV. The lookup goes through a map rather than Files.FindByFile
+	// for the reason cobertura.go and jacoco.go record, that FindByFile rescans the slice once
+	// per element, and a Clover report has one <file> element per file, so a large report
+	// parsed in quadratic time. The map holds only identities that are unique by construction,
+	// a path attribute or an absolute name. A bare relative name is a display name two files can
+	// share, and stacking on it fused different files, so such an element is appended as before.
+	byIdentity := map[string]*FileCoverage{}
+	add := func(f CloverReportFile) {
+		identity, unique := cloverIdentity(f)
+		if unique {
+			if existing, ok := byIdentity[identity]; ok {
+				existing.Blocks = append(existing.Blocks, parseReportLines(f)...)
+				return
+			}
+		}
+		fcov := NewFileCoverage(identity, TypeLOC)
+		fcov.Blocks = parseReportLines(f)
+		cov.Files = append(cov.Files, fcov)
+		if unique {
+			byIdentity[identity] = fcov
+		}
+	}
 	for _, f := range r.Project.File {
-		cov.Files = append(cov.Files, parseReportFile(f))
+		add(f)
 	}
 	for _, p := range r.Project.Package {
 		for _, f := range p.File {
-			cov.Files = append(cov.Files, parseReportFile(f))
+			add(f)
 		}
 	}
 	for _, fcov := range cov.Files {
@@ -142,12 +166,19 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 	return cov, rp, nil
 }
 
-func parseReportFile(f CloverReportFile) *FileCoverage {
-	identity := f.Name
+// cloverIdentity returns the path an element is filed under and whether that path is unique by
+// construction. The path attribute is the real location and name the display name, typically a
+// basename (#639), so path wins when it is given and name is relative. An absolute name is a
+// real location too. A bare relative name is not, since files in different directories share it.
+func cloverIdentity(f CloverReportFile) (string, bool) {
 	if f.Path != "" && !filepath.IsAbs(f.Name) {
-		identity = f.Path
+		return f.Path, true
 	}
-	fcov := NewFileCoverage(identity, TypeLOC)
+	return f.Name, filepath.IsAbs(f.Name)
+}
+
+func parseReportLines(f CloverReportFile) BlockCoverages {
+	blocks := BlockCoverages{}
 	for _, l := range f.Line {
 		if l.Type != "stmt" {
 			continue
@@ -155,14 +186,14 @@ func parseReportFile(f CloverReportFile) *FileCoverage {
 		sl := l.Num
 		el := l.Num
 		c := toExecCount(l.Count)
-		fcov.Blocks = append(fcov.Blocks, &BlockCoverage{
+		blocks = append(blocks, &BlockCoverage{
 			Type:      TypeLOC,
 			StartLine: &sl,
 			EndLine:   &el,
 			Count:     &c,
 		})
 	}
-	return fcov
+	return blocks
 }
 
 func (c *Clover) detectReportPath(path string) (string, error) {

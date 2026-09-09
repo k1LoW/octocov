@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 )
@@ -159,5 +160,117 @@ func TestCloverCountsFromLines(t *testing.T) {
 	}
 	if got.Total != 11 || got.Covered != 11 {
 		t.Errorf("got %d/%d\nwant 11/11", got.Total, got.Covered)
+	}
+}
+
+func parseCloverString(t *testing.T, content string) *Coverage {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "coverage.xml")
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewClover().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return got
+}
+
+func TestCloverMergesFileNamedTwice(t *testing.T) {
+	// A report can describe one file at the project level and again inside a <package>. When
+	// both elements carry the path attribute the file is listed once, with the blocks of both
+	// stacked and counted once per line. The report below describes one file whose single
+	// listed line was executed.
+	got := parseCloverString(t, `<?xml version="1.0" ?>
+<coverage generated="1">
+  <project timestamp="1">
+    <file name="a.php" path="/src/a.php">
+      <metrics statements="5" coveredstatements="4"/>
+      <line num="1" type="stmt" count="1"/>
+    </file>
+    <package name="pkg">
+      <file name="a.php" path="/src/a.php">
+        <metrics statements="5" coveredstatements="4"/>
+        <line num="1" type="stmt" count="1"/>
+      </file>
+    </package>
+  </project>
+</coverage>
+`)
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := "/src/a.php"; got.Files[0].File != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].File, want)
+	}
+	if got.Total != 1 || got.Covered != 1 {
+		t.Errorf("got %d/%d\nwant 1/1", got.Total, got.Covered)
+	}
+	// The blocks keep every listed line, so the totals came from folding them rather than
+	// from an append that dropped the repeat.
+	if want := 2; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
+	}
+	if err := got.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got.Total != 1 || got.Covered != 1 {
+		t.Errorf("after Exclude got %d/%d\nwant 1/1", got.Total, got.Covered)
+	}
+}
+
+func TestCloverMergesAbsoluteNameWithoutPath(t *testing.T) {
+	// An absolute name is a real location on its own, so two elements naming it merge without a
+	// path attribute, which is how PHPUnit writes its reports.
+	got := parseCloverString(t, `<?xml version="1.0" ?>
+<coverage generated="1">
+  <project timestamp="1">
+    <file name="/src/a.php">
+      <line num="1" type="stmt" count="1"/>
+    </file>
+    <package name="pkg">
+      <file name="/src/a.php">
+        <line num="2" type="stmt" count="0"/>
+      </file>
+    </package>
+  </project>
+</coverage>
+`)
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if got.Total != 2 || got.Covered != 1 {
+		t.Errorf("got %d/%d\nwant 2/1", got.Total, got.Covered)
+	}
+}
+
+func TestCloverKeepsSameNamedFilesWithoutPathApart(t *testing.T) {
+	// Files in different packages can share a bare name, and without a path attribute that name
+	// is all the report gives, so it cannot say whether two such elements are one file or two.
+	// They stay two entries rather than being fused into one whose lines would hide each other's
+	// misses. The report below has two files of two lines, one fully covered and one not at all.
+	got := parseCloverString(t, `<?xml version="1.0" ?>
+<coverage generated="1">
+  <project timestamp="1">
+    <package name="src/a">
+      <file name="utils.ts">
+        <line num="1" type="stmt" count="1"/>
+        <line num="2" type="stmt" count="1"/>
+      </file>
+    </package>
+    <package name="src/b">
+      <file name="utils.ts">
+        <line num="1" type="stmt" count="0"/>
+        <line num="2" type="stmt" count="0"/>
+      </file>
+    </package>
+  </project>
+</coverage>
+`)
+	if want := 2; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if got.Total != 4 || got.Covered != 2 {
+		t.Errorf("got %d/%d\nwant 4/2", got.Total, got.Covered)
 	}
 }
