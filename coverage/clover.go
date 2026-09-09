@@ -182,12 +182,13 @@ func cloverIdentity(f CloverReportFile) (string, bool) {
 // isAbsReportPath reports whether a path a report recorded is absolute on the host that produced
 // the report. filepath.IsAbs answers for the host octocov runs on, so a Unix path read on Windows,
 // or a Windows path read on Unix, came out relative there, and a file was filed under the wrong
-// identity or refused a merge depending on the runner rather than on the report.
+// identity or refused a merge depending on the runner rather than on the report. It is not
+// consulted at all, since its Windows answer has also widened between Go releases.
 func isAbsReportPath(p string) bool {
-	if filepath.IsAbs(p) || strings.HasPrefix(p, "/") {
+	if strings.HasPrefix(p, "/") {
 		return true
 	}
-	// A drive letter and a separator, the volume shape filepath recognizes on Windows only.
+	// A drive letter and a separator, the one shape of a Windows absolute path a report writes.
 	return len(p) >= 3 && p[1] == ':' && (p[2] == '\\' || p[2] == '/') &&
 		(('a' <= p[0] && p[0] <= 'z') || ('A' <= p[0] && p[0] <= 'Z'))
 }
