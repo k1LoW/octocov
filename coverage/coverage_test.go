@@ -1,6 +1,7 @@
 package coverage
 
 import (
+	"math"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -425,4 +426,75 @@ func newBlockCoverage(t Type, sl, sc, el, ec, ns, c int) *BlockCoverage {
 	}
 
 	return bc
+}
+
+func TestLineRangeWalksTerminateAtMaxInt(t *testing.T) {
+	// A line or column number of math.MaxInt used to wrap the loop counter to math.MinInt, so
+	// the walk never ended and ToLineCoverages grew a nested map per key while it spun. Every
+	// walk must instead treat such a block as the single line or column it describes.
+	t.Run("ToLineCoverages", func(t *testing.T) {
+		blocks := BlockCoverages{
+			&BlockCoverage{Type: TypeLOC, StartLine: new(math.MaxInt), EndLine: new(math.MaxInt), Count: new(ExecCount(1))},
+		}
+		lcs := blocks.ToLineCoverages()
+		if want := 1; lcs.Total() != want {
+			t.Errorf("got %v\nwant %v", lcs.Total(), want)
+		}
+		if want := 1; lcs.Covered() != want {
+			t.Errorf("got %v\nwant %v", lcs.Covered(), want)
+		}
+		if want := math.MaxInt; lcs[0].Line != want {
+			t.Errorf("got %v\nwant %v", lcs[0].Line, want)
+		}
+	})
+
+	t.Run("MaxCount", func(t *testing.T) {
+		blocks := BlockCoverages{
+			&BlockCoverage{Type: TypeLOC, StartLine: new(math.MaxInt), EndLine: new(math.MaxInt), Count: new(ExecCount(7))},
+		}
+		if want := ExecCount(7); blocks.MaxCount() != want {
+			t.Errorf("got %v\nwant %v", blocks.MaxCount(), want)
+		}
+	})
+
+	t.Run("FindBlocksByLine", func(t *testing.T) {
+		fc := &FileCoverage{
+			File: "a.kt",
+			Blocks: BlockCoverages{
+				&BlockCoverage{Type: TypeLOC, StartLine: new(math.MaxInt), EndLine: new(math.MaxInt), Count: new(ExecCount(1))},
+			},
+		}
+		if want := 1; len(fc.FindBlocksByLine(math.MaxInt)) != want {
+			t.Errorf("got %v\nwant %v", len(fc.FindBlocksByLine(math.MaxInt)), want)
+		}
+	})
+
+	t.Run("column walk", func(t *testing.T) {
+		// The TypeStmt path walks StartCol to EndCol for a block confined to one line, which
+		// is the fourth copy of the same shape and is not reachable through a line number.
+		blocks := BlockCoverages{
+			&BlockCoverage{
+				Type:      TypeStmt,
+				StartLine: new(1), EndLine: new(1),
+				StartCol: new(math.MaxInt), EndCol: new(math.MaxInt),
+				Count: new(ExecCount(1)),
+			},
+		}
+		lcs := blocks.ToLineCoverages()
+		if want := 1; lcs.Total() != want {
+			t.Errorf("got %v\nwant %v", lcs.Total(), want)
+		}
+	})
+
+	t.Run("start above end yields nothing", func(t *testing.T) {
+		blocks := BlockCoverages{
+			&BlockCoverage{Type: TypeLOC, StartLine: new(5), EndLine: new(3), Count: new(ExecCount(1))},
+		}
+		if want := 0; blocks.ToLineCoverages().Total() != want {
+			t.Errorf("got %v\nwant %v", blocks.ToLineCoverages().Total(), want)
+		}
+		if want := ExecCount(0); blocks.MaxCount() != want {
+			t.Errorf("got %v\nwant %v", blocks.MaxCount(), want)
+		}
+	})
 }
