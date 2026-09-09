@@ -72,7 +72,7 @@ func TestJacocoFilesOrder(t *testing.T) {
 		"org/http4k/security/oauth/server/accesstoken/GrantConfiguration.kt",
 	}
 	var first []string
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		cov, _, err := NewJacoco().ParseReport(path)
 		if err != nil {
 			t.Fatal(err)

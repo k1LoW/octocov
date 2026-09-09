@@ -69,7 +69,7 @@ func TestCoberturaFilesOrder(t *testing.T) {
 	// order however many times the same report is parsed.
 	head := []string{"__init__.py", "applications.py", "background.py"}
 	var first []string
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		cov, _, err := NewCobertura().ParseReport(path)
 		if err != nil {
 			t.Fatal(err)
