@@ -132,13 +132,13 @@ func (c *Jacoco) ParseReport(path string) (*Coverage, string, error) {
 	for _, f := range order {
 		blocks := flm[f]
 		fcov := NewFileCoverage(f, TypeLOC)
-		for _, b := range blocks {
-			fcov.Total += 1
-			if *b.Count > 0 {
-				fcov.Covered += 1
-			}
-		}
 		fcov.Blocks = blocks
+		// A <sourcefile> lists each line once, but a repeated <package> name brings the same
+		// file back with lines that may repeat, so fold the blocks per line the way
+		// Coverage.reCalc does rather than counting one line per block.
+		lcs := blocks.ToLineCoverages()
+		fcov.Total = lcs.Total()
+		fcov.Covered = lcs.Covered()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
 		cov.Files = append(cov.Files, fcov)

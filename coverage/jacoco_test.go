@@ -140,3 +140,49 @@ func TestJacocoMergesPackagesOfSameName(t *testing.T) {
 		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }
+
+func TestJacocoCountsSharedLineOnce(t *testing.T) {
+	// A repeated <package> name can bring the same file back with a line it already listed.
+	// That line counts once, and counts as covered when any of the elements records a hit. The
+	// file below has three distinct lines, of which 1 and 2 were executed.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "jacocoTestReport.xml")
+	content := `<?xml version="1.0" ?>
+<report name="agg">
+  <package name="org/example">
+    <sourcefile name="A.kt">
+      <line nr="1" mi="0" ci="1"/>
+      <line nr="2" mi="0" ci="1"/>
+    </sourcefile>
+  </package>
+  <package name="org/example">
+    <sourcefile name="A.kt">
+      <line nr="1" mi="1" ci="0"/>
+      <line nr="3" mi="1" ci="0"/>
+    </sourcefile>
+  </package>
+</report>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewJacoco().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 3; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 2; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := 3; got.Files[0].Total != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Total, want)
+	}
+	if want := 2; got.Files[0].Covered != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Covered, want)
+	}
+}
