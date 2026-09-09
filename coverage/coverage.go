@@ -249,6 +249,23 @@ func (bc *BlockCoverage) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+// walkable reports whether the two line walks, MaxCount and ToLineCoverages, can dereference
+// the block. Every field but Type is omitempty, so a stored report can leave the range, the
+// count or the columns out. Such a block contributes no lines rather than being assumed to
+// start at 0, the reading FindBlocksByLine already had for a missing range. The predicate is
+// the union of what both walks read, so a statement block with no columns is skipped by
+// MaxCount as well, though only ToLineCoverages reads them. FindBlocksByLine does not use it;
+// see the note on its guard.
+func (bc *BlockCoverage) walkable() bool {
+	if bc.StartLine == nil || bc.EndLine == nil || bc.Count == nil {
+		return false
+	}
+	if bc.Type != TypeLOC && (bc.StartCol == nil || bc.EndCol == nil) {
+		return false
+	}
+	return true
+}
+
 type BlockCoverages []*BlockCoverage
 
 type Processor interface {
@@ -314,6 +331,8 @@ func (fc *FileCoverage) FindBlocksByLine(n int) BlockCoverages {
 		for _, b := range fc.Blocks {
 			// A stored report can omit the line range, since both fields are omitempty.
 			// Such a block contributes no lines rather than being assumed to start at 0.
+			// Deliberately narrower than walkable, since PatchCoverage reads a block whose
+			// count is missing as an uncovered line and needs it returned.
 			if b.StartLine == nil || b.EndLine == nil {
 				continue
 			}
@@ -380,6 +399,9 @@ func inclusiveRange(start, end int) func(func(int) bool) {
 func (bc BlockCoverages) MaxCount() ExecCount { //nostyle:recvtype
 	counts := map[int]ExecCount{}
 	for _, c := range bc {
+		if !c.walkable() {
+			continue
+		}
 		sl := *c.StartLine
 		el := *c.EndLine
 		for i := range inclusiveRange(sl, el) {
@@ -479,6 +501,9 @@ func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype
 	m := skipmap.NewInt[*skipmap.IntMap[ExecCount]]()
 
 	for _, c := range bc {
+		if !c.walkable() {
+			continue
+		}
 		sl := *c.StartLine
 		el := *c.EndLine
 		for i := range inclusiveRange(sl, el) {
