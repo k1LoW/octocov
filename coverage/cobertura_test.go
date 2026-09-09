@@ -145,3 +145,60 @@ func TestCoberturaMergesClassesOfSameFile(t *testing.T) {
 		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }
+
+func TestCoberturaCountsSharedLineOnce(t *testing.T) {
+	// A line listed under two <class> elements of one file counts once, and counts as covered
+	// when any of those elements records a hit. The file below has three distinct lines, of
+	// which 1 and 2 were executed, and line 1 is listed under both classes.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "coverage.xml")
+	content := `<?xml version="1.0" ?>
+<coverage>
+  <packages>
+    <package name="com.example">
+      <classes>
+        <class filename="com/example/Foo.kt" name="Foo">
+          <lines>
+            <line number="1" hits="1"/>
+            <line number="2" hits="1"/>
+          </lines>
+        </class>
+        <class filename="com/example/Foo.kt" name="Foo.bar.1">
+          <lines>
+            <line number="1" hits="0"/>
+            <line number="3" hits="0"/>
+          </lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewCobertura().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 3; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 2; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+	if want := 1; len(got.Files) != want {
+		t.Fatalf("got %v\nwant %v", len(got.Files), want)
+	}
+	if want := 3; got.Files[0].Total != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Total, want)
+	}
+	if want := 2; got.Files[0].Covered != want {
+		t.Errorf("got %v\nwant %v", got.Files[0].Covered, want)
+	}
+	// The blocks keep every listed line, so the totals came from folding them rather than
+	// from an append that dropped the repeat.
+	if want := 4; len(got.Files[0].Blocks) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
+	}
+}
