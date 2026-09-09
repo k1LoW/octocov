@@ -135,3 +135,28 @@ end_of_record
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
 }
+
+func TestLcovAcceptsChecksum(t *testing.T) {
+	// DA:<line>,<count>[,<checksum>] (lcov --checksum)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "lcov.info")
+	content := `TN:
+SF:src/a.ts
+DA:1,1,abcdef
+DA:2,0,abcdef
+end_of_record
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := 2; got.Total != want {
+		t.Errorf("got %v\nwant %v", got.Total, want)
+	}
+	if want := 1; got.Covered != want {
+		t.Errorf("got %v\nwant %v", got.Covered, want)
+	}
+}

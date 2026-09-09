@@ -72,8 +72,9 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			fileName = splitted[1]
 		case "DA":
 			total += 1
+			// DA:<line>,<count>[,<checksum>]
 			nums := strings.Split(splitted[1], ",")
-			if len(nums) != 2 {
+			if len(nums) != 2 && len(nums) != 3 {
 				_ = r.Close() //nostyle:handlerrors
 				return nil, "", fmt.Errorf("can not parse: %s", l)
 			}
