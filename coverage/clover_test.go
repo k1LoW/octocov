@@ -247,8 +247,8 @@ func TestCloverMergesAbsoluteNameWithoutPath(t *testing.T) {
 func TestCloverKeepsSameNamedFilesWithoutPathApart(t *testing.T) {
 	// Files in different packages can share a bare name, and without a path attribute that name
 	// is all the report gives, so it cannot say whether two such elements are one file or two.
-	// They stay two entries rather than being fused into one whose lines would hide each other's
-	// misses. The report below has two files of two lines, one fully covered and one not at all.
+	// They stay two entries. The report below has two files of two lines, one fully covered and
+	// one not at all.
 	got := parseCloverString(t, `<?xml version="1.0" ?>
 <coverage generated="1">
   <project timestamp="1">
