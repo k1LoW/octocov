@@ -73,3 +73,33 @@ func testdataDir(t *testing.T) string {
 	}
 	return dir
 }
+
+func TestGocoverRejectsImplausibleBlock(t *testing.T) {
+	// x/tools/cover accepts any integer for a block's lines and columns, and Go cover is the one
+	// format whose blocks span lines, so a profile can describe a run of source no file has. The
+	// parse must fail rather than hand the block to a walk that allocates per line.
+	tests := []struct {
+		name    string
+		block   string
+		wantErr bool
+	}{
+		{"wide line span", "x.go:1.1,9223372036854775806.1 1 1", true},
+		{"wide column span", "x.go:1.1,1.9223372036854775806 1 1", true},
+		{"ends before it starts", "x.go:9.1,3.1 1 1", true},
+		// The usual shape of a block that spans lines, ending at a column below where it began.
+		{"spans lines", "x.go:10.66,12.25 1 1", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dir := t.TempDir()
+			path := filepath.Join(dir, "coverage.out")
+			if err := os.WriteFile(path, []byte("mode: count\n"+tt.block+"\n"), 0600); err != nil {
+				t.Fatal(err)
+			}
+			_, _, err := NewGocover().ParseReport(path)
+			if tt.wantErr != (err != nil) {
+				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
