@@ -134,8 +134,9 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 		fcov.Blocks = blocks
 		// Two <class> elements of one file can both list the same line (a Kotlin or Scala
 		// lambda shows up under its outer class and under a synthetic one), so fold the
-		// blocks per line the way Coverage.reCalc does. Counting one line per block would
-		// count such a line twice and return a total the blocks do not support.
+		// blocks per line through foldLines, whose result reCalc re-sums instead of recomputing.
+		// Counting one line per block would count such a line twice and return a total the
+		// blocks do not support.
 		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered

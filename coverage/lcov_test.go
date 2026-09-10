@@ -204,7 +204,8 @@ end_of_record
 	if want := 3; got.Covered != want {
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
-	// Exclude() recalculates from blocks; the totals must not change.
+	// Exclude() re-sums the totals the parser folded and refolds only when Blocks changed.
+	// The totals must not change.
 	if err := got.Exclude(nil); err != nil {
 		t.Fatal(err)
 	}
@@ -257,7 +258,8 @@ end_of_record
 	if want := 2; got.Covered != want {
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
-	// Exclude() recalculates from blocks; the totals must not change.
+	// Exclude() re-sums the totals the parser folded and refolds only when Blocks changed.
+	// The totals must not change.
 	if err := got.Exclude(nil); err != nil {
 		t.Fatal(err)
 	}

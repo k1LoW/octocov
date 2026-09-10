@@ -153,12 +153,12 @@ func (c *Clover) ParseReport(path string) (*Coverage, string, error) {
 		}
 	}
 	for _, fcov := range cov.Files {
-		// Fold per line the way Coverage.reCalc does rather than trusting the <metrics>
-		// attributes, so the total ParseReport returns agrees with the blocks returned beside
-		// it, the contract #728 and #734 settled for the other LOC parsers and #738 records.
-		// The report's own statement count is the more authoritative number in principle, but
-		// every path that shows a number recounts from the blocks, so a total taken from
-		// <metrics> was one no consumer saw.
+		// Fold per line through foldLines rather than trusting the <metrics> attributes, so the
+		// total ParseReport returns agrees with the blocks returned beside it, the contract #728
+		// and #734 settled for the other LOC parsers and #738 records. The report's own statement
+		// count is the more authoritative number in principle, but no consumer ever read it. Every
+		// path recounted from the blocks when #749 made this choice, and since #738 reCalc re-sums
+		// this fold instead, so the total folded here is the one every consumer sees.
 		fcov.foldLines()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
