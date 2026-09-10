@@ -17,6 +17,7 @@ import (
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/ratio"
+	"github.com/tenntenn/golden"
 	"golang.org/x/text/language"
 )
 
@@ -367,31 +368,26 @@ func TestTable(t *testing.T) {
 }
 
 func TestOut(t *testing.T) {
-	tests := []struct {
-		path string
-		want string
-	}{
-		{
-			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
-			"            master (896d3c5)  \n------------------------------\n  \x1b[1mCoverage\x1b[0m             68.4%  \n",
-		},
-		{
-			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
-			"                       master (896d3c5)  \n-----------------------------------------\n  \x1b[1mCoverage\x1b[0m                        68.4%  \n  \x1b[1mCode to Test Ratio\x1b[0m              1:0.5  \n  \x1b[1mTest Execution Time\x1b[0m             4m40s  \n",
-		},
+	tests := []string{
+		filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
+		filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
 	}
-	for _, tt := range tests {
-		t.Run(tt.path, func(t *testing.T) {
+	for i, path := range tests {
+		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			r := &Report{}
-			if err := r.Load(tt.path); err != nil {
+			if err := r.Load(path); err != nil {
 				t.Fatal(err)
 			}
-			buf := new(bytes.Buffer)
-			if err := r.Out(buf); err != nil {
+			got := new(bytes.Buffer)
+			if err := r.Out(got); err != nil {
 				t.Fatal(err)
 			}
-			got := buf.String()
-			if diff := cmp.Diff(got, tt.want, nil); diff != "" {
+			f := fmt.Sprintf("out.%d", i)
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				golden.Update(t, testdataDir(t), f, got)
+				return
+			}
+			if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
 				t.Error(diff)
 			}
 		})
