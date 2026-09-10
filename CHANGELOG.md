@@ -1,5 +1,24 @@
 # Changelog
 
+## [v0.78.0](https://github.com/k1LoW/octocov/compare/v0.77.0...v0.78.0) - 2026-09-10
+
+### New Features 🎉
+- perf: re-sum a folded file in reCalc instead of folding it again by @k1LoW in https://github.com/k1LoW/octocov/pull/752
+- feat: show the numbers behind each metric in the local table by @k1LoW in https://github.com/k1LoW/octocov/pull/753
+### Fix bug 🐛
+- fix: parse LCOV reports with repeated SF records, checksums, and colons in paths by @k1LoW in https://github.com/k1LoW/octocov/pull/725
+- fix: give every map-keyed coverage parser a stable file order by @k1LoW in https://github.com/k1LoW/octocov/pull/730
+- fix: count a line once when two Cobertura classes share a filename by @k1LoW in https://github.com/k1LoW/octocov/pull/731
+- fix: count an LCOV line once when a record repeats a DA: line by @k1LoW in https://github.com/k1LoW/octocov/pull/735
+- fix: stop the line and column walks at the top of their range by @k1LoW in https://github.com/k1LoW/octocov/pull/741
+- fix: skip a block the line walks cannot dereference instead of panicking by @k1LoW in https://github.com/k1LoW/octocov/pull/746
+- fix: anchor the fuzzy file match on a path segment and prefer the more specific candidate by @k1LoW in https://github.com/k1LoW/octocov/pull/748
+- fix: count a Clover file from its lines and list it once by @k1LoW in https://github.com/k1LoW/octocov/pull/749
+- fix: reject a block whose range no source file could have by @k1LoW in https://github.com/k1LoW/octocov/pull/747
+- fix: skip a statement block whose count or statement number is omitted by @k1LoW in https://github.com/k1LoW/octocov/pull/751
+### Other Changes
+- feat: add the OGP image source by @k1LoW in https://github.com/k1LoW/octocov/pull/739
+
 ## [v0.77.0](https://github.com/k1LoW/octocov/compare/v0.76.0...v0.77.0) - 2026-09-08
 
 ### Breaking Changes 🛠
