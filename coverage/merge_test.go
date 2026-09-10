@@ -786,3 +786,55 @@ func TestReCalcSkipsStatementBlockWithoutCountOrNumStmt(t *testing.T) {
 		})
 	}
 }
+
+func TestReCalcRefoldsWhenBlocksChange(t *testing.T) {
+	// Blocks is exported, so a caller can append to it without going through Merge. Total and
+	// Covered folded before such an append are stale and must be folded again, while a file
+	// whose blocks are unchanged keeps the totals its parser folded.
+	fc := &FileCoverage{File: "a.rb", Type: TypeLOC, Blocks: BlockCoverages{
+		newBlockCoverage(TypeLOC, 1, -1, 1, -1, 1, 1),
+		newBlockCoverage(TypeLOC, 2, -1, 2, -1, 1, 0),
+	}}
+	fc.foldLines()
+	c := &Coverage{Type: TypeLOC, Files: FileCoverages{fc}}
+	if err := c.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{c.Total, c.Covered}, [2]int{2, 1}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+
+	fc.Blocks = append(fc.Blocks, newBlockCoverage(TypeLOC, 2, -1, 3, -1, 1, 1))
+	if err := c.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{c.Total, c.Covered}, [2]int{3, 3}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestReCalcRepairsTotalsNeverFoldedFromBlocks(t *testing.T) {
+	// A report decoded from JSON carries whatever totals the octocov that stored it computed.
+	// One that counted a line per block over-counts a repeated line, so recalculating must
+	// fold the blocks rather than trust those totals.
+	c := &Coverage{
+		Type: TypeLOC,
+		Files: FileCoverages{
+			&FileCoverage{File: "a.rb", Type: TypeLOC, Total: 2, Covered: 2, Blocks: BlockCoverages{
+				newBlockCoverage(TypeLOC, 1, -1, 1, -1, 1, 1),
+				newBlockCoverage(TypeLOC, 1, -1, 1, -1, 1, 1),
+			}},
+		},
+		Total:   2,
+		Covered: 2,
+	}
+	if err := c.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{c.Total, c.Covered}, [2]int{1, 1}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if got, want := [2]int{c.Files[0].Total, c.Files[0].Covered}, [2]int{1, 1}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}

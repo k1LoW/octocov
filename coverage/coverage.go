@@ -56,6 +56,11 @@ type FileCoverage struct {
 	Covered        int            `json:"covered"`
 	Blocks         BlockCoverages `json:"blocks,omitempty"`
 	cache          map[int]BlockCoverages
+	// foldedBlocks is len(Blocks) at the moment Total and Covered were last folded from them,
+	// or 0 when they never were, as in a report decoded from JSON. It is a count rather than a
+	// flag because Blocks is exported and can be appended to without going through any method,
+	// and a flag would keep reading as current while the totals were stale (#738).
+	foldedBlocks int
 }
 
 func NewFileCoverage(file string, coverageType Type) *FileCoverage { //nostyle:repetition
@@ -564,6 +569,15 @@ func (lc LineCoverages) Covered() int { //nostyle:recvtype
 		}
 	}
 	return covered
+}
+
+// foldLines folds Blocks per line into Total and Covered and records the block count it folded,
+// so reCalc can re-sum the file instead of folding it a second time while Blocks is unchanged.
+func (fc *FileCoverage) foldLines() {
+	lcs := fc.Blocks.ToLineCoverages()
+	fc.Total = lcs.Total()
+	fc.Covered = lcs.Covered()
+	fc.foldedBlocks = len(fc.Blocks)
 }
 
 func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype

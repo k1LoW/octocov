@@ -46,9 +46,18 @@ func (c *Coverage) reCalc() error {
 
 		switch c.Type {
 		case TypeLOC, TypeMerged:
-			lcs := f.Blocks.ToLineCoverages()
-			fileTotal = lcs.Total()
-			fileCovered = lcs.Covered()
+			// A file the parser folded from these very blocks is re-summed rather than re-folded, since
+			// the fold is deterministic over Blocks and would only reproduce Total and Covered (#738).
+			// Anything that changed the block count, a Merge stacking a second report or an append
+			// through the exported field, and any file never folded, such as one an older octocov
+			// stored with one line counted per block, is folded here as before. A block edited in
+			// place is not detected. Catching that would mean fingerprinting every block on every
+			// reCalc, and nothing in octocov edits a block after parsing.
+			if f.foldedBlocks == 0 || f.foldedBlocks != len(f.Blocks) {
+				f.foldLines()
+			}
+			fileTotal = f.Total
+			fileCovered = f.Covered
 
 		case TypeStmt: // Coverage of a single unmerged TypeStmt.
 			for _, b := range f.Blocks {

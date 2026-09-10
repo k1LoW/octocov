@@ -122,9 +122,9 @@ func TestCloverParseAllFormat(t *testing.T) {
 func TestCloverCountsFromLines(t *testing.T) {
 	// The totals come from the <line type="stmt"> elements, folded per line, and not from the
 	// <metrics> attributes, so what ParseReport returns is what its blocks support and what
-	// Exclude recounts to. The fixture declares statements="36" coveredstatements="28" for a
-	// file listing ten executed statement lines, and statements="0" for one listing a single
-	// executed line.
+	// Exclude carries through unchanged. The fixture declares statements="36"
+	// coveredstatements="28" for a file listing ten executed statement lines, and
+	// statements="0" for one listing a single executed line.
 	path := filepath.Join(testdataDir(t), "clover", "coverage_package.xml")
 	got, _, err := NewClover().ParseReport(path)
 	if err != nil {
@@ -154,7 +154,8 @@ func TestCloverCountsFromLines(t *testing.T) {
 	if want := 11; got.Covered != want {
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
-	// Exclude() recalculates from blocks; the totals must not change.
+	// Exclude() re-sums the totals the parser folded and refolds only when Blocks changed.
+	// The totals must not change.
 	if err := got.Exclude(nil); err != nil {
 		t.Fatal(err)
 	}
