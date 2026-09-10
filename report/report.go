@@ -247,8 +247,8 @@ func (r *Report) Out(w io.Writer) error {
 	if r.IsMeasuredCoverage() {
 		table.Rich([]string{"Coverage", fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent()))}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
 		table.Append([]string{"  Files", fmt.Sprintf("%d", len(r.Coverage.Files))})
+		table.Append([]string{"  Lines", fmt.Sprintf("%d", r.Coverage.Total)})
 		table.Append([]string{"  Covered", fmt.Sprintf("%d", r.Coverage.Covered)})
-		table.Append([]string{"  Total", fmt.Sprintf("%d", r.Coverage.Total)})
 	}
 
 	if r.IsMeasuredCodeToTestRatio() {

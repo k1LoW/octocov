@@ -373,11 +373,11 @@ func TestOut(t *testing.T) {
 	}{
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json"),
-			"             master (896d3c5)  \n-------------------------------\n  \x1b[1mCoverage\x1b[0m              68.4%  \n    Files                  31  \n    Covered              1957  \n    Total                2857  \n",
+			"             master (896d3c5)  \n-------------------------------\n  \x1b[1mCoverage\x1b[0m              68.4%  \n    Files                  31  \n    Lines                2857  \n    Covered              1957  \n",
 		},
 		{
 			filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json"),
-			"                       master (896d3c5)  \n-----------------------------------------\n  \x1b[1mCoverage\x1b[0m                        68.4%  \n    Files                            31  \n    Covered                        1957  \n    Total                          2857  \n  \x1b[1mCode to Test Ratio\x1b[0m              1:0.5  \n    Code                           7202  \n    Test                           3704  \n  \x1b[1mTest Execution Time\x1b[0m             4m40s  \n",
+			"                       master (896d3c5)  \n-----------------------------------------\n  \x1b[1mCoverage\x1b[0m                        68.4%  \n    Files                            31  \n    Lines                          2857  \n    Covered                        1957  \n  \x1b[1mCode to Test Ratio\x1b[0m              1:0.5  \n    Code                           7202  \n    Test                           3704  \n  \x1b[1mTest Execution Time\x1b[0m             4m40s  \n",
 		},
 	}
 	for _, tt := range tests {
