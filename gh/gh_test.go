@@ -57,6 +57,9 @@ func TestFetchDefaultBranch(t *testing.T) {
 }
 
 func TestFetchRawRootURL(t *testing.T) {
+	// The case under test is the github.com one, which an ambient value naming a GitHub
+	// Enterprise Server would answer before the tree is ever read.
+	t.Setenv("GITHUB_SERVER_URL", DefaultGithubServerURL)
 	ctx := context.TODO()
 	token, _, _, _ := factory.GetTokenAndEndpoints()
 	if token == "" {
