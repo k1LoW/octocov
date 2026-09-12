@@ -303,6 +303,14 @@ func funcs() map[string]any {
 			}
 			return time.Duration(r.TestExecutionTimeNano()).String()
 		},
+		"badge": func(r *report.Report, alt, src string) string {
+			img := fmt.Sprintf("![%s](%s)", alt, src)
+			u := r.ViewerURL()
+			if u == "" {
+				return img
+			}
+			return fmt.Sprintf("[%s](%s)", img, u)
+		},
 	}
 }
 
