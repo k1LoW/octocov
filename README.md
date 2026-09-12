@@ -283,6 +283,8 @@ central:
   push: # enable self git push
 ```
 
+Each badge in the generated index links to [octocov.dev](https://octocov.dev/), where the report behind it can be browsed, and the markdown offered under **Copy status badge markdown** carries the same link. A central repository running on GitHub Enterprise Server renders them as plain images instead, since the pages read the reports through the github.com API.
+
 ### Merging reports from multiple GitHub Action jobs
 
 This example illustrates how to merge coverage reports from multiple jobs.
