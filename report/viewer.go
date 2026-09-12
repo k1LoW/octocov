@@ -13,8 +13,9 @@ import (
 const viewerBaseURL = "https://octocov.dev"
 
 // Viewer turns the coverage cells of the rendered tables into links to the pages that
-// browse the report behind them. A report is addressed there by the artifact it was stored
-// under, so a Viewer is built from that name.
+// browse the report behind them. A file is addressed there by the artifact its report was
+// stored under, so a Viewer is built from that name. The report as a whole is routed by its
+// ref instead, which is why Report.ViewerURL answers for it without a Viewer at all.
 //
 // A nil Viewer renders every cell as plain text, which lets a caller with no artifact
 // datastore, or one that turned the links off, pass nil rather than branch at each cell.
