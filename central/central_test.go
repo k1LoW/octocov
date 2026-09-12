@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/datastore/artifact"
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/report"
 )
@@ -206,6 +208,77 @@ func TestRenderIndex(t *testing.T) {
 
 	if got != want {
 		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+// The index links a badge only where the collected report came from an artifact, since the
+// pages read a report out of the artifacts of the repository it describes and collecting
+// from anywhere else says nothing about whether one is there.
+func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+	c := config.New()
+	c.Setwd(filepath.Dir(wd))
+	c.Repository = "k1LoW/octocov"
+	c.Central = &config.Central{
+		Reports: config.CentralReports{
+			Datastores: []string{"reports"},
+		},
+		Badges: config.CentralBadges{
+			Datastores: []string{"badges"},
+		},
+	}
+	c.Build()
+	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	bd, err := local.New(filepath.Join(c.Wd(), "example/central/badges"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctr := New(&Config{
+		Repository:             c.Repository,
+		Index:                  c.Central.Root,
+		Wd:                     c.Wd(),
+		Badges:                 []datastore.Datastore{bd},
+		Reports:                []datastore.Datastore{rd},
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
+	if err := ctr.collectReports(); err != nil {
+		t.Fatal(err)
+	}
+	ctr.artifactBacked = map[string]bool{"k1LoW/tbls": true}
+
+	buf := &bytes.Buffer{}
+	if err := ctr.renderIndex(buf); err != nil {
+		t.Fatal(err)
+	}
+	got := buf.String()
+
+	// The three badges of the row and the three the copy snippet offers.
+	if n, want := strings.Count(got, "](https://octocov.dev/k1LoW/tbls)"), 6; n != want {
+		t.Errorf("got %v\nwant %v", n, want)
+	}
+	if n, want := strings.Count(got, "octocov.dev"), 6; n != want {
+		t.Errorf("got %v\nwant %v", n, want)
+	}
+}
+
+func TestIsArtifact(t *testing.T) {
+	if !isArtifact(&artifact.Artifact{}) {
+		t.Error("an artifact datastore is what the pages read too")
+	}
+	d, err := local.New(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if isArtifact(d) {
+		t.Error("a local datastore says nothing about the artifacts of the repositories it holds")
 	}
 }
 

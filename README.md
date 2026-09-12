@@ -283,7 +283,7 @@ central:
   push: # enable self git push
 ```
 
-Each badge in the generated index links to [octocov.dev](https://octocov.dev/), where the report behind it can be browsed, and the markdown offered under **Copy status badge markdown** carries the same link. A central repository running on GitHub Enterprise Server renders them as plain images instead, since the pages read the reports through the github.com API.
+Where a report is collected from a GitHub Actions artifact ( `artifact://` ), the badges of its row link to [octocov.dev](https://octocov.dev/), and the markdown offered under **Copy status badge markdown** carries the same link. The pages there read a report out of the artifacts of the repository it describes, so collecting from one is what says the page is there to open. A report collected from any other datastore, and every report of a central repository running on GitHub Enterprise Server, gets plain images instead.
 
 ### Merging reports from multiple GitHub Action jobs
 

@@ -18,6 +18,7 @@ import (
 
 	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/datastore"
+	"github.com/k1LoW/octocov/datastore/artifact"
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
@@ -30,6 +31,12 @@ var indexTmpl []byte
 type Central struct {
 	config  *Config
 	reports []*report.Report
+	// artifactBacked says, per repository, whether the collected report was read out of a
+	// GitHub Actions artifact. The pages that browse a report read it out of the artifacts of
+	// the repository it describes, so collecting from one is the index's only proof that such
+	// a page exists. A report read from anywhere else may still have one, and may not, and
+	// nothing here can tell the two apart.
+	artifactBacked map[string]bool
 }
 
 type Config struct {
@@ -85,9 +92,11 @@ func (c *Central) CollectedReports() []*report.Report {
 
 func (c *Central) collectReports() error {
 	rsMap := map[string]*report.Report{}
+	backed := map[string]bool{}
 
 	// collect reports
 	for _, d := range c.config.Reports {
+		fromArtifact := isArtifact(d)
 		fsys, err := d.FS()
 		if err != nil {
 			return err
@@ -124,10 +133,12 @@ func (c *Central) collectReports() error {
 					return err
 				}
 				rsMap[r.Repository] = r
+				backed[r.Repository] = fromArtifact
 				return nil
 			}
 			if current.Timestamp.UnixNano() < r.Timestamp.UnixNano() {
 				rsMap[r.Repository] = r
+				backed[r.Repository] = fromArtifact
 			}
 			return nil
 		}); err != nil {
@@ -138,6 +149,7 @@ func (c *Central) collectReports() error {
 	for _, r := range rsMap {
 		c.reports = append(c.reports, r)
 	}
+	c.artifactBacked = backed
 	sort.Slice(c.reports, func(i, j int) bool { return c.reports[i].Repository < c.reports[j].Repository })
 	return nil
 }
@@ -207,7 +219,7 @@ func (c *Central) generateBadges() ([]string, error) {
 }
 
 func (c *Central) renderIndex(wr io.Writer) error {
-	tmpl := template.Must(template.New("index").Funcs(funcs()).Parse(string(indexTmpl)))
+	tmpl := template.Must(template.New("index").Funcs(c.funcs()).Parse(string(indexTmpl)))
 	host := os.Getenv("GITHUB_SERVER_URL")
 	if host == "" {
 		host = gh.DefaultGithubServerURL
@@ -286,7 +298,7 @@ func (c *Central) renderIndex(wr io.Writer) error {
 	return nil
 }
 
-func funcs() map[string]any {
+func (c *Central) funcs() map[string]any {
 	return template.FuncMap{
 		"coverage": func(r *report.Report) string {
 			return fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent()))
@@ -305,6 +317,9 @@ func funcs() map[string]any {
 		},
 		"badge": func(r *report.Report, alt, src string) string {
 			img := fmt.Sprintf("![%s](%s)", alt, src)
+			if !c.artifactBacked[r.Repository] {
+				return img
+			}
 			u := r.ViewerURL()
 			if u == "" {
 				return img
@@ -312,6 +327,13 @@ func funcs() map[string]any {
 			return fmt.Sprintf("[%s](%s)", img, u)
 		},
 	}
+}
+
+// isArtifact reports whether d reads its reports out of GitHub Actions artifacts, which is
+// the same place the pages that browse a report read it from.
+func isArtifact(d datastore.Datastore) bool {
+	_, ok := d.(*artifact.Artifact)
+	return ok
 }
 
 // floor1 round down to one decimal place.
