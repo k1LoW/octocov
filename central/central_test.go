@@ -17,6 +17,7 @@ import (
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/local"
+	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -161,6 +162,9 @@ func TestGenerateBadges(t *testing.T) {
 }
 
 func TestRenderIndex(t *testing.T) {
+	// Both the repository column and the badge links are shaped from this, so an ambient
+	// value naming another server renders something the golden file cannot match.
+	t.Setenv("GITHUB_SERVER_URL", gh.DefaultGithubServerURL)
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
@@ -307,6 +311,7 @@ func TestCollectReportsTracksWhichDatastoreSuppliedTheReport(t *testing.T) {
 // pages read a report out of the artifacts of the repository it describes and collecting
 // from anywhere else says nothing about whether one is there.
 func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", gh.DefaultGithubServerURL)
 	wd, err := os.Getwd()
 	if err != nil {
 		t.Fatal(err)
