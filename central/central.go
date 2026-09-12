@@ -18,7 +18,6 @@ import (
 
 	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/datastore"
-	"github.com/k1LoW/octocov/datastore/artifact"
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
@@ -329,11 +328,16 @@ func (c *Central) funcs() map[string]any {
 	}
 }
 
+// artifactDatastore is the datastore that reads its reports out of GitHub Actions artifacts.
+type artifactDatastore interface {
+	IsArtifact() bool
+}
+
 // isArtifact reports whether d reads its reports out of GitHub Actions artifacts, which is
 // the same place the pages that browse a report read it from.
 func isArtifact(d datastore.Datastore) bool {
-	_, ok := d.(*artifact.Artifact)
-	return ok
+	a, ok := d.(artifactDatastore)
+	return ok && a.IsArtifact()
 }
 
 // floor1 round down to one decimal place.

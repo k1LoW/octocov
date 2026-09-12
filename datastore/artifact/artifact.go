@@ -45,6 +45,14 @@ func New(gh *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
 	}, nil
 }
 
+// IsArtifact reports that this datastore reads its reports out of GitHub Actions artifacts,
+// which is the same place the pages that browse a report read it from. It is stated as a
+// method so a caller can ask it of any datastore.Datastore without naming this type, which
+// nothing standing in for it while reading the API is out of reach could satisfy.
+func (a *Artifact) IsArtifact() bool {
+	return true
+}
+
 func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	name, err := a.StoreName(r)
 	if err != nil {
