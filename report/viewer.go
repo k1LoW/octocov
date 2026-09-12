@@ -31,11 +31,21 @@ func NewViewer(artifactName string) *Viewer {
 	return &Viewer{artifactName: artifactName}
 }
 
-// reportURL returns the page of the report as a whole. That page is routed by the ref
+// reportURL returns the page of the report as a whole, and nothing when the caller stored
+// the report in no artifact.
+func (v *Viewer) reportURL(r *Report) string {
+	if v == nil {
+		return ""
+	}
+	return r.ViewerURL()
+}
+
+// ViewerURL returns the page that browses this report. That page is routed by the ref
 // rather than by the artifact name, and the ref key is what says which one, so the report
 // of the default branch is the repository itself and every other ref has a page beside it.
-func (v *Viewer) reportURL(r *Report) string {
-	if v == nil || r == nil {
+// It is empty when the report has no page there at all.
+func (r *Report) ViewerURL() string {
+	if r == nil {
 		return ""
 	}
 	repo, ok := viewerRepo(r)
