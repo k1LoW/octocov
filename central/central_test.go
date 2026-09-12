@@ -223,13 +223,13 @@ type artifactStub struct {
 	fsys fs.FS
 }
 
-func (d *artifactStub) Put(_ context.Context, _ string, _ []byte) error { return nil }
+func (s *artifactStub) Put(_ context.Context, _ string, _ []byte) error { return nil }
 
-func (d *artifactStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
+func (s *artifactStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
 
-func (d *artifactStub) FS() (fs.FS, error) { return d.fsys, nil }
+func (s *artifactStub) FS() (fs.FS, error) { return s.fsys, nil }
 
-func (d *artifactStub) IsArtifact() bool { return true }
+func (s *artifactStub) IsArtifact() bool { return true }
 
 func centralReport(repo string, ts time.Time) *report.Report {
 	return &report.Report{

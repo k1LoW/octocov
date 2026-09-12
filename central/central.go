@@ -330,6 +330,7 @@ func (c *Central) funcs() map[string]any {
 
 // artifactDatastore is the datastore that reads its reports out of GitHub Actions artifacts.
 type artifactDatastore interface {
+	datastore.Datastore
 	IsArtifact() bool
 }
 
