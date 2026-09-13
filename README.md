@@ -2,7 +2,7 @@
 <img src="https://github.com/k1LoW/octocov/raw/main/docs/logo.png" width="200" alt="octocov">
 </p>
 
-![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/coverage.svg) ![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/ratio.svg) ![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/time.svg) [![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions/workflows/ci.yml)
+[![Coverage](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/coverage.svg)](https://octocov.dev/k1LoW/octocov) [![Code to Test Ratio](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/ratio.svg)](https://octocov.dev/k1LoW/octocov) [![Test Execution Time](https://raw.githubusercontent.com/k1LoW/octocovs/main/badges/k1LoW/octocov/time.svg)](https://octocov.dev/k1LoW/octocov) [![build](https://github.com/k1LoW/octocov/actions/workflows/ci.yml/badge.svg)](https://github.com/k1LoW/octocov/actions/workflows/ci.yml)
 
 `octocov` is a toolkit for collecting code metrics (code coverage, code to test ratio, test execution time and **[your own custom metrics](#custom-metrics)**).
 
@@ -282,6 +282,8 @@ central:
       - local://badges # directory where badges are generated.
   push: # enable self git push
 ```
+
+Where a report is collected from a GitHub Actions artifact ( `artifact://` ), the badges of its row link to [octocov.dev](https://octocov.dev/), and the markdown offered under **Copy status badge markdown** carries the same link. The pages there read a report out of the artifacts of the repository it describes, so collecting from one is what says the page is there to open. A report collected from any other datastore, and every report of a central repository running on GitHub Enterprise Server, gets plain images instead.
 
 ### Merging reports from multiple GitHub Action jobs
 

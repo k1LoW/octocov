@@ -38,6 +38,33 @@ func TestViewerReportURL(t *testing.T) {
 	}
 }
 
+// The central index links the badges of the reports it collected, and it holds no artifact
+// name for any of them, so the page of a report has to be reachable without one.
+func TestReportViewerURL(t *testing.T) {
+	tests := []struct {
+		name       string
+		serverURL  string
+		repository string
+		ref        string
+		baseRef    string
+		want       string
+	}{
+		{"a collected report links at its repository", "", "k1LoW/tbls", "refs/heads/main", "refs/heads/main", "https://octocov.dev/k1LoW/tbls"},
+		{"a report carrying no ref at all links at its repository", "", "k1LoW/tbls", "", "", "https://octocov.dev/k1LoW/tbls"},
+		{"a GitHub Enterprise Server run links nowhere", "https://github.example.com", "k1LoW/tbls", "refs/heads/main", "refs/heads/main", ""},
+		{"a repository that is not owner/repo links nowhere", "", "tbls", "refs/heads/main", "refs/heads/main", ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
+			r := &Report{Repository: tt.repository, Ref: tt.ref, BaseRef: tt.baseRef}
+			if got := r.ViewerURL(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestViewerFileURL(t *testing.T) {
 	tests := []struct {
 		name         string

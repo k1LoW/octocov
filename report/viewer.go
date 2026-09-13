@@ -13,8 +13,9 @@ import (
 const viewerBaseURL = "https://octocov.dev"
 
 // Viewer turns the coverage cells of the rendered tables into links to the pages that
-// browse the report behind them. A report is addressed there by the artifact it was stored
-// under, so a Viewer is built from that name.
+// browse the report behind them. A file is addressed there by the artifact its report was
+// stored under, so a Viewer is built from that name. The report as a whole is routed by its
+// ref instead, which is why Report.ViewerURL answers for it without a Viewer at all.
 //
 // A nil Viewer renders every cell as plain text, which lets a caller with no artifact
 // datastore, or one that turned the links off, pass nil rather than branch at each cell.
@@ -31,11 +32,21 @@ func NewViewer(artifactName string) *Viewer {
 	return &Viewer{artifactName: artifactName}
 }
 
-// reportURL returns the page of the report as a whole. That page is routed by the ref
+// reportURL returns the page of the report as a whole, and nothing when the caller stored
+// the report in no artifact.
+func (v *Viewer) reportURL(r *Report) string {
+	if v == nil {
+		return ""
+	}
+	return r.ViewerURL()
+}
+
+// ViewerURL returns the page that browses this report. That page is routed by the ref
 // rather than by the artifact name, and the ref key is what says which one, so the report
 // of the default branch is the repository itself and every other ref has a page beside it.
-func (v *Viewer) reportURL(r *Report) string {
-	if v == nil || r == nil {
+// It is empty when the report has no page there at all.
+func (r *Report) ViewerURL() string {
+	if r == nil {
 		return ""
 	}
 	repo, ok := viewerRepo(r)
