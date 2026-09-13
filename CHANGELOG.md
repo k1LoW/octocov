@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.79.0](https://github.com/k1LoW/octocov/compare/v0.78.0...v0.79.0) - 2026-09-13
+
+### New Features 🎉
+- feat: link the central index badges to octocov.dev by @k1LoW in https://github.com/k1LoW/octocov/pull/754
+
 ## [v0.78.0](https://github.com/k1LoW/octocov/compare/v0.77.0...v0.78.0) - 2026-09-10
 
 ### New Features 🎉
