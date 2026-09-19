@@ -164,11 +164,13 @@ func (c *Central) collectReports() error {
 		}
 	}
 
-	// Every datastore failing is not the same as each of them failing on its own. The index
-	// is rewritten from what was collected, so carrying on here would replace the whole of
-	// it with nothing, which is the state the warnings were meant to make visible.
-	if failed > 0 && failed == len(c.config.Reports) {
-		return fmt.Errorf("could not collect reports from any of the %d datastore(s)", failed)
+	// The index is rewritten from what was collected, so a failure that leaves nothing to
+	// write with would replace the whole of it with an empty page, which is the state the
+	// warnings were meant to make visible. What decides it is whether anything was
+	// collected rather than how many datastores failed, since a walk that stops partway
+	// still contributes the repositories it reached and those belong in the index.
+	if failed > 0 && len(rsMap) == 0 {
+		return fmt.Errorf("could not collect any report, and %d of the %d datastore(s) could not be read", failed, len(c.config.Reports))
 	}
 
 	for _, r := range rsMap {
