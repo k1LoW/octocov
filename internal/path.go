@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -144,96 +143,4 @@ func CollectFiles(root string) ([]string, error) {
 		return nil, err
 	}
 	return files, nil
-}
-
-func DetectPrefix(root, wd string, files, cfiles []string) string {
-	var rcfiles [][]string
-	for _, f := range cfiles {
-		s := strings.Split(filepath.FromSlash(f), string(filepath.Separator))
-		reverse(s)
-		rcfiles = append(rcfiles, s)
-	}
-
-	var rfiles [][]string
-	for _, f := range files {
-		s := strings.Split(filepath.FromSlash(f), string(filepath.Separator))
-		reverse(s)
-		rfiles = append(rfiles, s)
-	}
-
-	j := 0
-	prefix := ""
-	for i := 0; i < len(rcfiles); i++ {
-	L:
-		for j < len(rfiles) {
-			if rcfiles[i][0] != rfiles[j][0] {
-				j += 1
-				continue
-			}
-			if i < len(rcfiles)-1 && rcfiles[i][0] == rcfiles[i+1][0] {
-				// if the same file name continues, exclude it from sampling.
-				i += 2
-				continue L
-			}
-
-			detect := func(s []string, i, j int) string {
-				// reverse slice
-				reverse(s)
-				suffix := join(s...)
-				cfile := cfiles[i]
-				cfp := strings.TrimSuffix(cfile, suffix)
-				file := files[j]
-				fp := strings.TrimSuffix(file, suffix)
-
-				// fmt.Printf("root: %s\nwd: %s\n", root, wd)
-				// fmt.Printf("file: %s\ncfile: %s\n", file, cfile)
-				// fmt.Printf("suffix: %s\n", suffix)
-				// fmt.Printf("file_prefix: %s\ncfile_prefix: %s\n", fp, cfp)
-				// fmt.Printf("---\n")
-
-				if len(fp) < len(root) {
-					cfp = filepath.Join(cfp, strings.TrimPrefix(root, fp))
-				}
-
-				prefix := filepath.Join(cfp, strings.TrimPrefix(wd, root))
-				if prefix == "." {
-					return ""
-				}
-				return prefix
-			}
-
-			for k := range rcfiles[i] {
-				if len(rcfiles[i]) <= k || len(rfiles[j]) <= k || rcfiles[i][k] != rfiles[j][k] {
-					return detect(rcfiles[i][:k], i, j)
-				}
-			}
-
-			for k := range rfiles[j] {
-				if len(rfiles[j]) <= k || len(rcfiles[i]) <= k || rcfiles[i][k] != rfiles[j][k] {
-					return detect(rcfiles[i][:k], i, j)
-				}
-			}
-
-			if len(rcfiles[i]) == len(rfiles[j]) && rcfiles[i][len(rcfiles[i])-1] == rfiles[j][len(rfiles[j])-1] {
-				return detect(rcfiles[i], i, j)
-			}
-
-			j += 1
-		}
-	}
-	return prefix
-}
-
-func reverse(s []string) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
-}
-
-func join(elem ...string) string {
-	if runtime.GOOS == "windows" && elem[0][len(elem[0])-1] == ':' {
-		// Allow filepath.join to be an absolute path
-		elem[0] += "\\"
-	}
-	return filepath.Join(elem...)
 }
