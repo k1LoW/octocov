@@ -128,6 +128,8 @@ diff:
 
 ![img](docs/comment_with_diff.png)
 
+The breakdown behind that comparison is folded into a `Details` section. Set `comment.expandDetails:` ( or the same key under `summary:` or `body:` ) to render it, and the `Metadata` of each custom metric set, already open.
+
 When the report is stored in a GitHub Actions artifact, the coverage values of the comment link to [octocov.dev](https://octocov.dev/), where the stored report can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The compared column is linked only when `diff.datastores:` read it out of an artifact, since that is what the page it would open serves, and no column is linked at all unless this run stores its own report in one. The file names keep pointing at the source on GitHub. Set `comment.hideCoverageLink:` ( or the same key under `summary:` or `body:` ) to render them as plain values again.
 
 ### Check for acceptable score
@@ -731,6 +733,17 @@ comment:
   hideCoverageLink: true
 ```
 
+### `comment.expandDetails:`
+
+Expand the collapsible sections of the report ( the `Details` of the comparison with the previous report, and the `Metadata` of each custom metric set ) instead of rendering them folded.
+
+The `Details` section is rendered only when a previous report was found to compare against. The file coverage table folds itself once the pull request touches enough files, which this does not change, since that fold is what keeps the comment inside what GitHub will render.
+
+```yaml
+comment:
+  expandDetails: true
+```
+
 ### `comment.deletePrevious:`
 
 Delete previous code metrics report comments instead of hiding them
@@ -795,6 +808,15 @@ summary:
   hideCoverageLink: true
 ```
 
+### `summary.expandDetails:`
+
+Expand the collapsible sections of the report ( the `Details` of the comparison with the previous report, and the `Metadata` of each custom metric set ) instead of rendering them folded.
+
+```yaml
+summary:
+  expandDetails: true
+```
+
 ### `summary.message:`
 
 Add message to report.
@@ -836,6 +858,15 @@ Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
 ```yaml
 body:
   hideCoverageLink: true
+```
+
+### `body.expandDetails:`
+
+Expand the collapsible sections of the report ( the `Details` of the comparison with the previous report, and the `Metadata` of each custom metric set ) instead of rendering them folded.
+
+```yaml
+body:
+  expandDetails: true
 ```
 
 ### `body.message:`
