@@ -25,6 +25,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -33,6 +34,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/k1LoW/octocov/config"
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/lucasb-eyer/go-colorful"
@@ -65,17 +67,13 @@ var lsFilesCmd = &cobra.Command{
 		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			return err
 		}
-		t := 0
-		sort.Slice(r.Coverage.Files, func(i int, j int) bool {
-			if r.Coverage.Files[i].Total > t {
-				t = r.Coverage.Files[i].Total
-			}
-			return r.Coverage.Files[i].EffectivePath() < r.Coverage.Files[j].EffectivePath()
-		})
-
 		if len(r.Coverage.Files) == 0 {
 			return nil
 		}
+		sort.Slice(r.Coverage.Files, func(i int, j int) bool {
+			return r.Coverage.Files[i].EffectivePath() < r.Coverage.Files[j].EffectivePath()
+		})
+
 		wd, err := os.Getwd()
 		if err != nil {
 			return err
@@ -84,38 +82,99 @@ var lsFilesCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		var cfiles []string
-		for _, f := range r.Coverage.Files {
-			cfiles = append(cfiles, f.EffectivePath())
+		// MeasureCoverage normalizes against the git root, so a repository identified by its
+		// config file alone leaves every entry unresolved. Re-normalizing against root picks
+		// those up, and is skipped when nothing is unresolved so the walk is not repeated.
+		if slices.ContainsFunc(r.Coverage.Files, func(fc *coverage.FileCoverage) bool {
+			return fc.NormalizedPath == ""
+		}) {
+			if files, err := internal.CollectFiles(root); err == nil {
+				r.Coverage.NormalizePaths(root, files)
+			}
 		}
-		files, err := internal.CollectFiles(wd)
+		rel, err := filepath.Rel(root, wd)
 		if err != nil {
 			return err
 		}
-		slices.Sort(files)
 
-		prefix := internal.DetectPrefix(root, wd, files, cfiles)
-		for _, f := range r.Coverage.Files {
-			p := filepath.Clean(f.EffectivePath())
-			if !strings.HasPrefix(p, prefix) {
-				continue
+		scope := filepath.ToSlash(rel)
+		rows, unresolved := lsFilesRows(r.Coverage.Files, scope)
+
+		t := 0
+		for _, fr := range rows {
+			if fr.total > t {
+				t = fr.total
 			}
-			trimed := strings.TrimPrefix(strings.TrimPrefix(p, prefix), "/")
-			cover := float64(f.Covered) / float64(f.Total) * 100
-			if f.Total == 0 {
-				cover = 0.0
+		}
+		w := len(strconv.Itoa(t))*2 + 1
+		for _, fr := range rows {
+			cover := 0.0
+			if fr.total > 0 {
+				cover = float64(fr.covered) / float64(fr.total) * 100
 			}
 			cl := c.CoverageColor(cover)
 			c, err := detectTermColor(cl)
 			if err != nil {
 				return err
 			}
-			w := len(strconv.Itoa(t))*2 + 1
-			cmd.Printf("%s [%s] %s\n", c.Sprint(fmt.Sprintf("%5s%%", fmt.Sprintf("%.1f", floor1(cover)))), fmt.Sprintf(fmt.Sprintf("%%%ds", w), fmt.Sprintf("%d/%d", f.Covered, f.Total)), trimed)
+			cmd.Printf("%s [%s] %s\n", c.Sprint(fmt.Sprintf("%5s%%", fmt.Sprintf("%.1f", floor1(cover)))), fmt.Sprintf(fmt.Sprintf("%%%ds", w), fmt.Sprintf("%d/%d", fr.covered, fr.total)), fr.path)
+		}
+		if len(unresolved) > 0 {
+			cmd.PrintErrf("%d file(s) in the report could not be placed under %s and were not listed: %s\n", len(unresolved), scope, strings.Join(unresolved, ", "))
 		}
 
 		return nil
 	},
+}
+
+type lsFilesRow struct {
+	path           string
+	covered, total int
+}
+
+// lsFilesRows lists the files of a report that sit in scope, a slash-separated directory
+// relative to the repository root, with their paths relative to it. It also returns the
+// entries that could not be placed, which the caller reports rather than dropping in silence.
+func lsFilesRows(files coverage.FileCoverages, scope string) ([]lsFilesRow, []string) {
+	if scope == "." {
+		scope = ""
+	}
+	var (
+		rows       []lsFilesRow
+		unresolved []string
+	)
+	for _, f := range files {
+		p := f.NormalizedPath
+		if p == "" {
+			// Nothing on disk answers to this entry, so which directory it belongs to is
+			// unknown. At the root every entry is listed, under its path as the report writes
+			// it; below the root it cannot be placed and is reported instead.
+			if scope != "" {
+				unresolved = append(unresolved, f.File)
+				continue
+			}
+			p = path.Clean(filepath.ToSlash(f.File))
+		} else {
+			p = path.Clean(filepath.ToSlash(p))
+			if !underDir(p, scope) {
+				continue
+			}
+			p = strings.TrimPrefix(strings.TrimPrefix(p, scope), "/")
+		}
+		rows = append(rows, lsFilesRow{path: p, covered: f.Covered, total: f.Total})
+	}
+	return rows, unresolved
+}
+
+// underDir reports whether the slash-separated path p sits below dir. An empty dir is the root,
+// which everything is below. The comparison is per segment, so cmd/apple is not read as being
+// below cmd/app, and dir itself is not below dir, which keeps a path equal to it from being
+// listed under an empty name.
+func underDir(p, dir string) bool {
+	if dir == "" {
+		return true
+	}
+	return strings.HasPrefix(p, dir+"/")
 }
 
 func detectTermColor(cl string) (*color.Color, error) {
