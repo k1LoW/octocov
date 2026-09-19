@@ -71,6 +71,10 @@ var viewCmd = &cobra.Command{
 				}
 				fc, err := r.Coverage.Files.FuzzyFindByFile(f)
 				if err != nil {
+					// The file is still printed, since asking for one the report does not cover
+					// is how a gap gets looked at. Without this line the page it prints reads
+					// exactly like a file whose statements are all uncovered.
+					cmd.PrintErrf("no coverage for %s in the report\n", f)
 					fc = &coverage.FileCoverage{
 						File: f,
 					}
