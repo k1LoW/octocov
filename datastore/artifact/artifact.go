@@ -94,13 +94,19 @@ func (a *Artifact) FS() (fs.FS, error) {
 	}
 	log.Printf("artifact name: %s", name)
 	af, err := a.gh.FetchLatestArtifact(ctx, r.Owner, r.Repo, name, reportFilename)
-	fsys := fstest.MapFS{}
-	if err == nil {
-		fsys[path] = &fstest.MapFile{
+	if err != nil {
+		// An empty filesystem used to stand in for every failure here, which left a missing
+		// permission and an expired artifact looking exactly like a repository that had
+		// never reported. Saying so is what lets the caller decide, and the central mode
+		// turns it into a warning rather than stopping.
+		return nil, fmt.Errorf("failed to fetch artifact %s of %s/%s: %w", name, r.Owner, r.Repo, err)
+	}
+	fsys := fstest.MapFS{
+		path: &fstest.MapFile{
 			Data:    af.Content,
 			Mode:    fs.ModePerm,
 			ModTime: af.CreatedAt,
-		}
+		},
 	}
 	return &fsys, nil
 }

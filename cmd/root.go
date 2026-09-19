@@ -355,7 +355,11 @@ var rootCmd = &cobra.Command{
 				}
 				fsys, err := d.FS()
 				if err != nil {
-					return err
+					// The previous report simply may not be there yet, which the artifact
+					// datastore now says rather than answering with an empty filesystem, so
+					// this is the same kind of miss the reads below already carry on from.
+					log.Printf("%s: %v", s, err)
+					continue
 				}
 				f, err := fsys.Open(path)
 				if err != nil {
