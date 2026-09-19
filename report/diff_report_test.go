@@ -46,7 +46,7 @@ func TestDiffTable(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	got := a.Compare(b).Table(nil, nil)
+	got := a.Compare(b).Table(nil, nil, false)
 	f := "diff_table"
 	if os.Getenv("UPDATE_GOLDEN") != "" {
 		golden.Update(t, testdataDir(t), f, got)
@@ -137,7 +137,7 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 	b.Ref = "refs/heads/main"
 	b.BaseRef = "refs/heads/main"
 
-	got := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"), NewViewer("octocov-report"))
+	got := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"), NewViewer("octocov-report"), false)
 	for _, want := range []string{
 		"](https://octocov.dev/k1LoW/tbls/pull/722)",
 		"](https://octocov.dev/k1LoW/tbls)",
@@ -150,13 +150,13 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 	if n := strings.Count(got, "octocov.dev"); n != 2 {
 		t.Errorf("got %d links\nwant 2\n%v", n, got)
 	}
-	if strings.Contains(a.Compare(b).Table(nil, nil), "octocov.dev") {
+	if strings.Contains(a.Compare(b).Table(nil, nil, false), "octocov.dev") {
 		t.Error("a nil viewer must not link to the viewer")
 	}
 
 	// The compared report can have been read from somewhere the pages do not serve, and
 	// then only the side that was stored in an artifact is linked.
-	only := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"), nil)
+	only := a.Compare(b).Table(NewViewer("octocov-report@refs_pull_722"), nil, false)
 	if want := "](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(only, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", only, want)
 	}
@@ -193,5 +193,41 @@ func TestDiffFileCoveragesTablePathsAreSlashSeparated(t *testing.T) {
 	}
 	if !strings.Contains(got, "sub/") {
 		t.Errorf("got\n%v\nwant it to carry the joined prefix", got)
+	}
+}
+
+func TestDiffTableExpandDetails(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+	a := &Report{}
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	b := &Report{}
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	d := a.Compare(b)
+
+	tests := []struct {
+		name          string
+		expandDetails bool
+		want          string
+	}{
+		{"collapsed", false, "<details>\n\n<summary>Details</summary>"},
+		{"expanded", true, "<details open>\n\n<summary>Details</summary>"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := d.Table(nil, nil, tt.expandDetails)
+			if !strings.Contains(got, tt.want) {
+				t.Errorf("got\n%v\nwant it to contain\n%v", got, tt.want)
+			}
+			// The section is still a section either way, so a reader who has read it can
+			// fold it away again.
+			if n := strings.Count(got, "</details>"); n != 1 {
+				t.Errorf("got %d closing tags\nwant 1\n%v", n, got)
+			}
+		})
 	}
 }

@@ -90,7 +90,7 @@ func (s *CustomMetricSet) Table() string {
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
 
-func (s *CustomMetricSet) MetadataTable() string {
+func (s *CustomMetricSet) MetadataTable(expandDetails bool) string {
 	if len(s.Metadata) == 0 {
 		return ""
 	}
@@ -104,7 +104,7 @@ func (s *CustomMetricSet) MetadataTable() string {
 		d = append(d, m.Value)
 	}
 	buf := new(bytes.Buffer)
-	buf.WriteString("<details><summary>Metadata</summary>\n\n")
+	fmt.Fprintf(buf, "%s<summary>Metadata</summary>\n\n", detailsTag(expandDetails))
 	table := tablewriter.NewWriter(buf)
 	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
@@ -303,15 +303,15 @@ func (d *DiffCustomMetricSet) Table() string {
 	return strings.Replace(strings.Replace(buf.String(), "---|", "--:|", 4), "--:|", "---|", 1)
 }
 
-func (d *DiffCustomMetricSet) MetadataTable() string {
+func (d *DiffCustomMetricSet) MetadataTable(expandDetails bool) string {
 	if len(d.A.Metadata) == 0 {
 		return ""
 	}
 	if d.B == nil || len(d.B.Metadata) == 0 {
-		return d.A.MetadataTable()
+		return d.A.MetadataTable(expandDetails)
 	}
 	buf := new(bytes.Buffer)
-	buf.WriteString("<details><summary>Metadata</summary>\n\n")
+	fmt.Fprintf(buf, "%s<summary>Metadata</summary>\n\n", detailsTag(expandDetails))
 	table := tablewriter.NewWriter(buf)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)

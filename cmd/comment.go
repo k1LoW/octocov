@@ -46,8 +46,9 @@ func commentReport(ctx context.Context, c *config.Config, content, key string) e
 // changed file list, fetched by the caller so that the three outputs and the patch coverage
 // measurement share one paginated fetch instead of repeating it. v links the coverage cells
 // to the pages that browse the stored report, vPrev does the same for the report being
-// compared against, and either is nil when there is no page to link at.
-func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.PullRequestFile, message string, hideFooterLink bool, v, vPrev *report.Viewer) (string, error) {
+// compared against, and either is nil when there is no page to link at. expandDetails renders
+// the collapsible sections already open.
+func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.PullRequestFile, message string, hideFooterLink, expandDetails bool, v, vPrev *report.Viewer) (string, error) {
 	footer := "Reported by [octocov](https://github.com/k1LoW/octocov)"
 	if hideFooterLink {
 		footer = "Reported by octocov"
@@ -58,7 +59,7 @@ func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.
 	)
 	if rPrev != nil {
 		d := r.Compare(rPrev)
-		table = d.Table(v, vPrev)
+		table = d.Table(v, vPrev, expandDetails)
 		relWd := c.Root()
 		if c.GitRoot != "" {
 			if rw, err := filepath.Rel(c.GitRoot, c.Root()); err == nil {
@@ -70,13 +71,13 @@ func createReportContent(c *config.Config, r, rPrev *report.Report, files []*gh.
 		}
 		fileTable = d.FileCoveragesTable(files, relWd, v)
 		for _, s := range d.CustomMetrics {
-			customTables = append(customTables, s.Table(), s.MetadataTable())
+			customTables = append(customTables, s.Table(), s.MetadataTable(expandDetails))
 		}
 	} else {
 		table = r.Table(v)
 		fileTable = r.FileCoveragesTable(files, v)
 		for _, s := range r.CustomMetrics {
-			customTables = append(customTables, s.Table(), s.MetadataTable())
+			customTables = append(customTables, s.Table(), s.MetadataTable(expandDetails))
 		}
 	}
 
