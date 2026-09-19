@@ -108,9 +108,9 @@ var lsFilesCmd = &cobra.Command{
 		}
 		w := len(strconv.Itoa(t))*2 + 1
 		for _, fr := range rows {
-			cover := float64(fr.covered) / float64(fr.total) * 100
-			if fr.total == 0 {
-				cover = 0.0
+			cover := 0.0
+			if fr.total > 0 {
+				cover = float64(fr.covered) / float64(fr.total) * 100
 			}
 			cl := c.CoverageColor(cover)
 			c, err := detectTermColor(cl)
