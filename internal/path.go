@@ -1,11 +1,14 @@
 package internal
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 )
 
 var ConfigPaths = []string{
@@ -106,35 +109,65 @@ func RootPath(base string) (string, error) {
 }
 
 var defaultSkipDirs = map[string]struct{}{
-	".git":        {},
+	".git":         {},
 	"node_modules": {},
-	"vendor":      {},
-	".bundle":     {},
-	"__pycache__": {},
-	".tox":        {},
-	".venv":       {},
+	"vendor":       {},
+	".bundle":      {},
+	"__pycache__":  {},
+	".tox":         {},
+	".venv":        {},
 }
 
 // CollectFiles walks from root and returns absolute paths of all files,
-// skipping directories in defaultSkipDirs.
+// skipping directories in defaultSkipDirs and everything .gitignore excludes.
 func CollectFiles(root string) ([]string, error) {
 	absRoot, err := filepath.Abs(root)
 	if err != nil {
 		return nil, err
 	}
-	var files []string
+	var (
+		files    []string
+		patterns []gitignore.Pattern
+	)
+	// The patterns of a directory are read as the walk enters it, so they are in place before
+	// its children are visited and a deeper .gitignore outranks a shallower one, which is the
+	// order gitignore.Matcher reads them in. gitignore.ReadPatterns would collect them in one
+	// call, but it walks the tree itself without honoring defaultSkipDirs, so a committed
+	// vendor/ would be descended into twice. .git/info/exclude is not read: it is local to one
+	// checkout and says nothing about the repository a report is being resolved against.
+	m := gitignore.NewMatcher(nil)
 	err = filepath.Walk(absRoot, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
+		rel, err := filepath.Rel(absRoot, path)
+		if err != nil {
+			return err
+		}
+		var segments []string
+		if rel != "." {
+			segments = strings.Split(filepath.ToSlash(rel), "/")
+		}
 		if info.IsDir() {
-			if _, skip := defaultSkipDirs[info.Name()]; skip {
-				return filepath.SkipDir
+			if len(segments) > 0 {
+				if _, skip := defaultSkipDirs[info.Name()]; skip {
+					return filepath.SkipDir
+				}
+				if m.Match(segments, true) {
+					return filepath.SkipDir
+				}
+			}
+			if ps := readIgnorePatterns(path, segments); len(ps) > 0 {
+				patterns = append(patterns, ps...)
+				m = gitignore.NewMatcher(patterns)
 			}
 			return nil
 		}
 		// Skip .git file (present in git worktrees instead of .git directory)
 		if info.Name() == ".git" {
+			return nil
+		}
+		if m.Match(segments, false) {
 			return nil
 		}
 		files = append(files, path)
@@ -144,6 +177,25 @@ func CollectFiles(root string) ([]string, error) {
 		return nil, err
 	}
 	return files, nil
+}
+
+// readIgnorePatterns reads the .gitignore of dir, if it has one, as patterns scoped to domain.
+func readIgnorePatterns(dir string, domain []string) []gitignore.Pattern {
+	f, err := os.Open(filepath.Join(dir, ".gitignore"))
+	if err != nil {
+		return nil
+	}
+	defer f.Close() //nostyle:handlerrors
+	var ps []gitignore.Pattern
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		s := scanner.Text()
+		if strings.HasPrefix(s, "#") || strings.TrimSpace(s) == "" {
+			continue
+		}
+		ps = append(ps, gitignore.ParsePattern(s, domain))
+	}
+	return ps
 }
 
 func DetectPrefix(root, wd string, files, cfiles []string) string {

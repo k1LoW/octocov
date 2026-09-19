@@ -2,6 +2,7 @@ package internal
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"slices"
 	"sort"
@@ -401,5 +402,95 @@ func TestCollectFiles_WorktreeGitFile(t *testing.T) {
 	want := []string{filepath.Join(root, "main.go")}
 	if !slices.Equal(got, want) {
 		t.Errorf("CollectFiles() = %v, want %v (should not include .git file)", got, want)
+	}
+}
+
+func TestCollectFiles_Gitignore(t *testing.T) {
+	tests := []struct {
+		name    string
+		ignores map[string]string
+		files   []string
+		want    []string
+	}{
+		{
+			// A scratch directory of cloned repositories left ls-files reporting 1 of 17
+			// files, because the paths under it answered to the report's entries.
+			"an ignored directory is not collected",
+			map[string]string{".": "tmp/\n"},
+			[]string{"main.go", "tmp/clone/main.go"},
+			[]string{"main.go"},
+		},
+		{
+			"an ignored file is not collected",
+			map[string]string{".": "coverage.out\n"},
+			[]string{"main.go", "coverage.out"},
+			[]string{"main.go"},
+		},
+		{
+			// Blank lines and comments are not patterns, and a # in a pattern of its own
+			// would otherwise ignore every path.
+			"comments and blank lines are not patterns",
+			map[string]string{".": "# a comment\n\n*.out\n"},
+			[]string{"main.go", "coverage.out"},
+			[]string{"main.go"},
+		},
+		{
+			// The pattern is anchored at the .gitignore that carries it, so a name matched
+			// under one directory is not matched under its siblings.
+			"a nested .gitignore only reaches its own directory",
+			map[string]string{"src": "build/\n"},
+			[]string{"src/app.go", "src/build/out.go", "build/keep.go"},
+			[]string{"build/keep.go", "src/app.go"},
+		},
+		{
+			// A deeper .gitignore is read after the shallower one, which is what lets it
+			// take a file back.
+			"a nested .gitignore can negate what the root ignored",
+			map[string]string{".": "*.go\n", "src": "!keep.go\n"},
+			[]string{"main.go", "src/keep.go", "src/drop.go"},
+			[]string{"src/keep.go"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			root := t.TempDir()
+			for dir, content := range tt.ignores {
+				d := filepath.Join(root, filepath.FromSlash(dir))
+				if err := os.MkdirAll(d, 0700); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(d, ".gitignore"), []byte(content), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			for _, f := range tt.files {
+				p := filepath.Join(root, filepath.FromSlash(f))
+				if err := os.MkdirAll(filepath.Dir(p), 0700); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(p, []byte(""), 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			got, err := CollectFiles(root)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// The .gitignore files themselves are tracked, so they are collected too.
+			want := tt.want
+			for dir := range tt.ignores {
+				want = append(want, path.Join(dir, ".gitignore"))
+			}
+			var abs []string
+			for _, f := range want {
+				abs = append(abs, filepath.Join(root, filepath.FromSlash(f)))
+			}
+			sort.Strings(got)
+			sort.Strings(abs)
+			if !slices.Equal(got, abs) {
+				t.Errorf("CollectFiles() =\n  %v\nwant\n  %v", got, abs)
+			}
+		})
 	}
 }
