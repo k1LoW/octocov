@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.79.0](https://github.com/k1LoW/octocov/compare/v0.78.0...v0.79.0) - 2026-09-19
+
+### New Features 🎉
+- feat: link the central index badges to octocov.dev by @k1LoW in https://github.com/k1LoW/octocov/pull/754
+### Fix bug 🐛
+- fix: place every file of a report by its own path in ls-files by @k1LoW in https://github.com/k1LoW/octocov/pull/760
+### Other Changes
+- chore(deps): bump go.opentelemetry.io/otel/sdk from 1.44.0 to 1.45.0 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/757
+- chore(deps): bump the dependencies group across 1 directory with 10 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/758
+
 ## [v0.78.0](https://github.com/k1LoW/octocov/compare/v0.77.0...v0.78.0) - 2026-09-10
 
 ### New Features 🎉
