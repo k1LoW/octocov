@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -36,7 +37,7 @@ func TestCollectReports(t *testing.T) {
 		Index:                  ".",
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
-		Reports:                []datastore.Datastore{rd},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -91,7 +92,7 @@ func TestCollectReportsSkipsReportsOfOtherRefs(t *testing.T) {
 		Index:                  ".",
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
-		Reports:                []datastore.Datastore{rd},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -125,7 +126,7 @@ func TestGenerateBadges(t *testing.T) {
 		Index:                  ".",
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
-		Reports:                []datastore.Datastore{rd},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -194,7 +195,7 @@ func TestRenderIndex(t *testing.T) {
 		Index:                  c.Central.Root,
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
-		Reports:                []datastore.Datastore{rd},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -286,7 +287,7 @@ func TestCollectReportsTracksWhichDatastoreSuppliedTheReport(t *testing.T) {
 		Index:                  ".",
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
-		Reports:                []datastore.Datastore{rd, &artifactStub{fsys: fsys}},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}, {URL: "artifact://owner/repo", Datastore: &artifactStub{fsys: fsys}}},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -353,7 +354,7 @@ func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
 		Index:                  c.Central.Root,
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
-		Reports:                []datastore.Datastore{rd, &artifactStub{fsys: fsys}},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}, {URL: "artifact://owner/repo", Datastore: &artifactStub{fsys: fsys}}},
 		CoverageColor:          c.CoverageColor,
 		CodeToTestRatioColor:   c.CodeToTestRatioColor,
 		TestExecutionTimeColor: c.TestExecutionTimeColor,
@@ -388,4 +389,151 @@ func testdataDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return dir
+}
+
+// failingStub stands in for a datastore that cannot be read, which is what a missing
+// permission, an expired artifact or an unreachable bucket amounts to here.
+type failingStub struct{ err error }
+
+func (s *failingStub) Put(_ context.Context, _ string, _ []byte) error { return nil }
+
+func (s *failingStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
+
+func (s *failingStub) FS() (fs.FS, error) { return nil, s.err }
+
+// One datastore that cannot be read must not cost the index the repositories the others
+// describe, and the warning has to name the datastore, since an index silently short of a
+// repository is what this replaced.
+func TestCollectReportsWarnsAndContinuesWhenADatastoreCannotBeRead(t *testing.T) {
+	c := config.New()
+	fsys := fstest.MapFS{
+		"owner/readable/report.json": &fstest.MapFile{Data: centralReport("owner/readable", time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)).Bytes()},
+	}
+	bd, err := local.New(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctr := New(&Config{
+		Repository: "owner/repo",
+		Index:      ".",
+		Wd:         c.Wd(),
+		Badges:     []datastore.Datastore{bd},
+		Reports: []ReportDatastore{
+			{URL: "artifact://owner/unreachable", Datastore: &failingStub{err: errors.New("artifact not found")}},
+			{URL: "artifact://owner/readable", Datastore: &artifactStub{fsys: fsys}},
+		},
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
+	warned := new(bytes.Buffer)
+	ctr.stderr = warned
+
+	if err := ctr.collectReports(); err != nil {
+		t.Fatal(err)
+	}
+
+	got := make([]string, 0, len(ctr.reports))
+	for _, r := range ctr.reports {
+		got = append(got, r.Repository)
+	}
+	if diff := cmp.Diff(got, []string{"owner/readable"}, nil); diff != "" {
+		t.Error(diff)
+	}
+	if want := "Skip collecting reports from artifact://owner/unreachable: artifact not found"; !strings.Contains(warned.String(), want) {
+		t.Errorf("got %v\nwant to contain %v", warned.String(), want)
+	}
+}
+
+// The index is rewritten from what was collected, so every datastore failing would empty it
+// of every repository at once. That is the outcome the warnings exist to prevent going
+// unnoticed, so it is an error rather than one more warning.
+func TestCollectReportsFailsWhenNoDatastoreCanBeRead(t *testing.T) {
+	c := config.New()
+	bd, err := local.New(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctr := New(&Config{
+		Repository: "owner/repo",
+		Index:      ".",
+		Wd:         c.Wd(),
+		Badges:     []datastore.Datastore{bd},
+		Reports: []ReportDatastore{
+			{URL: "artifact://owner/repo-1", Datastore: &failingStub{err: errors.New("artifact not found")}},
+			{URL: "artifact://owner/repo-2", Datastore: &failingStub{err: errors.New("403 Forbidden")}},
+		},
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
+	ctr.stderr = new(bytes.Buffer)
+
+	if err := ctr.collectReports(); err == nil {
+		t.Error("want error when no datastore could be read")
+	}
+}
+
+// walkErrorFS hands over the reports it holds until the walk reaches failDir, which it
+// refuses. A datastore listing a bucket or a branch fails this way rather than at FS(),
+// after some of what it holds has already been read.
+type walkErrorFS struct {
+	fs.FS
+	failDir string
+	err     error
+}
+
+func (f *walkErrorFS) ReadDir(name string) ([]fs.DirEntry, error) {
+	if name == f.failDir {
+		return nil, f.err
+	}
+	return fs.ReadDir(f.FS, name)
+}
+
+// A walk that stops partway still reached some repositories, and those belong in the index.
+// Dropping them would be the blank index this whole change is about, arrived at from the
+// other side, so the run carries on with what it has and only says what it missed.
+func TestCollectReportsKeepsWhatAWalkReachedBeforeItFailed(t *testing.T) {
+	c := config.New()
+	ts := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
+	// Walked in name order, so the readable directory is reached before the one that fails.
+	base := fstest.MapFS{
+		"owner/collected/report.json":  &fstest.MapFile{Data: centralReport("owner/collected", ts).Bytes()},
+		"owner/unreadable/report.json": &fstest.MapFile{Data: centralReport("owner/unreadable", ts).Bytes()},
+	}
+	bd, err := local.New(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctr := New(&Config{
+		Repository: "owner/repo",
+		Index:      ".",
+		Wd:         c.Wd(),
+		Badges:     []datastore.Datastore{bd},
+		Reports: []ReportDatastore{
+			{URL: "s3://bucket/reports", Datastore: &artifactStub{fsys: &walkErrorFS{FS: base, failDir: "owner/unreadable", err: errors.New("AccessDenied")}}},
+		},
+		CoverageColor:          c.CoverageColor,
+		CodeToTestRatioColor:   c.CodeToTestRatioColor,
+		TestExecutionTimeColor: c.TestExecutionTimeColor,
+	})
+	warned := new(bytes.Buffer)
+	ctr.stderr = warned
+
+	// The only datastore configured is the one that failed, and a report was still collected
+	// from it, so the index has something to be written from and the run is not an error.
+	if err := ctr.collectReports(); err != nil {
+		t.Fatal(err)
+	}
+
+	got := make([]string, 0, len(ctr.reports))
+	for _, r := range ctr.reports {
+		got = append(got, r.Repository)
+	}
+	if diff := cmp.Diff(got, []string{"owner/collected"}, nil); diff != "" {
+		t.Error(diff)
+	}
+	if want := "Skip collecting reports from s3://bucket/reports: AccessDenied"; !strings.Contains(warned.String(), want) {
+		t.Errorf("got %v\nwant to contain %v", warned.String(), want)
+	}
 }

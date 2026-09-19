@@ -103,13 +103,13 @@ var rootCmd = &cobra.Command{
 				badges = append(badges, d)
 			}
 
-			var reports []datastore.Datastore
+			var reports []central.ReportDatastore
 			for _, s := range c.Central.Reports.Datastores {
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()))
 				if err != nil {
 					return err
 				}
-				reports = append(reports, d)
+				reports = append(reports, central.ReportDatastore{URL: s, Datastore: d})
 			}
 
 			ctr := central.New(&central.Config{
@@ -355,7 +355,11 @@ var rootCmd = &cobra.Command{
 				}
 				fsys, err := d.FS()
 				if err != nil {
-					return err
+					// The previous report simply may not be there yet, which the artifact
+					// datastore now says rather than answering with an empty filesystem, so
+					// this is the same kind of miss the reads below already carry on from.
+					log.Printf("%s: %v", s, err)
+					continue
 				}
 				f, err := fsys.Open(path)
 				if err != nil {
