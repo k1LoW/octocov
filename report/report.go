@@ -371,6 +371,18 @@ func patchTitleSuffix(covered, total int) string {
 	return fmt.Sprintf(", patch %.1f%%", floor1(pc.Rate()))
 }
 
+// detailsTag opens a collapsible section of a rendered report, already expanded when the
+// output asked for it. The section keeps its tag rather than losing it, so a reader who has
+// finished with it can fold it away again, and so the summary line still names what it holds.
+// The file coverage table folds itself on file count instead, and is left alone here, since
+// that fold exists to keep a comment from growing past what GitHub will render.
+func detailsTag(expand bool) string {
+	if expand {
+		return "<details open>"
+	}
+	return "<details>"
+}
+
 // dropColumn removes the i-th cell of every row.
 func dropColumn(rows [][]string, i int) [][]string {
 	dropped := make([][]string, 0, len(rows))

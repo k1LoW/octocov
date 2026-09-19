@@ -438,7 +438,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				cur, prev := coverageViewers(c.Comment.HideCoverageLink)
-				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, cur, prev)
+				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, c.Comment.ExpandDetails, cur, prev)
 				if err != nil {
 					return err
 				}
@@ -468,7 +468,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				cur, prev := coverageViewers(c.Summary.HideCoverageLink)
-				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, cur, prev)
+				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, c.Summary.ExpandDetails, cur, prev)
 				if err != nil {
 					return err
 				}
@@ -498,7 +498,7 @@ var rootCmd = &cobra.Command{
 					return err
 				}
 				cur, prev := coverageViewers(c.Body.HideCoverageLink)
-				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, cur, prev)
+				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, c.Body.ExpandDetails, cur, prev)
 				if err != nil {
 					return err
 				}

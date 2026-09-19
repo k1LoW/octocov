@@ -133,6 +133,7 @@ type Push struct {
 type Comment struct {
 	HideFooterLink   bool   `yaml:"hideFooterLink"`
 	HideCoverageLink bool   `yaml:"hideCoverageLink"`
+	ExpandDetails    bool   `yaml:"expandDetails"`
 	DeletePrevious   bool   `yaml:"deletePrevious"`
 	UpdatePrevious   bool   `yaml:"updatePrevious"`
 	Message          string `yaml:"message,omitempty"`
@@ -142,6 +143,7 @@ type Comment struct {
 type Summary struct {
 	HideFooterLink   bool   `yaml:"hideFooterLink"`
 	HideCoverageLink bool   `yaml:"hideCoverageLink"`
+	ExpandDetails    bool   `yaml:"expandDetails"`
 	Message          string `yaml:"message,omitempty"`
 	If               string `yaml:"if,omitempty"`
 }
@@ -149,6 +151,7 @@ type Summary struct {
 type Body struct {
 	HideFooterLink   bool   `yaml:"hideFooterLink"`
 	HideCoverageLink bool   `yaml:"hideCoverageLink"`
+	ExpandDetails    bool   `yaml:"expandDetails"`
 	Message          string `yaml:"message,omitempty"`
 	If               string `yaml:"if,omitempty"`
 }

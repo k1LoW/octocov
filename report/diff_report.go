@@ -66,8 +66,8 @@ var leftSepRe = regexp.MustCompile(`(?m)^\|`)
 
 // Table renders the comparison. cur views the report being described and prev the one it
 // is compared against, which is a viewer of its own because a comparison can be read from
-// somewhere the pages do not serve.
-func (d *DiffReport) Table(cur, prev *Viewer) string {
+// somewhere the pages do not serve. expandDetails renders the breakdown already open.
+func (d *DiffReport) Table(cur, prev *Viewer, expandDetails bool) string {
 	var out []string
 
 	// Markdown table
@@ -127,7 +127,7 @@ func (d *DiffReport) Table(cur, prev *Viewer) string {
 			t2 = strings.Replace(t2, "  | Test Execution", "+ | Test Execution", 1)
 		}
 	}
-	out = append(out, fmt.Sprintf("<details>\n\n<summary>Details</summary>\n\n``` diff\n%s```\n\n</details>\n", t2))
+	out = append(out, fmt.Sprintf("%s\n\n<summary>Details</summary>\n\n``` diff\n%s```\n\n</details>\n", detailsTag(expandDetails), t2))
 
 	return strings.Join(out, "\n")
 }

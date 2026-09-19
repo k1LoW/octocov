@@ -124,7 +124,7 @@ func TestCustomMetricSetMetadataTable(t *testing.T) {
 	}
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
-			got := tt.s.MetadataTable()
+			got := tt.s.MetadataTable(false)
 			f := filepath.Join("custom_metrics", fmt.Sprintf("custom_metric_set_metadata_table.%d", i))
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, testdataDir(t), f, got)
@@ -556,7 +556,7 @@ func TestDiffCustomMetricSetMetadataTable(t *testing.T) {
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			d := tt.a.Compare(tt.b)
-			got := d.MetadataTable()
+			got := d.MetadataTable(false)
 			f := filepath.Join("custom_metrics", fmt.Sprintf("diff_custom_metric_set_metadata_table.%d", i))
 			if os.Getenv("UPDATE_GOLDEN") != "" {
 				golden.Update(t, testdataDir(t), f, got)
@@ -784,6 +784,55 @@ func TestReport_CustomMetricsAcceptable(t *testing.T) {
 			} else {
 				if err != nil {
 					t.Errorf("got error = %v, want nil", err)
+				}
+			}
+		})
+	}
+}
+
+func TestCustomMetricSetMetadataTableExpandDetails(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	s := &CustomMetricSet{
+		Key:  "benchmark_0",
+		Name: "Benchmark-0",
+		Metadata: []*MetadataKV{
+			{Key: "goos", Value: "darwin"},
+			{Key: "goarch", Value: "amd64"},
+		},
+		report: &Report{
+			Ref:    "main",
+			Commit: "1234567890",
+		},
+	}
+	// The compared set carries metadata of its own, so that the diff renders its own table
+	// rather than handing the call to the set it compares against.
+	s2 := &CustomMetricSet{
+		Key:  "benchmark_0",
+		Name: "Benchmark-0",
+		Metadata: []*MetadataKV{
+			{Key: "goos", Value: "linux"},
+			{Key: "goarch", Value: "amd64"},
+		},
+		report: &Report{
+			Ref:    "main",
+			Commit: "0987654321",
+		},
+	}
+
+	tests := []struct {
+		name          string
+		expandDetails bool
+		want          string
+	}{
+		{"collapsed", false, "<details><summary>Metadata</summary>"},
+		{"expanded", true, "<details open><summary>Metadata</summary>"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			for _, got := range []string{s.MetadataTable(tt.expandDetails), s.Compare(s2).MetadataTable(tt.expandDetails)} {
+				if !strings.Contains(got, tt.want) {
+					t.Errorf("got\n%v\nwant it to contain\n%v", got, tt.want)
 				}
 			}
 		})
