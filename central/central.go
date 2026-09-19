@@ -36,6 +36,9 @@ type Central struct {
 	// a page exists. A report read from anywhere else may still have one, and may not, and
 	// nothing here can tell the two apart.
 	artifactBacked map[string]bool
+	// stderr is where the warnings about what could not be collected go. It is a field so a
+	// test can read them back, since a warning nobody can see is the state this replaced.
+	stderr io.Writer
 }
 
 type Config struct {
@@ -43,15 +46,24 @@ type Config struct {
 	Wd                     string
 	Index                  string
 	Badges                 []datastore.Datastore
-	Reports                []datastore.Datastore
+	Reports                []ReportDatastore
 	CoverageColor          func(cover float64) string
 	CodeToTestRatioColor   func(ratio float64) string
 	TestExecutionTimeColor func(d time.Duration) string
 }
 
+// ReportDatastore is a datastore the index is collected from, named by the URL it was
+// configured with. A Datastore cannot say which line of the config produced it, and a
+// warning about one that could not be read is of no use without that name.
+type ReportDatastore struct {
+	URL       string
+	Datastore datastore.Datastore
+}
+
 func New(c *Config) *Central {
 	return &Central{
 		config: c,
+		stderr: os.Stderr,
 	}
 }
 
@@ -94,11 +106,14 @@ func (c *Central) collectReports() error {
 	backed := map[string]bool{}
 
 	// collect reports
-	for _, d := range c.config.Reports {
-		fromArtifact := isArtifact(d)
-		fsys, err := d.FS()
+	failed := 0
+	for _, rd := range c.config.Reports {
+		fromArtifact := isArtifact(rd.Datastore)
+		fsys, err := rd.Datastore.FS()
 		if err != nil {
-			return err
+			c.warnSkippedDatastore(rd.URL, err)
+			failed++
+			continue
 		}
 		if err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
@@ -128,7 +143,7 @@ func (c *Central) collectReports() error {
 			}
 			current, ok := rsMap[r.Repository]
 			if !ok {
-				if _, err := fmt.Fprintf(os.Stderr, "Collect report of %s\n", r.Repository); err != nil {
+				if _, err := fmt.Fprintf(c.stderr, "Collect report of %s\n", r.Repository); err != nil {
 					return err
 				}
 				rsMap[r.Repository] = r
@@ -141,8 +156,19 @@ func (c *Central) collectReports() error {
 			}
 			return nil
 		}); err != nil {
-			return err
+			// Whatever the walk reached before it stopped is kept, since a half-collected
+			// datastore still describes the repositories it did reach.
+			c.warnSkippedDatastore(rd.URL, err)
+			failed++
+			continue
 		}
+	}
+
+	// Every datastore failing is not the same as each of them failing on its own. The index
+	// is rewritten from what was collected, so carrying on here would replace the whole of
+	// it with nothing, which is the state the warnings were meant to make visible.
+	if failed > 0 && failed == len(c.config.Reports) {
+		return fmt.Errorf("could not collect reports from any of the %d datastore(s)", failed)
 	}
 
 	for _, r := range rsMap {
@@ -339,6 +365,16 @@ type artifactDatastore interface {
 func isArtifact(d datastore.Datastore) bool {
 	a, ok := d.(artifactDatastore)
 	return ok && a.IsArtifact()
+}
+
+// warnSkippedDatastore reports a datastore the index could not be collected from. One
+// unreadable datastore is not a reason to drop the repositories the others describe, so it
+// is a warning rather than a failure.
+func (c *Central) warnSkippedDatastore(u string, err error) {
+	if u == "" {
+		u = "datastore"
+	}
+	fmt.Fprintf(c.stderr, "Skip collecting reports from %s: %v\n", u, err) //nostyle:handlerrors
 }
 
 // floor1 round down to one decimal place.

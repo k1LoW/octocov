@@ -103,13 +103,13 @@ var rootCmd = &cobra.Command{
 				badges = append(badges, d)
 			}
 
-			var reports []datastore.Datastore
+			var reports []central.ReportDatastore
 			for _, s := range c.Central.Reports.Datastores {
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()))
 				if err != nil {
 					return err
 				}
-				reports = append(reports, d)
+				reports = append(reports, central.ReportDatastore{URL: s, Datastore: d})
 			}
 
 			ctr := central.New(&central.Config{
