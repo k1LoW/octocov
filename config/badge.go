@@ -37,25 +37,6 @@ type BadgeColor struct {
 	Color string `yaml:"color"`
 }
 
-// build records where the badge is configured, which decides both how `icon:` resolves and how
-// an error about the badge names itself.
-func (b *Badge) build(key, dir string) {
-	if b == nil {
-		return
-	}
-	b.key = key
-	b.dir = dir
-}
-
-// section returns the config section to name in an error. A badge that never went through
-// Build, as in a test, falls back to the key the sections have in common.
-func (b *Badge) section() string {
-	if b == nil || b.key == "" {
-		return "badge"
-	}
-	return b.key
-}
-
 // badges returns the badge configurations set for central mode.
 func (b *CentralBadges) badges() []*Badge {
 	var badges []*Badge
@@ -129,6 +110,25 @@ func (b *Badge) CodeToTestRatioColor(ratio float64) (string, error) {
 // TestExecutionTimeColor returns the message color of the test execution time badge.
 func (b *Badge) TestExecutionTimeColor(d time.Duration) (string, error) {
 	return b.color(float64(d), normalizeTestExecutionTimeCond, defaultTestExecutionTimeColor(d))
+}
+
+// build records where the badge is configured, which decides both how `icon:` resolves and how
+// an error about the badge names itself.
+func (b *Badge) build(key, dir string) {
+	if b == nil {
+		return
+	}
+	b.key = key
+	b.dir = dir
+}
+
+// section returns the config section to name in an error. A badge that never went through
+// Build, as in a test, falls back to the key the sections have in common.
+func (b *Badge) section() string {
+	if b == nil || b.key == "" {
+		return "badge"
+	}
+	return b.key
 }
 
 // render renders the badge to w. label, message and messageColor are what the measured metric
