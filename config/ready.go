@@ -211,6 +211,9 @@ func (c *Config) CentralConfigReady() error {
 	if len(c.Central.Reports.Datastores) == 0 {
 		return errors.New("central.reports.datastores is not set")
 	}
+	if err := c.Central.Badges.validate(); err != nil {
+		return err
+	}
 	ok, err := c.CheckIf(c.Central.If)
 	if err != nil {
 		return fmt.Errorf("the condition in the `if` section is not met (%s): %w", c.Central.If, err)

@@ -294,7 +294,7 @@ func TestCoverageBadgeConfigReady(t *testing.T) {
 			&Config{
 				Coverage: &Coverage{
 					Paths: []string{"path/to/coverage.xml"},
-					Badge: CoverageBadge{
+					Badge: Badge{
 						Path: "path/to/coverage.svg",
 					},
 				},
@@ -341,7 +341,7 @@ func TestCodeToTestRatioBadgeConfigReady(t *testing.T) {
 					Test: []string{
 						"**_test.go",
 					},
-					Badge: CodeToTestRatioBadge{
+					Badge: Badge{
 						Path: "path/to/ratio.svg",
 					},
 				},
@@ -388,7 +388,7 @@ func TestTestExecutionTimeBadgeConfigReady(t *testing.T) {
 					Steps: []string{
 						"Run tests",
 					},
-					Badge: TestExecutionTimeBadge{
+					Badge: Badge{
 						Path: "path/to/time.svg",
 					},
 				},

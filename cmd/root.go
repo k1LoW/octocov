@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -32,9 +33,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
@@ -118,9 +117,9 @@ var rootCmd = &cobra.Command{
 				Wd:                     c.Wd(),
 				Badges:                 badges,
 				Reports:                reports,
-				CoverageColor:          c.CoverageColor,
-				CodeToTestRatioColor:   c.CodeToTestRatioColor,
-				TestExecutionTimeColor: c.TestExecutionTimeColor,
+				CoverageBadge:          c.Central.Badges.Coverage.RenderCoverage,
+				CodeToTestRatioBadge:   c.Central.Badges.CodeToTestRatio.RenderCodeToTestRatio,
+				TestExecutionTimeBadge: c.Central.Badges.TestExecutionTime.RenderTestExecutionTime,
 			})
 
 			paths, err := ctr.Generate(ctx)
@@ -229,25 +228,15 @@ var rootCmd = &cobra.Command{
 				}
 				cp := r.CoveragePercent()
 				cmd.PrintErrln("Generate coverage report badge...")
-				out, err := badgeFile(c.Coverage.Badge.Path)
-				if err != nil {
-					return err
-				}
 				bp, err := filepath.Abs(filepath.Clean(c.Coverage.Badge.Path))
 				if err != nil {
 					return err
 				}
 				addPaths = append(addPaths, bp)
 
-				b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
-				b.MessageColor = c.CoverageColor(cp)
-				if err := b.AddIcon(internal.Icon); err != nil {
-					return err
-				}
-				if err := b.Render(out); err != nil {
-					return err
-				}
-				return nil
+				return badgeFile(c.Coverage.Badge.Path, func(out io.Writer) error {
+					return c.Coverage.Badge.RenderCoverage(out, cp)
+				})
 			}(); err != nil {
 				return err
 			}
@@ -263,25 +252,15 @@ var rootCmd = &cobra.Command{
 
 				tr := r.CodeToTestRatioRatio()
 				cmd.PrintErrln("Generate code-to-test-ratio report badge...")
-				out, err := badgeFile(c.CodeToTestRatio.Badge.Path)
-				if err != nil {
-					return err
-				}
 				bp, err := filepath.Abs(filepath.Clean(c.CodeToTestRatio.Badge.Path))
 				if err != nil {
 					return err
 				}
 				addPaths = append(addPaths, bp)
 
-				b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
-				b.MessageColor = c.CodeToTestRatioColor(tr)
-				if err := b.AddIcon(internal.Icon); err != nil {
-					return err
-				}
-				if err := b.Render(out); err != nil {
-					return err
-				}
-				return nil
+				return badgeFile(c.CodeToTestRatio.Badge.Path, func(out io.Writer) error {
+					return c.CodeToTestRatio.Badge.RenderCodeToTestRatio(out, tr)
+				})
 			}(); err != nil {
 				return err
 			}
@@ -296,26 +275,15 @@ var rootCmd = &cobra.Command{
 				}
 
 				cmd.PrintErrln("Generate test-execution-time report badge...")
-				out, err := badgeFile(c.TestExecutionTime.Badge.Path)
-				if err != nil {
-					return err
-				}
 				bp, err := filepath.Abs(filepath.Clean(c.TestExecutionTime.Badge.Path))
 				if err != nil {
 					return err
 				}
 				addPaths = append(addPaths, bp)
 
-				d := time.Duration(r.TestExecutionTimeNano())
-				b := badge.New("test execution time", d.String())
-				b.MessageColor = c.TestExecutionTimeColor(d)
-				if err := b.AddIcon(internal.Icon); err != nil {
-					return err
-				}
-				if err := b.Render(out); err != nil {
-					return err
-				}
-				return nil
+				return badgeFile(c.TestExecutionTime.Badge.Path, func(out io.Writer) error {
+					return c.TestExecutionTime.Badge.RenderTestExecutionTime(out, r.TestExecutionTimeNano())
+				})
 			}(); err != nil {
 				return err
 			}
@@ -739,16 +707,18 @@ func reportToDatastores(ctx context.Context, c *config.Config, datastores []stri
 	return nil
 }
 
-func badgeFile(path string) (*os.File, error) {
-	err := os.MkdirAll(filepath.Dir(path), 0755) // #nosec
-	if err != nil {
-		return nil, err
+// badgeFile writes the badge render produced to path. The badge is rendered into memory
+// first, so a run that fails on a configuration error leaves the badge that is already there
+// rather than truncating it to nothing.
+func badgeFile(path string, render func(io.Writer) error) error {
+	buf := new(bytes.Buffer)
+	if err := render(buf); err != nil {
+		return err
 	}
-	out, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-	if err != nil {
-		return nil, err
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil { // #nosec
+		return err
 	}
-	return out, nil
+	return os.WriteFile(path, buf.Bytes(), 0644) // #nosec
 }
 
 func Execute() {

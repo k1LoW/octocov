@@ -2,9 +2,11 @@ package badge
 
 import (
 	"bytes"
+	"encoding/xml"
 	"flag"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/tenntenn/golden"
@@ -118,4 +120,37 @@ func testdataDir(t *testing.T) string {
 		t.Fatal(err)
 	}
 	return dir
+}
+
+func TestRenderEscapesTextNodes(t *testing.T) {
+	b := New("R&D <coverage>", `1:1.3 "ok"`)
+	got := new(bytes.Buffer)
+	if err := b.Render(got); err != nil {
+		t.Fatal(err)
+	}
+	if err := xml.Unmarshal(got.Bytes(), new(any)); err != nil {
+		t.Errorf("rendered badge is not well-formed: %v", err)
+	}
+	for _, want := range []string{"R&amp;D &lt;coverage&gt;", "&#34;ok&#34;"} {
+		if !strings.Contains(got.String(), want) {
+			t.Errorf("want to contain %v\ngot %v", want, got.String())
+		}
+	}
+	if strings.Contains(got.String(), "<coverage>") {
+		t.Error("want the label to be escaped")
+	}
+}
+
+func TestRenderIconWithUppercaseRoot(t *testing.T) {
+	b := New("coverage", "50%")
+	if err := b.AddIcon([]byte(`<SVG xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="4"/></SVG>`)); err != nil {
+		t.Fatal(err)
+	}
+	got := new(bytes.Buffer)
+	if err := b.Render(got); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(got.String(), "<image") {
+		t.Error("want the icon to be rendered")
+	}
 }

@@ -22,6 +22,9 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
+// testBadge is the badge configuration of a central mode repository that customizes nothing.
+var testBadge = &config.Badge{}
+
 func TestCollectReports(t *testing.T) {
 	c := config.New()
 	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
@@ -38,9 +41,9 @@ func TestCollectReports(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -93,9 +96,9 @@ func TestCollectReportsSkipsReportsOfOtherRefs(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -127,9 +130,9 @@ func TestGenerateBadges(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
@@ -159,6 +162,60 @@ func TestGenerateBadges(t *testing.T) {
 
 	if want := 11; len(got) != want {
 		t.Errorf("got %v\nwant %v", len(got), want)
+	}
+}
+
+// The badges of every collected repository are rendered from the central repository's own
+// configuration, since a report carries none of the configuration of the repository it
+// describes.
+func TestGenerateBadgesUsesTheConfiguredBadge(t *testing.T) {
+	c := config.New()
+	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	td := t.TempDir()
+	bd, err := local.New(td)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := &config.Badge{
+		Label: "cov",
+		Icon:  "none",
+		Colors: []config.BadgeColor{
+			{Color: "#123456"},
+		},
+	}
+	ctr := New(&Config{
+		Repository:             "owner/repo",
+		Index:                  ".",
+		Wd:                     c.Wd(),
+		Badges:                 []datastore.Datastore{bd},
+		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
+		CoverageBadge:          b.RenderCoverage,
+		CodeToTestRatioBadge:   b.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: b.RenderTestExecutionTime,
+	})
+	if err := ctr.collectReports(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ctr.generateBadges(); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := os.ReadFile(filepath.Join(td, ctr.reports[0].Repository, "coverage.svg"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{">cov<", "#123456"} {
+		if !strings.Contains(string(got), want) {
+			t.Errorf("want to contain %v", want)
+		}
+	}
+	for _, notWant := range []string{">coverage<", "<image"} {
+		if strings.Contains(string(got), notWant) {
+			t.Errorf("want not to contain %v", notWant)
+		}
 	}
 }
 
@@ -196,9 +253,9 @@ func TestRenderIndex(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
@@ -288,9 +345,9 @@ func TestCollectReportsTracksWhichDatastoreSuppliedTheReport(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}, {URL: "artifact://owner/repo", Datastore: &artifactStub{fsys: fsys}}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -355,9 +412,9 @@ func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}, {URL: "artifact://owner/repo", Datastore: &artifactStub{fsys: fsys}}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
@@ -422,9 +479,9 @@ func TestCollectReportsWarnsAndContinuesWhenADatastoreCannotBeRead(t *testing.T)
 			{URL: "artifact://owner/unreachable", Datastore: &failingStub{err: errors.New("artifact not found")}},
 			{URL: "artifact://owner/readable", Datastore: &artifactStub{fsys: fsys}},
 		},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	warned := new(bytes.Buffer)
 	ctr.stderr = warned
@@ -463,9 +520,9 @@ func TestCollectReportsFailsWhenNoDatastoreCanBeRead(t *testing.T) {
 			{URL: "artifact://owner/repo-1", Datastore: &failingStub{err: errors.New("artifact not found")}},
 			{URL: "artifact://owner/repo-2", Datastore: &failingStub{err: errors.New("403 Forbidden")}},
 		},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	ctr.stderr = new(bytes.Buffer)
 
@@ -513,9 +570,9 @@ func TestCollectReportsKeepsWhatAWalkReachedBeforeItFailed(t *testing.T) {
 		Reports: []ReportDatastore{
 			{URL: "s3://bucket/reports", Datastore: &artifactStub{fsys: &walkErrorFS{FS: base, failDir: "owner/unreadable", err: errors.New("AccessDenied")}}},
 		},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	warned := new(bytes.Buffer)
 	ctr.stderr = warned

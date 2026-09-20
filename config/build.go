@@ -38,6 +38,13 @@ func (c *Config) Build() {
 		c.TestExecutionTime = &TestExecutionTime{}
 	}
 
+	// Badges
+	c.Coverage.Badge.build("coverage.badge", c.Root())
+	if c.CodeToTestRatio != nil {
+		c.CodeToTestRatio.Badge.build("codeToTestRatio.badge", c.Root())
+	}
+	c.TestExecutionTime.Badge.build("testExecutionTime.badge", c.Root())
+
 	// Report
 
 	// Central
@@ -54,6 +61,9 @@ func (c *Config) Build() {
 		if len(c.Central.Badges.Datastores) == 0 {
 			c.Central.Badges.Datastores = append(c.Central.Badges.Datastores, defaultBadgesDatastore)
 		}
+		c.Central.Badges.Coverage.build("central.badges.coverage", c.Root())
+		c.Central.Badges.CodeToTestRatio.build("central.badges.codeToTestRatio", c.Root())
+		c.Central.Badges.TestExecutionTime.build("central.badges.testExecutionTime", c.Root())
 	}
 
 	// Push

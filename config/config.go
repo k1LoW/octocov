@@ -28,15 +28,6 @@ const defaultReportsDatastore = "local://reports"
 const defaultTimeout = "30sec"
 const largeEnoughTime = float64(99 * time.Hour)
 
-const (
-	// https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12
-	green       = "#97CA00"
-	yellowgreen = "#A4A61D"
-	yellow      = "#DFB317"
-	orange      = "#FE7D37"
-	red         = "#E05D44"
-)
-
 var Paths = internal.ConfigPaths
 
 type Config struct {
@@ -62,12 +53,12 @@ type Config struct {
 }
 
 type Coverage struct {
-	Path       string        `yaml:"path,omitempty"`
-	Paths      []string      `yaml:"paths,omitempty"`
-	Exclude    []string      `yaml:"exclude,omitempty"`
-	Badge      CoverageBadge `yaml:"badge,omitempty"`
-	Acceptable string        `yaml:"acceptable,omitempty"`
-	If         string        `yaml:"if,omitempty"`
+	Path       string   `yaml:"path,omitempty"`
+	Paths      []string `yaml:"paths,omitempty"`
+	Exclude    []string `yaml:"exclude,omitempty"`
+	Badge      Badge    `yaml:"badge,omitempty"`
+	Acceptable string   `yaml:"acceptable,omitempty"`
+	If         string   `yaml:"if,omitempty"`
 }
 
 var patchVarRe = regexp.MustCompile(`\bpatch\b`)
@@ -81,31 +72,19 @@ func (c *Coverage) AcceptableReferencesPatch() bool {
 	return patchVarRe.MatchString(c.Acceptable)
 }
 
-type CoverageBadge struct {
-	Path string `yaml:"path,omitempty"`
-}
-
 type CodeToTestRatio struct {
-	Code       []string             `yaml:"code"`
-	Test       []string             `yaml:"test"`
-	Badge      CodeToTestRatioBadge `yaml:"badge,omitempty"`
-	Acceptable string               `yaml:"acceptable,omitempty"`
-	If         string               `yaml:"if,omitempty"`
-}
-
-type CodeToTestRatioBadge struct {
-	Path string `yaml:"path,omitempty"`
+	Code       []string `yaml:"code"`
+	Test       []string `yaml:"test"`
+	Badge      Badge    `yaml:"badge,omitempty"`
+	Acceptable string   `yaml:"acceptable,omitempty"`
+	If         string   `yaml:"if,omitempty"`
 }
 
 type TestExecutionTime struct {
-	Badge      TestExecutionTimeBadge `yaml:"badge,omitempty"`
-	Acceptable string                 `yaml:"acceptable,omitempty"`
-	Steps      []string               `yaml:"steps,omitempty"`
-	If         string                 `yaml:"if,omitempty"`
-}
-
-type TestExecutionTimeBadge struct {
-	Path string `yaml:"path,omitempty"`
+	Badge      Badge    `yaml:"badge,omitempty"`
+	Acceptable string   `yaml:"acceptable,omitempty"`
+	Steps      []string `yaml:"steps,omitempty"`
+	If         string   `yaml:"if,omitempty"`
 }
 
 type Central struct {
@@ -122,7 +101,10 @@ type CentralReports struct {
 }
 
 type CentralBadges struct {
-	Datastores []string `yaml:"datastores"`
+	Datastores        []string `yaml:"datastores"`
+	Coverage          *Badge   `yaml:"coverage,omitempty"`
+	CodeToTestRatio   *Badge   `yaml:"codeToTestRatio,omitempty"`
+	TestExecutionTime *Badge   `yaml:"testExecutionTime,omitempty"`
 }
 
 type Push struct {
@@ -286,6 +268,44 @@ var (
 	durationRe        = regexp.MustCompile(`[\d][\d\.\sa-z]*[a-z]`)
 )
 
+// normalizeCoverageCond normalizes a condition on a measured coverage into an expression.
+func normalizeCoverageCond(cond string) (string, error) {
+	// Trim '%'
+	return expandCond(trimPercentRe.ReplaceAllString(cond, "$1"), ">="), nil
+}
+
+// normalizeCodeToTestRatioCond normalizes a condition on a measured code to test ratio into an expression.
+func normalizeCodeToTestRatioCond(cond string) (string, error) {
+	// Trim '1:'
+	return expandCond(trimRatioPrefixRe.ReplaceAllString(cond, "$1"), ">="), nil
+}
+
+// normalizeTestExecutionTimeCond normalizes a condition on a measured test execution time into
+// an expression. Durations are replaced with nanoseconds, the unit the measured value carries.
+func normalizeTestExecutionTimeCond(cond string) (string, error) {
+	for _, m := range durationRe.FindAllString(cond, -1) {
+		d, err := duration.Parse(m)
+		if err != nil {
+			return "", err
+		}
+		cond = strings.Replace(cond, m, strconv.FormatFloat(float64(d), 'f', -1, 64), 1)
+	}
+	return expandCond(cond, "<="), nil
+}
+
+// expandCond expands a condition written as a threshold alone (`60`) or as a comparison alone
+// (`> 60`) into a full expression on `current`.
+func expandCond(cond, op string) string {
+	switch {
+	case numberOnlyRe.MatchString(cond):
+		return fmt.Sprintf("current %s %s", op, cond)
+	case compOpRe.MatchString(cond):
+		return fmt.Sprintf("current %s", cond)
+	default:
+		return cond
+	}
+}
+
 // defaultPatchCoverage is substituted for the `patch` variable when patch coverage cannot be
 // measured. Missing patch data is a data-level gap, like a missing previous report, so the
 // condition is still evaluated with a permissive value rather than skipped: `patch >= 70%` passes,
@@ -310,13 +330,9 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) err
 		return nil
 	}
 	org := cond
-	// Trim '%'
-	cond = trimPercentRe.ReplaceAllString(cond, "$1")
-
-	if numberOnlyRe.MatchString(cond) {
-		cond = fmt.Sprintf("current >= %s", cond)
-	} else if compOpRe.MatchString(cond) {
-		cond = fmt.Sprintf("current %s", cond)
+	cond, err := normalizeCoverageCond(cond)
+	if err != nil {
+		return err
 	}
 
 	diff := new(big.Rat).Sub(current, prev)
@@ -359,13 +375,9 @@ func codeToTestRatioAcceptable(current, prev *big.Rat, cond string) error {
 		return nil
 	}
 	org := cond
-	// Trim '1:'
-	cond = trimRatioPrefixRe.ReplaceAllString(cond, "$1")
-
-	if numberOnlyRe.MatchString(cond) {
-		cond = fmt.Sprintf("current >= %s", cond)
-	} else if compOpRe.MatchString(cond) {
-		cond = fmt.Sprintf("current %s", cond)
+	cond, err := normalizeCodeToTestRatioCond(cond)
+	if err != nil {
+		return err
 	}
 
 	diff := new(big.Rat).Sub(current, prev)
@@ -396,19 +408,9 @@ func testExecutionTimeAcceptable(current, prev *big.Rat, cond string) error {
 		return nil
 	}
 	org := cond
-	matches := durationRe.FindAllString(cond, -1)
-	for _, m := range matches {
-		d, err := duration.Parse(m)
-		if err != nil {
-			return err
-		}
-		cond = strings.Replace(cond, m, strconv.FormatFloat(float64(d), 'f', -1, 64), 1)
-	}
-
-	if numberOnlyRe.MatchString(cond) {
-		cond = fmt.Sprintf("current <= %s", cond)
-	} else if compOpRe.MatchString(cond) {
-		cond = fmt.Sprintf("current %s", cond)
+	cond, err := normalizeTestExecutionTimeCond(cond)
+	if err != nil {
+		return err
 	}
 
 	diff := new(big.Rat).Sub(current, prev)
@@ -435,49 +437,22 @@ func testExecutionTimeAcceptable(current, prev *big.Rat, cond string) error {
 	return nil
 }
 
+// CoverageColor returns the color of a measured coverage by the built-in thresholds. It is the
+// color of the metric itself rather than of a badge, which is what `octocov ls-files` paints a
+// listing with. A badge resolves its own color through Badge.CoverageColor, since `colors:`
+// describes one badge rather than what a coverage figure means.
 func (c *Config) CoverageColor(cover float64) string {
-	switch {
-	case cover >= 80.0:
-		return green
-	case cover >= 60.0:
-		return yellowgreen
-	case cover >= 40.0:
-		return yellow
-	case cover >= 20.0:
-		return orange
-	default:
-		return red
-	}
+	return defaultCoverageColor(cover)
 }
 
+// CodeToTestRatioColor returns the color of a measured code to test ratio by the built-in thresholds.
 func (c *Config) CodeToTestRatioColor(ratio float64) string {
-	switch {
-	case ratio >= 1.2:
-		return green
-	case ratio >= 1.0:
-		return yellowgreen
-	case ratio >= 0.8:
-		return yellow
-	case ratio >= 0.6:
-		return orange
-	default:
-		return red
-	}
+	return defaultCodeToTestRatioColor(ratio)
 }
 
+// TestExecutionTimeColor returns the color of a measured test execution time by the built-in thresholds.
 func (c *Config) TestExecutionTimeColor(d time.Duration) string {
-	switch {
-	case d < 5*time.Minute:
-		return green
-	case d < 10*time.Minute:
-		return yellowgreen
-	case d < 15*time.Minute:
-		return yellow
-	case d < 20*time.Minute:
-		return orange
-	default:
-		return red
-	}
+	return defaultTestExecutionTimeColor(d)
 }
 
 func (c *Config) CheckIf(cond string) (bool, error) {

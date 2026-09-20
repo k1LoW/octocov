@@ -536,6 +536,51 @@ coverage:
     path: docs/coverage.svg
 ```
 
+### `coverage.badge.label:` `coverage.badge.labelColor:`
+
+The text and the background color of the left side of the badge. default: `coverage` and `#24292E`.
+
+A color is a hex RGB notation ( `#97CA00` ) or one of the [shields.io color names](https://github.com/badges/shields/blob/7d452472defa0e0bd71d6443393e522e8457f856/badge-maker/lib/color.js#L8-L12) ( `brightgreen` `green` `yellowgreen` `yellow` `orange` `red` `blue` `grey` `lightgrey` ).
+
+```yaml
+coverage:
+  badge:
+    path: docs/coverage.svg
+    label: cov
+    labelColor: "#24292E"
+```
+
+### `coverage.badge.icon:`
+
+The icon image of the badge. A path relative to the config file, or a base64 encoded `data:` URI. `none` renders the badge without an icon. default: the octocov icon.
+
+```yaml
+coverage:
+  badge:
+    path: docs/coverage.svg
+    icon: .github/badge-icon.svg
+```
+
+### `coverage.badge.colors:`
+
+The color of the right side of the badge, as the conditions it is picked by. The color of the first met condition is used, and an entry without `if:` is met by anything.
+
+The condition is written the same way as `coverage.acceptable:`, with the measured coverage as `current`.
+
+```yaml
+coverage:
+  badge:
+    path: docs/coverage.svg
+    colors:
+      - if: current >= 80%
+        color: green
+      - if: 60%           # `current >= 60%`
+        color: yellowgreen
+      - color: red
+```
+
+When `colors:` is not set, or when no condition is met, the built-in thresholds are used ( `>= 80%` green, `>= 60%` yellowgreen, `>= 40%` yellow, `>= 20%` orange, otherwise red ).
+
 ### `coverage.if:`
 
 Conditions for measuring code coverage.
@@ -604,6 +649,22 @@ codeToTestRatio:
   badge:
     path: docs/ratio.svg
 ```
+
+### `codeToTestRatio.badge.label:` `codeToTestRatio.badge.labelColor:` `codeToTestRatio.badge.icon:` `codeToTestRatio.badge.colors:`
+
+The appearance of the badge, written the same way as [`coverage.badge:`](#coveragebadgelabel-coveragebadgelabelcolor). The condition of `colors:` takes the measured ratio as `current`, written the same way as `codeToTestRatio.acceptable:`.
+
+```yaml
+codeToTestRatio:
+  badge:
+    path: docs/ratio.svg
+    colors:
+      - if: 1:1.2
+        color: green
+      - color: red
+```
+
+The built-in thresholds are used when `colors:` is not set or when no condition is met ( `>= 1.2` green, `>= 1.0` yellowgreen, `>= 0.8` yellow, `>= 0.6` orange, otherwise red ).
 
 ### `codeToTestRatio.if:`
 
@@ -675,6 +736,22 @@ testExecutionTime:
   badge:
     path: docs/time.svg
 ```
+
+### `testExecutionTime.badge.label:` `testExecutionTime.badge.labelColor:` `testExecutionTime.badge.icon:` `testExecutionTime.badge.colors:`
+
+The appearance of the badge, written the same way as [`coverage.badge:`](#coveragebadgelabel-coveragebadgelabelcolor). The condition of `colors:` takes the measured time as `current`, written the same way as `testExecutionTime.acceptable:`.
+
+```yaml
+testExecutionTime:
+  badge:
+    path: docs/time.svg
+    colors:
+      - if: 1min
+        color: green
+      - color: red
+```
+
+The built-in thresholds are used when `colors:` is not set or when no condition is met ( `< 5min` green, `< 10min` yellowgreen, `< 15min` yellow, `< 20min` orange, otherwise red ).
 
 ### `testExecutionTime.if:`
 
@@ -1322,6 +1399,25 @@ central:
     datastores:
       - local://badges
       - s3://my-s3-buckets/badges
+```
+
+### `central.badges.coverage:` `central.badges.codeToTestRatio:` `central.badges.testExecutionTime:`
+
+The appearance of the badges generated in central mode, written the same way as [`coverage.badge:`](#coveragebadgelabel-coveragebadgelabelcolor) except for `path:`, which central mode decides.
+
+A report does not carry the configuration of the repository it was collected from, so the badges of every repository are generated as configured here.
+
+```yaml
+central:
+  badges:
+    datastores:
+      - local://badges
+    coverage:
+      icon: none
+      colors:
+        - if: 80%
+          color: green
+        - color: red
 ```
 
 ### `central.push:`
