@@ -28,7 +28,8 @@ type Badge struct {
 	// dir is the directory `icon:` is resolved from, which is the one holding the config file.
 	dir string
 	// key is the config section this badge is written in, which is what an error about it has
-	// to name: three badges are generated in one run and every one of them has a `colors:`.
+	// to name. A run generates a badge per metric, and a central one a badge per metric per
+	// repository, so every one of them carries a `colors:` an error could be about.
 	key string
 }
 
@@ -138,7 +139,7 @@ func (b *Badge) build(key, dir string) {
 }
 
 // section returns the config section to name in an error. A badge that never went through
-// Build, as in a test, falls back to the key the sections have in common.
+// Build, as in a test, falls back to the name of the key itself.
 func (b *Badge) section() string {
 	if b == nil || b.key == "" {
 		return "badge"
