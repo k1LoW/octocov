@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.80.0](https://github.com/k1LoW/octocov/compare/v0.79.0...v0.80.0) - 2026-09-20
+
+### New Features 🎉
+- feat: let an output render the report's collapsible sections expanded by @k1LoW in https://github.com/k1LoW/octocov/pull/764
+- feat: let each badge take its label, colors and icon from the config by @k1LoW in https://github.com/k1LoW/octocov/pull/765
+### Fix bug 🐛
+- fix: warn and carry on when a central datastore cannot be read by @k1LoW in https://github.com/k1LoW/octocov/pull/762
+
 ## [v0.79.0](https://github.com/k1LoW/octocov/compare/v0.78.0...v0.79.0) - 2026-09-19
 
 ### New Features 🎉
