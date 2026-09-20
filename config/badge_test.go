@@ -43,6 +43,10 @@ func TestBadgeCoverageColor(t *testing.T) {
 		{"invalid color", &Badge{Colors: []BadgeColor{
 			{If: "10%", Color: "octocov"},
 		}}, 85.0, "", true},
+		{"invalid color of an entry the value does not reach", &Badge{Colors: []BadgeColor{
+			{If: "80%", Color: "green"},
+			{If: "10%", Color: "octocov"},
+		}}, 85.0, "", true},
 		{"invalid condition", &Badge{Colors: []BadgeColor{
 			{If: "current >>= 10", Color: "blue"},
 		}}, 85.0, "", true},

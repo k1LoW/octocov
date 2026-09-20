@@ -161,10 +161,13 @@ func (b *Badge) color(current float64, normalize func(string) (string, error), d
 	if b == nil {
 		return def, nil
 	}
-	for i, c := range b.Colors {
-		if c.Color == "" {
-			return "", fmt.Errorf("badge.colors[%d].color: is not set", i)
-		}
+	// Every entry is validated before any of them is evaluated. A color is only parsed when its
+	// condition is met, so a typo in an entry the measured value happens to skip would otherwise
+	// wait for the day the value reaches it.
+	if err := b.Validate(); err != nil {
+		return "", err
+	}
+	for _, c := range b.Colors {
 		if c.If == "" {
 			return badge.ParseColor(c.Color)
 		}

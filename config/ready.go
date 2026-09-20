@@ -178,9 +178,6 @@ func (c *Config) CoverageBadgeConfigReady() error {
 	if c.Coverage.Badge.Path == "" {
 		return errors.New("coverage.badge.path: is not set")
 	}
-	if err := c.Coverage.Badge.Validate(); err != nil {
-		return fmt.Errorf("coverage.%w", err)
-	}
 	return nil
 }
 
@@ -191,9 +188,6 @@ func (c *Config) CodeToTestRatioBadgeConfigReady() error {
 	if c.CodeToTestRatio.Badge.Path == "" {
 		return errors.New("codeToTestRatio.badge.path: is not set")
 	}
-	if err := c.CodeToTestRatio.Badge.Validate(); err != nil {
-		return fmt.Errorf("codeToTestRatio.%w", err)
-	}
 	return nil
 }
 
@@ -203,9 +197,6 @@ func (c *Config) TestExecutionTimeBadgeConfigReady() error {
 	}
 	if c.TestExecutionTime.Badge.Path == "" {
 		return errors.New("testExecutionTime.badge.path: is not set")
-	}
-	if err := c.TestExecutionTime.Badge.Validate(); err != nil {
-		return fmt.Errorf("testExecutionTime.%w", err)
 	}
 	return nil
 }
