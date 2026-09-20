@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/base64"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"image"
 	"image/color"
@@ -130,7 +131,13 @@ func (b *Badge) Render(wr io.Writer) error {
 			if err != nil {
 				return err
 			}
-			s := xmlquery.FindOne(imgdoc, "//svg")
+			// The root element rather than a match on the name `svg`, since the XPath is case
+			// sensitive while the check that sent the image here is not, and an icon rooted at
+			// <SVG> would match nothing and be dereferenced as nil.
+			s := xmlquery.FindOne(imgdoc, "/*")
+			if s == nil {
+				return errors.New("invalid icon: no svg element")
+			}
 			icon = fmt.Sprintf("data:image/svg+xml;base64,%s", base64.StdEncoding.EncodeToString([]byte(s.OutputXML(true))))
 		} else {
 			_, format, err := image.DecodeConfig(bytes.NewReader(b.Icon))

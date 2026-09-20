@@ -140,3 +140,17 @@ func TestRenderEscapesTextNodes(t *testing.T) {
 		t.Error("want the label to be escaped")
 	}
 }
+
+func TestRenderIconWithUppercaseRoot(t *testing.T) {
+	b := New("coverage", "50%")
+	if err := b.AddIcon([]byte(`<SVG xmlns="http://www.w3.org/2000/svg" width="10" height="10"><circle cx="5" cy="5" r="4"/></SVG>`)); err != nil {
+		t.Fatal(err)
+	}
+	got := new(bytes.Buffer)
+	if err := b.Render(got); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(got.String(), "<image") {
+		t.Error("want the icon to be rendered")
+	}
+}
