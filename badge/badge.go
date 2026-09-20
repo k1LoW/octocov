@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"strings"
 	"text/template"
 
 	"github.com/antchfx/xmlquery"
@@ -25,7 +24,7 @@ import (
 )
 
 const defaultLabelColor = "#24292E"
-const defaultMessageColor = "#007EC6"
+const defaultMessageColor = ColorBlue
 const fontSize = 11
 const dpi = 72
 
@@ -105,11 +104,7 @@ func (b *Badge) SetMessageColor(c any) error {
 func castColor(c any) (string, error) {
 	switch v := c.(type) {
 	case string:
-		rgb := strings.ToUpper(strings.TrimPrefix(v, "#"))
-		if !rgbRe.MatchString(rgb) {
-			return "", fmt.Errorf("invalid color: %s", v)
-		}
-		return fmt.Sprintf("#%s", rgb), nil
+		return ParseColor(v)
 	default:
 		return "", fmt.Errorf("invalid color: %v", v)
 	}

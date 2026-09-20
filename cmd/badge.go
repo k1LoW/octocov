@@ -23,16 +23,12 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"math"
 	"os"
 	"strings"
-	"time"
 
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/config"
-	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/spf13/cobra"
 )
@@ -72,8 +68,7 @@ var badgeCoverageCmd = &cobra.Command{
 		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			return err
 		}
-		cp := r.CoveragePercent()
-		return renderBadgeWithIcon("coverage", fmt.Sprintf("%.1f%%", floor1(cp)), c.CoverageColor(cp), out)
+		return c.Coverage.Badge.RenderCoverage(out, r.CoveragePercent())
 	},
 }
 
@@ -101,8 +96,7 @@ var badgeRatioCmd = &cobra.Command{
 		if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 			return err
 		}
-		tr := r.CodeToTestRatioRatio()
-		return renderBadgeWithIcon("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)), c.CodeToTestRatioColor(tr), out)
+		return c.CodeToTestRatio.Badge.RenderCodeToTestRatio(out, r.CodeToTestRatioRatio())
 	},
 }
 
@@ -131,8 +125,7 @@ var badgeTimeCmd = &cobra.Command{
 		if err := r.MeasureTestExecutionTime(context.Background(), stepNames); err != nil {
 			return err
 		}
-		d := time.Duration(r.TestExecutionTimeNano())
-		return renderBadgeWithIcon("test execution time", d.String(), c.TestExecutionTimeColor(d), out)
+		return c.TestExecutionTime.Badge.RenderTestExecutionTime(out, r.TestExecutionTimeNano())
 	},
 }
 
@@ -166,16 +159,6 @@ func openOut(path string) (io.Writer, func(), error) {
 		}
 	}
 	return file, cleanup, nil
-}
-
-// renderBadgeWithIcon render badge with icon.
-func renderBadgeWithIcon(name, message, color string, out io.Writer) error {
-	b := badge.New(name, message)
-	b.MessageColor = color
-	if err := b.AddIcon(internal.Icon); err != nil {
-		return err
-	}
-	return b.Render(out)
 }
 
 // floor1 round down to one decimal place.

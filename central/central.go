@@ -16,11 +16,9 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/datastore/local"
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -47,10 +45,15 @@ type Config struct {
 	Index                  string
 	Badges                 []datastore.Datastore
 	Reports                []ReportDatastore
-	CoverageColor          func(cover float64) string
-	CodeToTestRatioColor   func(ratio float64) string
-	TestExecutionTimeColor func(d time.Duration) string
+	CoverageBadge          BadgeRenderer
+	CodeToTestRatioBadge   BadgeRenderer
+	TestExecutionTimeBadge BadgeRenderer
 }
+
+// BadgeRenderer renders the badge of a measured value to w. What the badge says about the
+// value, and how it is decorated, belongs to the configuration of the repository running
+// central mode, which is read outside of this package.
+type BadgeRenderer func(w io.Writer, value float64) error
 
 // ReportDatastore is a datastore the index is collected from, named by the URL it was
 // configured with. A Datastore cannot say which line of the config produced it, and a
@@ -185,30 +188,18 @@ func (c *Central) generateBadges() ([]string, error) {
 	ctx := context.Background()
 	badges := map[string][]byte{}
 	for _, r := range c.reports {
-		cp := r.CoveragePercent()
 		bp := filepath.Join(r.Repository, "coverage.svg")
 		out := new(bytes.Buffer)
-		b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
-		b.MessageColor = c.config.CoverageColor(cp)
-		if err := b.AddIcon(internal.Icon); err != nil {
-			return nil, err
-		}
-		if err := b.Render(out); err != nil {
+		if err := c.config.CoverageBadge(out, r.CoveragePercent()); err != nil {
 			return nil, err
 		}
 		badges[bp] = out.Bytes()
 
 		// Code to Test Ratio
 		if r.CodeToTestRatio != nil {
-			tr := r.CodeToTestRatioRatio()
 			bp := filepath.Join(r.Repository, "ratio.svg")
 			out := new(bytes.Buffer)
-			b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
-			b.MessageColor = c.config.CodeToTestRatioColor(tr)
-			if err := b.AddIcon(internal.Icon); err != nil {
-				return nil, err
-			}
-			if err := b.Render(out); err != nil {
+			if err := c.config.CodeToTestRatioBadge(out, r.CodeToTestRatioRatio()); err != nil {
 				return nil, err
 			}
 			badges[bp] = out.Bytes()
@@ -216,15 +207,9 @@ func (c *Central) generateBadges() ([]string, error) {
 
 		// Test Execution Time
 		if r.TestExecutionTime != nil {
-			d := time.Duration(r.TestExecutionTimeNano())
 			bp := filepath.Join(r.Repository, "time.svg")
 			out := new(bytes.Buffer)
-			b := badge.New("test execution time", d.String())
-			b.MessageColor = c.config.TestExecutionTimeColor(d)
-			if err := b.AddIcon(internal.Icon); err != nil {
-				return nil, err
-			}
-			if err := b.Render(out); err != nil {
+			if err := c.config.TestExecutionTimeBadge(out, r.TestExecutionTimeNano()); err != nil {
 				return nil, err
 			}
 			badges[bp] = out.Bytes()

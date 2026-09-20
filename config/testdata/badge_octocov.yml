@@ -1,0 +1,23 @@
+repository: owner/repo
+coverage:
+  badge:
+    path: docs/coverage.svg
+    label: cov
+    labelColor: "#24292E"
+    icon: icon.svg
+    colors:
+      - if: current >= 80%
+        color: green
+      - color: red
+central:
+  reports:
+    datastores:
+      - local://reports
+  badges:
+    datastores:
+      - local://badges
+    coverage:
+      icon: none
+      colors:
+        - if: 80%
+          color: green

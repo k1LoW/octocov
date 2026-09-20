@@ -22,6 +22,9 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
+// testBadge is the badge configuration of a central mode repository that customizes nothing.
+var testBadge = &config.Badge{}
+
 func TestCollectReports(t *testing.T) {
 	c := config.New()
 	rd, err := local.New(filepath.Join(testdataDir(t), "reports"))
@@ -38,9 +41,9 @@ func TestCollectReports(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -93,9 +96,9 @@ func TestCollectReportsSkipsReportsOfOtherRefs(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -127,9 +130,9 @@ func TestGenerateBadges(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
@@ -196,9 +199,9 @@ func TestRenderIndex(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
@@ -288,9 +291,9 @@ func TestCollectReportsTracksWhichDatastoreSuppliedTheReport(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}, {URL: "artifact://owner/repo", Datastore: &artifactStub{fsys: fsys}}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -355,9 +358,9 @@ func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
 		Wd:                     c.Wd(),
 		Badges:                 []datastore.Datastore{bd},
 		Reports:                []ReportDatastore{{URL: "local://reports", Datastore: rd}, {URL: "artifact://owner/repo", Datastore: &artifactStub{fsys: fsys}}},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)
@@ -422,9 +425,9 @@ func TestCollectReportsWarnsAndContinuesWhenADatastoreCannotBeRead(t *testing.T)
 			{URL: "artifact://owner/unreachable", Datastore: &failingStub{err: errors.New("artifact not found")}},
 			{URL: "artifact://owner/readable", Datastore: &artifactStub{fsys: fsys}},
 		},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	warned := new(bytes.Buffer)
 	ctr.stderr = warned
@@ -463,9 +466,9 @@ func TestCollectReportsFailsWhenNoDatastoreCanBeRead(t *testing.T) {
 			{URL: "artifact://owner/repo-1", Datastore: &failingStub{err: errors.New("artifact not found")}},
 			{URL: "artifact://owner/repo-2", Datastore: &failingStub{err: errors.New("403 Forbidden")}},
 		},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	ctr.stderr = new(bytes.Buffer)
 
@@ -513,9 +516,9 @@ func TestCollectReportsKeepsWhatAWalkReachedBeforeItFailed(t *testing.T) {
 		Reports: []ReportDatastore{
 			{URL: "s3://bucket/reports", Datastore: &artifactStub{fsys: &walkErrorFS{FS: base, failDir: "owner/unreadable", err: errors.New("AccessDenied")}}},
 		},
-		CoverageColor:          c.CoverageColor,
-		CodeToTestRatioColor:   c.CodeToTestRatioColor,
-		TestExecutionTimeColor: c.TestExecutionTimeColor,
+		CoverageBadge:          testBadge.RenderCoverage,
+		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
+		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 	warned := new(bytes.Buffer)
 	ctr.stderr = warned

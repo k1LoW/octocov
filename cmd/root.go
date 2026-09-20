@@ -32,9 +32,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
-	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
@@ -118,9 +116,9 @@ var rootCmd = &cobra.Command{
 				Wd:                     c.Wd(),
 				Badges:                 badges,
 				Reports:                reports,
-				CoverageColor:          c.CoverageColor,
-				CodeToTestRatioColor:   c.CodeToTestRatioColor,
-				TestExecutionTimeColor: c.TestExecutionTimeColor,
+				CoverageBadge:          c.Central.Badges.Coverage.RenderCoverage,
+				CodeToTestRatioBadge:   c.Central.Badges.CodeToTestRatio.RenderCodeToTestRatio,
+				TestExecutionTimeBadge: c.Central.Badges.TestExecutionTime.RenderTestExecutionTime,
 			})
 
 			paths, err := ctr.Generate(ctx)
@@ -239,15 +237,7 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, bp)
 
-				b := badge.New("coverage", fmt.Sprintf("%.1f%%", floor1(cp)))
-				b.MessageColor = c.CoverageColor(cp)
-				if err := b.AddIcon(internal.Icon); err != nil {
-					return err
-				}
-				if err := b.Render(out); err != nil {
-					return err
-				}
-				return nil
+				return c.Coverage.Badge.RenderCoverage(out, cp)
 			}(); err != nil {
 				return err
 			}
@@ -273,15 +263,7 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, bp)
 
-				b := badge.New("code to test ratio", fmt.Sprintf("1:%.1f", floor1(tr)))
-				b.MessageColor = c.CodeToTestRatioColor(tr)
-				if err := b.AddIcon(internal.Icon); err != nil {
-					return err
-				}
-				if err := b.Render(out); err != nil {
-					return err
-				}
-				return nil
+				return c.CodeToTestRatio.Badge.RenderCodeToTestRatio(out, tr)
 			}(); err != nil {
 				return err
 			}
@@ -306,16 +288,7 @@ var rootCmd = &cobra.Command{
 				}
 				addPaths = append(addPaths, bp)
 
-				d := time.Duration(r.TestExecutionTimeNano())
-				b := badge.New("test execution time", d.String())
-				b.MessageColor = c.TestExecutionTimeColor(d)
-				if err := b.AddIcon(internal.Icon); err != nil {
-					return err
-				}
-				if err := b.Render(out); err != nil {
-					return err
-				}
-				return nil
+				return c.TestExecutionTime.Badge.RenderTestExecutionTime(out, r.TestExecutionTimeNano())
 			}(); err != nil {
 				return err
 			}

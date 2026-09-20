@@ -112,7 +112,10 @@ var lsFilesCmd = &cobra.Command{
 			if fr.total > 0 {
 				cover = float64(fr.covered) / float64(fr.total) * 100
 			}
-			cl := c.CoverageColor(cover)
+			cl, err := c.CoverageColor(cover)
+			if err != nil {
+				return err
+			}
 			c, err := detectTermColor(cl)
 			if err != nil {
 				return err

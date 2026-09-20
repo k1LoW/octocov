@@ -38,6 +38,11 @@ func (c *Config) Build() {
 		c.TestExecutionTime = &TestExecutionTime{}
 	}
 
+	// Badges
+	for _, b := range c.badges() {
+		b.dir = c.Root()
+	}
+
 	// Report
 
 	// Central
@@ -53,6 +58,9 @@ func (c *Config) Build() {
 		}
 		if len(c.Central.Badges.Datastores) == 0 {
 			c.Central.Badges.Datastores = append(c.Central.Badges.Datastores, defaultBadgesDatastore)
+		}
+		for _, b := range c.Central.Badges.badges() {
+			b.dir = c.Root()
 		}
 	}
 
