@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"encoding/base64"
+	"encoding/xml"
 	"fmt"
 	"image"
 	"image/color"
@@ -43,6 +44,7 @@ type Badge struct {
 var badgeTmpl []byte
 
 // https://github.com/googlefonts/noto-fonts/blob/main/hinted/ttf/NotoSans/NotoSans-Medium.ttf
+//
 //go:embed NotoSans-Medium.ttf
 var noto []byte
 
@@ -140,8 +142,8 @@ func (b *Badge) Render(wr io.Writer) error {
 	}
 
 	d := map[string]any{
-		"Label":        b.Label,
-		"Message":      b.Message,
+		"Label":        escapeText(b.Label),
+		"Message":      escapeText(b.Message),
 		"LabelColor":   b.LabelColor,
 		"MessageColor": b.MessageColor,
 		"Width":        lw + mw + iw,
@@ -156,6 +158,19 @@ func (b *Badge) Render(wr io.Writer) error {
 	}
 
 	return nil
+}
+
+// escapeText escapes a string for the text nodes of the badge. The template stays
+// text/template because html/template rewrites the icon's data: URI into #ZgotmplZ, so the
+// escaping the label and the message need is done here instead.
+func escapeText(s string) string {
+	var buf bytes.Buffer
+	if err := xml.EscapeText(&buf, []byte(s)); err != nil {
+		// bytes.Buffer writes never fail, so the unescaped string can only be reached by a
+		// future writer that does.
+		return s
+	}
+	return buf.String()
 }
 
 func (b *Badge) stringWidth(s string) float64 {
