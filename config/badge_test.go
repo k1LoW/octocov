@@ -50,6 +50,10 @@ func TestBadgeCoverageColor(t *testing.T) {
 		{"invalid condition", &Badge{Colors: []BadgeColor{
 			{If: "current >>= 10", Color: "blue"},
 		}}, 85.0, "", true},
+		{"invalid condition of an entry the value does not reach", &Badge{Colors: []BadgeColor{
+			{If: "80%", Color: "green"},
+			{If: "current >>= 10", Color: "blue"},
+		}}, 85.0, "", true},
 		{"color is not set", &Badge{Colors: []BadgeColor{
 			{If: "10%"},
 		}}, 85.0, "", true},
@@ -228,6 +232,8 @@ func TestBadgeValidate(t *testing.T) {
 		{"invalid labelColor", &Badge{LabelColor: "octocov"}, true},
 		{"invalid color", &Badge{Colors: []BadgeColor{{If: "80%", Color: "octocov"}}}, true},
 		{"color is not set", &Badge{Colors: []BadgeColor{{If: "80%"}}}, true},
+		{"icon file that does not exist", &Badge{Icon: "no_such_icon.svg"}, true},
+		{"icon data URI that is not base64", &Badge{Icon: "data:image/svg+xml,<svg/>"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

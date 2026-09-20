@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/expr-lang/expr"
+	"github.com/expr-lang/expr/vm"
 	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/internal"
 )
@@ -48,23 +49,15 @@ func (b *CentralBadges) badges() []*Badge {
 	return badges
 }
 
-// Validate validates the parts of the badge configuration that do not depend on a measured value.
+// Validate validates the whole badge configuration, the icon included, without a measured
+// value. It is the up-front check of a central mode run, where a badge that cannot be rendered
+// is worth hearing about before every datastore has been walked rather than after.
 func (b *Badge) Validate() error {
-	if b == nil {
-		return nil
+	if err := b.validateColors(); err != nil {
+		return err
 	}
-	if b.LabelColor != "" {
-		if _, err := badge.ParseColor(b.LabelColor); err != nil {
-			return fmt.Errorf("%s.labelColor: %w", b.section(), err)
-		}
-	}
-	for i, c := range b.Colors {
-		if c.Color == "" {
-			return fmt.Errorf("%s.colors[%d].color: is not set", b.section(), i)
-		}
-		if _, err := badge.ParseColor(c.Color); err != nil {
-			return fmt.Errorf("%s.colors[%d].color: %w", b.section(), i, err)
-		}
+	if _, err := b.icon(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -110,6 +103,28 @@ func (b *Badge) CodeToTestRatioColor(ratio float64) (string, error) {
 // TestExecutionTimeColor returns the message color of the test execution time badge.
 func (b *Badge) TestExecutionTimeColor(d time.Duration) (string, error) {
 	return b.color(float64(d), normalizeTestExecutionTimeCond, defaultTestExecutionTimeColor(d))
+}
+
+// validateColors validates the colors alone. It is what the render path checks, since the icon
+// is read there anyway and reading it twice per badge would be the cost of checking it here.
+func (b *Badge) validateColors() error {
+	if b == nil {
+		return nil
+	}
+	if b.LabelColor != "" {
+		if _, err := badge.ParseColor(b.LabelColor); err != nil {
+			return fmt.Errorf("%s.labelColor: %w", b.section(), err)
+		}
+	}
+	for i, c := range b.Colors {
+		if c.Color == "" {
+			return fmt.Errorf("%s.colors[%d].color: is not set", b.section(), i)
+		}
+		if _, err := badge.ParseColor(c.Color); err != nil {
+			return fmt.Errorf("%s.colors[%d].color: %w", b.section(), i, err)
+		}
+	}
+	return nil
 }
 
 // build records where the badge is configured, which decides both how `icon:` resolves and how
@@ -167,21 +182,32 @@ func (b *Badge) color(current float64, normalize func(string) (string, error), d
 	if b == nil {
 		return def, nil
 	}
-	// Every entry is validated before any of them is evaluated. A color is only parsed when its
-	// condition is met, so a typo in an entry the measured value happens to skip would otherwise
-	// wait for the day the value reaches it.
-	if err := b.Validate(); err != nil {
+	// Every entry is compiled before any of them is evaluated. The walk stops at the first met
+	// condition, so an entry the measured value happens to skip today would otherwise carry its
+	// mistake until the day the value reaches it, and fail the run that gets there first.
+	if err := b.validateColors(); err != nil {
 		return "", err
 	}
+	programs := make([]*vm.Program, len(b.Colors))
 	for i, c := range b.Colors {
 		if c.If == "" {
-			return badge.ParseColor(c.Color)
+			continue
 		}
 		cond, err := normalize(c.If)
 		if err != nil {
 			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
-		v, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), map[string]any{"current": current})
+		p, err := expr.Compile(fmt.Sprintf("(%s) == true", cond))
+		if err != nil {
+			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
+		}
+		programs[i] = p
+	}
+	for i, c := range b.Colors {
+		if c.If == "" {
+			return badge.ParseColor(c.Color)
+		}
+		v, err := expr.Run(programs[i], map[string]any{"current": current})
 		if err != nil {
 			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
