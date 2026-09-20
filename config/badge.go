@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -27,6 +26,9 @@ type Badge struct {
 	Colors     []BadgeColor `yaml:"colors,omitempty"`
 	// dir is the directory `icon:` is resolved from, which is the one holding the config file.
 	dir string
+	// key is the config section this badge is written in, which is what an error about it has
+	// to name: three badges are generated in one run and every one of them has a `colors:`.
+	key string
 }
 
 // BadgeColor is a message color of a badge and the condition it is picked by.
@@ -35,19 +37,23 @@ type BadgeColor struct {
 	Color string `yaml:"color"`
 }
 
-// badges returns the badge configurations of the metrics measured in the repository.
-func (c *Config) badges() []*Badge {
-	var badges []*Badge
-	if c.Coverage != nil {
-		badges = append(badges, &c.Coverage.Badge)
+// build records where the badge is configured, which decides both how `icon:` resolves and how
+// an error about the badge names itself.
+func (b *Badge) build(key, dir string) {
+	if b == nil {
+		return
 	}
-	if c.CodeToTestRatio != nil {
-		badges = append(badges, &c.CodeToTestRatio.Badge)
+	b.key = key
+	b.dir = dir
+}
+
+// section returns the config section to name in an error. A badge that never went through
+// Build, as in a test, falls back to the key the sections have in common.
+func (b *Badge) section() string {
+	if b == nil || b.key == "" {
+		return "badge"
 	}
-	if c.TestExecutionTime != nil {
-		badges = append(badges, &c.TestExecutionTime.Badge)
-	}
-	return badges
+	return b.key
 }
 
 // badges returns the badge configurations set for central mode.
@@ -68,15 +74,15 @@ func (b *Badge) Validate() error {
 	}
 	if b.LabelColor != "" {
 		if _, err := badge.ParseColor(b.LabelColor); err != nil {
-			return fmt.Errorf("badge.labelColor: %w", err)
+			return fmt.Errorf("%s.labelColor: %w", b.section(), err)
 		}
 	}
 	for i, c := range b.Colors {
 		if c.Color == "" {
-			return fmt.Errorf("badge.colors[%d].color: is not set", i)
+			return fmt.Errorf("%s.colors[%d].color: is not set", b.section(), i)
 		}
 		if _, err := badge.ParseColor(c.Color); err != nil {
-			return fmt.Errorf("badge.colors[%d].color: %w", i, err)
+			return fmt.Errorf("%s.colors[%d].color: %w", b.section(), i, err)
 		}
 	}
 	return nil
@@ -167,21 +173,21 @@ func (b *Badge) color(current float64, normalize func(string) (string, error), d
 	if err := b.Validate(); err != nil {
 		return "", err
 	}
-	for _, c := range b.Colors {
+	for i, c := range b.Colors {
 		if c.If == "" {
 			return badge.ParseColor(c.Color)
 		}
 		cond, err := normalize(c.If)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
 		v, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), map[string]any{"current": current})
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
 		tf, ok := v.(bool)
 		if !ok {
-			return "", fmt.Errorf("invalid condition `%s`", c.If)
+			return "", fmt.Errorf("%s.colors[%d].if: invalid condition `%s`", b.section(), i, c.If)
 		}
 		if tf {
 			return badge.ParseColor(c.Color)
@@ -200,7 +206,7 @@ func (b *Badge) icon() ([]byte, error) {
 		return nil, nil
 	}
 	if strings.HasPrefix(b.Icon, "data:") {
-		return decodeDataURI(b.Icon)
+		return decodeDataURI(b.section(), b.Icon)
 	}
 	p := filepath.FromSlash(b.Icon)
 	if !filepath.IsAbs(p) {
@@ -211,14 +217,14 @@ func (b *Badge) icon() ([]byte, error) {
 
 // decodeDataURI decodes a data URI of an icon. Only base64 encoded data is accepted because an
 // icon is image data, which percent encoding would only make larger.
-func decodeDataURI(s string) ([]byte, error) {
+func decodeDataURI(section, s string) ([]byte, error) {
 	meta, data, ok := strings.Cut(strings.TrimPrefix(s, "data:"), ",")
 	if !ok || !strings.HasSuffix(meta, ";base64") {
-		return nil, errors.New("badge.icon: only a base64 encoded data URI is supported")
+		return nil, fmt.Errorf("%s.icon: only a base64 encoded data URI is supported", section)
 	}
 	b, err := base64.StdEncoding.DecodeString(data)
 	if err != nil {
-		return nil, fmt.Errorf("badge.icon: %w", err)
+		return nil, fmt.Errorf("%s.icon: %w", section, err)
 	}
 	return b, nil
 }

@@ -198,6 +198,7 @@ func TestBadgeLoad(t *testing.T) {
 			{Color: "red"},
 		},
 		dir: testdataDir(t),
+		key: "coverage.badge",
 	}
 	if diff := cmp.Diff(got, want, cmp.AllowUnexported(Badge{})); diff != "" {
 		t.Error(diff)
@@ -208,6 +209,7 @@ func TestBadgeLoad(t *testing.T) {
 		Icon:   "none",
 		Colors: []BadgeColor{{If: "80%", Color: "green"}},
 		dir:    testdataDir(t),
+		key:    "central.badges.coverage",
 	}
 	if diff := cmp.Diff(gotc, wantc, cmp.AllowUnexported(Badge{})); diff != "" {
 		t.Error(diff)

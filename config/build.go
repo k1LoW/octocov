@@ -39,9 +39,11 @@ func (c *Config) Build() {
 	}
 
 	// Badges
-	for _, b := range c.badges() {
-		b.dir = c.Root()
+	c.Coverage.Badge.build("coverage.badge", c.Root())
+	if c.CodeToTestRatio != nil {
+		c.CodeToTestRatio.Badge.build("codeToTestRatio.badge", c.Root())
 	}
+	c.TestExecutionTime.Badge.build("testExecutionTime.badge", c.Root())
 
 	// Report
 
@@ -59,9 +61,9 @@ func (c *Config) Build() {
 		if len(c.Central.Badges.Datastores) == 0 {
 			c.Central.Badges.Datastores = append(c.Central.Badges.Datastores, defaultBadgesDatastore)
 		}
-		for _, b := range c.Central.Badges.badges() {
-			b.dir = c.Root()
-		}
+		c.Central.Badges.Coverage.build("central.badges.coverage", c.Root())
+		c.Central.Badges.CodeToTestRatio.build("central.badges.codeToTestRatio", c.Root())
+		c.Central.Badges.TestExecutionTime.build("central.badges.testExecutionTime", c.Root())
 	}
 
 	// Push

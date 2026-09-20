@@ -213,7 +213,7 @@ func (c *Config) CentralConfigReady() error {
 	}
 	for _, b := range c.Central.Badges.badges() {
 		if err := b.Validate(); err != nil {
-			return fmt.Errorf("central.badges.%w", err)
+			return err
 		}
 	}
 	ok, err := c.CheckIf(c.Central.If)
