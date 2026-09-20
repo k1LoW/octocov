@@ -234,10 +234,15 @@ func TestBadgeValidate(t *testing.T) {
 		{"color is not set", &Badge{Colors: []BadgeColor{{If: "80%"}}}, true},
 		{"icon file that does not exist", &Badge{Icon: "no_such_icon.svg"}, true},
 		{"icon data URI that is not base64", &Badge{Icon: "data:image/svg+xml,<svg/>"}, true},
+		{"invalid condition", &Badge{Colors: []BadgeColor{{If: "current >>= 10", Color: "green"}}}, true},
+		{"invalid condition of an entry a value would not reach", &Badge{Colors: []BadgeColor{
+			{If: "80%", Color: "green"},
+			{If: "current >>= 10", Color: "red"},
+		}}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if err := tt.badge.Validate(); err != nil != tt.wantErr {
+			if err := tt.badge.Validate(normalizeCoverageCond); err != nil != tt.wantErr {
 				t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 			}
 		})

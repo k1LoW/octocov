@@ -39,22 +39,33 @@ type BadgeColor struct {
 	Color string `yaml:"color"`
 }
 
-// badges returns the badge configurations set for central mode.
-func (b *CentralBadges) badges() []*Badge {
-	var badges []*Badge
-	for _, bb := range []*Badge{b.Coverage, b.CodeToTestRatio, b.TestExecutionTime} {
-		if bb != nil {
-			badges = append(badges, bb)
+// validate validates the badge configurations set for central mode. Each is checked through
+// the normalizer of the metric it belongs to, since that is what a condition is written in.
+func (b *CentralBadges) validate() error {
+	for _, v := range []struct {
+		badge     *Badge
+		normalize func(string) (string, error)
+	}{
+		{b.Coverage, normalizeCoverageCond},
+		{b.CodeToTestRatio, normalizeCodeToTestRatioCond},
+		{b.TestExecutionTime, normalizeTestExecutionTimeCond},
+	} {
+		if err := v.badge.Validate(v.normalize); err != nil {
+			return err
 		}
 	}
-	return badges
+	return nil
 }
 
-// Validate validates the whole badge configuration, the icon included, without a measured
-// value. It is the up-front check of a central mode run, where a badge that cannot be rendered
-// is worth hearing about before every datastore has been walked rather than after.
-func (b *Badge) Validate() error {
+// Validate validates the whole badge configuration, the conditions and the icon included,
+// without a measured value. It is the up-front check of a central mode run, where a badge that
+// cannot be rendered is worth hearing about before every datastore has been walked rather than
+// after. normalize reads a condition the way the metric this badge belongs to writes one.
+func (b *Badge) Validate(normalize func(string) (string, error)) error {
 	if err := b.validateColors(); err != nil {
+		return err
+	}
+	if _, err := b.compileColors(normalize); err != nil {
 		return err
 	}
 	if _, err := b.icon(); err != nil {
@@ -104,6 +115,31 @@ func (b *Badge) CodeToTestRatioColor(ratio float64) (string, error) {
 // TestExecutionTimeColor returns the message color of the test execution time badge.
 func (b *Badge) TestExecutionTimeColor(d time.Duration) (string, error) {
 	return b.color(float64(d), normalizeTestExecutionTimeCond, defaultTestExecutionTimeColor(d))
+}
+
+// compileColors normalizes and compiles the condition of every entry of `colors:`, returning
+// the programs in the order the entries are walked in. Entries without `if:` get a nil program,
+// which the walk never runs.
+func (b *Badge) compileColors(normalize func(string) (string, error)) ([]*vm.Program, error) {
+	if b == nil {
+		return nil, nil
+	}
+	programs := make([]*vm.Program, len(b.Colors))
+	for i, c := range b.Colors {
+		if c.If == "" {
+			continue
+		}
+		cond, err := normalize(c.If)
+		if err != nil {
+			return nil, fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
+		}
+		p, err := expr.Compile(fmt.Sprintf("(%s) == true", cond))
+		if err != nil {
+			return nil, fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
+		}
+		programs[i] = p
+	}
+	return programs, nil
 }
 
 // validateColors validates the colors alone. It is what the render path checks, since the icon
@@ -189,20 +225,9 @@ func (b *Badge) color(current float64, normalize func(string) (string, error), d
 	if err := b.validateColors(); err != nil {
 		return "", err
 	}
-	programs := make([]*vm.Program, len(b.Colors))
-	for i, c := range b.Colors {
-		if c.If == "" {
-			continue
-		}
-		cond, err := normalize(c.If)
-		if err != nil {
-			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
-		}
-		p, err := expr.Compile(fmt.Sprintf("(%s) == true", cond))
-		if err != nil {
-			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
-		}
-		programs[i] = p
+	programs, err := b.compileColors(normalize)
+	if err != nil {
+		return "", err
 	}
 	for i, c := range b.Colors {
 		if c.If == "" {
