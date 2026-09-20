@@ -3,9 +3,9 @@ module github.com/k1LoW/octocov
 go 1.26.8
 
 require (
-	cloud.google.com/go/auth v0.23.2
-	cloud.google.com/go/bigquery v1.83.0
-	cloud.google.com/go/storage v1.67.1
+	cloud.google.com/go/auth v0.23.3
+	cloud.google.com/go/bigquery v1.84.0
+	cloud.google.com/go/storage v1.68.0
 	github.com/antchfx/xmlquery v1.5.1
 	github.com/aws/aws-sdk-go-v2 v1.47.0
 	github.com/aws/aws-sdk-go-v2/config v1.33.5
