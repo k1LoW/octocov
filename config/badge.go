@@ -238,7 +238,11 @@ func (b *Badge) icon() ([]byte, error) {
 	if !filepath.IsAbs(p) {
 		p = filepath.Join(b.dir, p)
 	}
-	return os.ReadFile(filepath.Clean(p))
+	icon, err := os.ReadFile(filepath.Clean(p))
+	if err != nil {
+		return nil, fmt.Errorf("%s.icon: %w", b.section(), err)
+	}
+	return icon, nil
 }
 
 // decodeDataURI decodes a data URI of an icon. Only base64 encoded data is accepted because an

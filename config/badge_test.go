@@ -153,7 +153,7 @@ func TestBadgeRenderCoverage(t *testing.T) {
 		{"icon file", &Badge{Icon: "icon.svg", dir: testdataDir(t)}, []string{"<image"}, nil, ""},
 		{"icon data URI", &Badge{Icon: "data:image/svg+xml;base64," + base64.StdEncoding.EncodeToString(icon)}, []string{"<image"}, nil, ""},
 		{"icon data URI that is not base64", &Badge{Icon: "data:image/svg+xml,<svg/>"}, nil, nil, "only a base64 encoded data URI is supported"},
-		{"icon file that does not exist", &Badge{Icon: "no_such_icon.svg", dir: testdataDir(t)}, nil, nil, "no_such_icon.svg"},
+		{"icon file that does not exist", &Badge{Icon: "no_such_icon.svg", dir: testdataDir(t), key: "coverage.badge"}, nil, nil, "coverage.badge.icon: open"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
