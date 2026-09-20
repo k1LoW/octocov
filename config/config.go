@@ -437,25 +437,22 @@ func testExecutionTimeAcceptable(current, prev *big.Rat, cond string) error {
 	return nil
 }
 
-func (c *Config) CoverageColor(cover float64) (string, error) {
-	if c.Coverage == nil {
-		return defaultCoverageColor(cover), nil
-	}
-	return c.Coverage.Badge.CoverageColor(cover)
+// CoverageColor returns the color of a measured coverage by the built-in thresholds. It is the
+// color of the metric itself rather than of a badge, which is what `octocov ls-files` paints a
+// listing with. A badge resolves its own color through Badge.CoverageColor, since `colors:`
+// describes one badge rather than what a coverage figure means.
+func (c *Config) CoverageColor(cover float64) string {
+	return defaultCoverageColor(cover)
 }
 
-func (c *Config) CodeToTestRatioColor(ratio float64) (string, error) {
-	if c.CodeToTestRatio == nil {
-		return defaultCodeToTestRatioColor(ratio), nil
-	}
-	return c.CodeToTestRatio.Badge.CodeToTestRatioColor(ratio)
+// CodeToTestRatioColor returns the color of a measured code to test ratio by the built-in thresholds.
+func (c *Config) CodeToTestRatioColor(ratio float64) string {
+	return defaultCodeToTestRatioColor(ratio)
 }
 
-func (c *Config) TestExecutionTimeColor(d time.Duration) (string, error) {
-	if c.TestExecutionTime == nil {
-		return defaultTestExecutionTimeColor(d), nil
-	}
-	return c.TestExecutionTime.Badge.TestExecutionTimeColor(d)
+// TestExecutionTimeColor returns the color of a measured test execution time by the built-in thresholds.
+func (c *Config) TestExecutionTimeColor(d time.Duration) string {
+	return defaultTestExecutionTimeColor(d)
 }
 
 func (c *Config) CheckIf(cond string) (bool, error) {

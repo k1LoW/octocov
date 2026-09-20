@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/octocov/badge"
+	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
 )
 
@@ -128,5 +130,24 @@ func TestLsFilesRows(t *testing.T) {
 				t.Error(diff)
 			}
 		})
+	}
+}
+
+// The colors of the listing are the built-in thresholds of the metric, not whatever a badge was
+// configured to look like. `coverage.badge.colors:` describes one SVG, and a brand color chosen
+// for it would otherwise paint every file of the listing the same.
+func TestLsFilesColorsIgnoreTheBadgeConfiguration(t *testing.T) {
+	c := config.New()
+	c.Coverage = &config.Coverage{
+		Badge: config.Badge{
+			LabelColor: "not a color",
+			Colors:     []config.BadgeColor{{Color: "#E05D44"}},
+		},
+	}
+	if got, want := c.CoverageColor(100.0), badge.ColorGreen; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if got, want := c.CoverageColor(0.0), badge.ColorRed; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
