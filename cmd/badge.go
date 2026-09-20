@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"math"
@@ -56,19 +57,15 @@ var badgeCoverageCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		out, cleanup, err := openOut(outPath)
-		if err != nil {
-			return err
-		}
-		defer cleanup()
-
 		if err := c.CoverageConfigReady(); err != nil {
 			return err
 		}
 		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			return err
 		}
-		return c.Coverage.Badge.RenderCoverage(out, r.CoveragePercent())
+		return writeOut(outPath, func(w io.Writer) error {
+			return c.Coverage.Badge.RenderCoverage(w, r.CoveragePercent())
+		})
 	},
 }
 
@@ -81,12 +78,6 @@ var badgeRatioCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		out, cleanup, err := openOut(outPath)
-		if err != nil {
-			return err
-		}
-		defer cleanup()
-
 		if !c.Loaded() {
 			cmd.PrintErrf("%s are not found\n", strings.Join(config.Paths, " and "))
 		}
@@ -96,7 +87,9 @@ var badgeRatioCmd = &cobra.Command{
 		if err := r.MeasureCodeToTestRatio(c.Root(), c.CodeToTestRatio.Code, c.CodeToTestRatio.Test); err != nil {
 			return err
 		}
-		return c.CodeToTestRatio.Badge.RenderCodeToTestRatio(out, r.CodeToTestRatioRatio())
+		return writeOut(outPath, func(w io.Writer) error {
+			return c.CodeToTestRatio.Badge.RenderCodeToTestRatio(w, r.CodeToTestRatioRatio())
+		})
 	},
 }
 
@@ -109,12 +102,6 @@ var badgeTimeCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		out, cleanup, err := openOut(outPath)
-		if err != nil {
-			return err
-		}
-		defer cleanup()
-
 		if err := c.TestExecutionTimeConfigReady(); err != nil {
 			return err
 		}
@@ -125,7 +112,9 @@ var badgeTimeCmd = &cobra.Command{
 		if err := r.MeasureTestExecutionTime(context.Background(), stepNames); err != nil {
 			return err
 		}
-		return c.TestExecutionTime.Badge.RenderTestExecutionTime(out, r.TestExecutionTimeNano())
+		return writeOut(outPath, func(w io.Writer) error {
+			return c.TestExecutionTime.Badge.RenderTestExecutionTime(w, r.TestExecutionTimeNano())
+		})
 	},
 }
 
@@ -143,22 +132,19 @@ func loadConfigAndReport(cfgPath string) (*config.Config, *report.Report, error)
 	return c, r, nil
 }
 
-// openOut open output writer and return cleanup function.
-func openOut(path string) (io.Writer, func(), error) {
+// writeOut writes what render produced to path, or to stdout when no path is given. The badge
+// is rendered into memory first, so a run that fails on a configuration error leaves whatever
+// badge is already on disk rather than truncating it to nothing.
+func writeOut(path string, render func(io.Writer) error) error {
+	buf := new(bytes.Buffer)
+	if err := render(buf); err != nil {
+		return err
+	}
 	if path == "" {
-		return os.Stdout, func() {}, nil
+		_, err := os.Stdout.Write(buf.Bytes())
+		return err
 	}
-	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-	if err != nil {
-		return nil, nil, err
-	}
-	cleanup := func() {
-		if err := file.Close(); err != nil {
-			// keep the original behavior: exit on close error
-			os.Exit(1)
-		}
-	}
-	return file, cleanup, nil
+	return os.WriteFile(path, buf.Bytes(), 0644) // #nosec
 }
 
 // floor1 round down to one decimal place.
