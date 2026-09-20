@@ -73,8 +73,44 @@ func New(l, m string) *Badge {
 
 // AddIcon add icon image to badge.
 func (b *Badge) AddIcon(imgf []byte) error {
+	if err := ValidateIcon(imgf); err != nil {
+		return err
+	}
 	b.Icon = imgf
 	return nil
+}
+
+// ValidateIcon reports whether an image is one a badge can embed, which is what a caller asks
+// before it has a badge to add the icon to.
+func ValidateIcon(imgf []byte) error {
+	_, err := iconDataURI(imgf)
+	return err
+}
+
+// iconDataURI returns the URI the badge embeds an icon image by.
+func iconDataURI(imgf []byte) (string, error) {
+	if len(imgf) == 0 {
+		return "", errors.New("invalid icon: empty image")
+	}
+	if issvg.Is(imgf) {
+		imgdoc, err := xmlquery.Parse(bytes.NewReader(imgf))
+		if err != nil {
+			return "", err
+		}
+		// The root element rather than a match on the name `svg`, since the XPath is case
+		// sensitive while the check that sent the image here is not, and an icon rooted at
+		// <SVG> would match nothing and be dereferenced as nil.
+		s := xmlquery.FindOne(imgdoc, "/*")
+		if s == nil {
+			return "", errors.New("invalid icon: no svg element")
+		}
+		return fmt.Sprintf("data:image/svg+xml;base64,%s", base64.StdEncoding.EncodeToString([]byte(s.OutputXML(true)))), nil
+	}
+	_, format, err := image.DecodeConfig(bytes.NewReader(imgf))
+	if err != nil {
+		return "", fmt.Errorf("invalid icon: %w", err)
+	}
+	return fmt.Sprintf("data:image/%s;base64,%s", format, base64.StdEncoding.EncodeToString(imgf)), nil
 }
 
 // AddIconFile add icon image file to badge.
@@ -126,25 +162,10 @@ func (b *Badge) Render(wr io.Writer) error {
 	var icon string
 	if len(b.Icon) != 0 {
 		iw = 15.5
-		if issvg.Is(b.Icon) {
-			imgdoc, err := xmlquery.Parse(bytes.NewReader(b.Icon))
-			if err != nil {
-				return err
-			}
-			// The root element rather than a match on the name `svg`, since the XPath is case
-			// sensitive while the check that sent the image here is not, and an icon rooted at
-			// <SVG> would match nothing and be dereferenced as nil.
-			s := xmlquery.FindOne(imgdoc, "/*")
-			if s == nil {
-				return errors.New("invalid icon: no svg element")
-			}
-			icon = fmt.Sprintf("data:image/svg+xml;base64,%s", base64.StdEncoding.EncodeToString([]byte(s.OutputXML(true))))
-		} else {
-			_, format, err := image.DecodeConfig(bytes.NewReader(b.Icon))
-			if err != nil {
-				return err
-			}
-			icon = fmt.Sprintf("data:image/%s;base64,%s", format, base64.StdEncoding.EncodeToString(b.Icon))
+		var err error
+		icon, err = iconDataURI(b.Icon)
+		if err != nil {
+			return err
 		}
 	}
 

@@ -68,8 +68,14 @@ func (b *Badge) Validate(normalize func(string) (string, error)) error {
 	if _, err := b.compileColors(normalize); err != nil {
 		return err
 	}
-	if _, err := b.icon(); err != nil {
-		return err
+	if b.hasIcon() {
+		icon, err := b.icon()
+		if err != nil {
+			return err
+		}
+		if err := badge.ValidateIcon(icon); err != nil {
+			return fmt.Errorf("%s.icon: %w", b.section(), err)
+		}
 	}
 	return nil
 }
@@ -200,13 +206,13 @@ func (b *Badge) render(w io.Writer, label, message, messageColor string) error {
 			return err
 		}
 	}
-	icon, err := b.icon()
-	if err != nil {
-		return err
-	}
-	if len(icon) > 0 {
-		if err := bb.AddIcon(icon); err != nil {
+	if b.hasIcon() {
+		icon, err := b.icon()
+		if err != nil {
 			return err
+		}
+		if err := bb.AddIcon(icon); err != nil {
+			return fmt.Errorf("%s.icon: %w", b.section(), err)
 		}
 	}
 	return bb.Render(w)
@@ -246,6 +252,13 @@ func (b *Badge) color(current float64, normalize func(string) (string, error), d
 		}
 	}
 	return def, nil
+}
+
+// hasIcon reports whether the badge carries an icon at all, which everything but `icon: none`
+// does. It is asked before the image is read, so that a file holding nothing is reported
+// rather than quietly rendering the badge without an icon.
+func (b *Badge) hasIcon() bool {
+	return b == nil || b.Icon != noIcon
 }
 
 // icon returns the icon image of the badge. The embedded octocov icon is used unless `icon:`
