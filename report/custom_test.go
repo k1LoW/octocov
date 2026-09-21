@@ -88,6 +88,33 @@ func TestCustomMetricSetTable(t *testing.T) {
 				opts:     &Options{Locale: &language.French},
 			},
 		}},
+		{&CustomMetricSet{
+			Key:  "one_metric",
+			Name: "One Metric",
+			Metrics: []*CustomMetric{
+				{Key: "A", Name: "Metrics A", Value: 1500.0, Unit: ""},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+			},
+		}},
+		{&CustomMetricSet{
+			Key:  "few_metrics",
+			Name: "Few Metrics",
+			Metrics: []*CustomMetric{
+				{Key: "A", Name: "Metrics A", Value: 1500.0, Unit: ""},
+				{Key: "B", Name: "Metrics B", Value: 1340.0, Unit: ""},
+				{Key: "C", Name: "Metrics C", Value: 1600.0, Unit: ""},
+				{Key: "D", Name: "Metrics D", Value: 1010.0, Unit: ""},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+			},
+		}},
 	}
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
@@ -121,7 +148,22 @@ func TestCustomMetricSetMetadataTable(t *testing.T) {
 				{Key: "commit", Value: "a1b2c3d4e5f6"},
 			},
 		}},
+		{&CustomMetricSet{
+			Key:  "benchmark_0",
+			Name: "Benchmark-0",
+			Metadata: []*MetadataKV{
+				{Key: "goos", Value: "darwin"},
+				{Key: "goarch", Value: "amd64"},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+			},
+		}},
 	}
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("%d", i), func(t *testing.T) {
 			got := tt.s.MetadataTable(false)

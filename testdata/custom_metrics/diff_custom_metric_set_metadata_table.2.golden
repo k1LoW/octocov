@@ -1,7 +1,8 @@
 <details><summary>Metadata</summary>
 
-|  goos  | goarch |
-|-------:|-------:|
-| darwin | amd64  |
+|        | main ([1234567](https://github.com/owner/repo/commit/1234567890)) |
+|-------:|------------------------------------------------------------------:|
+| goos   | darwin                                                            |
+| goarch | amd64                                                             |
 
 </details>

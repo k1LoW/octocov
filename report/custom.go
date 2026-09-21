@@ -13,8 +13,6 @@ import (
 	"github.com/xeipuuv/gojsonschema"
 )
 
-const swapXYMin = 5
-
 //go:embed custom_metrics_schema.json
 var schema []byte
 
@@ -62,30 +60,22 @@ func (s *CustomMetricSet) Table() string {
 	if len(s.Metrics) == 0 {
 		return ""
 	}
-	if len(s.Metrics) >= swapXYMin {
-		return s.tableSwaped()
-	}
 	report := s.report
 	if report == nil {
 		report = &Report{}
 	}
-	var (
-		h []string
-		d []string
-	)
-	for _, m := range s.Metrics {
-		h = append(h, m.Name)
-		d = append(d, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit))
-	}
 	buf := new(bytes.Buffer)
 	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
-	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	table.Append(d)
+	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit, nil)}
+	table.SetHeader(h)
+	for _, m := range s.Metrics {
+		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
+	}
 	table.Render()
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
 }
@@ -94,24 +84,25 @@ func (s *CustomMetricSet) MetadataTable(expandDetails bool) string {
 	if len(s.Metadata) == 0 {
 		return ""
 	}
-	var h []string
-	var d []string
-	for _, m := range s.Metadata {
-		if m.Name == "" {
-			m.Name = m.Key
-		}
-		h = append(h, m.Name)
-		d = append(d, m.Value)
+	report := s.report
+	if report == nil {
+		report = &Report{}
 	}
 	buf := new(bytes.Buffer)
 	fmt.Fprintf(buf, "%s<summary>Metadata</summary>\n\n", detailsTag(expandDetails))
 	table := tablewriter.NewWriter(buf)
-	table.SetHeader(h)
 	table.SetAutoFormatHeaders(false)
 	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	table.Append(d)
+	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit, nil)}
+	table.SetHeader(h)
+	for _, m := range s.Metadata {
+		if m.Name == "" {
+			m.Name = m.Key
+		}
+		table.Append([]string{m.Name, m.Value})
+	}
 	table.Render()
 	buf.WriteString("\n</details>\n")
 	return strings.Replace(buf.String(), "---|", "--:|", len(h))
@@ -222,24 +213,6 @@ func (s *CustomMetricSet) Validate() error {
 	}
 
 	return nil
-}
-
-func (s *CustomMetricSet) tableSwaped() string {
-	buf := new(bytes.Buffer)
-	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
-	table := tablewriter.NewWriter(buf)
-	table.SetAutoFormatHeaders(false)
-	table.SetAutoWrapText(false)
-	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
-	table.SetCenterSeparator("|")
-	table.SetHeader([]string{"", makeHeadTitleWithLink(s.report.Ref, s.report.Commit, nil)})
-
-	report := s.report
-	for _, m := range s.Metrics {
-		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
-	}
-	table.Render()
-	return strings.Replace(buf.String(), "---|", "--:|", len(s.Metrics))
 }
 
 func (s *CustomMetricSet) findMetricByKey(key string) *CustomMetric {
