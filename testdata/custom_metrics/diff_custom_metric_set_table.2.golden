@@ -1,5 +1,6 @@
 ## Benchmark-0
 
-| Number of iterations | Nanoseconds per iteration |
-|---------------------:|--------------------------:|
-| 1 000                | 676,5 ns/op               |
+|                           | main ([1234567](https://github.com/owner/repo/commit/1234567890)) |
+|--------------------------:|------------------------------------------------------------------:|
+| Number of iterations      | 1 000                                                             |
+| Nanoseconds per iteration | 676,5 ns/op                                                       |

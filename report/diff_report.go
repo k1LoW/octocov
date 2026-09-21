@@ -257,7 +257,7 @@ func (d *DiffReport) FileCoveragesTable(files []*gh.PullRequestFile, relWd strin
 
 func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.Colors, detail bool, withLink bool, cur, prev *Viewer) {
 	if withLink {
-		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitleWithLink(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
+		table.SetHeader([]string{"", makeHeadTitleWithLink(d.RefB, d.CommitB), makeHeadTitleWithLink(d.RefA, d.CommitA), "+/-"})
 	} else {
 		table.SetHeader([]string{"", makeHeadTitle(d.RefB, d.CommitB, d.ReportB.covPaths), makeHeadTitle(d.RefA, d.CommitA, d.ReportA.covPaths), "+/-"})
 	}
