@@ -115,6 +115,18 @@ func TestCustomMetricSetTable(t *testing.T) {
 				covPaths: []string{"testdata/cover.out"},
 			},
 		}},
+		{&CustomMetricSet{
+			Key: "unnamed_metrics",
+			Metrics: []*CustomMetric{
+				{Key: "A", Value: 1500.0, Unit: ""},
+				{Key: "B", Value: 1340.0, Unit: ""},
+			},
+			report: &Report{
+				Ref:      "main",
+				Commit:   "1234567890",
+				covPaths: []string{"testdata/cover.out"},
+			},
+		}},
 	}
 	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")

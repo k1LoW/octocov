@@ -64,6 +64,9 @@ func (s *CustomMetricSet) Table() string {
 	if report == nil {
 		report = &Report{}
 	}
+	if s.Name == "" {
+		s.Name = s.Key
+	}
 	buf := new(bytes.Buffer)
 	_, _ = fmt.Fprintf(buf, "## %s\n\n", s.Name) //nostyle:handlerrors
 	table := tablewriter.NewWriter(buf)
@@ -74,6 +77,9 @@ func (s *CustomMetricSet) Table() string {
 	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit)}
 	table.SetHeader(h)
 	for _, m := range s.Metrics {
+		if m.Name == "" {
+			m.Name = m.Key
+		}
 		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
 	}
 	table.Render()
