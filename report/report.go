@@ -864,7 +864,12 @@ func makeHeadTitle(ref, commit string, covPaths []string) string {
 	return fmt.Sprintf("%s (%s)", ref, commit)
 }
 
-func makeHeadTitleWithLink(ref, commit string, covPaths []string) string {
+// makeHeadTitleWithLink names the report whose values a markdown column holds. It takes no
+// coverage paths, unlike makeHeadTitle: they name the files coverage was read from rather
+// than the metric the column holds, and a report decoded out of a datastore carries none at
+// all, so the compared column that most needs naming could never have shown them. The commit
+// is what still identifies a report once the ref is gone.
+func makeHeadTitleWithLink(ref, commit string) string {
 	var (
 		refLink    string
 		commitLink string
@@ -886,7 +891,10 @@ func makeHeadTitleWithLink(ref, commit string, covPaths []string) string {
 		commitLink = "-"
 	}
 	if ref == "" {
-		return strings.Join(covPaths, ", ")
+		if len(commit) > 7 {
+			return commitLink
+		}
+		return ""
 	}
 	return fmt.Sprintf("%s (%s)", refLink, commitLink)
 }

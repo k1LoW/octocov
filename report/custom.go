@@ -71,7 +71,7 @@ func (s *CustomMetricSet) Table() string {
 	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit, nil)}
+	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit)}
 	table.SetHeader(h)
 	for _, m := range s.Metrics {
 		table.Append([]string{m.Name, fmt.Sprintf("%s%s", report.convertFormat(m.Value), m.Unit)})
@@ -95,7 +95,7 @@ func (s *CustomMetricSet) MetadataTable(expandDetails bool) string {
 	table.SetAutoWrapText(false)
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
-	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit, nil)}
+	h := []string{"", makeHeadTitleWithLink(report.Ref, report.Commit)}
 	table.SetHeader(h)
 	for _, m := range s.Metadata {
 		if m.Name == "" {
@@ -242,7 +242,7 @@ func (d *DiffCustomMetricSet) Table() string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil), "+/-"})
+	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit), "+/-"})
 	report := d.report()
 
 	for _, m := range d.Metrics {
@@ -291,7 +291,7 @@ func (d *DiffCustomMetricSet) MetadataTable(expandDetails bool) string {
 	table.SetBorders(tablewriter.Border{Left: true, Top: false, Right: true, Bottom: false})
 	table.SetCenterSeparator("|")
 	table.SetColumnAlignment([]int{tablewriter.ALIGN_LEFT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT, tablewriter.ALIGN_RIGHT})
-	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit, nil), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit, nil)})
+	table.SetHeader([]string{"", makeHeadTitleWithLink(d.B.report.Ref, d.B.report.Commit), makeHeadTitleWithLink(d.A.report.Ref, d.A.report.Commit)})
 	for _, ma := range d.A.Metadata {
 		mb, ok := lo.Find(d.B.Metadata, func(m *MetadataKV) bool {
 			return m.Key == ma.Key

@@ -778,3 +778,40 @@ func TestFileCoveragesTableLinksCoverageToTheViewer(t *testing.T) {
 		t.Error("a nil viewer must not link to the viewer")
 	}
 }
+
+func TestMakeHeadTitleWithLink(t *testing.T) {
+	tests := []struct {
+		name   string
+		ref    string
+		commit string
+		want   string
+	}{
+		{
+			"branch",
+			"refs/heads/main", "1234567890abcdef",
+			"[main](https://github.com/owner/repo/tree/main) ([1234567](https://github.com/owner/repo/commit/1234567890abcdef))",
+		},
+		{
+			"pull request",
+			"refs/pull/770/head", "1234567890abcdef",
+			"[#770](https://github.com/owner/repo/pull/770) ([1234567](https://github.com/owner/repo/commit/1234567890abcdef))",
+		},
+		{
+			"no ref falls back to the commit",
+			"", "1234567890abcdef",
+			"[1234567](https://github.com/owner/repo/commit/1234567890abcdef)",
+		},
+		{"no ref and no commit names nothing", "", "", ""},
+		{"no ref and an unusable commit names nothing", "", "123", ""},
+	}
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := makeHeadTitleWithLink(tt.ref, tt.commit)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
