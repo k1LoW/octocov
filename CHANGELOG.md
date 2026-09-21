@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.80.1](https://github.com/k1LoW/octocov/compare/v0.80.0...v0.80.1) - 2026-09-21
+
+### Breaking Changes 🛠
+- fix: settle on one orientation for the tables of a custom metric set by @k1LoW in https://github.com/k1LoW/octocov/pull/770
+### Other Changes
+- docs: refresh the README screenshots by @k1LoW in https://github.com/k1LoW/octocov/pull/768
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/767
+- chore(deps): bump the dependencies group with 3 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/766
+
 ## [v0.80.0](https://github.com/k1LoW/octocov/compare/v0.79.0...v0.80.0) - 2026-09-20
 
 ### New Features 🎉
