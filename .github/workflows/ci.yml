@@ -62,12 +62,41 @@ jobs:
         with:
           scan-type: 'fs'
 
+      # Each custom metrics step writes one JSON into .tmp/custom_metrics/, and the
+      # combine step below merges them into one array, so adding a metric only means
+      # adding a step here, not another OCTOCOV_CUSTOM_METRICS_* on every octocov run.
+      - name: Measure build size
+        run: |
+          mkdir -p .tmp/custom_metrics
+          # -s -w matches the release build, since the size that matters is the downloaded asset.
+          go build -ldflags="-s -w" -o .tmp/octocov .
+          size=$(wc -c < .tmp/octocov)
+          gzipped=$(gzip -9 -c .tmp/octocov | wc -c)
+          jq -n \
+            --arg goos "$(go env GOOS)" --arg goarch "$(go env GOARCH)" \
+            --argjson size "$size" --argjson gzipped "$gzipped" '{
+            key: "build_size",
+            name: "Build size",
+            metadata: [
+              { key: "goos", name: "GOOS", value: $goos },
+              { key: "goarch", name: "GOARCH", value: $goarch }
+            ],
+            metrics: [
+              { key: "binary", name: "Stripped binary", value: (($size / 1024) | round), unit: " KB" },
+              { key: "gzipped", name: "Gzipped", value: (($gzipped / 1024) | round), unit: " KB" }
+            ]
+          }' > .tmp/custom_metrics/build_size.json
+
+      - name: Combine custom metrics
+        run: jq -s . .tmp/custom_metrics/*.json > .tmp/custom_metrics.json
+
       - name: Build octocov and run as a action
         uses: ./testdata/actions/coverage
         env:
           MACKEREL_API_KEY: ${{ secrets.MACKEREL_API_KEY }}
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_1: ./testdata/custom_metrics/benchmark_1.json
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_0: ./testdata/custom_metrics/benchmark_0.json
+          OCTOCOV_CUSTOM_METRICS_CI: ./.tmp/custom_metrics.json
           GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
 
       # Storing the report twice in one run makes octocov delete the artifact it wrote
@@ -81,6 +110,7 @@ jobs:
           MACKEREL_API_KEY: ${{ secrets.MACKEREL_API_KEY }}
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_1: ./testdata/custom_metrics/benchmark_1.json
           OCTOCOV_CUSTOM_METRICS_BENCHMARK_0: ./testdata/custom_metrics/benchmark_0.json
+          OCTOCOV_CUSTOM_METRICS_CI: ./.tmp/custom_metrics.json
           GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
 
       - name: Show rate limit
