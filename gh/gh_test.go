@@ -817,8 +817,8 @@ func TestDeleteArtifactsBeforeRun(t *testing.T) {
 }
 
 func TestDeleteArtifactsBeforeRunFails(t *testing.T) {
-	// A delete the token is not allowed to make is returned, so the caller can say why the
-	// previous reports are still there.
+	// The error of a delete the token is not allowed to make is returned, so the caller can say
+	// why the previous reports are still there.
 	t.Setenv("GITHUB_TOKEN", "dummy")
 
 	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
