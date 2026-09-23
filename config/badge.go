@@ -138,7 +138,7 @@ func (b *Badge) compileColors(normalize func(string) (string, error)) ([]*condit
 		if err != nil {
 			return nil, fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
-		p, err := condition.Compile(cond, []string{"current"})
+		p, err := condition.Compile(cond, map[string]any{"current": float64(0)})
 		if err != nil {
 			return nil, fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}

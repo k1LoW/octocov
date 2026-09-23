@@ -33,10 +33,11 @@ type Program struct {
 	celErr error
 }
 
-// Compile compiles a condition that refers to the variables named names.
-func Compile(src string, names []string) (*Program, error) {
+// Compile compiles a condition. vars holds the variables the condition refers to, and only the
+// types of their values are read, so zero values do.
+func Compile(src string, vars map[string]any) (*Program, error) {
 	p := &Program{src: src}
-	prg, err := compileCEL(src, names)
+	prg, err := compileCEL(src, vars)
 	if err == nil {
 		p.cel = prg
 		return p, nil
@@ -51,11 +52,7 @@ func Compile(src string, names []string) (*Program, error) {
 
 // Eval compiles and evaluates a condition once.
 func Eval(src string, vars map[string]any) (bool, error) {
-	names := make([]string, 0, len(vars))
-	for k := range vars {
-		names = append(names, k)
-	}
-	p, err := Compile(src, names)
+	p, err := Compile(src, vars)
 	if err != nil {
 		return false, err
 	}
@@ -101,13 +98,17 @@ func (p *Program) compileExpr() error {
 	return nil
 }
 
-func compileCEL(src string, names []string) (cel.Program, error) {
+func compileCEL(src string, vars map[string]any) (cel.Program, error) {
 	opts := []cel.EnvOption{
 		cel.CrossTypeNumericComparisons(true),
 		cel.OptionalTypes(),
 	}
-	for _, n := range names {
-		opts = append(opts, cel.Variable(n, cel.DynType))
+	for k, v := range vars {
+		t := cel.DynType
+		if isInteger(v) {
+			t = cel.IntType
+		}
+		opts = append(opts, cel.Variable(k, t))
 	}
 	env, err := cel.NewEnv(opts...)
 	if err != nil {
@@ -117,62 +118,137 @@ func compileCEL(src string, names []string) (cel.Program, error) {
 	if iss.Err() != nil {
 		return nil, iss.Err()
 	}
-	intLiteralsToDouble(a.NativeRep())
+	rewrite := map[int64]struct{}{}
+	if typed, iss := env.Check(a); iss.Err() == nil {
+		intLiterals(a.NativeRep(), typed.NativeRep(), rewrite)
+	} else {
+		// Literals alone can fail the check, as `7 / 2 == 3.5` does, so every one of them is
+		// tried as a double before giving up.
+		intLiterals(a.NativeRep(), nil, rewrite)
+	}
+	// Parsed again rather than rewriting the AST that has been checked, which the checker may
+	// share with its result. A parse of the same source numbers the nodes the same way, so the
+	// ids found above apply to it.
+	a, iss = env.Parse(src)
+	if iss.Err() != nil {
+		return nil, iss.Err()
+	}
+	fac := ast.NewExprFactory()
+	for _, e := range ast.MatchDescendants(ast.NavigateAST(a.NativeRep()), ast.ConstantValueMatcher()) {
+		if _, ok := rewrite[e.ID()]; !ok {
+			continue
+		}
+		if v, ok := e.AsLiteral().(types.Int); ok {
+			e.SetKindCase(fac.NewLiteral(e.ID(), types.Double(v)))
+		}
+	}
 	checked, iss := env.Check(a)
 	if iss.Err() != nil {
-		// The literals compared with an int that is typed statically, such as the result of
-		// size(), have to stay ints, since the checker has no equality between int and double.
-		a, _ = env.Parse(src)
-		var iss2 *cel.Issues
-		checked, iss2 = env.Check(a)
-		if iss2.Err() != nil {
-			return nil, iss.Err()
-		}
+		return nil, iss.Err()
 	}
 	return env.Program(checked)
 }
 
-// intLiteralsToDouble rewrites the int literals into double ones. Measured values are float64
-// while thresholds are mostly written as integers, and CEL has no arithmetic between int and
-// double, so `current > prev + 1` would not evaluate otherwise. Overloading the arithmetic
-// operators for mixed operands is not an option since the standard ones are singleton
-// functions. The operands of an index and of `%` are left as they are, as those take ints.
-func intLiteralsToDouble(a *ast.AST) {
-	root := ast.NavigateAST(a)
-	keep := map[int64]struct{}{}
-	for _, e := range ast.MatchDescendants(root, ast.KindMatcher(ast.CallKind)) {
+// numericOperators are the binary operators an int literal is rewritten into a double under.
+var numericOperators = map[string]struct{}{
+	operators.Add:           {},
+	operators.Subtract:      {},
+	operators.Multiply:      {},
+	operators.Divide:        {},
+	operators.Less:          {},
+	operators.LessEquals:    {},
+	operators.Greater:       {},
+	operators.GreaterEquals: {},
+	operators.Equals:        {},
+	operators.NotEquals:     {},
+}
+
+// arithmeticOperators are the numericOperators whose result is a number.
+var arithmeticOperators = map[string]struct{}{
+	operators.Add:      {},
+	operators.Subtract: {},
+	operators.Multiply: {},
+	operators.Divide:   {},
+}
+
+// intLiterals adds to rewrite the int literals of a to be rewritten into doubles, which are the
+// operands of a numericOperators operator whose other operand does not stay an int, or every
+// such operand when typed is nil. Measured values are float64 while thresholds are mostly
+// written as integers, and CEL has no arithmetic between int and double, so `current > prev + 1`
+// would not evaluate otherwise. Overloading the arithmetic operators for mixed operands is not
+// an option since the standard ones are singleton functions. A literal paired with an int, such
+// as the result of size() or an integer variable, stays an int, since the checker has no
+// equality between int and double, and so does any literal elsewhere, such as an index or an
+// operand of `%`.
+func intLiterals(a, typed *ast.AST, rewrite map[int64]struct{}) {
+	for _, e := range ast.MatchDescendants(ast.NavigateAST(a), ast.KindMatcher(ast.CallKind)) {
 		c := e.AsCall()
-		switch c.FunctionName() {
-		case operators.Index, operators.OptIndex:
-			keep[c.Args()[1].ID()] = struct{}{}
-		case operators.Modulo:
-			for _, arg := range c.Args() {
-				keep[arg.ID()] = struct{}{}
-			}
-		}
-	}
-	fac := ast.NewExprFactory()
-	for _, e := range ast.MatchDescendants(root, ast.ConstantValueMatcher()) {
-		if _, ok := keep[e.ID()]; ok {
+		if _, ok := numericOperators[c.FunctionName()]; !ok {
 			continue
 		}
-		if i, ok := e.AsLiteral().(types.Int); ok {
-			e.SetKindCase(fac.NewLiteral(e.ID(), types.Double(i)))
+		args := c.Args()
+		if len(args) != 2 {
+			continue
+		}
+		for i, arg := range args {
+			if arg.Kind() != ast.LiteralKind {
+				continue
+			}
+			if _, ok := arg.AsLiteral().(types.Int); !ok {
+				continue
+			}
+			if typed != nil && staysInt(args[1-i], typed) {
+				continue
+			}
+			rewrite[arg.ID()] = struct{}{}
 		}
 	}
 }
 
-// celVars converts the integer variables into float64 ones, as the literals they are compared
-// with have been turned into doubles by intLiteralsToDouble.
+// staysInt reports whether e is an int after the rewrite. The type the checker gives an
+// arithmetic operator is not enough on its own, since `dyn + 1` is typed as an int and becomes a
+// double once its literal is rewritten, so an arithmetic operator stays an int only when both of
+// its operands do.
+func staysInt(e ast.Expr, typed *ast.AST) bool {
+	switch e.Kind() {
+	case ast.LiteralKind:
+		_, ok := e.AsLiteral().(types.Int)
+		return ok
+	case ast.CallKind:
+		c := e.AsCall()
+		if _, ok := arithmeticOperators[c.FunctionName()]; ok {
+			for _, arg := range c.Args() {
+				if !staysInt(arg, typed) {
+					return false
+				}
+			}
+			return true
+		}
+	}
+	return typed.GetType(e.ID()).Kind() == types.IntKind
+}
+
+func isInteger(v any) bool {
+	switch reflect.ValueOf(v).Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return true
+	default:
+		return false
+	}
+}
+
+// celVars converts the integer variables into int64, the one integer type CEL takes, so that a
+// named one such as time.Month is read as the int it has been declared as.
 func celVars(vars map[string]any) map[string]any {
 	converted := make(map[string]any, len(vars))
 	for k, v := range vars {
 		rv := reflect.ValueOf(v)
 		switch rv.Kind() {
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			converted[k] = float64(rv.Int())
+			converted[k] = rv.Int()
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-			converted[k] = float64(rv.Uint())
+			converted[k] = int64(rv.Uint()) // #nosec G115
 		default:
 			converted[k] = v
 		}

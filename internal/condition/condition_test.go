@@ -42,6 +42,11 @@ func TestEval(t *testing.T) {
 		{"labels[0] == 'bug'", true, false, false},
 		{"7 % 2 == 1", true, false, false},
 		{"size(labels) == 1", true, false, false},
+		{"size(labels) == 1 && current > prev + 1", true, false, false},
+		{"hour % 2 == 1", true, false, false},
+		{"labels[hour - 9] == 'bug'", true, false, false},
+		{"current > -1", true, false, false},
+		{"1 + 1 < current", true, false, false},
 		{"metrics.a + 1 > 3", true, false, false},
 		{"env.GITHUB_REF == 'refs/heads/main'", true, false, false},
 		{"env[?'FOO'].orValue('') == ''", true, false, false},
@@ -79,7 +84,7 @@ func TestEval(t *testing.T) {
 
 func TestProgramWarnsOnce(t *testing.T) {
 	buf := captureWarnings(t)
-	p, err := Compile("current >= 80 and current < 90", []string{"current"})
+	p, err := Compile("current >= 80 and current < 90", map[string]any{"current": float64(0)})
 	if err != nil {
 		t.Fatal(err)
 	}
