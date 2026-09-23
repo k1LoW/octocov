@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -31,6 +32,9 @@ type Artifact struct {
 	repository string
 	name       string
 	r          *report.Report
+	// stderr is where a failure to delete the previous reports of a pull request goes. It
+	// is a field so a test can read it back.
+	stderr io.Writer
 }
 
 func New(gh *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
@@ -42,6 +46,7 @@ func New(gh *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
 		repository: repo,
 		name:       name,
 		r:          r,
+		stderr:     os.Stderr,
 	}, nil
 }
 
@@ -58,7 +63,22 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	if err != nil {
 		return err
 	}
-	return a.put(ctx, name, reportFilename, r.Bytes())
+	if err := a.put(ctx, name, reportFilename, r.Bytes()); err != nil {
+		return err
+	}
+	if r.PullRequest == 0 {
+		// The report of a branch can be the base a pull request is compared against, which
+		// is picked by the merge base commit rather than by being the newest, so the older
+		// ones are still read.
+		return nil
+	}
+	if err := a.deletePrevious(ctx, name); err != nil {
+		// Deleting needs actions: write, which a workflow may not grant and a pull request
+		// from a fork never has. The report is stored by now, so failing the run over the
+		// artifacts it leaves behind would be worse than leaving them.
+		fmt.Fprintf(a.stderr, "Skip deleting the previous reports of %s: %v\n", name, err) //nostyle:handlerrors
+	}
+	return nil
 }
 
 func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
@@ -134,13 +154,36 @@ func (a *Artifact) put(ctx context.Context, name, path string, content []byte) e
 	if err != nil {
 		return err
 	}
+	runID, err := currentRunID()
+	if err != nil {
+		return err
+	}
+	return a.gh.PutArtifact(ctx, r.Owner, r.Repo, runID, name, path, content)
+}
+
+// deletePrevious deletes the artifacts of the name that earlier runs uploaded. Nothing reads
+// any but the newest, and unlike a datastore writing to a path fixed by the ref, a later
+// upload does not replace them.
+func (a *Artifact) deletePrevious(ctx context.Context, name string) error {
+	r, err := gh.Parse(a.repository)
+	if err != nil {
+		return err
+	}
+	runID, err := currentRunID()
+	if err != nil {
+		return err
+	}
+	return a.gh.DeleteArtifactsBeforeRun(ctx, r.Owner, r.Repo, name, runID)
+}
+
+func currentRunID() (int64, error) {
 	s := os.Getenv("GITHUB_RUN_ID")
 	if s == "" {
-		return errors.New("env GITHUB_RUN_ID is not set")
+		return 0, errors.New("env GITHUB_RUN_ID is not set")
 	}
 	runID, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		return fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
+		return 0, fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
 	}
-	return a.gh.PutArtifact(ctx, r.Owner, r.Repo, runID, name, path, content)
+	return runID, nil
 }

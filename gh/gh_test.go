@@ -3,6 +3,9 @@ package gh
 import (
 	"context"
 	"errors"
+	"net/http"
+	"path"
+	"strconv"
 	"testing"
 	"time"
 
@@ -753,4 +756,98 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 			t.Errorf("a malformed number must not read as an absent pull request (err: %v)", err)
 		}
 	})
+}
+
+func TestDeleteArtifactsBeforeRun(t *testing.T) {
+	// Only the artifacts earlier runs uploaded are deleted. A later run can finish first, and
+	// an artifact that names no run cannot be shown to be older.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+
+	artifact := func(id, runID int64) *github.Artifact {
+		a := &github.Artifact{ID: new(id), Name: new("octocov-report@refs_pull_1")}
+		if runID != 0 {
+			a.WorkflowRun = &github.ArtifactWorkflowRun{ID: new(runID)}
+		}
+		return a
+	}
+	var deleted []int64
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsArtifactsByOwnerByRepo,
+			github.ArtifactList{
+				Artifacts: []*github.Artifact{artifact(1, 30), artifact(2, 20)},
+			},
+			github.ArtifactList{
+				Artifacts: []*github.Artifact{
+					artifact(3, 10),
+					artifact(4, 0),
+					{ID: github.Int64(5), Name: new("octocov-report@refs_pull_10"), WorkflowRun: &github.ArtifactWorkflowRun{ID: github.Int64(10)}},
+				},
+			},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.DeleteReposActionsArtifactsByOwnerByRepoByArtifactId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				deleted = append(deleted, id)
+				w.WriteHeader(http.StatusNoContent)
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	if err := g.DeleteArtifactsBeforeRun(context.TODO(), "owner", "repo", "octocov-report@refs_pull_1", 20); err != nil {
+		t.Fatal(err)
+	}
+	want := []int64{3}
+	if diff := cmp.Diff(deleted, want, nil); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestDeleteArtifactsBeforeRunFails(t *testing.T) {
+	// A delete the token is not allowed to make is returned, so the caller can say why the
+	// previous reports are still there.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposActionsArtifactsByOwnerByRepo,
+			github.ArtifactList{
+				Artifacts: []*github.Artifact{
+					{ID: github.Int64(1), Name: new("octocov-report@refs_pull_1"), WorkflowRun: &github.ArtifactWorkflowRun{ID: github.Int64(10)}},
+				},
+			},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.DeleteReposActionsArtifactsByOwnerByRepoByArtifactId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				mock.WriteError(w, http.StatusForbidden, "Resource not accessible by integration")
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	if err := g.DeleteArtifactsBeforeRun(context.TODO(), "owner", "repo", "octocov-report@refs_pull_1", 20); err == nil {
+		t.Error("want err")
+	}
 }
