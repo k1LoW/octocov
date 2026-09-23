@@ -42,6 +42,7 @@ type Config struct {
 	Summary           *Summary           `yaml:"summary,omitempty"`
 	Body              *Body              `yaml:"body,omitempty"`
 	Diff              *Diff              `yaml:"diff,omitempty"`
+	Viewer            *Viewer            `yaml:"viewer,omitempty"`
 	Timeout           time.Duration      `yaml:"timeout,omitempty"`
 	Locale            *language.Tag      `yaml:"locale,omitempty"`
 	GitRoot           string             `yaml:"-"`
@@ -113,7 +114,8 @@ type Push struct {
 }
 
 type Comment struct {
-	HideFooterLink   bool   `yaml:"hideFooterLink"`
+	HideFooterLink bool `yaml:"hideFooterLink"`
+	// HideCoverageLink is removed in favor of `viewer: none`, and read only to say so.
 	HideCoverageLink bool   `yaml:"hideCoverageLink"`
 	ExpandDetails    bool   `yaml:"expandDetails"`
 	DeletePrevious   bool   `yaml:"deletePrevious"`
@@ -123,7 +125,8 @@ type Comment struct {
 }
 
 type Summary struct {
-	HideFooterLink   bool   `yaml:"hideFooterLink"`
+	HideFooterLink bool `yaml:"hideFooterLink"`
+	// HideCoverageLink is removed in favor of `viewer: none`, and read only to say so.
 	HideCoverageLink bool   `yaml:"hideCoverageLink"`
 	ExpandDetails    bool   `yaml:"expandDetails"`
 	Message          string `yaml:"message,omitempty"`
@@ -131,7 +134,8 @@ type Summary struct {
 }
 
 type Body struct {
-	HideFooterLink   bool   `yaml:"hideFooterLink"`
+	HideFooterLink bool `yaml:"hideFooterLink"`
+	// HideCoverageLink is removed in favor of `viewer: none`, and read only to say so.
 	HideCoverageLink bool   `yaml:"hideCoverageLink"`
 	ExpandDetails    bool   `yaml:"expandDetails"`
 	Message          string `yaml:"message,omitempty"`
@@ -459,28 +463,45 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 	if cond == "" {
 		return true, nil
 	}
-	e, err := gh.DecodeGitHubEvent()
+	variables, err := c.ifVariables()
 	if err != nil {
 		return false, err
 	}
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	if err != nil {
+		return false, err
+	}
+	tf, okk := ok.(bool)
+	if !okk {
+		return false, fmt.Errorf("invalid condition `%s`", cond)
+	}
+	return tf, nil
+}
+
+// ifVariables returns the variables an `if:` condition is evaluated with.
+func (c *Config) ifVariables() (map[string]any, error) {
+	e, err := gh.DecodeGitHubEvent()
+	if err != nil {
+		return nil, err
+	}
 	if c.Repository == "" {
-		return false, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
+		return nil, fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
 	}
 	ctx := context.Background()
 	repo, err := gh.Parse(c.Repository)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	if c.gh == nil {
 		g, err := gh.New()
 		if err != nil {
-			return false, err
+			return nil, err
 		}
 		c.gh = g
 	}
 	defaultBranch, err := c.gh.FetchDefaultBranch(ctx, repo.Owner, repo.Repo)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	isDefaultBranch := false
 	if b, err := c.gh.DetectCurrentBranch(ctx); err == nil {
@@ -496,13 +517,13 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		isPullRequest = true
 		pr, err := c.gh.FetchPullRequest(ctx, repo.Owner, repo.Repo, n)
 		if err != nil {
-			return false, err
+			return nil, err
 		}
 		isDraft = pr.IsDraft
 		labels = pr.Labels
 	}
 	now := time.Now()
-	variables := map[string]any{
+	return map[string]any{
 		"year":    now.UTC().Year(),
 		"month":   now.UTC().Month(),
 		"day":     now.UTC().Day(),
@@ -517,16 +538,7 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		"is_pull_request":   isPullRequest,
 		"is_draft":          isDraft,
 		"labels":            labels,
-	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
-	if err != nil {
-		return false, err
-	}
-	tf, okk := ok.(bool)
-	if !okk {
-		return false, fmt.Errorf("invalid condition `%s`", cond)
-	}
-	return tf, nil
+	}, nil
 }
 
 func envMap() map[string]string {

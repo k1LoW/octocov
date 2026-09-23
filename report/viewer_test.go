@@ -1,6 +1,14 @@
 package report
 
-import "testing"
+import (
+	"errors"
+	"path/filepath"
+	"strings"
+	"testing"
+
+	"github.com/goccy/go-yaml"
+	"github.com/k1LoW/octocov/config"
+)
 
 func TestViewerReportURL(t *testing.T) {
 	tests := []struct {
@@ -29,8 +37,8 @@ func TestViewerReportURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
-			v := NewViewer(tt.artifactName)
-			got := v.reportURL(&Report{Repository: tt.repository, Ref: tt.ref, BaseRef: tt.baseRef, PullRequest: tt.pullRequest, Commit: "0123456789abcdef"})
+			v := NewOctocovDevViewer(tt.artifactName)
+			got := v.CoverageURL(&Report{Repository: tt.repository, Ref: tt.ref, BaseRef: tt.baseRef, PullRequest: tt.pullRequest, Commit: "0123456789abcdef"})
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
@@ -83,7 +91,7 @@ func TestViewerFileURL(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
-			v := NewViewer(tt.artifactName)
+			v := NewOctocovDevViewer(tt.artifactName)
 			got := v.fileURL(&Report{Repository: "k1LoW/octocov", Commit: "0123456789abcdef"}, tt.path)
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
@@ -98,5 +106,99 @@ func TestLinkCell(t *testing.T) {
 	}
 	if got, want := linkCell("82.3%", "https://octocov.dev/o/r/pull/1"), "[82.3%](https://octocov.dev/o/r/pull/1)"; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestArtifactViewer(t *testing.T) {
+	const page = "https://github.com/k1LoW/octocov/actions/runs/1/artifacts/2"
+	v := NewArtifactViewer(page)
+	r := &Report{Repository: "k1LoW/octocov"}
+	if got := v.CoverageURL(r); got != page {
+		t.Errorf("got %v\nwant %v", got, page)
+	}
+	if got, want := v.fileURL(r, "docs/my file.md"), page+"#file-docs/my%20file.md"; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	// The page carries the coverage alone.
+	if got := v.CodeToTestRatioURL(r); got != "" {
+		t.Errorf("got %v\nwant no link", got)
+	}
+	if got := v.TestExecutionTimeURL(r); got != "" {
+		t.Errorf("got %v\nwant no link", got)
+	}
+	if NewArtifactViewer("") != nil {
+		t.Error("no page must be no viewer")
+	}
+}
+
+func customLinks(t *testing.T, links string) *config.CustomLinks {
+	t.Helper()
+	c := config.New()
+	if err := yaml.Unmarshal([]byte("viewer:\n  type: custom\n  links:\n"+links), c); err != nil {
+		t.Fatal(err)
+	}
+	return c.Viewer.CustomLinks(map[string]any{})
+}
+
+func TestCustomViewer(t *testing.T) {
+	links := customLinks(t, `    coverage: 'report.is_base ? nil : "https://example.com/" + report.commit'
+    coverageFile: '"https://example.com/" + report.commit + "/" + file.path'
+    codeToTestRatio: '"https://example.com/ratio/" + report.ref'
+    testExecutionTime: '"https://example.com/time/" + report.ref'
+`)
+	cur := NewCustomViewer(links, false)
+	prev := NewCustomViewer(links, true)
+	a := &Report{Repository: "k1LoW/octocov", Ref: "refs/pull/1/merge", Commit: "aaa"}
+	b := &Report{Repository: "k1LoW/octocov", Ref: "refs/heads/main", Commit: "bbb"}
+	tests := []struct {
+		name string
+		got  string
+		want string
+	}{
+		{"the current coverage", cur.CoverageURL(a), "https://example.com/aaa"},
+		{"the compared coverage is left out by is_base", prev.CoverageURL(b), ""},
+		{"a file", cur.fileURL(a, "a.go"), "https://example.com/aaa/a.go"},
+		// The compared column is evaluated with the base report's ref and commit.
+		{"a file of the compared report", prev.fileURL(b, "a.go"), "https://example.com/bbb/a.go"},
+		{"the code to test ratio", cur.CodeToTestRatioURL(a), "https://example.com/ratio/refs/pull/1/merge"},
+		{"the test execution time", prev.TestExecutionTimeURL(b), "https://example.com/time/refs/heads/main"},
+	}
+	for _, tt := range tests {
+		if tt.got != tt.want {
+			t.Errorf("%s: got %v\nwant %v", tt.name, tt.got, tt.want)
+		}
+	}
+	if err := errors.Join(cur.Err(), prev.Err()); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestCustomViewerErr(t *testing.T) {
+	v := NewCustomViewer(customLinks(t, "    coverage: '1'\n"), false)
+	if got := v.CoverageURL(&Report{}); got != "" {
+		t.Errorf("got %v\nwant no link", got)
+	}
+	if v.Err() == nil {
+		t.Error("a link that is not a string must be an error")
+	}
+}
+
+func TestTableLinksEveryValueACustomViewerLinks(t *testing.T) {
+	r := &Report{}
+	if err := r.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	if !r.IsMeasuredCodeToTestRatio() || !r.IsMeasuredTestExecutionTime() {
+		t.Fatal("the report measures less than this checks")
+	}
+	v := NewCustomViewer(customLinks(t, `    coverage: '"https://example.com/coverage"'
+    codeToTestRatio: '"https://example.com/ratio"'
+    testExecutionTime: '"https://example.com/time"'
+`), false)
+	got := r.Table(v)
+	for _, want := range []string{"](https://example.com/coverage)", "](https://example.com/ratio)", "](https://example.com/time)"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
+		}
 	}
 }

@@ -744,7 +744,7 @@ func TestTableLinksCoverageToTheViewer(t *testing.T) {
 	r.Repository = "k1LoW/tbls"
 	r.PullRequest = 722
 
-	if got, want := r.Table(NewViewer("octocov-report@refs_pull_722")), "[68.4%](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
+	if got, want := r.Table(NewOctocovDevViewer("octocov-report@refs_pull_722")), "[68.4%](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
 	}
 	// The same table without a viewer keeps the cell as it has always been rendered.
@@ -765,7 +765,7 @@ func TestFileCoveragesTableLinksCoverageToTheViewer(t *testing.T) {
 		{Filename: r.Coverage.Files[0].File, BlobURL: "https://github.com/k1LoW/tbls/blob/0123456789abcdef/f"},
 	}
 
-	got := r.FileCoveragesTable(files, NewViewer("octocov-report@refs_pull_722"))
+	got := r.FileCoveragesTable(files, NewOctocovDevViewer("octocov-report@refs_pull_722"))
 	want := "?artifact_name=octocov-report%40refs_pull_722)"
 	if !strings.Contains(got, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)

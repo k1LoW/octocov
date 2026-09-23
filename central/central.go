@@ -48,6 +48,8 @@ type Config struct {
 	CoverageBadge          BadgeRenderer
 	CodeToTestRatioBadge   BadgeRenderer
 	TestExecutionTimeBadge BadgeRenderer
+	// BadgeViewer is where the badges of the index link to, and nil links none.
+	BadgeViewer *report.Viewer
 }
 
 // BadgeRenderer renders the badge of a measured value to w. What the badge says about the
@@ -327,16 +329,35 @@ func (c *Central) funcs() map[string]any {
 			}
 			return time.Duration(r.TestExecutionTimeNano()).String()
 		},
-		"badge": func(r *report.Report, alt, src string) string {
+		"badge": func(r *report.Report, kind, alt, src string) (string, error) {
 			img := fmt.Sprintf("![%s](%s)", alt, src)
-			if !c.artifactBacked[r.Repository] {
-				return img
+			v := c.config.BadgeViewer
+			var u string
+			switch {
+			case v.ReadsArtifacts():
+				if !c.artifactBacked[r.Repository] {
+					return img, nil
+				}
+				// The pages have one per report rather than one per metric, so every badge
+				// opens the same one.
+				u = v.CoverageURL(r)
+			case kind == "coverage":
+				u = v.CoverageURL(r)
+			case kind == "ratio":
+				u = v.CodeToTestRatioURL(r)
+			case kind == "time":
+				u = v.TestExecutionTimeURL(r)
+			default:
+				return "", fmt.Errorf("unknown badge: %s", kind)
 			}
-			u := r.ViewerURL()
+
+			if err := v.Err(); err != nil {
+				return "", err
+			}
 			if u == "" {
-				return img
+				return img, nil
 			}
-			return fmt.Sprintf("[%s](%s)", img, u)
+			return fmt.Sprintf("[%s](%s)", img, u), nil
 		},
 	}
 }

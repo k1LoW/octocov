@@ -1009,3 +1009,63 @@ func TestDeleteArtifactsBeforeRunFails(t *testing.T) {
 		t.Error("want err")
 	}
 }
+
+func TestArtifactURL(t *testing.T) {
+	tests := []struct {
+		serverURL string
+		want      string
+	}{
+		{"", "https://github.com/owner/repo/actions/runs/10/artifacts/20"},
+		{"https://github.com/", "https://github.com/owner/repo/actions/runs/10/artifacts/20"},
+		{"https://github.example.com", "https://github.example.com/owner/repo/actions/runs/10/artifacts/20"},
+	}
+	for _, tt := range tests {
+		t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
+		if got := ArtifactURL("owner", "repo", 10, 20); got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestFetchMergeBase(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	var basehead string
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposPullsByOwnerByRepoByPullNumber,
+			github.PullRequest{
+				Base: &github.PullRequestBranch{SHA: new("base")},
+				Head: &github.PullRequestBranch{SHA: new("head")},
+			},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposCompareByOwnerByRepoByBasehead,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				basehead = path.Base(r.URL.Path)
+				_, _ = w.Write(mock.MustMarshal(github.CommitsComparison{ //nostyle:handlerrors
+					MergeBaseCommit: &github.RepositoryCommit{SHA: new("mergebase")},
+				}))
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	got, err := g.FetchMergeBase(context.TODO(), "owner", "repo", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "mergebase" {
+		t.Errorf("got %v\nwant %v", got, "mergebase")
+	}
+	if want := "base...head"; basehead != want {
+		t.Errorf("got %v\nwant %v", basehead, want)
+	}
+}

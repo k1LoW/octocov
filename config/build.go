@@ -72,6 +72,20 @@ func (c *Config) Build() {
 
 	// Diff
 
+	// Viewer
+	for _, removed := range []struct {
+		key string
+		set bool
+	}{
+		{"comment", c.Comment != nil && c.Comment.HideCoverageLink},
+		{"summary", c.Summary != nil && c.Summary.HideCoverageLink},
+		{"body", c.Body != nil && c.Body.HideCoverageLink},
+	} {
+		if removed.set {
+			_, _ = fmt.Fprintf(os.Stderr, "Removed: %s.hideCoverageLink: has been removed. please use viewer: none instead.\n", removed.key) //nostyle:handlerrors
+		}
+	}
+
 	// GitRoot
 	gitRoot, _ := internal.GitRoot(c.Root()) //nostyle:handlerrors
 	c.GitRoot = gitRoot

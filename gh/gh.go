@@ -345,10 +345,14 @@ func (g *Gh) FetchPullRequest(ctx context.Context, owner, repo string, number in
 }
 
 type PullRequestFile struct {
-	Filename     string
-	BlobURL      string
-	Status       string
-	ChangedLines []int // line numbers added or modified in the file (new-file line numbers)
+	Filename         string
+	PreviousFilename string
+	BlobURL          string
+	Status           string
+	Additions        int
+	Deletions        int
+	Patch            string
+	ChangedLines     []int // line numbers added or modified in the file (new-file line numbers)
 }
 
 // ChangedLinesByFile converts a list of PullRequestFile into a map of filename to changed line numbers.
@@ -699,6 +703,57 @@ func (g *Gh) PutArtifact(ctx context.Context, owner, repo string, runID int64, n
 	return artifact.Upload(ctx, name, fp, bytes.NewReader(content))
 }
 
+// PutUnarchivedArtifact uploads content as an artifact of a single file named name, which
+// is served as the file itself rather than as a zip of it, and returns the ID of the
+// artifact. Where only a zipped artifact can be uploaded, which is on GitHub Enterprise
+// Server, it is uploaded zipped instead.
+func (g *Gh) PutUnarchivedArtifact(ctx context.Context, owner, repo string, runID int64, name string, content []byte) (int64, error) {
+	if err := g.deleteRunArtifact(ctx, owner, repo, runID, name); err != nil {
+		return 0, err
+	}
+	id, err := artifact.UploadUnarchived(ctx, name, bytes.NewReader(content))
+	if !errors.Is(err, artifact.ErrUnarchivedUploadNotSupported) {
+		return id, err
+	}
+	if err := artifact.Upload(ctx, name, name, bytes.NewReader(content)); err != nil {
+		return 0, err
+	}
+	// The legacy upload does not answer with the ID, so it is looked up by the name, which
+	// is unique within the run once the earlier one has been deleted.
+	current, _, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, &github.ListOptions{PerPage: 100})
+	if err != nil {
+		return 0, err
+	}
+	for _, a := range current.Artifacts {
+		if a.GetName() == name {
+			return a.GetID(), nil
+		}
+	}
+	return 0, fmt.Errorf("the uploaded artifact %s is not found", name)
+}
+
+// ArtifactURL returns the URL an artifact of a workflow run is opened at.
+func ArtifactURL(owner, repo string, runID, artifactID int64) string {
+	server := strings.TrimRight(os.Getenv("GITHUB_SERVER_URL"), "/")
+	if server == "" {
+		server = DefaultGithubServerURL
+	}
+	return fmt.Sprintf("%s/%s/%s/actions/runs/%d/artifacts/%d", server, owner, repo, runID, artifactID)
+}
+
+// FetchMergeBase returns the commit the changes of the pull request are counted from.
+func (g *Gh) FetchMergeBase(ctx context.Context, owner, repo string, number int) (string, error) {
+	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return "", err
+	}
+	compare, _, err := g.client.Repositories.CompareCommits(ctx, owner, repo, pr.GetBase().GetSHA(), pr.GetHead().GetSHA(), &github.ListOptions{PerPage: 1})
+	if err != nil {
+		return "", err
+	}
+	return compare.GetMergeBaseCommit().GetSHA(), nil
+}
+
 // DeleteArtifactsBeforeRun deletes the artifacts of the name that were uploaded by a workflow
 // run with an id lower than runID. Two runs can finish out of order, so an artifact of a
 // later run is kept even when it was uploaded first.
@@ -825,6 +880,24 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 	return r.GetPrivate(), nil
 }
 
+// deleteRunArtifact deletes the artifact of the name that an earlier attempt of the same
+// run uploaded, since a name can be used only once within a run.
+func (g *Gh) deleteRunArtifact(ctx context.Context, owner, repo string, runID int64, name string) error {
+	current, _, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, &github.ListOptions{PerPage: 100})
+	if err != nil {
+		return err
+	}
+	for _, a := range current.Artifacts {
+		if a.GetName() == name {
+			if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, a.GetID()); err != nil {
+				return err
+			}
+			break
+		}
+	}
+	return nil
+}
+
 // fetchMergeCommitFiles returns the files commit changes against its first parent when commit is
 // the merge of head onto the base branch of a pull request, and false otherwise.
 func (g *Gh) fetchMergeCommitFiles(ctx context.Context, owner, repo, commit, head string) ([]*github.CommitFile, bool, error) {
@@ -864,10 +937,14 @@ func (g *Gh) listPullRequestFiles(ctx context.Context, owner, repo string, numbe
 		}
 		for _, f := range commitFiles {
 			files = append(files, &PullRequestFile{
-				Filename:     f.GetFilename(),
-				BlobURL:      f.GetBlobURL(),
-				Status:       f.GetStatus(),
-				ChangedLines: parseChangedLinesFromPatch(f.GetPatch()),
+				Filename:         f.GetFilename(),
+				PreviousFilename: f.GetPreviousFilename(),
+				BlobURL:          f.GetBlobURL(),
+				Status:           f.GetStatus(),
+				Additions:        f.GetAdditions(),
+				Deletions:        f.GetDeletions(),
+				Patch:            f.GetPatch(),
+				ChangedLines:     parseChangedLinesFromPatch(f.GetPatch()),
 			})
 		}
 		page += 1

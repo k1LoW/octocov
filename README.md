@@ -130,7 +130,7 @@ diff:
 
 The breakdown behind that comparison is folded into a `Details` section. Set `comment.expandDetails:` ( or the same key under `summary:` or `body:` ) to render it, and the `Metadata` of each custom metric set, already open.
 
-When the report is stored in a GitHub Actions artifact, the coverage values of the comment link to [octocov.dev](https://octocov.dev/), where the stored report can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The compared column is linked only when `diff.datastores:` read it out of an artifact, since that is what the page it would open serves, and no column is linked at all unless this run stores its own report in one. The file names keep pointing at the source on GitHub. Set `comment.hideCoverageLink:` ( or the same key under `summary:` or `body:` ) to render them as plain values again.
+The coverage values of the comment, the job summary and the pull request body link to a page where the report can be read. [`viewer:`](#viewer) says which page that is. The file names keep pointing at the source on GitHub.
 
 ### Check for acceptable score
 
@@ -812,15 +812,6 @@ comment:
   hideFooterLink: true
 ```
 
-### `comment.hideCoverageLink:`
-
-Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
-
-```yaml
-comment:
-  hideCoverageLink: true
-```
-
 ### `comment.expandDetails:`
 
 Expand the collapsible sections of the report ( the `Details` of the comparison with the previous report, and the `Metadata` of each custom metric set ) instead of rendering them folded.
@@ -887,15 +878,6 @@ summary:
   hideFooterLink: true
 ```
 
-### `summary.hideCoverageLink:`
-
-Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
-
-```yaml
-summary:
-  hideCoverageLink: true
-```
-
 ### `summary.expandDetails:`
 
 Expand the collapsible sections of the report ( the `Details` of the comparison with the previous report, and the `Metadata` of each custom metric set ) instead of rendering them folded.
@@ -939,15 +921,6 @@ body:
   hideFooterLink: true
 ```
 
-### `body.hideCoverageLink:`
-
-Hide the [octocov.dev](https://octocov.dev/) links the coverage values carry.
-
-```yaml
-body:
-  hideCoverageLink: true
-```
-
 ### `body.expandDetails:`
 
 Expand the collapsible sections of the report ( the `Details` of the comparison with the previous report, and the `Metadata` of each custom metric set ) instead of rendering them folded.
@@ -977,6 +950,82 @@ body:
 ```
 
 The variables available in the `if` section are [here](https://github.com/k1LoW/octocov#if).
+
+### `viewer:`
+
+Where the values in the tables of the comment, the job summary and the pull request body link to. It is one setting for the whole run, since the page a report can be read on does not depend on which of them the table is written to.
+
+```yaml
+viewer: octocov.dev   # the octocov.dev pages
+viewer: artifact      # a single page of HTML octocov renders and uploads as an artifact
+viewer: none          # no links
+```
+
+Each of these is shorthand for a map with only `type` in it.
+
+```yaml
+viewer:
+  type: artifact
+```
+
+When `viewer:` is not set, a public repository on github.com whose `report.datastores:` has `artifact://` links to `octocov.dev`, and everything else ( a private repository, a report stored in no artifact, GitHub Enterprise Server ) links to `artifact`. `none` is only ever set explicitly.
+
+`octocov.dev` and `artifact` link the overall coverage and the coverage of each file, and nothing else.
+
+#### `viewer: octocov.dev`
+
+The values link to [octocov.dev](https://octocov.dev/), where the report stored in a GitHub Actions artifact can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The compared column is linked only when `diff.datastores:` read it out of an artifact, since that is what the page it would open serves, and no column is linked at all unless this run stores its own report in one.
+
+Opening the report of a private repository there means granting octocov.dev access to that repository.
+
+#### `viewer: artifact`
+
+On a pull request run, octocov renders the changes of the pull request as a single page of HTML ( the changed hunks with the coverage of the base and the head beside them, plus the files whose coverage moved while their code did not ) and uploads it as an artifact that opens in the browser. It needs nothing beyond read access to the repository to open.
+
+- The overall coverage links to the page, and the coverage of each file links to the card of that file on it. The compared column gets no link, since the page shows both reports side by side.
+- The page is rendered only when the comment, the job summary or the pull request body is written, and only when there is a previous report to compare against ( see [`diff:`](#diff) ). A run on a branch gets no page and no links.
+- The artifact is named after the report, `octocov-report[-<key>]@refs_pull_<number>.html`. The pages earlier runs of the same pull request uploaded are deleted, which needs `actions: write`.
+- On GitHub Enterprise Server, where an artifact is always a zip archive, the page is uploaded zipped.
+- The badges of the central mode get no link, since the page has no URL that stays the same from one run to the next.
+
+#### `viewer.type: custom`
+
+A viewer of your own. Each key under `viewer.links:` is an [expr-lang](https://expr-lang.org/) expression evaluated for every value of that kind, with the same variables as [`*.if:`](#if).
+
+| Key | The value it links |
+| --- | --- |
+| `coverage` | the overall coverage |
+| `coverageFile` | the coverage of a file |
+| `codeToTestRatio` | the code to test ratio |
+| `testExecutionTime` | the test execution time |
+
+A key left out links nothing. The variables of `*.if:` are joined by the following ones, and the `pathEscape` and `queryEscape` functions are available.
+
+| Variable | Type | Description |
+| --- | --- | --- |
+| `report.key` | `string` | The key of the report, which is empty unless the report is one of a monorepo |
+| `report.ref` | `string` | The ref the report was measured on |
+| `report.commit` | `string` | The commit the report was measured at |
+| `report.is_base` | `bool` | Whether the compared column is being rendered |
+| `file.path` | `string` | The repository relative path of the file ( `coverageFile` only ) |
+
+A string is the link, `nil` or an empty string is no link, and anything else is an error. The compared column is evaluated with the `ref` and `commit` of the compared report.
+
+```yaml
+viewer:
+  type: custom
+  links:
+    coverage: >-
+      report.is_base ? nil
+      : "https://coverage.example.com/" + env.GITHUB_REPOSITORY + "/pr/" + string(github.event.pull_request.number) + "/"
+    coverageFile: >-
+      report.is_base || file.path startsWith "gen/" ? nil
+      : "https://coverage.example.com/" + env.GITHUB_REPOSITORY + "/pr/" + string(github.event.pull_request.number) + "/" + pathEscape(file.path) + ".html"
+```
+
+The links are written into the comment, which anyone who can read the pull request can read, so do not build them from `env` values that are not meant to be public.
+
+The badges of the central mode link by the same expressions, `coverage` for the coverage badge, `codeToTestRatio` for the code to test ratio badge and `testExecutionTime` for the test execution time badge.
 
 ### `diff:`
 

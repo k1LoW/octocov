@@ -348,6 +348,7 @@ func TestCollectReportsTracksWhichDatastoreSuppliedTheReport(t *testing.T) {
 		CoverageBadge:          testBadge.RenderCoverage,
 		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
+		BadgeViewer:            report.NewOctocovDevRefViewer(),
 	})
 
 	if err := ctr.collectReports(); err != nil {
@@ -415,6 +416,7 @@ func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
 		CoverageBadge:          testBadge.RenderCoverage,
 		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
+		BadgeViewer:            report.NewOctocovDevRefViewer(),
 	})
 	if err := ctr.collectReports(); err != nil {
 		t.Fatal(err)

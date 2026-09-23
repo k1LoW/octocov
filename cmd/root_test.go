@@ -62,7 +62,7 @@ func TestStoredArtifactViewer(t *testing.T) {
 }
 
 func TestViewersFor(t *testing.T) {
-	stored := report.NewViewer("octocov-report@refs_pull_722")
+	stored := report.NewOctocovDevViewer("octocov-report@refs_pull_722")
 	tests := []struct {
 		name             string
 		stored           *report.Viewer

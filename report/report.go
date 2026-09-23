@@ -209,16 +209,16 @@ func (r *Report) Table(v *Viewer) string {
 	)
 	if r.IsMeasuredCoverage() {
 		h = append(h, "Coverage")
-		m = append(m, linkCell(fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent())), v.reportURL(r)))
+		m = append(m, linkCell(fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent())), v.CoverageURL(r)))
 	}
 	if r.IsMeasuredCodeToTestRatio() {
 		h = append(h, "Code to Test Ratio")
-		m = append(m, fmt.Sprintf("1:%.1f", floor1(r.CodeToTestRatioRatio())))
+		m = append(m, linkCell(fmt.Sprintf("1:%.1f", floor1(r.CodeToTestRatioRatio())), v.CodeToTestRatioURL(r)))
 	}
 	if r.IsMeasuredTestExecutionTime() {
 		h = append(h, "Test Execution Time")
 		d := time.Duration(r.TestExecutionTimeNano())
-		m = append(m, d.String())
+		m = append(m, linkCell(d.String(), v.TestExecutionTimeURL(r)))
 	}
 	buf := new(bytes.Buffer)
 	table := tablewriter.NewWriter(buf)
