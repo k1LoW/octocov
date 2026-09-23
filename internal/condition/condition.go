@@ -6,6 +6,7 @@ package condition
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"reflect"
 	"sync"
@@ -185,5 +186,9 @@ func warn(src string, celErr error) {
 	if _, loaded := warned.LoadOrStore(src, struct{}{}); loaded {
 		return
 	}
-	_, _ = fmt.Fprintf(warnOut, "Deprecated: the condition `%s` is evaluated as an expr-lang/expr expression, which will not be supported in a future release. Rewrite it as a CEL expression: %v\n", src, celErr)
+	if _, err := fmt.Fprintf(warnOut, "Deprecated: the condition `%s` is evaluated as an expr-lang/expr expression, which will not be supported in a future release. Rewrite it as a CEL expression: %v\n", src, celErr); err != nil {
+		// The condition has been evaluated all the same, and failing a coverage gate because
+		// stderr could not be written to would be worse than losing the warning.
+		log.Printf("failed to write the deprecation warning: %v", err)
+	}
 }
