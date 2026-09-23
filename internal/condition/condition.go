@@ -114,24 +114,46 @@ func compileCEL(src string, vars map[string]any) (cel.Program, error) {
 	if err != nil {
 		return nil, err
 	}
+	rewrite := map[int64]struct{}{}
+	a, iss := parseRewritten(env, src, rewrite)
+	if iss.Err() != nil {
+		return nil, iss.Err()
+	}
+	typed, iss := env.Check(a)
+	if iss.Err() != nil {
+		// Literals alone can fail the check, as `7 / 2 == 3.5` does. Only the subexpressions
+		// made of literals are rewritten for it, as rewriting the rest here, with no types to go
+		// by, would turn the literal of `hour + 1` into a double beside an int.
+		literalOnlyIntLiterals(a.NativeRep(), rewrite)
+		a, iss = parseRewritten(env, src, rewrite)
+		if iss.Err() != nil {
+			return nil, iss.Err()
+		}
+		typed, iss = env.Check(a)
+		if iss.Err() != nil {
+			return nil, iss.Err()
+		}
+	}
+	intLiterals(a.NativeRep(), typed.NativeRep(), rewrite)
+	a, iss = parseRewritten(env, src, rewrite)
+	if iss.Err() != nil {
+		return nil, iss.Err()
+	}
+	checked, iss := env.Check(a)
+	if iss.Err() != nil {
+		return nil, iss.Err()
+	}
+	return env.Program(checked)
+}
+
+// parseRewritten parses src with the int literals of rewrite turned into doubles. Every rewrite
+// starts from a fresh parse rather than from an AST that has been checked, which the checker
+// may share with its result. A parse of the same source numbers the nodes the same way, so the
+// ids found on one parse apply to the next.
+func parseRewritten(env *cel.Env, src string, rewrite map[int64]struct{}) (*cel.Ast, *cel.Issues) {
 	a, iss := env.Parse(src)
 	if iss.Err() != nil {
-		return nil, iss.Err()
-	}
-	rewrite := map[int64]struct{}{}
-	if typed, iss := env.Check(a); iss.Err() == nil {
-		intLiterals(a.NativeRep(), typed.NativeRep(), rewrite)
-	} else {
-		// Literals alone can fail the check, as `7 / 2 == 3.5` does, so every one of them is
-		// tried as a double before giving up.
-		intLiterals(a.NativeRep(), nil, rewrite)
-	}
-	// Parsed again rather than rewriting the AST that has been checked, which the checker may
-	// share with its result. A parse of the same source numbers the nodes the same way, so the
-	// ids found above apply to it.
-	a, iss = env.Parse(src)
-	if iss.Err() != nil {
-		return nil, iss.Err()
+		return nil, iss
 	}
 	fac := ast.NewExprFactory()
 	for _, e := range ast.MatchDescendants(ast.NavigateAST(a.NativeRep()), ast.ConstantValueMatcher()) {
@@ -142,11 +164,7 @@ func compileCEL(src string, vars map[string]any) (cel.Program, error) {
 			e.SetKindCase(fac.NewLiteral(e.ID(), types.Double(v)))
 		}
 	}
-	checked, iss := env.Check(a)
-	if iss.Err() != nil {
-		return nil, iss.Err()
-	}
-	return env.Program(checked)
+	return a, iss
 }
 
 // numericOperators are the binary operators an int literal is rewritten into a double under.
@@ -172,8 +190,7 @@ var arithmeticOperators = map[string]struct{}{
 }
 
 // intLiterals adds to rewrite the int literals of a to be rewritten into doubles, which are the
-// operands of a numericOperators operator whose other operand does not stay an int, or every
-// such operand when typed is nil. Measured values are float64 while thresholds are mostly
+// operands of a numericOperators operator whose other operand does not stay an int. Measured values are float64 while thresholds are mostly
 // written as integers, and CEL has no arithmetic between int and double, so `current > prev + 1`
 // would not evaluate otherwise. Overloading the arithmetic operators for mixed operands is not
 // an option since the standard ones are singleton functions. A literal paired with an int, such
@@ -197,11 +214,46 @@ func intLiterals(a, typed *ast.AST, rewrite map[int64]struct{}) {
 			if _, ok := arg.AsLiteral().(types.Int); !ok {
 				continue
 			}
-			if typed != nil && staysInt(args[1-i], typed) {
+			if staysInt(args[1-i], typed) {
 				continue
 			}
 			rewrite[arg.ID()] = struct{}{}
 		}
+	}
+}
+
+// literalOnlyIntLiterals adds to rewrite the int literals of the numericOperators operators
+// that are made of literals alone.
+func literalOnlyIntLiterals(a *ast.AST, rewrite map[int64]struct{}) {
+	for _, e := range ast.MatchDescendants(ast.NavigateAST(a), ast.KindMatcher(ast.CallKind)) {
+		if !literalOnly(e) {
+			continue
+		}
+		for _, l := range ast.MatchDescendants(e, ast.ConstantValueMatcher()) {
+			if _, ok := l.AsLiteral().(types.Int); ok {
+				rewrite[l.ID()] = struct{}{}
+			}
+		}
+	}
+}
+
+func literalOnly(e ast.Expr) bool {
+	switch e.Kind() {
+	case ast.LiteralKind:
+		return true
+	case ast.CallKind:
+		c := e.AsCall()
+		if _, ok := numericOperators[c.FunctionName()]; !ok {
+			return false
+		}
+		for _, arg := range c.Args() {
+			if !literalOnly(arg) {
+				return false
+			}
+		}
+		return true
+	default:
+		return false
 	}
 }
 

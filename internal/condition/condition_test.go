@@ -47,6 +47,7 @@ func TestEval(t *testing.T) {
 		{"labels[hour - 9] == 'bug'", true, false, false},
 		{"current > -1", true, false, false},
 		{"1 + 1 < current", true, false, false},
+		{"hour + 1 == 10 && 7 / 2 == 3.5", true, false, false},
 		{"metrics.a + 1 > 3", true, false, false},
 		{"env.GITHUB_REF == 'refs/heads/main'", true, false, false},
 		{"env[?'FOO'].orValue('') == ''", true, false, false},
