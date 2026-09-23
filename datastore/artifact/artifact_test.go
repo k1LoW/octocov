@@ -107,6 +107,7 @@ func (c *fakeClient) FetchLatestArtifact(ctx context.Context, owner, repo, name,
 func TestStoreReport(t *testing.T) {
 	tests := []struct {
 		name        string
+		ref         string
 		pullRequest int
 		putErr      error
 		deleteErr   error
@@ -114,10 +115,11 @@ func TestStoreReport(t *testing.T) {
 		wantErr     bool
 		wantStderr  string
 	}{
-		{"a pull request deletes the earlier reports after storing its own", 123, nil, nil, []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, ""},
-		{"a branch keeps the earlier reports", 0, nil, nil, []string{"put octocov-report@refs_heads_feat_x"}, false, ""},
-		{"a failed upload deletes nothing", 123, errors.New("upload failed"), nil, []string{"put octocov-report@refs_pull_123"}, true, ""},
-		{"a failed delete is a warning", 123, nil, errors.New("403 Resource not accessible by integration"), []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, "Skip deleting the previous reports of octocov-report@refs_pull_123: 403 Resource not accessible by integration\n"},
+		{"a pull request deletes the earlier reports after storing its own", "refs/pull/123/merge", 123, nil, nil, []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, ""},
+		{"a pull request whose number was not detected deletes them as well", "refs/pull/123/merge", 0, nil, nil, []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, ""},
+		{"a branch keeps the earlier reports", "refs/heads/feat/x", 0, nil, nil, []string{"put octocov-report@refs_heads_feat_x"}, false, ""},
+		{"a failed upload deletes nothing", "refs/pull/123/merge", 123, errors.New("upload failed"), nil, []string{"put octocov-report@refs_pull_123"}, true, ""},
+		{"a failed delete is a warning", "refs/pull/123/merge", 123, nil, errors.New("403 Resource not accessible by integration"), []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, "Skip deleting the previous reports of octocov-report@refs_pull_123: 403 Resource not accessible by integration\n"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -126,13 +128,9 @@ func TestStoreReport(t *testing.T) {
 			c := &fakeClient{putErr: tt.putErr, deleteErr: tt.deleteErr}
 			stderr := new(bytes.Buffer)
 			a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, stderr: stderr}
-			ref := "refs/heads/feat/x"
-			if tt.pullRequest > 0 {
-				ref = "refs/pull/123/merge"
-			}
 			err := a.StoreReport(context.TODO(), &report.Report{
 				Repository:  "owner/repo",
-				Ref:         ref,
+				Ref:         tt.ref,
 				BaseRef:     "refs/heads/main",
 				PullRequest: tt.pullRequest,
 			})

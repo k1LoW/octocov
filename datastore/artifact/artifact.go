@@ -74,10 +74,12 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	if err := a.put(ctx, name, reportFilename, r.Bytes()); err != nil {
 		return err
 	}
-	if r.PullRequest == 0 {
-		// The report of a branch can be the base a pull request is compared against, which
-		// is picked by the merge base commit rather than by being the newest, so the older
-		// ones are still read.
+	// The ref key rather than PullRequest decides it, since the key falls back to the ref of
+	// a pull request whose number could not be detected, and the report is stored under the
+	// name of that pull request all the same. The report of a branch can be the base a pull
+	// request is compared against, which is picked by the merge base commit rather than by
+	// being the newest, so the older ones are still read.
+	if !strings.HasPrefix(r.RefKey(), "refs/pull/") {
 		return nil
 	}
 	if err := a.deletePrevious(ctx, name); err != nil {
