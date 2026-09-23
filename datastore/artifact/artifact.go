@@ -27,8 +27,16 @@ const refSeparator = "@"
 
 var keyRep = strings.NewReplacer(`"`, "_", ":", "_", "<", "_", ">", "_", "|", "_", "*", "_", "?", "_", "\r", "_", "\n", "_", "\\", "_", "/", "_")
 
+// client is the part of *gh.Gh this datastore uses. It is an interface so a test can stand
+// in for the upload, which otherwise needs the runtime of a GitHub Actions job.
+type client interface {
+	PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error
+	DeleteArtifactsBeforeRun(ctx context.Context, owner, repo, name string, runID int64) error
+	FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*gh.ArtifactFile, error)
+}
+
 type Artifact struct {
-	gh         *gh.Gh
+	gh         client
 	repository string
 	name       string
 	r          *report.Report
