@@ -191,26 +191,47 @@ func affectedSources(gitRoot string, r, rPrev *report.Report, files []*gh.PullRe
 	if d.Coverage == nil {
 		return nil
 	}
+	// The paths come out of a report, which a pull request can write, so they are opened
+	// through the checkout rather than joined onto it: a `..` or a symlink pointing out of
+	// it would otherwise put a file of the runner into the uploaded page.
+	root, err := os.OpenRoot(gitRoot)
+	if err != nil {
+		return nil
+	}
+	defer root.Close()
 	sources := map[string]string{}
 	for _, fc := range d.Coverage.Files {
 		if fc.Diff == 0 || fc.FileCoverageA == nil || fc.FileCoverageB == nil {
 			continue
 		}
 		path := fc.FileCoverageA.NormalizedPath
-		if path == "" || changed[path] || filepath.IsAbs(path) {
+		if path == "" || changed[path] {
 			continue
 		}
-		fi, err := os.Stat(filepath.Join(gitRoot, filepath.FromSlash(path)))
-		if err != nil || fi.IsDir() || fi.Size() > maxSourceBytes {
-			continue
-		}
-		b, err := os.ReadFile(filepath.Join(gitRoot, filepath.FromSlash(path)))
+		b, err := readSource(root, filepath.FromSlash(path))
 		if err != nil {
 			continue
 		}
 		sources[fc.FileCoverageA.File] = string(b)
 	}
 	return sources
+}
+
+// readSource reads the file at path under root, up to maxSourceBytes.
+func readSource(root *os.Root, path string) ([]byte, error) {
+	f, err := root.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	fi, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if fi.IsDir() || fi.Size() > maxSourceBytes {
+		return nil, fmt.Errorf("%s is not a file to draw", path)
+	}
+	return io.ReadAll(f)
 }
 
 // storedArtifactViewer returns the octocov.dev viewer for the artifact this run stores its

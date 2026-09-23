@@ -52,3 +52,30 @@ func TestAffectedSources(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestAffectedSourcesStayInTheCheckout(t *testing.T) {
+	// A report is something a pull request can write, so a path out of it that leaves the
+	// checkout, by `..` or by a symlink, must not put the file it reaches into the page.
+	outside := t.TempDir()
+	secret := filepath.Join(outside, "secret")
+	if err := os.WriteFile(secret, []byte("secret\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	root := t.TempDir()
+	if err := os.Symlink(secret, filepath.Join(root, "link.go")); err != nil {
+		t.Fatal(err)
+	}
+	rel, err := filepath.Rel(root, secret)
+	if err != nil {
+		t.Fatal(err)
+	}
+	file := func(path string, covered int) *coverage.FileCoverage {
+		return &coverage.FileCoverage{File: path, NormalizedPath: filepath.ToSlash(path), Total: 10, Covered: covered}
+	}
+	head := &report.Report{Coverage: &coverage.Coverage{Total: 20, Covered: 16, Files: coverage.FileCoverages{file("link.go", 8), file(rel, 8)}}}
+	base := &report.Report{Coverage: &coverage.Coverage{Total: 20, Covered: 8, Files: coverage.FileCoverages{file("link.go", 4), file(rel, 4)}}}
+
+	if got := affectedSources(root, head, base, nil); len(got) != 0 {
+		t.Errorf("got %v\nwant nothing read from outside the checkout", got)
+	}
+}
