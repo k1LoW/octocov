@@ -17,9 +17,14 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
-// maxSourceBytes is the largest file whose text is handed to the page. The page draws no
-// larger one either, so reading it would only be memory spent on nothing.
-const maxSourceBytes = 1024 * 1024
+// maxSourceBytes is the largest file whose text is handed to the page, and
+// maxSourcesBytes the most that all of them may hold together. They are the page's own
+// ceilings on one card's body and on a page's bodies, so what is past them would only be
+// memory spent on text nothing draws.
+const (
+	maxSourceBytes  = 1024 * 1024
+	maxSourcesBytes = 4 * 1024 * 1024
+)
 
 // resolveViewers returns the viewers the tables of the comment, the job summary and the
 // pull request body link through. cur links the report of this run and prev the one it is
@@ -200,6 +205,7 @@ func affectedSources(gitRoot string, r, rPrev *report.Report, files []*gh.PullRe
 	}
 	defer root.Close()
 	sources := map[string]string{}
+	total := 0
 	for _, fc := range d.Coverage.Files {
 		if fc.Diff == 0 || fc.FileCoverageA == nil || fc.FileCoverageB == nil {
 			continue
@@ -212,6 +218,12 @@ func affectedSources(gitRoot string, r, rPrev *report.Report, files []*gh.PullRe
 		if err != nil {
 			continue
 		}
+		// Ends the list rather than skipping past the file, the way the page ends its own,
+		// so which files get their text does not depend on which of them happen to be small.
+		if total+len(b) > maxSourcesBytes {
+			break
+		}
+		total += len(b)
 		sources[fc.FileCoverageA.File] = string(b)
 	}
 	return sources

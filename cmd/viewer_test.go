@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -77,5 +79,29 @@ func TestAffectedSourcesStayInTheCheckout(t *testing.T) {
 
 	if got := affectedSources(root, head, base, nil); len(got) != 0 {
 		t.Errorf("got %v\nwant nothing read from outside the checkout", got)
+	}
+}
+
+func TestAffectedSourcesStopAtThePageBudget(t *testing.T) {
+	// Reading on past what the page draws would be memory spent on nothing, so the reads
+	// stop once the files read hold as much as the page's bodies may.
+	root := t.TempDir()
+	body := strings.Repeat("x", maxSourceBytes)
+	var headFiles, baseFiles coverage.FileCoverages
+	n := maxSourcesBytes/maxSourceBytes + 2
+	for i := range n {
+		p := fmt.Sprintf("f%d.go", i)
+		if err := os.WriteFile(filepath.Join(root, p), []byte(body), 0o600); err != nil {
+			t.Fatal(err)
+		}
+		headFiles = append(headFiles, &coverage.FileCoverage{File: p, NormalizedPath: p, Total: 10, Covered: 8})
+		baseFiles = append(baseFiles, &coverage.FileCoverage{File: p, NormalizedPath: p, Total: 10, Covered: 4})
+	}
+	head := &report.Report{Coverage: &coverage.Coverage{Total: 10 * n, Covered: 8 * n, Files: headFiles}}
+	base := &report.Report{Coverage: &coverage.Coverage{Total: 10 * n, Covered: 4 * n, Files: baseFiles}}
+
+	got := affectedSources(root, head, base, nil)
+	if want := maxSourcesBytes / maxSourceBytes; len(got) != want {
+		t.Errorf("got %d sources\nwant %d", len(got), want)
 	}
 }
