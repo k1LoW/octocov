@@ -49,7 +49,7 @@ func TestParse(t *testing.T) {
 func TestFetchDefaultBranch(t *testing.T) {
 	mg := mockedGh(t)
 	want := "main"
-	got, err := mg.FetchDefaultBranch(context.TODO(), "owner", "repo")
+	got, err := mg.FetchDefaultBranch(t.Context(), "owner", "repo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func TestFetchRawRootURL(t *testing.T) {
 	// The case under test is the github.com one, which an ambient value naming a GitHub
 	// Enterprise Server would answer before the tree is ever read.
 	t.Setenv("GITHUB_SERVER_URL", DefaultGithubServerURL)
-	ctx := context.TODO()
+	ctx := t.Context()
 	token, _, _, _ := factory.GetTokenAndEndpoints()
 	if token == "" {
 		t.Skip("no token")
@@ -105,7 +105,7 @@ func TestDetectCurrentBranch(t *testing.T) {
 		{"refs/heads/branch/branch/name", "", "branch/branch/name", false},
 		{"refs/pull/8/head", "mybranch", "mybranch", false},
 	}
-	ctx := context.TODO()
+	ctx := t.Context()
 	mg := mockedGh(t)
 	for _, tt := range tests {
 		t.Run(tt.GITHUB_REF, func(t *testing.T) {
@@ -146,7 +146,7 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 		// go after the head ref rather than after whatever GITHUB_REF holds.
 		{"base branch ref with a head ref", "", "refs/heads/main", "branch/branch/name", 13, false},
 	}
-	ctx := context.TODO()
+	ctx := t.Context()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Per case, since the mock serves each matched request once and more than one
@@ -430,7 +430,7 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			}
 			g.SetClient(client)
 
-			got, err := g.DetectCurrentPullRequestNumber(context.TODO(), "owner", "repo")
+			got, err := g.DetectCurrentPullRequestNumber(t.Context(), "owner", "repo")
 			if err != nil {
 				if !tt.wantErr {
 					t.Errorf("got err: %v", err)
@@ -480,7 +480,7 @@ func TestListWorkflowJobs(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	jobs, err := g.listWorkflowJobs(context.TODO(), "owner", "repo", 1)
+	jobs, err := g.listWorkflowJobs(t.Context(), "owner", "repo", 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -557,7 +557,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 
 			// The retry window spans tens of seconds, so end it through the context
 			// instead of waiting it out.
-			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			ctx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
 			defer cancel()
 
 			got, err := g.FetchStepsByName(ctx, "owner", "repo", tt.step)
@@ -885,7 +885,7 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 		{"env is not set", "", true},
 		{"pushed to a branch with no open pull request", "refs/heads/no-such-branch", true},
 	}
-	ctx := context.TODO()
+	ctx := t.Context()
 	mg := mockedGh(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -965,7 +965,7 @@ func TestDeleteArtifactsBeforeRun(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	if err := g.DeleteArtifactsBeforeRun(context.TODO(), "owner", "repo", "octocov-report@refs_pull_1", 20); err != nil {
+	if err := g.DeleteArtifactsBeforeRun(t.Context(), "owner", "repo", "octocov-report@refs_pull_1", 20); err != nil {
 		t.Fatal(err)
 	}
 	want := []int64{3}
@@ -1005,7 +1005,7 @@ func TestDeleteArtifactsBeforeRunFails(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	if err := g.DeleteArtifactsBeforeRun(context.TODO(), "owner", "repo", "octocov-report@refs_pull_1", 20); err == nil {
+	if err := g.DeleteArtifactsBeforeRun(t.Context(), "owner", "repo", "octocov-report@refs_pull_1", 20); err == nil {
 		t.Error("want err")
 	}
 }
@@ -1058,7 +1058,7 @@ func TestFetchMergeBase(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	got, err := g.FetchMergeBase(context.TODO(), "owner", "repo", 1)
+	got, err := g.FetchMergeBase(t.Context(), "owner", "repo", 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1094,7 +1094,7 @@ func TestFindRunArtifactReadsEveryPage(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	a, err := g.findRunArtifact(context.TODO(), "owner", "repo", 10, "octocov-report@refs_pull_1.html")
+	a, err := g.findRunArtifact(t.Context(), "owner", "repo", 10, "octocov-report@refs_pull_1.html")
 	if err != nil {
 		t.Fatal(err)
 	}

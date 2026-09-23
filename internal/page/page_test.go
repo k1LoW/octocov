@@ -1,7 +1,6 @@
 package page
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -52,7 +51,7 @@ func TestRenderChanges(t *testing.T) {
 		Base:   Base{Report: testReport("b", 5), Label: "main", Aligned: true},
 		Files:  files,
 	}
-	got, err := RenderChanges(context.Background(), "Coverage of k1LoW/octocov#1", in)
+	got, err := RenderChanges(t.Context(), "Coverage of k1LoW/octocov#1", in)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -87,7 +86,7 @@ func TestRenderChangesUnrenderable(t *testing.T) {
 		Base:   Base{Report: testReport("b", 5), Label: "main", Aligned: true},
 		Files:  []*ChangedFile{{Filename: "report/report.go", Status: "modified", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"}},
 	}
-	if _, err := RenderChanges(context.Background(), "", in); !errors.Is(err, ErrUnrenderable) {
+	if _, err := RenderChanges(t.Context(), "", in); !errors.Is(err, ErrUnrenderable) {
 		t.Errorf("got %v, want %v", err, ErrUnrenderable)
 	}
 }

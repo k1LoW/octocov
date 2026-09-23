@@ -1,7 +1,6 @@
 package config
 
 import (
-	"context"
 	"strings"
 	"testing"
 	"time"
@@ -118,7 +117,7 @@ func TestResolveViewer(t *testing.T) {
 				Viewer:     tt.viewer,
 				gh:         mockedRepositoryGh(t, tt.private),
 			}
-			if got := c.ResolveViewer(context.Background()); got != tt.want {
+			if got := c.ResolveViewer(t.Context()); got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
 		})
