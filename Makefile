@@ -39,6 +39,9 @@ build_badgen:
 coverage: build
 	./octocov
 
+page_bundle:
+	cd internal/page/bundle && npm ci && npm run build
+
 bqdoc:
 	cd docs/bq && tbls doc -f
 

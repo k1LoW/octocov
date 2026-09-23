@@ -1,0 +1,81 @@
+{
+  "about": "Paths and the anchor fileAnchor gives each. Read by the package's tests and by the Go reference in integration/, so an implementation elsewhere can be checked against the same answers.",
+  "vectors": [
+    {
+      "path": "report/report.go",
+      "anchor": "file-report/report.go"
+    },
+    {
+      "path": "report/report_test.go",
+      "anchor": "file-report/report_test.go"
+    },
+    {
+      "path": "web/src/App.tsx",
+      "anchor": "file-web/src/App.tsx"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "anchor": "file-.github/workflows/ci.yml"
+    },
+    {
+      "path": "a-b/c.d",
+      "anchor": "file-a-b/c.d"
+    },
+    {
+      "path": "docs/my file.md",
+      "anchor": "file-docs/my%20file.md"
+    },
+    {
+      "path": "a#b.go",
+      "anchor": "file-a%23b.go"
+    },
+    {
+      "path": "100%.txt",
+      "anchor": "file-100%25.txt"
+    },
+    {
+      "path": "a%20b",
+      "anchor": "file-a%2520b"
+    },
+    {
+      "path": "~user/a.go",
+      "anchor": "file-~user/a.go"
+    },
+    {
+      "path": "a+b(c)[d]{e}.go",
+      "anchor": "file-a%2Bb%28c%29%5Bd%5D%7Be%7D.go"
+    },
+    {
+      "path": "q?x=1&y=2",
+      "anchor": "file-q%3Fx%3D1%26y%3D2"
+    },
+    {
+      "path": "dir\\win.go",
+      "anchor": "file-dir%5Cwin.go"
+    },
+    {
+      "path": "\"quoted\"<tag>",
+      "anchor": "file-%22quoted%22%3Ctag%3E"
+    },
+    {
+      "path": "日本語/ファイル.go",
+      "anchor": "file-%E6%97%A5%E6%9C%AC%E8%AA%9E/%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB.go"
+    },
+    {
+      "path": "é.go",
+      "anchor": "file-%C3%A9.go"
+    },
+    {
+      "path": "😀.go",
+      "anchor": "file-%F0%9F%98%80.go"
+    },
+    {
+      "path": "tab\there",
+      "anchor": "file-tab%09here"
+    },
+    {
+      "path": "",
+      "anchor": "file-"
+    }
+  ]
+}
