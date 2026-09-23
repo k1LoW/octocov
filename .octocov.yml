@@ -23,4 +23,3 @@ summary:
 report:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
-viewer: artifact
