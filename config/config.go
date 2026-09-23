@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/expr-lang/expr"
 	"github.com/goccy/go-yaml"
 	"github.com/k1LoW/duration"
 	"github.com/k1LoW/errors"
@@ -20,6 +19,7 @@ import (
 	cov "github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
+	"github.com/k1LoW/octocov/internal/condition"
 	"golang.org/x/text/language"
 )
 
@@ -349,14 +349,9 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) err
 		"diff":    diffF,
 		"patch":   patchF,
 	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	tf, err := condition.Eval(cond, variables)
 	if err != nil {
 		return err
-	}
-
-	tf, okk := ok.(bool)
-	if !okk {
-		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
 		// Report the measured patch coverage as well, so that a condition failing on the `patch`
@@ -389,13 +384,9 @@ func codeToTestRatioAcceptable(current, prev *big.Rat, cond string) error {
 		"prev":    prevF,
 		"diff":    diffF,
 	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	tf, err := condition.Eval(cond, variables)
 	if err != nil {
 		return err
-	}
-	tf, okk := ok.(bool)
-	if !okk {
-		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
 		return fmt.Errorf("code to test ratio is 1:%.1f. the condition in the `codeToTestRatio.acceptable:` section is not met (`%s`)", floor1(currentF), org)
@@ -422,14 +413,9 @@ func testExecutionTimeAcceptable(current, prev *big.Rat, cond string) error {
 		"prev":    prevF,
 		"diff":    diffF,
 	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	tf, err := condition.Eval(cond, variables)
 	if err != nil {
 		return err
-	}
-
-	tf, okk := ok.(bool)
-	if !okk {
-		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
 		return fmt.Errorf("test execution time is %v. the condition in the `testExecutionTime.acceptable:` section is not met (`%s`)", time.Duration(int64(currentF)), org)
@@ -518,15 +504,7 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		"is_draft":          isDraft,
 		"labels":            labels,
 	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
-	if err != nil {
-		return false, err
-	}
-	tf, okk := ok.(bool)
-	if !okk {
-		return false, fmt.Errorf("invalid condition `%s`", cond)
-	}
-	return tf, nil
+	return condition.Eval(cond, variables)
 }
 
 func envMap() map[string]string {

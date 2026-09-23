@@ -1183,7 +1183,9 @@ The variables available in the `if` section are [here](https://github.com/k1LoW/
 
 ### `*.if:`
 
-> **Note**: It supports [expr-lang/expr](https://github.com/expr-lang/expr) expressions.
+> **Note**: It supports [CEL](https://cel.dev/) expressions. The same goes for the conditions of `acceptable:`, `colors[].if:` and the `acceptables` of custom metrics.
+>
+> **Deprecated**: A condition that cannot be evaluated as CEL is evaluated as an [expr-lang/expr](https://github.com/expr-lang/expr) expression with a warning, which will not be supported in a future release. For example, write `is_pull_request && !is_draft` instead of `is_pull_request and not is_draft`, `size(labels)` instead of `len(labels)`, and `env[?'FOO'].orValue('') == 'x'` or `has(env.FOO) && env.FOO == 'x'` for an environment variable that may not be set.
 
 The variables available in the `if` section are as follows
 

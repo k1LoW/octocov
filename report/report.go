@@ -15,13 +15,13 @@ import (
 	"time"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/expr-lang/expr"
 	"github.com/goccy/go-json"
 	"github.com/k1LoW/errors"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/internal"
+	"github.com/k1LoW/octocov/internal/condition"
 	"github.com/k1LoW/octocov/ratio"
 	"github.com/olekukonko/tablewriter"
 	"github.com/samber/lo"
@@ -791,13 +791,10 @@ func (r *Report) CustomMetricsAcceptable(cr config.Reporter) error {
 			if cond == "" {
 				continue
 			}
-			ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+			tf, err := condition.Eval(cond, variables)
 			if err != nil {
 				errs = errors.Join(errs, err)
-			}
-			tf, okk := ok.(bool)
-			if !okk {
-				errs = errors.Join(errs, fmt.Errorf("invalid condition: %q", cond))
+				continue
 			}
 			if !tf {
 				errs = errors.Join(errs, fmt.Errorf("not acceptable condition: %q", cond))

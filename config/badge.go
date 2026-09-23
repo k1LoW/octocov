@@ -9,10 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/expr-lang/expr"
-	"github.com/expr-lang/expr/vm"
 	"github.com/k1LoW/octocov/badge"
 	"github.com/k1LoW/octocov/internal"
+	"github.com/k1LoW/octocov/internal/condition"
 )
 
 // noIcon is the value of `icon:` that renders the badge without any icon.
@@ -126,11 +125,11 @@ func (b *Badge) TestExecutionTimeColor(d time.Duration) (string, error) {
 // compileColors normalizes and compiles the condition of every entry of `colors:`, returning
 // the programs in the order the entries are walked in. Entries without `if:` get a nil program,
 // which the walk never runs.
-func (b *Badge) compileColors(normalize func(string) (string, error)) ([]*vm.Program, error) {
+func (b *Badge) compileColors(normalize func(string) (string, error)) ([]*condition.Program, error) {
 	if b == nil {
 		return nil, nil
 	}
-	programs := make([]*vm.Program, len(b.Colors))
+	programs := make([]*condition.Program, len(b.Colors))
 	for i, c := range b.Colors {
 		if c.If == "" {
 			continue
@@ -139,7 +138,7 @@ func (b *Badge) compileColors(normalize func(string) (string, error)) ([]*vm.Pro
 		if err != nil {
 			return nil, fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
-		p, err := expr.Compile(fmt.Sprintf("(%s) == true", cond))
+		p, err := condition.Compile(cond, []string{"current"})
 		if err != nil {
 			return nil, fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
 		}
@@ -239,13 +238,9 @@ func (b *Badge) color(current float64, normalize func(string) (string, error), d
 		if c.If == "" {
 			return badge.ParseColor(c.Color)
 		}
-		v, err := expr.Run(programs[i], map[string]any{"current": current})
+		tf, err := programs[i].Eval(map[string]any{"current": current})
 		if err != nil {
 			return "", fmt.Errorf("%s.colors[%d].if: %w", b.section(), i, err)
-		}
-		tf, ok := v.(bool)
-		if !ok {
-			return "", fmt.Errorf("%s.colors[%d].if: invalid condition `%s`", b.section(), i, c.If)
 		}
 		if tf {
 			return badge.ParseColor(c.Color)

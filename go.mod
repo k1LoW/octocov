@@ -3,6 +3,7 @@ module github.com/k1LoW/octocov
 go 1.26.8
 
 require (
+	cel.dev/cel-go v0.32.0
 	cloud.google.com/go/auth v0.23.3
 	cloud.google.com/go/bigquery v1.84.0
 	cloud.google.com/go/storage v1.68.0
@@ -74,6 +75,7 @@ require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/ProtonMail/go-crypto v1.1.6 // indirect
 	github.com/antchfx/xpath v1.3.6 // indirect
+	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/apache/arrow/go/v15 v15.0.2 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.20 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.20.5 // indirect
@@ -161,6 +163,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.45.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.45.0 // indirect
 	go.opentelemetry.io/otel/trace v1.45.0 // indirect
+	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/mod v0.41.0 // indirect
 	golang.org/x/net v0.59.0 // indirect
