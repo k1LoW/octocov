@@ -14,6 +14,7 @@ import (
 	"cel.dev/cel-go/cel"
 	"cel.dev/cel-go/common/ast"
 	"cel.dev/cel-go/common/operators"
+	"cel.dev/cel-go/common/overloads"
 	"cel.dev/cel-go/common/types"
 	"github.com/expr-lang/expr"
 	"github.com/expr-lang/expr/vm"
@@ -114,27 +115,16 @@ func compileCEL(src string, vars map[string]any) (cel.Program, error) {
 	if err != nil {
 		return nil, err
 	}
-	rewrite := map[int64]struct{}{}
-	a, iss := parseRewritten(env, src, rewrite)
+	typed, err := probeTypes(env, src)
+	if err != nil {
+		return nil, err
+	}
+	a, iss := env.Parse(src)
 	if iss.Err() != nil {
 		return nil, iss.Err()
 	}
-	typed, iss := env.Check(a)
-	if iss.Err() != nil {
-		// Literals alone can fail the check, as `7 / 2 == 3.5` does. Only the subexpressions
-		// made of literals are rewritten for it, as rewriting the rest here, with no types to go
-		// by, would turn the literal of `hour + 1` into a double beside an int.
-		literalOnlyIntLiterals(a.NativeRep(), rewrite)
-		a, iss = parseRewritten(env, src, rewrite)
-		if iss.Err() != nil {
-			return nil, iss.Err()
-		}
-		typed, iss = env.Check(a)
-		if iss.Err() != nil {
-			return nil, iss.Err()
-		}
-	}
-	intLiterals(a.NativeRep(), typed.NativeRep(), rewrite)
+	rewrite := map[int64]struct{}{}
+	classify(ast.NavigateAST(a.NativeRep()), typed, rewrite)
 	a, iss = parseRewritten(env, src, rewrite)
 	if iss.Err() != nil {
 		return nil, iss.Err()
@@ -144,6 +134,35 @@ func compileCEL(src string, vars map[string]any) (cel.Program, error) {
 		return nil, iss.Err()
 	}
 	return env.Program(checked)
+}
+
+// probeTypes checks src with every int literal wrapped in dyn(), for the types of everything
+// else in it. The literals are what is being decided, and checked as they are written they can
+// fail the check on their own, as `7 / 2 == 3.5` does.
+func probeTypes(env *cel.Env, src string) (*ast.AST, error) {
+	a, iss := env.Parse(src)
+	if iss.Err() != nil {
+		return nil, iss.Err()
+	}
+	root := ast.NavigateAST(a.NativeRep())
+	var maxID int64
+	for _, e := range ast.MatchDescendants(root, func(ast.NavigableExpr) bool { return true }) {
+		maxID = max(maxID, e.ID())
+	}
+	fac := ast.NewExprFactory()
+	for _, e := range ast.MatchDescendants(root, ast.ConstantValueMatcher()) {
+		v, ok := e.AsLiteral().(types.Int)
+		if !ok {
+			continue
+		}
+		maxID++
+		e.SetKindCase(fac.NewCall(e.ID(), overloads.TypeConvertDyn, fac.NewLiteral(maxID, v)))
+	}
+	checked, iss := env.Check(a)
+	if iss.Err() != nil {
+		return nil, iss.Err()
+	}
+	return checked.NativeRep(), nil
 }
 
 // parseRewritten parses src with the int literals of rewrite turned into doubles. Every rewrite
@@ -167,117 +186,115 @@ func parseRewritten(env *cel.Env, src string, rewrite map[int64]struct{}) (*cel.
 	return a, iss
 }
 
-// numericOperators are the binary operators an int literal is rewritten into a double under.
-var numericOperators = map[string]struct{}{
-	operators.Add:           {},
-	operators.Subtract:      {},
-	operators.Multiply:      {},
-	operators.Divide:        {},
-	operators.Less:          {},
-	operators.LessEquals:    {},
-	operators.Greater:       {},
-	operators.GreaterEquals: {},
-	operators.Equals:        {},
-	operators.NotEquals:     {},
-}
+// numClass is what an expression is as a number, for deciding its int literals by.
+type numClass int
 
-// arithmeticOperators are the numericOperators whose result is a number.
-var arithmeticOperators = map[string]struct{}{
-	operators.Add:      {},
-	operators.Subtract: {},
-	operators.Multiply: {},
-	operators.Divide:   {},
-}
+const (
+	notNumeric numClass = iota
+	// intLiteral is made of int literals alone, which can be rewritten into doubles.
+	intLiteral
+	// intTyped is an int that cannot be rewritten, such as size() or an integer variable.
+	intTyped
+	// doubleTyped is a double, or a dyn, which the measured values are declared as.
+	doubleTyped
+)
 
-// intLiterals adds to rewrite the int literals of a to be rewritten into doubles, which are the
-// operands of a numericOperators operator whose other operand does not stay an int. Measured values are float64 while thresholds are mostly
-// written as integers, and CEL has no arithmetic between int and double, so `current > prev + 1`
-// would not evaluate otherwise. Overloading the arithmetic operators for mixed operands is not
-// an option since the standard ones are singleton functions. A literal paired with an int, such
-// as the result of size() or an integer variable, stays an int, since the checker has no
-// equality between int and double, and so does any literal elsewhere, such as an index or an
-// operand of `%`.
-func intLiterals(a, typed *ast.AST, rewrite map[int64]struct{}) {
-	for _, e := range ast.MatchDescendants(ast.NavigateAST(a), ast.KindMatcher(ast.CallKind)) {
-		c := e.AsCall()
-		if _, ok := numericOperators[c.FunctionName()]; !ok {
-			continue
-		}
-		args := c.Args()
-		if len(args) != 2 {
-			continue
-		}
-		for i, arg := range args {
-			if arg.Kind() != ast.LiteralKind {
-				continue
-			}
-			if _, ok := arg.AsLiteral().(types.Int); !ok {
-				continue
-			}
-			if staysInt(args[1-i], typed) {
-				continue
-			}
-			rewrite[arg.ID()] = struct{}{}
-		}
+var (
+	arithmeticOperators = map[string]struct{}{
+		operators.Add:      {},
+		operators.Subtract: {},
+		operators.Multiply: {},
+		operators.Divide:   {},
 	}
-}
-
-// literalOnlyIntLiterals adds to rewrite the int literals of the numericOperators operators
-// that are made of literals alone.
-func literalOnlyIntLiterals(a *ast.AST, rewrite map[int64]struct{}) {
-	for _, e := range ast.MatchDescendants(ast.NavigateAST(a), ast.KindMatcher(ast.CallKind)) {
-		if !literalOnly(e) {
-			continue
-		}
-		for _, l := range ast.MatchDescendants(e, ast.ConstantValueMatcher()) {
-			if _, ok := l.AsLiteral().(types.Int); ok {
-				rewrite[l.ID()] = struct{}{}
-			}
-		}
+	comparisonOperators = map[string]struct{}{
+		operators.Less:          {},
+		operators.LessEquals:    {},
+		operators.Greater:       {},
+		operators.GreaterEquals: {},
+		operators.Equals:        {},
+		operators.NotEquals:     {},
 	}
-}
+)
 
-func literalOnly(e ast.Expr) bool {
+// classify adds to rewrite the int literals of e to be rewritten into doubles, and returns what
+// e is as a number. Measured values are float64 while thresholds are mostly written as integers,
+// and CEL has no arithmetic between int and double, so `current > prev + 1` would not evaluate
+// otherwise. Overloading the arithmetic operators for mixed operands is not an option since the
+// standard ones are singleton functions. The literals are rewritten a subexpression at a time,
+// where one made of int literals alone meets a double under an arithmetic or comparison
+// operator, so that `current + (1 + 1)` is rewritten as a whole while `hour + 1`, an index or
+// an operand of `%` keeps its ints.
+func classify(e ast.NavigableExpr, typed *ast.AST, rewrite map[int64]struct{}) numClass {
+	children := e.Children()
 	switch e.Kind() {
 	case ast.LiteralKind:
-		return true
+		switch e.AsLiteral().(type) {
+		case types.Int:
+			return intLiteral
+		case types.Double:
+			return doubleTyped
+		default:
+			return notNumeric
+		}
 	case ast.CallKind:
-		c := e.AsCall()
-		if _, ok := numericOperators[c.FunctionName()]; !ok {
-			return false
+		fn := e.AsCall().FunctionName()
+		if _, ok := arithmeticOperators[fn]; ok && len(children) == 2 {
+			return classifyPair(children[0], children[1], typed, rewrite)
 		}
-		for _, arg := range c.Args() {
-			if !literalOnly(arg) {
-				return false
+		if _, ok := comparisonOperators[fn]; ok && len(children) == 2 {
+			classifyPair(children[0], children[1], typed, rewrite)
+			return notNumeric
+		}
+		if fn == operators.Negate && len(children) == 1 {
+			return classify(children[0], typed, rewrite)
+		}
+		if fn == operators.Modulo {
+			for _, c := range children {
+				classify(c, typed, rewrite)
 			}
+			return intTyped
 		}
-		return true
+	}
+	for _, c := range children {
+		classify(c, typed, rewrite)
+	}
+	switch typed.GetType(e.ID()).Kind() {
+	case types.IntKind, types.UintKind:
+		return intTyped
+	case types.DoubleKind, types.DynKind:
+		return doubleTyped
 	default:
-		return false
+		return notNumeric
 	}
 }
 
-// staysInt reports whether e is an int after the rewrite. The type the checker gives an
-// arithmetic operator is not enough on its own, since `dyn + 1` is typed as an int and becomes a
-// double once its literal is rewritten, so an arithmetic operator stays an int only when both of
-// its operands do.
-func staysInt(e ast.Expr, typed *ast.AST) bool {
-	switch e.Kind() {
-	case ast.LiteralKind:
-		_, ok := e.AsLiteral().(types.Int)
-		return ok
-	case ast.CallKind:
-		c := e.AsCall()
-		if _, ok := arithmeticOperators[c.FunctionName()]; ok {
-			for _, arg := range c.Args() {
-				if !staysInt(arg, typed) {
-					return false
-				}
-			}
-			return true
+func classifyPair(l, r ast.NavigableExpr, typed *ast.AST, rewrite map[int64]struct{}) numClass {
+	lc := classify(l, typed, rewrite)
+	rc := classify(r, typed, rewrite)
+	switch {
+	case lc == doubleTyped && rc == intLiteral:
+		toDouble(r, rewrite)
+		return doubleTyped
+	case lc == intLiteral && rc == doubleTyped:
+		toDouble(l, rewrite)
+		return doubleTyped
+	case lc == doubleTyped || rc == doubleTyped:
+		return doubleTyped
+	case lc == intTyped || rc == intTyped:
+		return intTyped
+	case lc == intLiteral && rc == intLiteral:
+		return intLiteral
+	default:
+		return notNumeric
+	}
+}
+
+func toDouble(e ast.NavigableExpr, rewrite map[int64]struct{}) {
+	for _, l := range ast.MatchDescendants(e, ast.ConstantValueMatcher()) {
+		if _, ok := l.AsLiteral().(types.Int); ok {
+			rewrite[l.ID()] = struct{}{}
 		}
 	}
-	return typed.GetType(e.ID()).Kind() == types.IntKind
 }
 
 func isInteger(v any) bool {
