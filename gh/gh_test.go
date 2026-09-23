@@ -1069,3 +1069,36 @@ func TestFetchMergeBase(t *testing.T) {
 		t.Errorf("got %v\nwant %v", basehead, want)
 	}
 }
+
+func TestFindRunArtifactReadsEveryPage(t *testing.T) {
+	// A run with a large matrix holds more artifacts than one page does, and the one looked
+	// for can be on any of them.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	named := func(id int64, name string) *github.Artifact {
+		return &github.Artifact{ID: new(id), Name: new(name)}
+	}
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsRunsArtifactsByOwnerByRepoByRunId,
+			github.ArtifactList{Artifacts: []*github.Artifact{named(1, "a"), named(2, "b")}},
+			github.ArtifactList{Artifacts: []*github.Artifact{named(3, "octocov-report@refs_pull_1.html")}},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	a, err := g.findRunArtifact(context.TODO(), "owner", "repo", 10, "octocov-report@refs_pull_1.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a == nil || a.GetID() != 3 {
+		t.Errorf("got %v\nwant the artifact on the second page", a)
+	}
+}

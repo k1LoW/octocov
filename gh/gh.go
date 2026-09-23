@@ -720,16 +720,14 @@ func (g *Gh) PutUnarchivedArtifact(ctx context.Context, owner, repo string, runI
 	}
 	// The legacy upload does not answer with the ID, so it is looked up by the name, which
 	// is unique within the run once the earlier one has been deleted.
-	current, _, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, &github.ListOptions{PerPage: 100})
+	a, err := g.findRunArtifact(ctx, owner, repo, runID, name)
 	if err != nil {
 		return 0, err
 	}
-	for _, a := range current.Artifacts {
-		if a.GetName() == name {
-			return a.GetID(), nil
-		}
+	if a == nil {
+		return 0, fmt.Errorf("the uploaded artifact %s is not found", name)
 	}
-	return 0, fmt.Errorf("the uploaded artifact %s is not found", name)
+	return a.GetID(), nil
 }
 
 // ArtifactURL returns the URL an artifact of a workflow run is opened at.
@@ -883,19 +881,34 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 // deleteRunArtifact deletes the artifact of the name that an earlier attempt of the same
 // run uploaded, since a name can be used only once within a run.
 func (g *Gh) deleteRunArtifact(ctx context.Context, owner, repo string, runID int64, name string) error {
-	current, _, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, &github.ListOptions{PerPage: 100})
-	if err != nil {
+	a, err := g.findRunArtifact(ctx, owner, repo, runID, name)
+	if err != nil || a == nil {
 		return err
 	}
-	for _, a := range current.Artifacts {
-		if a.GetName() == name {
-			if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, a.GetID()); err != nil {
-				return err
-			}
-			break
+	_, err = g.client.Actions.DeleteArtifact(ctx, owner, repo, a.GetID())
+	return err
+}
+
+// findRunArtifact returns the artifact of the name the workflow run uploaded, or nil when
+// there is none. Every page is read, since a run with a large matrix can hold more
+// artifacts than one page does.
+func (g *Gh) findRunArtifact(ctx context.Context, owner, repo string, runID int64, name string) (*github.Artifact, error) {
+	opts := &github.ListOptions{PerPage: 100}
+	for {
+		l, res, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, opts)
+		if err != nil {
+			return nil, err
 		}
+		for _, a := range l.Artifacts {
+			if a.GetName() == name {
+				return a, nil
+			}
+		}
+		if res.NextPage == 0 {
+			return nil, nil
+		}
+		opts.Page = res.NextPage
 	}
-	return nil
 }
 
 // fetchMergeCommitFiles returns the files commit changes against its first parent when commit is
