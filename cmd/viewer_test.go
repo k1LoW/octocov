@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -8,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
@@ -27,6 +29,33 @@ func TestChangedFilesLeaveOutWhatTheMergeDoesNotChange(t *testing.T) {
 	}
 	if diff := cmp.Diff(names, []string{"a.go", "large.go"}); diff != "" {
 		t.Error(diff)
+	}
+}
+
+func TestMayDeleteEarlierPages(t *testing.T) {
+	skipped := errors.New("the condition in the `if` section is not met")
+	tests := []struct {
+		name         string
+		c            *config.Config
+		commentReady error
+		bodyReady    error
+		written      bool
+		want         bool
+	}{
+		{"every output written", &config.Config{Comment: &config.Comment{}, Body: &config.Body{}}, nil, nil, true, true},
+		{"an output failed", &config.Config{Comment: &config.Comment{}}, nil, nil, false, false},
+		// The comment an earlier run wrote is left as it was, with its link.
+		{"a configured comment was not attempted", &config.Config{Comment: &config.Comment{}}, skipped, nil, true, false},
+		{"a configured body was not attempted", &config.Config{Body: &config.Body{}}, nil, skipped, true, false},
+		// Nothing an earlier run wrote is there to keep a link.
+		{"no comment is configured", &config.Config{}, errors.New("comment: is not set"), errors.New("body: is not set"), true, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := mayDeleteEarlierPages(tt.c, tt.commentReady, tt.bodyReady, tt.written); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
 	}
 }
 

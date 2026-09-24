@@ -174,6 +174,25 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 	return gh.ArtifactURL(repo.Owner, repo.Repo, runID, id), p.Anchors, cleanup, nil
 }
 
+// mayDeleteEarlierPages reports whether the pages earlier runs uploaded can go, which is when no
+// output that lasts past this run is left linking to one of them. written says whether every
+// output that was attempted got written. A comment or a body that is configured and was not
+// attempted, as where its if: does not hold on this run, is left as an earlier run wrote it,
+// with its links. The job summary is not counted, since each run has one of its own and this
+// run's leaves the earlier ones as they are either way.
+func mayDeleteEarlierPages(c *config.Config, commentReady, bodyReady error, written bool) bool {
+	if !written {
+		return false
+	}
+	if c.Comment != nil && commentReady != nil {
+		return false
+	}
+	if c.Body != nil && bodyReady != nil {
+		return false
+	}
+	return true
+}
+
 // pageArtifactName returns the name the page is uploaded as on the given attempt of the run.
 // A re-run keeps its run id, and a run cannot hold two artifacts of one name, so each attempt
 // uploads under a name of its own rather than deleting the one before it first, which would

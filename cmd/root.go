@@ -397,9 +397,9 @@ var rootCmd = &cobra.Command{
 		if commentReady == nil || summaryReady == nil || bodyReady == nil {
 			cur, prev, cleanup = resolveViewers(ctx, cmd.ErrOrStderr(), c, r, rPrev, comparedArtifact, pullRequestDiff)
 		}
-		// Whether every output that was to be written got written, which is what the pages
-		// earlier runs uploaded may be deleted on. An output left as it was still links to
-		// one of them.
+		// Whether every output that was attempted got written, which is part of what the pages
+		// earlier runs uploaded may be deleted on. An output left as it was still links to one
+		// of them.
 		written := true
 		viewerErr := func() error {
 			return errors.Join(cur.Err(), prev.Err())
@@ -504,7 +504,7 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		if cleanup != nil && written {
+		if cleanup != nil && mayDeleteEarlierPages(c, commentReady, bodyReady, written) {
 			cleanup()
 		}
 
