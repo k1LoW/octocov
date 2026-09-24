@@ -230,20 +230,35 @@ func affectedSources(gitRoot string, r, rPrev *report.Report, files []*gh.PullRe
 }
 
 // readSource reads the file at path under root, up to maxSourceBytes.
+//
+// The size is checked on what is read rather than on what Stat says, since a file can grow
+// between the two. Anything but a regular file is refused before it is opened, because
+// opening a FIFO for reading waits for a writer that never comes.
 func readSource(root *os.Root, path string) ([]byte, error) {
+	fi, err := root.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+	if !fi.Mode().IsRegular() {
+		return nil, fmt.Errorf("%s is not a regular file", path)
+	}
 	f, err := root.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
-	fi, err := f.Stat()
+	// Once more on what was opened, since the path can have been replaced in between.
+	if fi, err := f.Stat(); err != nil || !fi.Mode().IsRegular() {
+		return nil, fmt.Errorf("%s is not a regular file", path)
+	}
+	b, err := io.ReadAll(io.LimitReader(f, maxSourceBytes+1))
 	if err != nil {
 		return nil, err
 	}
-	if fi.IsDir() || fi.Size() > maxSourceBytes {
-		return nil, fmt.Errorf("%s is not a file to draw", path)
+	if len(b) > maxSourceBytes {
+		return nil, fmt.Errorf("%s is larger than the page draws", path)
 	}
-	return io.ReadAll(f)
+	return b, nil
 }
 
 // storedArtifactViewer returns the octocov.dev viewer for the artifact this run stores its
