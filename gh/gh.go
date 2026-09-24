@@ -490,6 +490,7 @@ func (g *Gh) FetchChangedFiles(ctx context.Context, owner, repo string) ([]*Pull
 			Filename:         f.GetFilename(),
 			PreviousFilename: f.GetPreviousFilename(),
 			BlobURL:          f.GetBlobURL(),
+			Status:           f.GetStatus(),
 			Additions:        f.GetAdditions(),
 			Deletions:        f.GetDeletions(),
 			Patch:            f.GetPatch(),

@@ -1126,3 +1126,41 @@ func TestFindRunArtifactReadsEveryPage(t *testing.T) {
 		t.Errorf("got %v\nwant the artifact on the second page", a)
 	}
 }
+
+func TestFetchChangedFilesCarryWhatTheFileCardsDraw(t *testing.T) {
+	// A run whose pull request cannot be looked up falls back to these, and the page draws
+	// each of them as a card with its status and its patch.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	t.Setenv("GITHUB_HEAD_REF", "feature")
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposByOwnerByRepo,
+			github.Repository{DefaultBranch: new("main")},
+		),
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposCompareByOwnerByRepoByBasehead,
+			github.CommitsComparison{Files: []*github.CommitFile{{
+				Filename: new("a.go"), Status: new("added"), Additions: new(1),
+				Patch: new("@@ -0,0 +1 @@\n+x"),
+			}}},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	files, err := g.FetchChangedFiles(t.Context(), "owner", "repo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []*PullRequestFile{{Filename: "a.go", Status: "added", Additions: 1, Patch: "@@ -0,0 +1 @@\n+x", ChangedLines: []int{1}}}
+	if diff := cmp.Diff(files, want); diff != "" {
+		t.Error(diff)
+	}
+}
