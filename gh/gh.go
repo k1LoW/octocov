@@ -839,6 +839,8 @@ func (g *Gh) fetchMergeCommitFiles(ctx context.Context, owner, repo, commit, hea
 		// As on pull_request_target, or on a run the head has moved past since.
 		return nil, false, nil
 	}
+	// Not paginated, because pages split the commits only. The files come on the first page,
+	// up to compareFilesLimit of them for the whole comparison.
 	comparison, _, err := g.client.Repositories.CompareCommits(ctx, owner, repo, c.Parents[0].GetSHA(), commit, &github.ListOptions{})
 	if err != nil {
 		return nil, false, err
