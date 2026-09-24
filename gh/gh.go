@@ -369,31 +369,80 @@ func ChangedLinesByFile(files []*PullRequestFile) map[string][]int {
 	return m
 }
 
-func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]*PullRequestFile, error) {
-	var files []*PullRequestFile
-	page := 1
-	for {
-		commitFiles, _, err := g.client.PullRequests.ListFiles(ctx, owner, repo, number, &github.ListOptions{
-			Page:    page,
-			PerPage: 100,
-		})
-		if err != nil {
-			return nil, err
-		}
-		if len(commitFiles) == 0 {
-			break
-		}
-		for _, f := range commitFiles {
-			files = append(files, &PullRequestFile{
-				Filename:     f.GetFilename(),
-				BlobURL:      f.GetBlobURL(),
-				Status:       f.GetStatus(),
-				ChangedLines: parseChangedLinesFromPatch(f.GetPatch()),
-			})
-		}
-		page += 1
+// FetchPullRequestFiles returns the files a pull request changes, with ChangedLines numbered as
+// the lines of commit, the commit the coverage was measured on. When commit is the merge commit
+// GitHub creates for the pull request, the changed lines are taken from the diff of that commit
+// against its first parent, since the patches of the pull request files API number the lines of
+// the pull request head, which differ from those of the merge commit wherever the base branch has
+// changed a file above them since the pull request branched.
+//
+// Where some of the changed lines could not be numbered that way and are left numbered as the
+// pull request head's, the second return value says why, and is empty otherwise.
+func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, number int, commit string) ([]*PullRequestFile, string, error) {
+	files, err := g.listPullRequestFiles(ctx, owner, repo, number)
+	if err != nil {
+		return nil, "", err
 	}
-	return files, nil
+	if commit == "" {
+		return files, "", nil
+	}
+	// A failed lookup below leaves the head's lines rather than failing, because the whole file
+	// coverage table and the comment would go down with it over lines that are only wrong for
+	// the files the base branch has also changed.
+	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return files, fmt.Sprintf("could not look up the head of pull request #%d: %v", number, err), nil
+	}
+	head := pr.GetHead().GetSHA()
+	if commit == head {
+		// The coverage was measured on the head, whose line numbers the patches already carry.
+		return files, "", nil
+	}
+	merged, ok, err := g.fetchMergeCommitFiles(ctx, owner, repo, commit, head)
+	if err != nil {
+		return files, fmt.Sprintf("could not diff commit %s against its first parent: %v", commit, err), nil
+	}
+	if !ok {
+		return files, fmt.Sprintf("commit %s is neither the head of pull request #%d nor its merge commit", commit, number), nil
+	}
+	if n := alignChangedLines(files, merged); n > 0 {
+		return files, fmt.Sprintf("the diff of merge commit %s stops at %d files and leaves out %d of the changed files", commit, compareFilesLimit, n), nil
+	}
+	return files, "", nil
+}
+
+// compareFilesLimit is the most files the compare API returns for one comparison.
+const compareFilesLimit = 300
+
+// alignChangedLines replaces the ChangedLines of files with the lines the patches of merged
+// number, where merged is the diff of the merge commit against its first parent. The pull
+// request files API still decides which files there are, because it returns up to 3000 files
+// where the compare API stops at compareFilesLimit. It returns how many files were left with the
+// lines of the pull request head because merged stopped at that limit.
+func alignChangedLines(files []*PullRequestFile, merged []*github.CommitFile) int {
+	patches := make(map[string]string, len(merged))
+	for _, f := range merged {
+		patches[f.GetFilename()] = f.GetPatch()
+	}
+	truncated := len(merged) >= compareFilesLimit
+	kept := 0
+	for _, f := range files {
+		if p, ok := patches[f.Filename]; ok {
+			f.ChangedLines = parseChangedLinesFromPatch(p)
+			continue
+		}
+		if truncated {
+			// The file may be past the limit rather than unchanged by the merge. Its lines are
+			// the ones of the pull request head, which is what every file got before, rather
+			// than none, which would drop it from patch coverage altogether.
+			kept++
+			continue
+		}
+		// The merge changes nothing in the file, as when the base branch already carries the
+		// same change.
+		f.ChangedLines = nil
+	}
+	return kept
 }
 
 func (g *Gh) FetchChangedFiles(ctx context.Context, owner, repo string) ([]*PullRequestFile, error) {
@@ -774,6 +823,56 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 		return false, err
 	}
 	return r.GetPrivate(), nil
+}
+
+// fetchMergeCommitFiles returns the files commit changes against its first parent when commit is
+// the merge of head onto the base branch of a pull request, and false otherwise.
+func (g *Gh) fetchMergeCommitFiles(ctx context.Context, owner, repo, commit, head string) ([]*github.CommitFile, bool, error) {
+	// The git data API rather than the commits API, which would also send the files of the
+	// commit only to have them thrown away. The parents cannot be read from the local checkout
+	// either, since a shallow checkout of the merge commit does not carry them.
+	c, _, err := g.client.Git.GetCommit(ctx, owner, repo, commit)
+	if err != nil {
+		return nil, false, err
+	}
+	if len(c.Parents) != 2 || c.Parents[1].GetSHA() != head {
+		// As on pull_request_target, or on a run the head has moved past since.
+		return nil, false, nil
+	}
+	// Not paginated, because pages split the commits only. The files come on the first page,
+	// up to compareFilesLimit of them for the whole comparison.
+	comparison, _, err := g.client.Repositories.CompareCommits(ctx, owner, repo, c.Parents[0].GetSHA(), commit, &github.ListOptions{})
+	if err != nil {
+		return nil, false, err
+	}
+	return comparison.Files, true, nil
+}
+
+func (g *Gh) listPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]*PullRequestFile, error) {
+	var files []*PullRequestFile
+	page := 1
+	for {
+		commitFiles, _, err := g.client.PullRequests.ListFiles(ctx, owner, repo, number, &github.ListOptions{
+			Page:    page,
+			PerPage: 100,
+		})
+		if err != nil {
+			return nil, err
+		}
+		if len(commitFiles) == 0 {
+			break
+		}
+		for _, f := range commitFiles {
+			files = append(files, &PullRequestFile{
+				Filename:     f.GetFilename(),
+				BlobURL:      f.GetBlobURL(),
+				Status:       f.GetStatus(),
+				ChangedLines: parseChangedLinesFromPatch(f.GetPatch()),
+			})
+		}
+		page += 1
+	}
+	return files, nil
 }
 
 // listWorkflowJobs returns every job of the workflow run, following pagination.

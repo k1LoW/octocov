@@ -690,6 +690,164 @@ func TestParseChangedLinesFromPatch(t *testing.T) {
 	}
 }
 
+func TestFetchPullRequestFiles(t *testing.T) {
+	// A file of six lines at the merge base. The pull request adds two lines after line 4, and
+	// the base branch has since added three lines after line 1, so the lines the pull request
+	// added are 5 and 6 in its head and 8 and 9 in the merge commit.
+	const (
+		headSHA    = "head"
+		baseSHA    = "base"
+		mergeSHA   = "merge"
+		prPatch    = "@@ -4,3 +4,5 @@\n l4\n+a\n+b\n l5\n l6"
+		mergePatch = "@@ -7,3 +7,5 @@\n l4\n+a\n+b\n l5\n l6"
+	)
+	tests := []struct {
+		name        string
+		commit      string
+		parents     []string
+		commitFails bool
+		want        []int
+		wantAligned bool
+	}{
+		{
+			name:        "the merge commit takes the lines it numbers",
+			commit:      mergeSHA,
+			parents:     []string{baseSHA, headSHA},
+			want:        []int{8, 9},
+			wantAligned: true,
+		},
+		{
+			name:        "the head keeps the lines of the pull request",
+			commit:      headSHA,
+			want:        []int{5, 6},
+			wantAligned: true,
+		},
+		{
+			name:    "a merge of another head keeps the lines of the pull request",
+			commit:  mergeSHA,
+			parents: []string{baseSHA, "other"},
+			want:    []int{5, 6},
+		},
+		{
+			name:        "a merge commit that cannot be looked up keeps the lines of the pull request",
+			commit:      mergeSHA,
+			commitFails: true,
+			want:        []int{5, 6},
+		},
+		{
+			name:        "no commit keeps the lines of the pull request",
+			commit:      "",
+			want:        []int{5, 6},
+			wantAligned: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			var parents []*github.Commit
+			for _, p := range tt.parents {
+				parents = append(parents, &github.Commit{SHA: new(p)})
+			}
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposPullsFilesByOwnerByRepoByPullNumber,
+					[]*github.CommitFile{{Filename: new("a.go"), Status: new("modified"), Patch: new(prPatch)}},
+					[]*github.CommitFile{},
+				),
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposPullsByOwnerByRepoByPullNumber,
+					github.PullRequest{Number: new(1), Head: &github.PullRequestBranch{SHA: new(headSHA)}},
+				),
+				mock.WithRequestMatchHandler( //nostyle:funcfmt
+					mock.GetReposGitCommitsByOwnerByRepoByCommitSha,
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						if tt.commitFails {
+							mock.WriteError(w, http.StatusInternalServerError, "boom")
+							return
+						}
+						if _, err := w.Write(mock.MustMarshal(github.Commit{SHA: new(tt.commit), Parents: parents})); err != nil {
+							t.Error(err)
+						}
+					}),
+				),
+				mock.WithRequestMatch( //nostyle:funcfmt
+					mock.GetReposCompareByOwnerByRepoByBasehead,
+					github.CommitsComparison{Files: []*github.CommitFile{{Filename: new("a.go"), Patch: new(mergePatch)}}},
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			files, unaligned, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(files) != 1 {
+				t.Fatalf("got %d files, want 1", len(files))
+			}
+			if diff := cmp.Diff(files[0].ChangedLines, tt.want); diff != "" {
+				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+			if got := unaligned == ""; got != tt.wantAligned {
+				t.Errorf("got unaligned %q, want aligned %v", unaligned, tt.wantAligned)
+			}
+		})
+	}
+}
+
+func TestAlignChangedLines(t *testing.T) {
+	merged := func(n int) []*github.CommitFile {
+		files := []*github.CommitFile{{Filename: new("a.go"), Patch: new("@@ -1,1 +1,2 @@\n l1\n+a")}}
+		for i := len(files); i < n; i++ {
+			files = append(files, &github.CommitFile{Filename: new(strconv.Itoa(i) + ".go")})
+		}
+		return files
+	}
+	tests := []struct {
+		name     string
+		merged   []*github.CommitFile
+		want     map[string][]int
+		wantKept int
+	}{
+		{
+			name:   "a file the merge leaves unchanged has no changed lines",
+			merged: merged(1),
+			want:   map[string][]int{"a.go": {2}, "b.go": nil},
+		},
+		{
+			name:     "a file past the compare limit keeps the lines of the pull request",
+			merged:   merged(compareFilesLimit),
+			want:     map[string][]int{"a.go": {2}, "b.go": {7}},
+			wantKept: 1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			files := []*PullRequestFile{
+				{Filename: "a.go", ChangedLines: []int{5}},
+				{Filename: "b.go", ChangedLines: []int{7}},
+			}
+			if kept := alignChangedLines(files, tt.merged); kept != tt.wantKept {
+				t.Errorf("got %d files kept, want %d", kept, tt.wantKept)
+			}
+			got := map[string][]int{}
+			for _, f := range files {
+				got[f.Filename] = f.ChangedLines
+			}
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+		})
+	}
+}
+
 func TestChangedLinesByFile(t *testing.T) {
 	files := []*PullRequestFile{
 		{Filename: "a.go", ChangedLines: []int{1, 2}},

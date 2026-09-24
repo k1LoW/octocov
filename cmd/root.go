@@ -374,7 +374,7 @@ var rootCmd = &cobra.Command{
 		// changed file list, and each fetch is paginated over up to 3000 files. Fetch it at
 		// most once, and only if one of them actually asks for it.
 		pullRequestFiles := sync.OnceValues(func() ([]*gh.PullRequestFile, error) {
-			return fetchPullRequestFiles(ctx, cmd, c.Repository)
+			return fetchPullRequestFiles(ctx, cmd, c.Repository, r.Commit)
 		})
 
 		// Resolved at most once, since the readiness check inside reaches the API and the
@@ -556,8 +556,9 @@ var rootCmd = &cobra.Command{
 // fetchPullRequestFiles returns the changed files of the current pull request, or, when the run
 // is not against a pull request, the files changed since the default branch. Both the patch
 // coverage column of the file coverage tables and the `patch` acceptable variable are measured
-// over the changed lines it carries.
-func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository string) ([]*gh.PullRequestFile, error) {
+// over the changed lines it carries, so those are numbered as the lines of commit, the commit
+// the coverage was measured on.
+func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository, commit string) ([]*gh.PullRequestFile, error) {
 	repo, err := gh.Parse(repository)
 	if err != nil {
 		return nil, err
@@ -577,7 +578,17 @@ func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository s
 		}
 		return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 	}
-	return g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n)
+	files, unaligned, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
+	if err != nil {
+		return nil, err
+	}
+	if unaligned != "" {
+		// The table and the `patch` variable still read these lines, so the job log is the one
+		// place that can say some of them may be other lines than the ones the pull request
+		// changed.
+		cmd.PrintErrf("Patch coverage may be measured over lines other than the changed ones, since some changed lines are numbered as the pull request head's rather than as commit %s's: %s\n", commit, unaligned)
+	}
+	return files, nil
 }
 
 func printMetrics(cmd *cobra.Command) error {
