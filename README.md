@@ -980,7 +980,7 @@ Opening the report of a private repository there means granting octocov.dev acce
 
 #### `viewer: artifact`
 
-On a pull request run, octocov renders the changes of the pull request as a single page of HTML ( the changed hunks with the coverage of the base and the head beside them, plus the files whose coverage moved while their code did not ) and uploads it as an artifact that opens in the browser. It needs nothing beyond read access to the repository to open.
+On a pull request run, octocov renders the changes of the pull request as a single page of HTML ( the changed hunks with the coverage of the base and the head beside them, plus the files whose coverage moved while their code did not ) and uploads it as an artifact that opens in the browser. Anyone signed in to GitHub who can read the repository can open it, and signing in is required even on a public repository, as it is for every artifact.
 
 - The overall coverage links to the page, and the coverage of each file links to the card of that file on it. The compared column gets no link, since the page shows both reports side by side.
 - The page is rendered only when the comment, the job summary or the pull request body is written, and only when there is a previous report to compare against ( see [`diff:`](#diff) ). A run on a branch gets no page and no links.
