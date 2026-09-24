@@ -5,8 +5,8 @@
 //
 // An entry this script writes is the one whose URL is the package's page on npm, so each
 // run removes those and writes them again from what is bundled now. Running it twice
-// leaves the file as the first run did, and a package the bundle stops taking leaves the
-// file with it. The entries written by hand are kept byte for byte.
+// leaves the file as the first run did, and the entry of a package the bundle no longer
+// takes is gone after the next run. The entries written by hand are kept byte for byte.
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { build } from "esbuild";
