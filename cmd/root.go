@@ -578,7 +578,17 @@ func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository, 
 		}
 		return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 	}
-	return g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
+	files, unaligned, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
+	if err != nil {
+		return nil, err
+	}
+	if unaligned != "" {
+		// The table and the `patch` variable still read these lines, so the job log is the one
+		// place that can say some of them may be other lines than the ones the pull request
+		// changed.
+		cmd.PrintErrf("Patch coverage may be measured over lines other than the changed ones, since some changed lines are numbered as the pull request head's rather than as commit %s's: %s\n", commit, unaligned)
+	}
+	return files, nil
 }
 
 func printMetrics(cmd *cobra.Command) error {

@@ -707,17 +707,20 @@ func TestFetchPullRequestFiles(t *testing.T) {
 		parents     []string
 		commitFails bool
 		want        []int
+		wantAligned bool
 	}{
 		{
-			name:    "the merge commit takes the lines it numbers",
-			commit:  mergeSHA,
-			parents: []string{baseSHA, headSHA},
-			want:    []int{8, 9},
+			name:        "the merge commit takes the lines it numbers",
+			commit:      mergeSHA,
+			parents:     []string{baseSHA, headSHA},
+			want:        []int{8, 9},
+			wantAligned: true,
 		},
 		{
-			name:   "the head keeps the lines of the pull request",
-			commit: headSHA,
-			want:   []int{5, 6},
+			name:        "the head keeps the lines of the pull request",
+			commit:      headSHA,
+			want:        []int{5, 6},
+			wantAligned: true,
 		},
 		{
 			name:    "a merge of another head keeps the lines of the pull request",
@@ -732,9 +735,10 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			want:        []int{5, 6},
 		},
 		{
-			name:   "no commit keeps the lines of the pull request",
-			commit: "",
-			want:   []int{5, 6},
+			name:        "no commit keeps the lines of the pull request",
+			commit:      "",
+			want:        []int{5, 6},
+			wantAligned: true,
 		},
 	}
 	for _, tt := range tests {
@@ -781,7 +785,7 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			}
 			g.SetClient(client)
 
-			files, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
+			files, unaligned, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -790,6 +794,9 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			}
 			if diff := cmp.Diff(files[0].ChangedLines, tt.want); diff != "" {
 				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+			if got := unaligned == ""; got != tt.wantAligned {
+				t.Errorf("got unaligned %q, want aligned %v", unaligned, tt.wantAligned)
 			}
 		})
 	}
@@ -804,9 +811,10 @@ func TestAlignChangedLines(t *testing.T) {
 		return files
 	}
 	tests := []struct {
-		name   string
-		merged []*github.CommitFile
-		want   map[string][]int
+		name     string
+		merged   []*github.CommitFile
+		want     map[string][]int
+		wantKept int
 	}{
 		{
 			name:   "a file the merge leaves unchanged has no changed lines",
@@ -814,9 +822,10 @@ func TestAlignChangedLines(t *testing.T) {
 			want:   map[string][]int{"a.go": {2}, "b.go": nil},
 		},
 		{
-			name:   "a file past the compare limit keeps the lines of the pull request",
-			merged: merged(compareFilesLimit),
-			want:   map[string][]int{"a.go": {2}, "b.go": {7}},
+			name:     "a file past the compare limit keeps the lines of the pull request",
+			merged:   merged(compareFilesLimit),
+			want:     map[string][]int{"a.go": {2}, "b.go": {7}},
+			wantKept: 1,
 		},
 	}
 	for _, tt := range tests {
@@ -825,7 +834,9 @@ func TestAlignChangedLines(t *testing.T) {
 				{Filename: "a.go", ChangedLines: []int{5}},
 				{Filename: "b.go", ChangedLines: []int{7}},
 			}
-			alignChangedLines(files, tt.merged)
+			if kept := alignChangedLines(files, tt.merged); kept != tt.wantKept {
+				t.Errorf("got %d files kept, want %d", kept, tt.wantKept)
+			}
 			got := map[string][]int{}
 			for _, f := range files {
 				got[f.Filename] = f.ChangedLines
