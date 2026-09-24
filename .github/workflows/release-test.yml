@@ -45,11 +45,6 @@ jobs:
     name: Release assets test for Linux
     runs-on: ubuntu-latest
     steps:
-      - name: Set up gcc-aarch64-linux-gnu
-        run: |
-          sudo apt-get update || true
-          sudo apt-get install -y gcc-aarch64-linux-gnu
-
       - name: Check out source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
