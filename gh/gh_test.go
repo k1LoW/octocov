@@ -1346,12 +1346,19 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 	}))
 	t.Cleanup(zips.Close)
 
+	// The run of an artifact pushed is numbered from 100 and the run of one of a pull request
+	// from 1000, which is how the mocked run below tells the event.
 	artifact := func(id int64, branch string) *github.Artifact {
 		return &github.Artifact{
 			ID:          new(id),
 			Name:        new("octocov-report"),
-			WorkflowRun: &github.ArtifactWorkflowRun{HeadBranch: new(branch)},
+			WorkflowRun: &github.ArtifactWorkflowRun{ID: new(id + 100), HeadBranch: new(branch)},
 		}
+	}
+	pullRequest := func(id int64, branch string) *github.Artifact {
+		a := artifact(id, branch)
+		a.WorkflowRun.ID = new(id + 1000)
+		return a
 	}
 	tests := []struct {
 		name    string
@@ -1374,6 +1381,11 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 			"main", "2", nil,
 		},
 		{
+			"a run of a pull request whose head is the branch, as a release pull request's is",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "develop"), artifact(2, "develop")}}},
+			"develop", "2", nil,
+		},
+		{
 			"no artifact of the branch",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(2, "feat"), artifact(1, "fix")}}},
 			"main", "", ErrArtifactNotFound,
@@ -1392,6 +1404,20 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 			}
 			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
 				mock.WithRequestMatchPages(mock.GetReposActionsArtifactsByOwnerByRepo, pages...),
+				mock.WithRequestMatchHandler( //nostyle:funcfmt
+					mock.GetReposActionsRunsByOwnerByRepoByRunId,
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+						if err != nil {
+							t.Error(err)
+						}
+						event := "push"
+						if id >= 1000 {
+							event = "pull_request"
+						}
+						_, _ = w.Write(mock.MustMarshal(github.WorkflowRun{ID: new(id), Event: new(event)})) //nostyle:handlerrors
+					}),
+				),
 				mock.WithRequestMatchHandler( //nostyle:funcfmt
 					mock.GetReposActionsArtifactsByOwnerByRepoByArtifactIdByArchiveFormat,
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

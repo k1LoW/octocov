@@ -840,8 +840,11 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 }
 
 // FetchLatestArtifactOfBranch is FetchLatestArtifact for the artifacts that a workflow run on
-// branch uploaded, or for all of them when branch is empty.
+// branch uploaded, or for all of them when branch is empty. A run of a pull request is left out,
+// since its head branch is the branch it merges from: a release pull request from the default
+// branch runs on it as a push does, and measures the merge onto another branch.
 func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name, fp, branch string) (*ArtifactFile, error) {
+	pullRequestRun := map[int64]bool{}
 	page := 1
 	for {
 		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListArtifactsOptions{
@@ -856,8 +859,23 @@ func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name,
 		}
 		page += 1
 		for _, a := range l.Artifacts {
-			if branch != "" && a.GetWorkflowRun().GetHeadBranch() != branch {
-				continue
+			if branch != "" {
+				if a.GetWorkflowRun().GetHeadBranch() != branch {
+					continue
+				}
+				id := a.GetWorkflowRun().GetID()
+				pr, seen := pullRequestRun[id]
+				if !seen {
+					run, _, err := g.client.Actions.GetWorkflowRunByID(ctx, owner, repo, id)
+					if err != nil {
+						return nil, err
+					}
+					pr = run.GetEvent() == "pull_request" || run.GetEvent() == "pull_request_target"
+					pullRequestRun[id] = pr
+				}
+				if pr {
+					continue
+				}
 			}
 			af, err := g.downloadArtifactFile(ctx, owner, repo, a, fp)
 			if err != nil {

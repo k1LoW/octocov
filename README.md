@@ -1121,7 +1121,7 @@ artifact://[owner]/[repo]/[artifactName]
 
 The report of every ref is stored under the artifact name as it is configured. Beside it, each run stores an artifact of metadata that points, by ID, at the artifact holding the report of the ref the run is on, and records the commit that ref was at, which on a pull request is its head rather than the merge commit measured. It is named `octocov-metadata-`, the artifact name, `@` and the ref, with the characters an artifact name may not hold replaced by `_` ( e.g. `octocov-metadata-octocov-report@refs_heads_main`, `octocov-metadata-octocov-report@refs_pull_123` ).
 
-`diff.datastores:` reads the report the metadata of the base branch points at, and the central mode the one of the default branch. Where that metadata is not there, as for a report stored by an octocov that did not write it, the newest artifact of the name that a run on that branch uploaded is read instead.
+`diff.datastores:` reads the report the metadata of the base branch points at, and the central mode the one of the default branch. Where that metadata is not there, as for a report stored by an octocov that did not write it, the newest artifact of the name that a run on that branch uploaded, other than a run of a pull request whose head is that branch, is read instead.
 
 > **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
