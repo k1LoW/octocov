@@ -114,6 +114,13 @@ func (r *Report) DetectRef(ctx context.Context) error {
 		return err
 	}
 	r.BaseRef = base
+	// Outside a pull request event, DetectCurrentPullRequestNumber falls back to the open
+	// pull request whose head is the current branch. On a push to the default branch that
+	// is a release pull request kept open against another branch, and the report of the
+	// default branch would be taken for the report of that pull request.
+	if !isPullRequestEvent() {
+		return nil
+	}
 	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
 	switch {
 	case err == nil:
@@ -123,6 +130,14 @@ func (r *Report) DetectRef(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+// isPullRequestEvent reports whether the run was triggered by an event of a pull request,
+// which is where GitHub itself says which pull request the run is of.
+func isPullRequestEvent() bool {
+	return os.Getenv("GITHUB_PULL_REQUEST_NUMBER") != "" ||
+		os.Getenv("GITHUB_HEAD_REF") != "" ||
+		strings.HasPrefix(os.Getenv("GITHUB_REF"), "refs/pull/")
 }
 
 // RefKey returns the key that separates this report from the reports of other refs in

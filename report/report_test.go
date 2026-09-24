@@ -691,6 +691,32 @@ func TestRefKey(t *testing.T) {
 	}
 }
 
+func TestIsPullRequestEvent(t *testing.T) {
+	tests := []struct {
+		name     string
+		ref      string
+		headRef  string
+		prNumber string
+		want     bool
+	}{
+		{"a push to the default branch is not one, whatever pull request its head is", "refs/heads/main", "", "", false},
+		{"a push to another branch is not one", "refs/heads/feat/x", "", "", false},
+		{"pull_request", "refs/pull/123/merge", "feat/x", "", true},
+		{"pull_request_target names the base branch in GITHUB_REF", "refs/heads/main", "feat/x", "", true},
+		{"a number given explicitly", "refs/heads/main", "", "123", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_REF", tt.ref)
+			t.Setenv("GITHUB_HEAD_REF", tt.headRef)
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.prNumber)
+			if got := isPullRequestEvent(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestStorePath(t *testing.T) {
 	tests := []struct {
 		name        string
