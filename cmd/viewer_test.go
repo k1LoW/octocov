@@ -32,6 +32,29 @@ func TestBaseLabel(t *testing.T) {
 	}
 }
 
+func TestPullRequestNumber(t *testing.T) {
+	tests := []struct {
+		name   string
+		r      *report.Report
+		want   int
+		wantOK bool
+	}{
+		{"the detected number", &report.Report{Ref: "refs/pull/1/merge", BaseRef: "refs/heads/main", PullRequest: 1}, 1, true},
+		// The number could not be detected, and the ref still says which pull request it is.
+		{"the number the ref carries", &report.Report{Ref: "refs/pull/2/merge", BaseRef: "refs/heads/main"}, 2, true},
+		{"a branch", &report.Report{Ref: "refs/heads/feat", BaseRef: "refs/heads/main"}, 0, false},
+		{"the default branch", &report.Report{Ref: "refs/heads/main", BaseRef: "refs/heads/main"}, 0, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, ok := pullRequestNumber(tt.r)
+			if got != tt.want || ok != tt.wantOK {
+				t.Errorf("got %v, %v\nwant %v, %v", got, ok, tt.want, tt.wantOK)
+			}
+		})
+	}
+}
+
 func TestAffectedSources(t *testing.T) {
 	root := t.TempDir()
 	for _, p := range []string{"moved.go", "changed.go", "same.go"} {

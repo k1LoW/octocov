@@ -82,7 +82,8 @@ func resolveBadgeViewer(ctx context.Context, stderr io.Writer, c *config.Config)
 func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.Report, fetchFiles func() ([]*gh.PullRequestFile, error)) (string, error) {
 	// A branch has no changes to draw, and a page of every file with its source is too
 	// large and too slow to render on every push.
-	if !strings.HasPrefix(r.RefKey(), "refs/pull/") || r.PullRequest == 0 {
+	n, ok := pullRequestNumber(r)
+	if !ok {
 		return "", errors.New("the page is rendered only for a pull request")
 	}
 	if !r.IsMeasuredCoverage() {
@@ -108,7 +109,7 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 		return "", err
 	}
 	aligned := false
-	if mb, err := g.FetchMergeBase(ctx, repo.Owner, repo.Repo, r.PullRequest); err == nil {
+	if mb, err := g.FetchMergeBase(ctx, repo.Owner, repo.Repo, n); err == nil {
 		aligned = mb != "" && mb == rPrev.Commit
 	}
 	in := &page.ChangesInput{
@@ -127,7 +128,7 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 		// the base report addresses the same lines, so their text is read only then.
 		in.Sources = affectedSources(c.GitRoot, r, rPrev, files)
 	}
-	title := fmt.Sprintf("Coverage of %s#%d", r.Repository, r.PullRequest)
+	title := fmt.Sprintf("Coverage of %s#%d", r.Repository, n)
 	html, err := page.RenderChanges(ctx, title, in)
 	if err != nil {
 		return "", err
@@ -151,6 +152,18 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 		fmt.Fprintf(os.Stderr, "Skip deleting the previous pages of %s: %v\n", name, err) //nostyle:handlerrors
 	}
 	return gh.ArtifactURL(repo.Owner, repo.Repo, runID, id), nil
+}
+
+// pullRequestNumber returns the number of the pull request the report is of. It is read
+// off the ref key rather than off PullRequest, since the key falls back to the ref of a
+// pull request whose number could not be detected, and the report and its page are named
+// after that pull request all the same.
+func pullRequestNumber(r *report.Report) (int, bool) {
+	n, err := strconv.Atoi(strings.TrimPrefix(r.RefKey(), "refs/pull/"))
+	if err != nil || n <= 0 {
+		return 0, false
+	}
+	return n, true
 }
 
 func changedFiles(files []*gh.PullRequestFile) []*page.ChangedFile {
