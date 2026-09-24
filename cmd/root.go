@@ -390,10 +390,17 @@ var rootCmd = &cobra.Command{
 		commentReady := c.CommentConfigReady()
 		summaryReady := c.SummaryConfigReady()
 		bodyReady := c.BodyConfigReady()
-		var cur, prev *report.Viewer
+		var (
+			cur, prev *report.Viewer
+			cleanup   func()
+		)
 		if commentReady == nil || summaryReady == nil || bodyReady == nil {
-			cur, prev = resolveViewers(ctx, cmd.ErrOrStderr(), c, r, rPrev, comparedArtifact, pullRequestDiff)
+			cur, prev, cleanup = resolveViewers(ctx, cmd.ErrOrStderr(), c, r, rPrev, comparedArtifact, pullRequestDiff)
 		}
+		// Whether every output that was to be written got written, which is what the pages
+		// earlier runs uploaded may be deleted on. An output left as it was still links to
+		// one of them.
+		written := true
 		viewerErr := func() error {
 			return errors.Join(cur.Err(), prev.Err())
 		}
@@ -426,6 +433,7 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
+				written = false
 				cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
 			}
 		}
@@ -458,6 +466,7 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
+				written = false
 				cmd.PrintErrf("Skip adding report to job summary page: %v\n", err)
 			}
 		}
@@ -490,8 +499,13 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
+				written = false
 				cmd.PrintErrf("Skip inserting report to body of pull request: %v\n", err)
 			}
+		}
+
+		if cleanup != nil && written {
+			cleanup()
 		}
 
 		// Measure patch coverage before storing the report, because storing the report shrinks

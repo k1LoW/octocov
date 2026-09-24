@@ -30,28 +30,33 @@ const (
 // pull request body link through. cur links the report of this run and prev the one it is
 // compared against. A failure to work out where to link is not a reason to hold the
 // report back, so it is said on stderr and the values are left unlinked.
-func resolveViewers(ctx context.Context, stderr io.Writer, c *config.Config, r, rPrev *report.Report, comparedArtifact string, diff func() (*gh.PullRequestFiles, error)) (cur, prev *report.Viewer) {
+//
+// cleanup deletes what the links of earlier runs point at and the ones returned here replace,
+// and is nil when there is nothing to delete. It is left to the caller, to be called once the
+// outputs carrying the new links are written.
+func resolveViewers(ctx context.Context, stderr io.Writer, c *config.Config, r, rPrev *report.Report, comparedArtifact string, diff func() (*gh.PullRequestFiles, error)) (cur, prev *report.Viewer, cleanup func()) {
 	switch c.ResolveViewer(ctx) {
 	case config.ViewerOctocovDev:
-		return viewersFor(storedArtifactViewer(c, r), comparedArtifact)
+		cur, prev := viewersFor(storedArtifactViewer(c, r), comparedArtifact)
+		return cur, prev, nil
 	case config.ViewerArtifact:
-		u, anchors, err := uploadChangesPage(ctx, c, r, rPrev, diff)
+		u, anchors, cleanup, err := uploadChangesPage(ctx, c, r, rPrev, diff)
 		if err != nil {
 			fmt.Fprintf(stderr, "Skip linking to the page of the report: %v\n", err) //nostyle:handlerrors
-			return nil, nil
+			return nil, nil, nil
 		}
 		// The page shows the compared report beside this one, so the compared column has
 		// nowhere of its own to link to.
-		return report.NewArtifactViewer(u, anchors), nil
+		return report.NewArtifactViewer(u, anchors), nil, cleanup
 	case config.ViewerCustom:
 		links, err := c.CustomLinks()
 		if err != nil {
 			fmt.Fprintf(stderr, "Skip linking the values of the report: %v\n", err) //nostyle:handlerrors
-			return nil, nil
+			return nil, nil, nil
 		}
-		return report.NewCustomViewer(links, false), report.NewCustomViewer(links, true)
+		return report.NewCustomViewer(links, false), report.NewCustomViewer(links, true), nil
 	default:
-		return nil, nil
+		return nil, nil, nil
 	}
 }
 
@@ -75,38 +80,39 @@ func resolveBadgeViewer(ctx context.Context, stderr io.Writer, c *config.Config)
 }
 
 // uploadChangesPage renders the changes page of the pull request, uploads it as an
-// artifact and returns the URL it opens at, with the anchors of the file cards drawn on it.
+// artifact and returns the URL it opens at, with the anchors of the file cards drawn on it and
+// what deletes the pages earlier runs uploaded.
 //
 // It is uploaded before the comment, the job summary and the body are written, since the
 // URL carries the artifact ID, which is known only once the upload is finalized.
-func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.Report, fetchDiff func() (*gh.PullRequestFiles, error)) (string, map[string]bool, error) {
+func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.Report, fetchDiff func() (*gh.PullRequestFiles, error)) (string, map[string]bool, func(), error) {
 	// A branch has no changes to draw, and a page of every file with its source is too
 	// large and too slow to render on every push.
 	n, ok := pullRequestNumber(r)
 	if !ok {
-		return "", nil, errors.New("the page is rendered only for a pull request")
+		return "", nil, nil, errors.New("the page is rendered only for a pull request")
 	}
 	if !r.IsMeasuredCoverage() {
-		return "", nil, errors.New("coverage is not measured")
+		return "", nil, nil, errors.New("coverage is not measured")
 	}
 	if rPrev == nil || !rPrev.IsMeasuredCoverage() {
-		return "", nil, errors.New("there is no previous report to compare the coverage against")
+		return "", nil, nil, errors.New("there is no previous report to compare the coverage against")
 	}
 	repo, err := gh.Parse(os.Getenv("GITHUB_REPOSITORY"))
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
 	runID, err := strconv.ParseInt(os.Getenv("GITHUB_RUN_ID"), 10, 64)
 	if err != nil {
-		return "", nil, fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
+		return "", nil, nil, fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
 	}
 	g, err := gh.New()
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
 	d, err := fetchDiff()
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
 	files := d.Files
 	aligned := baseAligned(ctx, g, repo, n, d, rPrev)
@@ -133,7 +139,7 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 	title := fmt.Sprintf("Coverage of %s#%d", r.Repository, n)
 	p, err := page.RenderChanges(ctx, title, in)
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
 
 	var datastores []string
@@ -142,18 +148,21 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 	}
 	name, err := datastore.PageArtifactName(datastores, r)
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
 	id, err := g.PutUnarchivedArtifact(ctx, repo.Owner, repo.Repo, runID, name, p.HTML)
 	if err != nil {
-		return "", nil, err
+		return "", nil, nil, err
 	}
-	if err := g.DeleteArtifactsBeforeRun(ctx, repo.Owner, repo.Repo, name, runID); err != nil {
-		// Deleting needs actions: write, which a workflow may not grant and a pull request
-		// from a fork never has. The page is uploaded by now, so it is linked all the same.
-		fmt.Fprintf(os.Stderr, "Skip deleting the previous pages of %s: %v\n", name, err) //nostyle:handlerrors
+	cleanup := func() {
+		if err := g.DeleteArtifactsBeforeRun(ctx, repo.Owner, repo.Repo, name, runID); err != nil {
+			// Deleting needs actions: write, which a workflow may not grant and a pull request
+			// from a fork never has. The outputs are written by now, so failing the run over
+			// the pages it leaves behind would be worse than leaving them.
+			fmt.Fprintf(os.Stderr, "Skip deleting the previous pages of %s: %v\n", name, err) //nostyle:handlerrors
+		}
 	}
-	return gh.ArtifactURL(repo.Owner, repo.Repo, runID, id), p.Anchors, nil
+	return gh.ArtifactURL(repo.Owner, repo.Repo, runID, id), p.Anchors, cleanup, nil
 }
 
 // pullRequestNumber returns the number of the pull request the report is of. It is read
