@@ -423,7 +423,7 @@ func storedArtifactViewer(c *config.Config, r *report.Report) *report.Viewer {
 	if err := c.ReportConfigReady(); err != nil {
 		return nil
 	}
-	name, ok := datastore.ArtifactName(c.Report.Datastores, r)
+	name, ok := datastore.MetadataArtifactName(c.Report.Datastores, r)
 	if !ok {
 		return nil
 	}

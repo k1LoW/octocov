@@ -30,12 +30,12 @@ type Viewer struct {
 	err error
 }
 
-// NewOctocovDevViewer returns the viewer linking to the octocov.dev pages of the report
-// stored under artifactName, or nil when the name is empty. A file is addressed there by
-// the artifact its report was stored under, while the report as a whole is routed by its
-// ref, which is why Report.ViewerURL answers for it without a Viewer at all.
-func NewOctocovDevViewer(artifactName string) *Viewer {
-	if artifactName == "" {
+// NewOctocovDevViewer returns the viewer linking to the octocov.dev pages of the report whose
+// metadata is stored under metadataName, or nil when the name is empty. A file is addressed
+// there by the metadata of the ref its report was stored for, while the report as a whole is
+// routed by its ref, which is why Report.ViewerURL answers for it without a Viewer at all.
+func NewOctocovDevViewer(metadataName string) *Viewer {
+	if metadataName == "" {
 		return nil
 	}
 	return &Viewer{
@@ -43,7 +43,7 @@ func NewOctocovDevViewer(artifactName string) *Viewer {
 			return r.ViewerURL(), nil
 		},
 		coverageFile: func(r *Report, path string) (string, error) {
-			return octocovDevFileURL(artifactName, r, path), nil
+			return octocovDevFileURL(metadataName, r, path), nil
 		},
 		readsArtifacts: true,
 	}
@@ -222,10 +222,11 @@ func (r *Report) ViewerURL() string {
 }
 
 // octocovDevFileURL returns the octocov.dev page of one file's coverage. The pull request
-// path carries no per-file page, so the report is named by its artifact in the query
-// instead. The artifact name is the whole of what the page needs to find the report, since
-// the commit only ever reaches a cache keyed by an artifact id this side has no way to know.
-func octocovDevFileURL(artifactName string, r *Report, path string) string {
+// path carries no per-file page, so the report is named in the query by the artifact holding
+// the metadata of its ref. The artifact holding the report itself shares its name with the
+// reports of every other ref, and its ID is known only once the report is stored, which is
+// after the links are written.
+func octocovDevFileURL(metadataName string, r *Report, path string) string {
 	if r == nil || path == "" {
 		return ""
 	}
@@ -234,7 +235,7 @@ func octocovDevFileURL(artifactName string, r *Report, path string) string {
 		return ""
 	}
 	q := url.Values{}
-	q.Set("artifact_name", artifactName)
+	q.Set("metadata_name", metadataName)
 	return fmt.Sprintf("%s/%s/%s/file/%s?%s", viewerBaseURL, repo.Owner, repo.Repo, escapePath(path), q.Encode())
 }
 

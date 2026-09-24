@@ -62,7 +62,7 @@ func TestStoredArtifactViewer(t *testing.T) {
 }
 
 func TestViewersFor(t *testing.T) {
-	stored := report.NewOctocovDevViewer("octocov-report@refs_pull_722")
+	stored := report.NewOctocovDevViewer("octocov-metadata-octocov-report@refs_pull_722")
 	tests := []struct {
 		name             string
 		stored           *report.Viewer
@@ -70,11 +70,11 @@ func TestViewersFor(t *testing.T) {
 		wantCur          bool
 		wantPrev         bool
 	}{
-		{"both sides when both came from an artifact", stored, "octocov-report", true, true},
+		{"both sides when both came from an artifact", stored, "octocov-metadata-octocov-report@refs_heads_main", true, true},
 		{"the compared side alone stays unlinked", stored, "", true, false},
 		// A run storing no artifact of its own links nothing, so that every link in a
 		// comment belongs to a run that wrote one.
-		{"a run storing no artifact links neither side", nil, "octocov-report", false, false},
+		{"a run storing no artifact links neither side", nil, "octocov-metadata-octocov-report@refs_heads_main", false, false},
 		{"neither side when there is nothing either way", nil, "", false, false},
 	}
 	for _, tt := range tests {

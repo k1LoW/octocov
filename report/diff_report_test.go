@@ -137,7 +137,7 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 	b.Ref = "refs/heads/main"
 	b.BaseRef = "refs/heads/main"
 
-	got := a.Compare(b).Table(NewOctocovDevViewer("octocov-report@refs_pull_722"), NewOctocovDevViewer("octocov-report"), false)
+	got := a.Compare(b).Table(NewOctocovDevViewer("octocov-metadata-octocov-report@refs_pull_722"), NewOctocovDevViewer("octocov-metadata-octocov-report@refs_heads_main"), false)
 	for _, want := range []string{
 		"](https://octocov.dev/k1LoW/tbls/pull/722)",
 		"](https://octocov.dev/k1LoW/tbls)",
@@ -156,7 +156,7 @@ func TestDiffTableLinksBothCoveragesToTheViewer(t *testing.T) {
 
 	// The compared report can have been read from somewhere the pages do not serve, and
 	// then only the side that was stored in an artifact is linked.
-	only := a.Compare(b).Table(NewOctocovDevViewer("octocov-report@refs_pull_722"), nil, false)
+	only := a.Compare(b).Table(NewOctocovDevViewer("octocov-metadata-octocov-report@refs_pull_722"), nil, false)
 	if want := "](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(only, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", only, want)
 	}
@@ -184,7 +184,7 @@ func TestDiffFileCoveragesTablePathsAreSlashSeparated(t *testing.T) {
 	// the viewer link built from the result are URLs.
 	got := a.Compare(b).FileCoveragesTable([]*gh.PullRequestFile{ //nostyle:funcfmt
 		{Filename: "no-such-file.go", BlobURL: "https://github.com/k1LoW/octocov/blob/0123456789abcdef/no-such-file.go"},
-	}, "sub", NewOctocovDevViewer("octocov-report"))
+	}, "sub", NewOctocovDevViewer("octocov-metadata-octocov-report@refs_heads_main"))
 	if got == "" {
 		t.Fatal("got an empty table, so nothing was checked")
 	}
