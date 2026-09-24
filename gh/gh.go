@@ -790,41 +790,39 @@ func (g *Gh) FetchMergeBase(ctx context.Context, owner, repo string, number int)
 // run with an id lower than runID. Two runs can finish out of order, so an artifact of a
 // later run is kept even when it was uploaded first.
 func (g *Gh) DeleteArtifactsBeforeRun(ctx context.Context, owner, repo, name string, runID int64) error {
-	// Every page is read before anything is deleted, since deleting while paging shifts
-	// the artifacts that follow onto a page that has already been read.
-	var ids []int64
-	opts := &github.ListArtifactsOptions{
-		Name:        &name,
-		ListOptions: github.ListOptions{PerPage: 100},
+	artifacts, err := g.artifactsBeforeRun(ctx, owner, repo, name, runID)
+	if err != nil {
+		return err
 	}
-	for {
-		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, opts)
-		if err != nil {
-			return err
-		}
-		for _, a := range l.Artifacts {
-			if a.GetName() != name {
-				continue
+	return g.deleteArtifacts(ctx, owner, repo, artifacts)
+}
+
+// DeleteCompletedArtifactsBeforeRun is DeleteArtifactsBeforeRun for the artifacts of the runs
+// that have completed. A run still in progress may yet write a link to the artifact it
+// uploaded, and deleting it first would leave that link pointing at nothing.
+func (g *Gh) DeleteCompletedArtifactsBeforeRun(ctx context.Context, owner, repo, name string, runID int64) error {
+	artifacts, err := g.artifactsBeforeRun(ctx, owner, repo, name, runID)
+	if err != nil {
+		return err
+	}
+	completed := map[int64]bool{}
+	var done []*github.Artifact
+	for _, a := range artifacts {
+		id := a.GetWorkflowRun().GetID()
+		ok, seen := completed[id]
+		if !seen {
+			run, _, err := g.client.Actions.GetWorkflowRunByID(ctx, owner, repo, id)
+			if err != nil {
+				return err
 			}
-			// An artifact that does not say which run uploaded it cannot be shown to be
-			// older, so it is left alone.
-			if id := a.GetWorkflowRun().GetID(); id != 0 && id < runID {
-				ids = append(ids, a.GetID())
-			}
+			ok = run.GetStatus() == "completed"
+			completed[id] = ok
 		}
-		if res.NextPage == 0 {
-			break
-		}
-		opts.Page = res.NextPage
-	}
-	for _, id := range ids {
-		// Stopping at the first failure rather than trying the rest, since the usual cause
-		// is a token without actions: write, which every other delete would fail on too.
-		if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, id); err != nil {
-			return fmt.Errorf("failed to delete artifact %d: %w", id, err)
+		if ok {
+			done = append(done, a)
 		}
 	}
-	return nil
+	return g.deleteArtifacts(ctx, owner, repo, done)
 }
 
 type ArtifactFile struct {
@@ -937,6 +935,50 @@ func (g *Gh) DeleteRunArtifacts(ctx context.Context, owner, repo string, runID i
 	for _, id := range ids {
 		if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, id); err != nil {
 			return fmt.Errorf("failed to delete artifact %d: %w", id, err)
+		}
+	}
+	return nil
+}
+
+// artifactsBeforeRun returns the artifacts of the name that were uploaded by a workflow run with
+// an id lower than runID.
+func (g *Gh) artifactsBeforeRun(ctx context.Context, owner, repo, name string, runID int64) ([]*github.Artifact, error) {
+	// Every page is read before anything is deleted, since deleting while paging shifts
+	// the artifacts that follow onto a page that has already been read.
+	var artifacts []*github.Artifact
+	opts := &github.ListArtifactsOptions{
+		Name:        &name,
+		ListOptions: github.ListOptions{PerPage: 100},
+	}
+	for {
+		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, opts)
+		if err != nil {
+			return nil, err
+		}
+		for _, a := range l.Artifacts {
+			if a.GetName() != name {
+				continue
+			}
+			// An artifact that does not say which run uploaded it cannot be shown to be
+			// older, so it is left alone.
+			if id := a.GetWorkflowRun().GetID(); id != 0 && id < runID {
+				artifacts = append(artifacts, a)
+			}
+		}
+		if res.NextPage == 0 {
+			break
+		}
+		opts.Page = res.NextPage
+	}
+	return artifacts, nil
+}
+
+func (g *Gh) deleteArtifacts(ctx context.Context, owner, repo string, artifacts []*github.Artifact) error {
+	for _, a := range artifacts {
+		// Stopping at the first failure rather than trying the rest, since the usual cause
+		// is a token without actions: write, which every other delete would fail on too.
+		if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, a.GetID()); err != nil {
+			return fmt.Errorf("failed to delete artifact %d: %w", a.GetID(), err)
 		}
 	}
 	return nil

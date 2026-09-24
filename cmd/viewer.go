@@ -156,14 +156,15 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 		return "", nil, nil, err
 	}
 	cleanup := func() {
-		// The earlier attempts of this run, and the first attempt of each earlier run, which
-		// is the one nearly every run is. A page an earlier run uploaded on a re-run of its own
+		// The earlier attempts of this run, and the first attempt of each earlier run that has
+		// completed, which is the one nearly every run is. One still in progress may yet link
+		// to its page. A page an earlier run uploaded on a re-run of its own
 		// is named for an attempt nothing here knows, so it is left to its retention.
 		if err := errors.Join(
 			g.DeleteRunArtifacts(ctx, repo.Owner, repo.Repo, runID, func(n string) bool {
 				return n != name && isPageArtifactOf(base, n)
 			}),
-			g.DeleteArtifactsBeforeRun(ctx, repo.Owner, repo.Repo, pageArtifactName(base, 1), runID),
+			g.DeleteCompletedArtifactsBeforeRun(ctx, repo.Owner, repo.Repo, pageArtifactName(base, 1), runID),
 		); err != nil {
 			// Deleting needs actions: write, which a workflow may not grant and a pull request
 			// from a fork never has. The outputs are written by now, so failing the run over

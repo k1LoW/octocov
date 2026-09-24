@@ -1219,3 +1219,58 @@ func TestDeleteRunArtifacts(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestDeleteCompletedArtifactsBeforeRun(t *testing.T) {
+	// An earlier run still in progress may yet link to the page it uploaded, so only the
+	// pages of the runs that have completed are deleted.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	page := func(id, runID int64) *github.Artifact {
+		return &github.Artifact{ID: new(id), Name: new("page.html"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(runID)}}
+	}
+	var deleted []int64
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposActionsArtifactsByOwnerByRepo,
+			github.ArtifactList{Artifacts: []*github.Artifact{page(1, 10), page(2, 20), page(3, 10)}},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposActionsRunsByOwnerByRepoByRunId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				status := "completed"
+				if path.Base(r.URL.Path) == "20" {
+					status = "in_progress"
+				}
+				if _, err := w.Write(mock.MustMarshal(github.WorkflowRun{Status: new(status)})); err != nil {
+					t.Error(err)
+				}
+			}),
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.DeleteReposActionsArtifactsByOwnerByRepoByArtifactId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				deleted = append(deleted, id)
+				w.WriteHeader(http.StatusNoContent)
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	if err := g.DeleteCompletedArtifactsBeforeRun(t.Context(), "owner", "repo", "page.html", 30); err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(deleted, []int64{1, 3}); diff != "" {
+		t.Error(diff)
+	}
+}
