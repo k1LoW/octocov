@@ -261,6 +261,31 @@ func TestFSFallsBackToTheNewestReportOfTheBaseBranch(t *testing.T) {
 	}
 }
 
+func TestFSFallsBackWhereTheMetadataPointsAtAReportGone(t *testing.T) {
+	// A re-run deletes the report the earlier attempt stored, and an attempt failing before its
+	// metadata is stored leaves the earlier metadata pointing at it.
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	c := newFakeClient()
+	c.add("octocov-report", reportFilename, "main", []byte(`{"commit":"base"}`))
+	m := &Metadata{Ref: "refs/heads/main", Commit: "gone"}
+	m.Report.ArtifactName = "octocov-report"
+	m.Report.ArtifactID = 999
+	b, err := json.Marshal(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	c.add("octocov-metadata-octocov-report@refs_heads_main", metadataFilename, "main", b)
+
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", BaseRef: "refs/heads/main"}}
+	got := readReport(t, a)
+	if want := `{"commit":"base"}`; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if want := "main"; c.askedBranch != want {
+		t.Errorf("got %v\nwant %v", c.askedBranch, want)
+	}
+}
+
 func TestFSReadsTheDefaultBranchWithoutAReport(t *testing.T) {
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	// As the central mode does, which has no report of its own to be compared.

@@ -1456,3 +1456,38 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 		})
 	}
 }
+
+func TestFetchArtifactOfAnArtifactGone(t *testing.T) {
+	// Metadata can outlive the report it points at, and the reader falls back on this error.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	tests := []struct {
+		name    string
+		handler http.HandlerFunc
+	}{
+		{"deleted", func(w http.ResponseWriter, r *http.Request) {
+			mock.WriteError(w, http.StatusNotFound, "Not Found")
+		}},
+		{"expired", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write(mock.MustMarshal(github.Artifact{ID: new(int64(1)), Expired: new(true)})) //nostyle:handlerrors
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatchHandler(mock.GetReposActionsArtifactsByOwnerByRepoByArtifactId, tt.handler),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+			if _, err := g.FetchArtifact(t.Context(), "owner", "repo", 1, "report.json"); !errors.Is(err, ErrArtifactNotFound) {
+				t.Errorf("got err %v\nwant %v", err, ErrArtifactNotFound)
+			}
+		})
+	}
+}

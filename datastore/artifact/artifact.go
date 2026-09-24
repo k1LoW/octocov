@@ -214,8 +214,9 @@ func headCommit(r *report.Report) string {
 
 // fetchReport returns the report of the artifacts of the name that the ref FS() reads stored
 // last, which is the one its metadata points at. A ref with no metadata, which is every ref
-// an octocov older than the metadata stored, is read from the newest artifact of the name a
-// run on its branch uploaded, so the reports of the other refs sharing the name stay out.
+// an octocov older than the metadata stored, or whose metadata points at a report no longer
+// there, is read from the newest artifact of the name a run on its branch uploaded, so the
+// reports of the other refs sharing the name stay out.
 func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name string) (*gh.ArtifactFile, error) {
 	ref, err := a.readRef(ctx, r)
 	if err != nil {
@@ -228,13 +229,19 @@ func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name strin
 		if err := json.Unmarshal(mf.Content, m); err != nil {
 			return nil, fmt.Errorf("failed to read the metadata of %s: %w", ref, err)
 		}
-		return a.gh.FetchArtifact(ctx, r.Owner, r.Repo, m.Report.ArtifactID, reportFilename)
+		af, err := a.gh.FetchArtifact(ctx, r.Owner, r.Repo, m.Report.ArtifactID, reportFilename)
+		// The report can be gone while its metadata is not. A re-run keeps the run id, and the
+		// upload of the report deletes the one the earlier attempt stored first, so an attempt
+		// that fails before storing the metadata leaves the earlier metadata pointing at nothing.
+		if !errors.Is(err, gh.ErrArtifactNotFound) {
+			return af, err
+		}
 	case errors.Is(err, gh.ErrArtifactNotFound):
-		branch, _ := strings.CutPrefix(ref, "refs/heads/")
-		return a.gh.FetchLatestArtifactOfBranch(ctx, r.Owner, r.Repo, name, reportFilename, branch)
 	default:
 		return nil, err
 	}
+	branch, _ := strings.CutPrefix(ref, "refs/heads/")
+	return a.gh.FetchLatestArtifactOfBranch(ctx, r.Owner, r.Repo, name, reportFilename, branch)
 }
 
 // readRef returns the ref FS() reads the report of, which is the one the report of this run

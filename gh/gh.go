@@ -892,11 +892,18 @@ func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name,
 	return nil, ErrArtifactNotFound
 }
 
-// FetchArtifact returns the file fp of the artifact of the id.
+// FetchArtifact returns the file fp of the artifact of the id. An artifact deleted or expired
+// is reported as ErrArtifactNotFound, as one that does not hold the file is.
 func (g *Gh) FetchArtifact(ctx context.Context, owner, repo string, id int64, fp string) (*ArtifactFile, error) {
-	a, _, err := g.client.Actions.GetArtifact(ctx, owner, repo, id)
+	a, res, err := g.client.Actions.GetArtifact(ctx, owner, repo, id)
 	if err != nil {
+		if res != nil && res.StatusCode == http.StatusNotFound {
+			return nil, fmt.Errorf("%w: artifact %d", ErrArtifactNotFound, id)
+		}
 		return nil, err
+	}
+	if a.GetExpired() {
+		return nil, fmt.Errorf("%w: artifact %d has expired", ErrArtifactNotFound, id)
 	}
 	af, err := g.downloadArtifactFile(ctx, owner, repo, a, fp)
 	if err != nil {
