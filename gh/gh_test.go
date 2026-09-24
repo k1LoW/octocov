@@ -728,8 +728,8 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			wantAligned: true,
 		},
 		{
-			name:    "a merge of another head keeps the lines of the pull request",
-			commit:  mergeSHA,
+			name:      "a merge of another head keeps the lines of the pull request",
+			commit:    mergeSHA,
 			parents:   []string{baseSHA, "other"},
 			want:      []int{5, 6},
 			wantPatch: prPatch,
