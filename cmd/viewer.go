@@ -183,9 +183,15 @@ func baseAligned(ctx context.Context, g *gh.Gh, repo *gh.Repository, n int, d *g
 	return mb != "" && mb == rPrev.Commit
 }
 
+// changedFiles returns the files the page draws as changed. A file the merge commit changes
+// nothing in is left out, since against the tree the coverage was measured on it is not
+// changed, and the page draws it as one whose coverage moved where the coverage did.
 func changedFiles(files []*gh.PullRequestFile) []*page.ChangedFile {
 	out := make([]*page.ChangedFile, 0, len(files))
 	for _, f := range files {
+		if f.UnchangedByMerge {
+			continue
+		}
 		out = append(out, &page.ChangedFile{
 			Filename:         f.Filename,
 			PreviousFilename: f.PreviousFilename,
@@ -217,6 +223,10 @@ func affectedSources(gitRoot string, r, rPrev *report.Report, files []*gh.PullRe
 	}
 	changed := map[string]bool{}
 	for _, f := range files {
+		// Not a changed file of the page either, so its text is what it is drawn from.
+		if f.UnchangedByMerge {
+			continue
+		}
 		changed[f.Filename] = true
 		if f.PreviousFilename != "" {
 			changed[f.PreviousFilename] = true

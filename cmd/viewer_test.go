@@ -13,6 +13,23 @@ import (
 	"github.com/k1LoW/octocov/report"
 )
 
+func TestChangedFilesLeaveOutWhatTheMergeDoesNotChange(t *testing.T) {
+	// A file whose patch is empty because the merge changes nothing in it is not a changed
+	// file of the tree the coverage was measured on, while one the API sent no patch for is.
+	got := changedFiles([]*gh.PullRequestFile{
+		{Filename: "a.go", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"},
+		{Filename: "large.go"},
+		{Filename: "merged.go", UnchangedByMerge: true},
+	})
+	var names []string
+	for _, f := range got {
+		names = append(names, f.Filename)
+	}
+	if diff := cmp.Diff(names, []string{"a.go", "large.go"}); diff != "" {
+		t.Error(diff)
+	}
+}
+
 func TestBaseLabel(t *testing.T) {
 	tests := []struct {
 		name string

@@ -860,6 +860,14 @@ func TestAlignChangedLines(t *testing.T) {
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("got diff (-got +want):\n%s", diff)
 			}
+			for _, f := range files {
+				// Only a file the merge diff leaves out while it is under the limit is one the
+				// merge changes nothing in.
+				want := len(tt.want[f.Filename]) == 0
+				if f.UnchangedByMerge != want {
+					t.Errorf("%s: got UnchangedByMerge %v, want %v", f.Filename, f.UnchangedByMerge, want)
+				}
+			}
 		})
 	}
 }

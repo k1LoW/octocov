@@ -353,6 +353,10 @@ type PullRequestFile struct {
 	Deletions        int
 	Patch            string
 	ChangedLines     []int // line numbers added or modified in the file (new-file line numbers)
+	// UnchangedByMerge says the merge commit changes nothing in the file against its first
+	// parent, as when the base branch already carries the same change. Patch is then empty for
+	// that reason rather than because the API left a large or binary file's patch out.
+	UnchangedByMerge bool
 }
 
 // ChangedLinesByFile converts a list of PullRequestFile into a map of filename to changed line numbers.
@@ -462,6 +466,7 @@ func alignChangedLines(files []*PullRequestFile, merged []*github.CommitFile) in
 		// same change.
 		f.Patch = ""
 		f.ChangedLines = nil
+		f.UnchangedByMerge = true
 	}
 	return kept
 }
