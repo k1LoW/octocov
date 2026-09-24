@@ -1,3 +1,4 @@
+timeout: 1min
 coverage:
   if: true
   acceptable: current >= 40%
