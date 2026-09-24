@@ -3,6 +3,7 @@ before:
   hooks:
     - go mod download
     - go mod tidy
+    - make page_bundle
 builds:
   -
     id: octocov-darwin
