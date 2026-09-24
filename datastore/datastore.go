@@ -272,6 +272,25 @@ func ArtifactName(datastores []string, r *report.Report) (string, bool) {
 	return "", false
 }
 
+// PageArtifactBase returns what the names of the pages of the report uploaded as artifacts are
+// built on, which is the name the report is stored under. The report may be stored in no
+// artifact at all, and then it is the name an artifact:// entry naming no artifact of its own
+// would store it under.
+func PageArtifactBase(datastores []string, r *report.Report) (string, error) {
+	n, ok := ArtifactName(datastores, r)
+	if !ok {
+		repo, err := gh.Parse(os.Getenv("GITHUB_REPOSITORY"))
+		if err != nil {
+			return "", err
+		}
+		n, ok = ArtifactName([]string{fmt.Sprintf("artifact://%s/%s", repo.Owner, repo.Repo)}, r)
+		if !ok {
+			return "", fmt.Errorf("the report of %s cannot be named as an artifact", r.Repository)
+		}
+	}
+	return n, nil
+}
+
 func NeedToShrink(u string) bool {
 	return strings.HasPrefix(u, "bq://")
 }

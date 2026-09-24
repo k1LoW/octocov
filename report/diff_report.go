@@ -280,8 +280,8 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 			// Each side by its own viewer, since each report names the ref its page is
 			// routed by, and only the compared side can have been read from somewhere the
 			// pages do not serve.
-			bc := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), prev.reportURL(d.ReportB))
-			ac := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), cur.reportURL(d.ReportA))
+			bc := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.B)), prev.CoverageURL(d.ReportB))
+			ac := linkCell(fmt.Sprintf("%.1f%%", floor1(d.Coverage.A)), cur.CoverageURL(d.ReportA))
 			table.Rich([]string{t, bc, ac, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 		}
 		if detail && d.Coverage.CoverageA != nil && d.Coverage.CoverageB != nil {
@@ -337,6 +337,12 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		if !detail {
 			t = "**Code to Test Ratio**"
 		}
+		if ratioB != "-" {
+			ratioB = linkCell(ratioB, prev.CodeToTestRatioURL(d.ReportB))
+		}
+		if ratioA != "-" {
+			ratioA = linkCell(ratioA, cur.CodeToTestRatioURL(d.ReportA))
+		}
 		table.Rich([]string{t, ratioB, ratioA, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
 
 		if detail && d.CodeToTestRatio.RatioA != nil && d.CodeToTestRatio.RatioB != nil {
@@ -362,10 +368,10 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 		ta := "-"
 		tb := "-"
 		if d.TestExecutionTime.A != nil {
-			ta = time.Duration(*d.TestExecutionTime.A).String()
+			ta = linkCell(time.Duration(*d.TestExecutionTime.A).String(), cur.TestExecutionTimeURL(d.ReportA))
 		}
 		if d.TestExecutionTime.B != nil {
-			tb = time.Duration(*d.TestExecutionTime.B).String()
+			tb = linkCell(time.Duration(*d.TestExecutionTime.B).String(), prev.TestExecutionTimeURL(d.ReportB))
 		}
 		dd := d.TestExecutionTime.Diff
 		ds := time.Duration(dd).String()

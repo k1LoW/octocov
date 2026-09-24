@@ -24,6 +24,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 		Summary           *Summary           `yaml:"summary,omitempty"`
 		Body              *Body              `yaml:"body,omitempty"`
 		Diff              *Diff              `yaml:"diff,omitempty"`
+		Viewer            *Viewer            `yaml:"viewer,omitempty"`
 		Timeout           string             `yaml:"timeout,omitempty"`
 		Locale            string             `yaml:"locale,omitempty"`
 	}{}
@@ -40,6 +41,7 @@ func (c *Config) UnmarshalYAML(data []byte) error {
 	c.Summary = s.Summary
 	c.Body = s.Body
 	c.Diff = s.Diff
+	c.Viewer = s.Viewer
 	if s.Timeout == "" {
 		s.Timeout = defaultTimeout
 	}

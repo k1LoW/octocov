@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -49,7 +50,7 @@ func TestParse(t *testing.T) {
 func TestFetchDefaultBranch(t *testing.T) {
 	mg := mockedGh(t)
 	want := "main"
-	got, err := mg.FetchDefaultBranch(context.TODO(), "owner", "repo")
+	got, err := mg.FetchDefaultBranch(t.Context(), "owner", "repo")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +64,7 @@ func TestFetchRawRootURL(t *testing.T) {
 	// The case under test is the github.com one, which an ambient value naming a GitHub
 	// Enterprise Server would answer before the tree is ever read.
 	t.Setenv("GITHUB_SERVER_URL", DefaultGithubServerURL)
-	ctx := context.TODO()
+	ctx := t.Context()
 	token, _, _, _ := factory.GetTokenAndEndpoints()
 	if token == "" {
 		t.Skip("no token")
@@ -105,7 +106,7 @@ func TestDetectCurrentBranch(t *testing.T) {
 		{"refs/heads/branch/branch/name", "", "branch/branch/name", false},
 		{"refs/pull/8/head", "mybranch", "mybranch", false},
 	}
-	ctx := context.TODO()
+	ctx := t.Context()
 	mg := mockedGh(t)
 	for _, tt := range tests {
 		t.Run(tt.GITHUB_REF, func(t *testing.T) {
@@ -146,7 +147,7 @@ func TestDetectCurrentPullRequestNumber(t *testing.T) {
 		// go after the head ref rather than after whatever GITHUB_REF holds.
 		{"base branch ref with a head ref", "", "refs/heads/main", "branch/branch/name", 13, false},
 	}
-	ctx := context.TODO()
+	ctx := t.Context()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Per case, since the mock serves each matched request once and more than one
@@ -430,7 +431,7 @@ func TestDetectCurrentPullRequestNumberSkipsForkPR(t *testing.T) {
 			}
 			g.SetClient(client)
 
-			got, err := g.DetectCurrentPullRequestNumber(context.TODO(), "owner", "repo")
+			got, err := g.DetectCurrentPullRequestNumber(t.Context(), "owner", "repo")
 			if err != nil {
 				if !tt.wantErr {
 					t.Errorf("got err: %v", err)
@@ -480,7 +481,7 @@ func TestListWorkflowJobs(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	jobs, err := g.listWorkflowJobs(context.TODO(), "owner", "repo", 1)
+	jobs, err := g.listWorkflowJobs(t.Context(), "owner", "repo", 1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -557,7 +558,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 
 			// The retry window spans tens of seconds, so end it through the context
 			// instead of waiting it out.
-			ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+			ctx, cancel := context.WithTimeout(t.Context(), 100*time.Millisecond)
 			defer cancel()
 
 			got, err := g.FetchStepsByName(ctx, "owner", "repo", tt.step)
@@ -707,6 +708,8 @@ func TestFetchPullRequestFiles(t *testing.T) {
 		parents     []string
 		commitFails bool
 		want        []int
+		wantPatch   string
+		wantParent  string
 		wantAligned bool
 	}{
 		{
@@ -714,30 +717,36 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			commit:      mergeSHA,
 			parents:     []string{baseSHA, headSHA},
 			want:        []int{8, 9},
+			wantPatch:   mergePatch,
+			wantParent:  baseSHA,
 			wantAligned: true,
 		},
 		{
 			name:        "the head keeps the lines of the pull request",
 			commit:      headSHA,
 			want:        []int{5, 6},
+			wantPatch:   prPatch,
 			wantAligned: true,
 		},
 		{
-			name:    "a merge of another head keeps the lines of the pull request",
-			commit:  mergeSHA,
-			parents: []string{baseSHA, "other"},
-			want:    []int{5, 6},
+			name:      "a merge of another head keeps the lines of the pull request",
+			commit:    mergeSHA,
+			parents:   []string{baseSHA, "other"},
+			want:      []int{5, 6},
+			wantPatch: prPatch,
 		},
 		{
 			name:        "a merge commit that cannot be looked up keeps the lines of the pull request",
 			commit:      mergeSHA,
 			commitFails: true,
 			want:        []int{5, 6},
+			wantPatch:   prPatch,
 		},
 		{
 			name:        "no commit keeps the lines of the pull request",
 			commit:      "",
 			want:        []int{5, 6},
+			wantPatch:   prPatch,
 			wantAligned: true,
 		},
 	}
@@ -785,15 +794,23 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			}
 			g.SetClient(client)
 
-			files, unaligned, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
+			got, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
 			if err != nil {
 				t.Fatal(err)
 			}
+			files, unaligned := got.Files, got.Unaligned
 			if len(files) != 1 {
 				t.Fatalf("got %d files, want 1", len(files))
 			}
 			if diff := cmp.Diff(files[0].ChangedLines, tt.want); diff != "" {
 				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+			// The page draws the patch beside the coverage, so it is numbered the same way.
+			if files[0].Patch != tt.wantPatch {
+				t.Errorf("got patch %q, want %q", files[0].Patch, tt.wantPatch)
+			}
+			if got.Parent != tt.wantParent {
+				t.Errorf("got parent %q, want %q", got.Parent, tt.wantParent)
 			}
 			if got := unaligned == ""; got != tt.wantAligned {
 				t.Errorf("got unaligned %q, want aligned %v", unaligned, tt.wantAligned)
@@ -804,7 +821,10 @@ func TestFetchPullRequestFiles(t *testing.T) {
 
 func TestAlignChangedLines(t *testing.T) {
 	merged := func(n int) []*github.CommitFile {
-		files := []*github.CommitFile{{Filename: new("a.go"), Patch: new("@@ -1,1 +1,2 @@\n l1\n+a")}}
+		files := []*github.CommitFile{{
+			Filename: new("a.go"), PreviousFilename: new("old.go"), Status: new("renamed"),
+			Additions: new(1), Deletions: new(0), Patch: new("@@ -1,1 +1,2 @@\n l1\n+a"),
+		}}
 		for i := len(files); i < n; i++ {
 			files = append(files, &github.CommitFile{Filename: new(strconv.Itoa(i) + ".go")})
 		}
@@ -831,7 +851,7 @@ func TestAlignChangedLines(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			files := []*PullRequestFile{
-				{Filename: "a.go", ChangedLines: []int{5}},
+				{Filename: "a.go", Status: "modified", Additions: 3, Deletions: 2, ChangedLines: []int{5}},
 				{Filename: "b.go", ChangedLines: []int{7}},
 			}
 			if kept := alignChangedLines(files, tt.merged); kept != tt.wantKept {
@@ -843,6 +863,19 @@ func TestAlignChangedLines(t *testing.T) {
 			}
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+			// The file the merge diff names is described by that diff throughout, since the page
+			// draws its counts and status beside the patch.
+			if a := files[0]; a.PreviousFilename != "old.go" || a.Status != "renamed" || a.Additions != 1 || a.Deletions != 0 {
+				t.Errorf("got %+v, want it described by the merge diff", a)
+			}
+			for _, f := range files {
+				// Only a file the merge diff leaves out while it is under the limit is one the
+				// merge changes nothing in.
+				want := len(tt.want[f.Filename]) == 0
+				if f.UnchangedByMerge != want {
+					t.Errorf("%s: got UnchangedByMerge %v, want %v", f.Filename, f.UnchangedByMerge, want)
+				}
 			}
 		})
 	}
@@ -885,7 +918,7 @@ func TestDetectCurrentPullRequestNumberClassifiesFailures(t *testing.T) {
 		{"env is not set", "", true},
 		{"pushed to a branch with no open pull request", "refs/heads/no-such-branch", true},
 	}
-	ctx := context.TODO()
+	ctx := t.Context()
 	mg := mockedGh(t)
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -965,7 +998,7 @@ func TestDeleteArtifactsBeforeRun(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	if err := g.DeleteArtifactsBeforeRun(context.TODO(), "owner", "repo", "octocov-report@refs_pull_1", 20); err != nil {
+	if err := g.DeleteArtifactsBeforeRun(t.Context(), "owner", "repo", "octocov-report@refs_pull_1", 20); err != nil {
 		t.Fatal(err)
 	}
 	want := []int64{3}
@@ -1005,7 +1038,285 @@ func TestDeleteArtifactsBeforeRunFails(t *testing.T) {
 	}
 	g.SetClient(client)
 
-	if err := g.DeleteArtifactsBeforeRun(context.TODO(), "owner", "repo", "octocov-report@refs_pull_1", 20); err == nil {
+	if err := g.DeleteArtifactsBeforeRun(t.Context(), "owner", "repo", "octocov-report@refs_pull_1", 20); err == nil {
 		t.Error("want err")
+	}
+}
+
+func TestArtifactURL(t *testing.T) {
+	tests := []struct {
+		serverURL string
+		want      string
+	}{
+		{"", "https://github.com/owner/repo/actions/runs/10/artifacts/20"},
+		{"https://github.com/", "https://github.com/owner/repo/actions/runs/10/artifacts/20"},
+		{"https://github.example.com", "https://github.example.com/owner/repo/actions/runs/10/artifacts/20"},
+	}
+	for _, tt := range tests {
+		t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
+		if got := ArtifactURL("owner", "repo", 10, 20); got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
+	}
+}
+
+func TestFetchMergeBase(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	var basehead string
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposPullsByOwnerByRepoByPullNumber,
+			github.PullRequest{
+				Base: &github.PullRequestBranch{SHA: new("base")},
+				Head: &github.PullRequestBranch{SHA: new("head")},
+			},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposCompareByOwnerByRepoByBasehead,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				basehead = path.Base(r.URL.Path)
+				_, _ = w.Write(mock.MustMarshal(github.CommitsComparison{ //nostyle:handlerrors
+					MergeBaseCommit: &github.RepositoryCommit{SHA: new("mergebase")},
+				}))
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	got, err := g.FetchMergeBase(t.Context(), "owner", "repo", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != "mergebase" {
+		t.Errorf("got %v\nwant %v", got, "mergebase")
+	}
+	if want := "base...head"; basehead != want {
+		t.Errorf("got %v\nwant %v", basehead, want)
+	}
+}
+
+func TestFindRunArtifactReadsEveryPage(t *testing.T) {
+	// A run with a large matrix holds more artifacts than one page does, and the one looked
+	// for can be on any of them.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	named := func(id int64, name string) *github.Artifact {
+		return &github.Artifact{ID: new(id), Name: new(name)}
+	}
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsRunsArtifactsByOwnerByRepoByRunId,
+			github.ArtifactList{Artifacts: []*github.Artifact{named(1, "a"), named(2, "b")}},
+			github.ArtifactList{Artifacts: []*github.Artifact{named(3, "octocov-report@refs_pull_1.html")}},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	a, err := g.findRunArtifact(t.Context(), "owner", "repo", 10, "octocov-report@refs_pull_1.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a == nil || a.GetID() != 3 {
+		t.Errorf("got %v\nwant the artifact on the second page", a)
+	}
+}
+
+func TestFetchChangedFilesCarryWhatTheFileCardsDraw(t *testing.T) {
+	// A run whose pull request cannot be looked up falls back to these, and the page draws
+	// each of them as a card with its status and its patch.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	t.Setenv("GITHUB_HEAD_REF", "feature")
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposByOwnerByRepo,
+			github.Repository{DefaultBranch: new("main")},
+		),
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposCompareByOwnerByRepoByBasehead,
+			github.CommitsComparison{Files: []*github.CommitFile{{
+				Filename: new("a.go"), Status: new("added"), Additions: new(1),
+				Patch: new("@@ -0,0 +1 @@\n+x"),
+			}}},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	files, err := g.FetchChangedFiles(t.Context(), "owner", "repo")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []*PullRequestFile{{Filename: "a.go", Status: "added", Additions: 1, Patch: "@@ -0,0 +1 @@\n+x", ChangedLines: []int{1}}}
+	if diff := cmp.Diff(files, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestDeleteRunArtifacts(t *testing.T) {
+	// The pages earlier attempts of a re-run uploaded are on any page of the run's listing,
+	// and only the ones the match names are deleted.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	named := func(id int64, name string) *github.Artifact {
+		return &github.Artifact{ID: new(id), Name: new(name)}
+	}
+	var deleted []int64
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsRunsArtifactsByOwnerByRepoByRunId,
+			github.ArtifactList{Artifacts: []*github.Artifact{named(1, "page.html"), named(2, "report")}},
+			github.ArtifactList{Artifacts: []*github.Artifact{named(3, "page@attempt_2.html")}},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.DeleteReposActionsArtifactsByOwnerByRepoByArtifactId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				deleted = append(deleted, id)
+				w.WriteHeader(http.StatusNoContent)
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	if err := g.DeleteRunArtifacts(t.Context(), "owner", "repo", 10, func(name string) bool {
+		return strings.HasPrefix(name, "page")
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(deleted, []int64{1, 3}); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestDeleteCompletedArtifactsBeforeRun(t *testing.T) {
+	// An earlier run still in progress may yet link to the page it uploaded, so only the
+	// pages of the runs that have completed are deleted.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	page := func(id, runID int64) *github.Artifact {
+		return &github.Artifact{ID: new(id), Name: new("page.html"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(runID)}}
+	}
+	var deleted []int64
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposActionsArtifactsByOwnerByRepo,
+			github.ArtifactList{Artifacts: []*github.Artifact{page(1, 10), page(2, 20), page(3, 10)}},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposActionsRunsByOwnerByRepoByRunId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				status := "completed"
+				if path.Base(r.URL.Path) == "20" {
+					status = "in_progress"
+				}
+				if _, err := w.Write(mock.MustMarshal(github.WorkflowRun{Status: new(status)})); err != nil {
+					t.Error(err)
+				}
+			}),
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.DeleteReposActionsArtifactsByOwnerByRepoByArtifactId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				deleted = append(deleted, id)
+				w.WriteHeader(http.StatusNoContent)
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	if err := g.DeleteCompletedArtifactsBeforeRun(t.Context(), "owner", "repo", "page.html", 30); err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(deleted, []int64{1, 3}); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestHasReports(t *testing.T) {
+	// A report an earlier run wrote is told by its signature, which is the key's.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposIssuesCommentsByOwnerByRepoByIssueNumber,
+			[]*github.IssueComment{{ID: new(int64(1)), Body: new("report\n<!-- octocov:sub -->")}},
+			[]*github.IssueComment{{ID: new(int64(1)), Body: new("report\n<!-- octocov:sub -->")}},
+		),
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposPullsByOwnerByRepoByPullNumber,
+			github.PullRequest{Body: new("text\n<!-- octocov -->\nreport\n<!-- octocov -->")},
+			github.PullRequest{Body: new("text\n<!-- octocov -->\nreport\n<!-- octocov -->")},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	for _, tt := range []struct {
+		name string
+		has  func(key string) (bool, error)
+		key  string
+		want bool
+	}{
+		{"a comment of the key", func(k string) (bool, error) { return g.HasCommentReport(t.Context(), "owner", "repo", 1, k) }, "sub", true},
+		{"a comment of another key", func(k string) (bool, error) { return g.HasCommentReport(t.Context(), "owner", "repo", 1, k) }, "", false},
+		{"a body of the key", func(k string) (bool, error) { return g.HasBodyReport(t.Context(), "owner", "repo", 1, k) }, "", true},
+		{"a body of another key", func(k string) (bool, error) { return g.HasBodyReport(t.Context(), "owner", "repo", 1, k) }, "sub", false},
+	} {
+		got, err := tt.has(tt.key)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != tt.want {
+			t.Errorf("%s: got %v, want %v", tt.name, got, tt.want)
+		}
 	}
 }

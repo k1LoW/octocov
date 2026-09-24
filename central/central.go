@@ -48,6 +48,8 @@ type Config struct {
 	CoverageBadge          BadgeRenderer
 	CodeToTestRatioBadge   BadgeRenderer
 	TestExecutionTimeBadge BadgeRenderer
+	// BadgeViewer is where the badges of the index link to, and nil links none.
+	BadgeViewer *report.Viewer
 }
 
 // BadgeRenderer renders the badge of a measured value to w. What the badge says about the
@@ -88,16 +90,23 @@ func (c *Central) Generate(ctx context.Context) ([]string, error) {
 	if err == nil && fi.IsDir() {
 		p = filepath.Join(c.config.Index, "README.md")
 	}
-	i, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-	if err != nil {
-		return nil, err
-	}
-	if err := c.renderIndex(i); err != nil {
+	if err := writeIndex(p, c.renderIndex); err != nil {
 		return nil, err
 	}
 	paths = append(paths, p)
 
 	return paths, nil
+}
+
+// writeIndex writes what render produces to p. It is rendered into memory first, so a render
+// that fails partway, as on a badge link a custom viewer cannot work out, leaves the index that
+// is already there rather than one cut off where the error was.
+func writeIndex(p string, render func(io.Writer) error) error {
+	buf := new(bytes.Buffer)
+	if err := render(buf); err != nil {
+		return err
+	}
+	return os.WriteFile(p, buf.Bytes(), 0644) // #nosec
 }
 
 func (c *Central) CollectedReports() []*report.Report {
@@ -327,16 +336,35 @@ func (c *Central) funcs() map[string]any {
 			}
 			return time.Duration(r.TestExecutionTimeNano()).String()
 		},
-		"badge": func(r *report.Report, alt, src string) string {
+		"badge": func(r *report.Report, kind, alt, src string) (string, error) {
 			img := fmt.Sprintf("![%s](%s)", alt, src)
-			if !c.artifactBacked[r.Repository] {
-				return img
+			v := c.config.BadgeViewer
+			var u string
+			switch {
+			case v.ReadsArtifacts():
+				if !c.artifactBacked[r.Repository] {
+					return img, nil
+				}
+				// The pages have one per report rather than one per metric, so every badge
+				// opens the same one.
+				u = v.CoverageURL(r)
+			case kind == "coverage":
+				u = v.CoverageURL(r)
+			case kind == "ratio":
+				u = v.CodeToTestRatioURL(r)
+			case kind == "time":
+				u = v.TestExecutionTimeURL(r)
+			default:
+				return "", fmt.Errorf("unknown badge: %s", kind)
 			}
-			u := r.ViewerURL()
+
+			if err := v.Err(); err != nil {
+				return "", err
+			}
 			if u == "" {
-				return img
+				return img, nil
 			}
-			return fmt.Sprintf("[%s](%s)", img, u)
+			return fmt.Sprintf("[%s](%s)", img, u), nil
 		},
 	}
 }

@@ -120,6 +120,7 @@ var rootCmd = &cobra.Command{
 				CoverageBadge:          c.Central.Badges.Coverage.RenderCoverage,
 				CodeToTestRatioBadge:   c.Central.Badges.CodeToTestRatio.RenderCodeToTestRatio,
 				TestExecutionTimeBadge: c.Central.Badges.TestExecutionTime.RenderTestExecutionTime,
+				BadgeViewer:            resolveBadgeViewer(ctx, cmd.ErrOrStderr(), c),
 			})
 
 			paths, err := ctr.Generate(ctx)
@@ -373,24 +374,39 @@ var rootCmd = &cobra.Command{
 		// The three pull request outputs and the patch coverage measurement all read the same
 		// changed file list, and each fetch is paginated over up to 3000 files. Fetch it at
 		// most once, and only if one of them actually asks for it.
-		pullRequestFiles := sync.OnceValues(func() ([]*gh.PullRequestFile, error) {
-			return fetchPullRequestFiles(ctx, cmd, c.Repository, r.Commit)
+		pullRequestDiff := sync.OnceValues(func() (*gh.PullRequestFiles, error) {
+			return fetchPullRequestDiff(ctx, cmd, c.Repository, r.Commit)
 		})
-
-		// Resolved at most once, since the readiness check inside reaches the API and the
-		// three outputs share the answer.
-		storedArtifact := sync.OnceValue(func() *report.Viewer {
-			return storedArtifactViewer(c, r)
-		})
-		coverageViewers := func(hide bool) (cur, prev *report.Viewer) {
-			if hide {
-				return nil, nil
+		pullRequestFiles := func() ([]*gh.PullRequestFile, error) {
+			d, err := pullRequestDiff()
+			if err != nil {
+				return nil, err
 			}
-			return viewersFor(storedArtifact(), comparedArtifact)
+			return d.Files, nil
+		}
+
+		// Each readiness check reaches the API, and whether any output is going to be written
+		// decides whether there is anything to link from, so each is checked once up front.
+		commentReady := c.CommentConfigReady()
+		summaryReady := c.SummaryConfigReady()
+		bodyReady := c.BodyConfigReady()
+		var (
+			cur, prev *report.Viewer
+			cleanup   func()
+		)
+		if commentReady == nil || summaryReady == nil || bodyReady == nil {
+			cur, prev, cleanup = resolveViewers(ctx, cmd.ErrOrStderr(), c, r, rPrev, comparedArtifact, pullRequestDiff)
+		}
+		// Whether every output that was attempted got written, which is part of what the pages
+		// earlier runs uploaded may be deleted on. An output left as it was still links to one
+		// of them.
+		written := true
+		viewerErr := func() error {
+			return errors.Join(cur.Err(), prev.Err())
 		}
 
 		// Comment report to pull request
-		if err := c.CommentConfigReady(); err != nil {
+		if err := commentReady; err != nil {
 			cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
 		} else {
 			if err := func() error {
@@ -405,9 +421,11 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				cur, prev := coverageViewers(c.Comment.HideCoverageLink)
 				content, err := createReportContent(c, r, rPrev, files, c.Comment.Message, c.Comment.HideFooterLink, c.Comment.ExpandDetails, cur, prev)
 				if err != nil {
+					return err
+				}
+				if err := viewerErr(); err != nil {
 					return err
 				}
 				if err := commentReport(ctx, c, content, r.Key()); err != nil {
@@ -415,12 +433,13 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
+				written = false
 				cmd.PrintErrf("Skip commenting report to pull request: %v\n", err)
 			}
 		}
 
 		// Add report to job summary page
-		if err := c.SummaryConfigReady(); err != nil {
+		if err := summaryReady; err != nil {
 			cmd.PrintErrf("Skip adding report to job summary page: %v\n", err)
 		} else {
 			if err := func() error {
@@ -435,9 +454,11 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				cur, prev := coverageViewers(c.Summary.HideCoverageLink)
 				content, err := createReportContent(c, r, rPrev, files, c.Summary.Message, c.Summary.HideFooterLink, c.Summary.ExpandDetails, cur, prev)
 				if err != nil {
+					return err
+				}
+				if err := viewerErr(); err != nil {
 					return err
 				}
 				if err := addReportContentToSummary(content); err != nil {
@@ -445,12 +466,13 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
+				written = false
 				cmd.PrintErrf("Skip adding report to job summary page: %v\n", err)
 			}
 		}
 
 		// Insert report to body of pull request
-		if err := c.BodyConfigReady(); err != nil {
+		if err := bodyReady; err != nil {
 			cmd.PrintErrf("Skip inserting report to body of pull request: %v\n", err)
 		} else {
 			if err := func() error {
@@ -465,9 +487,11 @@ var rootCmd = &cobra.Command{
 				if err != nil {
 					return err
 				}
-				cur, prev := coverageViewers(c.Body.HideCoverageLink)
 				content, err := createReportContent(c, r, rPrev, files, c.Body.Message, c.Body.HideFooterLink, c.Body.ExpandDetails, cur, prev)
 				if err != nil {
+					return err
+				}
+				if err := viewerErr(); err != nil {
 					return err
 				}
 				if err := replaceInsertReportToBody(ctx, c, content, r.Key()); err != nil {
@@ -475,8 +499,15 @@ var rootCmd = &cobra.Command{
 				}
 				return nil
 			}(); err != nil {
+				written = false
 				cmd.PrintErrf("Skip inserting report to body of pull request: %v\n", err)
 			}
+		}
+
+		if cleanup != nil && mayDeleteEarlierPages(c, commentReady, bodyReady, written, func() bool {
+			return earlierOutputsLeft(ctx, c, r)
+		}) {
+			cleanup()
 		}
 
 		// Measure patch coverage before storing the report, because storing the report shrinks
@@ -559,6 +590,16 @@ var rootCmd = &cobra.Command{
 // over the changed lines it carries, so those are numbered as the lines of commit, the commit
 // the coverage was measured on.
 func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository, commit string) ([]*gh.PullRequestFile, error) {
+	d, err := fetchPullRequestDiff(ctx, cmd, repository, commit)
+	if err != nil {
+		return nil, err
+	}
+	return d.Files, nil
+}
+
+// fetchPullRequestDiff is fetchPullRequestFiles with what the page it is drawn on needs to know
+// besides the files, which is which commits the two sides of the patches are numbered as.
+func fetchPullRequestDiff(ctx context.Context, cmd *cobra.Command, repository, commit string) (*gh.PullRequestFiles, error) {
 	repo, err := gh.Parse(repository)
 	if err != nil {
 		return nil, err
@@ -576,19 +617,23 @@ func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository, 
 			// simply is not a pull request, which is the ordinary way to reach this.
 			cmd.PrintErrf("Could not look up the current pull request, comparing against the default branch instead: %v\n", err)
 		}
-		return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
+		files, err := g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
+		if err != nil {
+			return nil, err
+		}
+		return &gh.PullRequestFiles{Files: files, Unaligned: "the changed files are those since the default branch rather than those of a pull request"}, nil
 	}
-	files, unaligned, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
+	d, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
 	if err != nil {
 		return nil, err
 	}
-	if unaligned != "" {
+	if d.Unaligned != "" {
 		// The table and the `patch` variable still read these lines, so the job log is the one
 		// place that can say some of them may be other lines than the ones the pull request
 		// changed.
-		cmd.PrintErrf("Patch coverage may be measured over lines other than the changed ones, since some changed lines are numbered as the pull request head's rather than as commit %s's: %s\n", commit, unaligned)
+		cmd.PrintErrf("Patch coverage may be measured over lines other than the changed ones, since some changed lines are numbered as the pull request head's rather than as commit %s's: %s\n", commit, d.Unaligned)
 	}
-	return files, nil
+	return d, nil
 }
 
 func printMetrics(cmd *cobra.Command) error {
@@ -651,34 +696,6 @@ func init() {
 	rootCmd.Flags().StringVarP(&configPath, "config", "", "", "config file path")
 	rootCmd.Flags().StringVarP(&reportPath, "report", "r", "", "coverage report file path")
 	rootCmd.Flags().BoolVarP(&createTable, "create-bq-table", "", false, "create table of BigQuery dataset")
-}
-
-// storedArtifactViewer returns the viewer for the artifact this run stores its report in,
-// and nil when it stores none. The pages the coverage cells link to read the report out of
-// a GitHub Actions artifact, so the links have to be gated on the same readiness that
-// decides whether the report is stored at all. Gating on the configured datastores alone
-// would keep linking on a run whose report.if: holds the storing back, at an artifact
-// nothing ever writes.
-func storedArtifactViewer(c *config.Config, r *report.Report) *report.Viewer {
-	if err := c.ReportConfigReady(); err != nil {
-		return nil
-	}
-	name, ok := datastore.ArtifactName(c.Report.Datastores, r)
-	if !ok {
-		return nil
-	}
-	return report.NewViewer(name)
-}
-
-// viewersFor pairs the viewer of the report being described with the one of the report it
-// is compared against. The compared side follows the current one, so that a link appears
-// only on a run that stores a report in an artifact of its own, and then only when the
-// comparison was read out of an artifact too.
-func viewersFor(stored *report.Viewer, comparedArtifact string) (cur, prev *report.Viewer) {
-	if stored == nil {
-		return nil, nil
-	}
-	return stored, report.NewViewer(comparedArtifact)
 }
 
 func reportToDatastores(ctx context.Context, c *config.Config, datastores []string, r *report.Report) error {
