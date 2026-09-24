@@ -8,7 +8,7 @@ else
 endif
 
 export GO111MODULE=on
-export CGO_ENABLED=1
+export CGO_ENABLED=0
 
 BUILD_LDFLAGS = -X $(PKG).commit=$(COMMIT) -X $(PKG).date=$(DATE)
 
