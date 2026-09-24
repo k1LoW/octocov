@@ -177,6 +177,30 @@ func TestCustomViewer(t *testing.T) {
 	}
 }
 
+func TestCustomViewerKey(t *testing.T) {
+	// The key is the report's own path under owner/repo, including in the central mode, where
+	// the report is of another repository than GITHUB_REPOSITORY.
+	t.Setenv("GITHUB_REPOSITORY", "k1LoW/central")
+	v := NewCustomViewer(customLinks(t, "    coverage: 'report.key'\n"), false)
+	tests := []struct {
+		repository string
+		want       string
+	}{
+		{"k1LoW/central", ""},
+		{"k1LoW/central/sub/dir", "sub/dir"},
+		{"k1LoW/tbls", ""},
+		{"k1LoW/monorepo/services/a", "services/a"},
+	}
+	for _, tt := range tests {
+		if got := v.CoverageURL(&Report{Repository: tt.repository}); got != tt.want {
+			t.Errorf("%s: got %q\nwant %q", tt.repository, got, tt.want)
+		}
+	}
+	if err := v.Err(); err != nil {
+		t.Error(err)
+	}
+}
+
 func TestCustomViewerErr(t *testing.T) {
 	v := NewCustomViewer(customLinks(t, "    coverage: '1'\n"), false)
 	if got := v.CoverageURL(&Report{}); got != "" {

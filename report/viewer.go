@@ -99,7 +99,7 @@ func NewCustomViewer(links *config.CustomLinks, isBase bool) *Viewer {
 		}
 		vars := map[string]any{
 			"report": map[string]any{
-				"key":     r.Key(),
+				"key":     repositoryKey(r),
 				"ref":     r.Ref,
 				"commit":  r.Commit,
 				"is_base": isBase,
@@ -124,6 +124,18 @@ func NewCustomViewer(links *config.CustomLinks, isBase bool) *Viewer {
 			return link(config.LinkTestExecutionTime, r, nil)
 		},
 	}
+}
+
+// repositoryKey returns the key of the report within its repository, which is the path under
+// owner/repo. It is read off the report's own repository rather than off Report.Key, which is
+// relative to GITHUB_REPOSITORY, since in the central mode the reports are of other
+// repositories than the one running.
+func repositoryKey(r *Report) string {
+	repo, err := gh.Parse(r.Repository)
+	if err != nil {
+		return ""
+	}
+	return repo.Path
 }
 
 // ReadsArtifacts reports whether the pages linked to read the report out of the artifacts
