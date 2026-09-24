@@ -504,7 +504,9 @@ var rootCmd = &cobra.Command{
 			}
 		}
 
-		if cleanup != nil && mayDeleteEarlierPages(c, commentReady, bodyReady, written) {
+		if cleanup != nil && mayDeleteEarlierPages(c, commentReady, bodyReady, written, func() bool {
+			return earlierOutputsLeft(ctx, c, r)
+		}) {
 			cleanup()
 		}
 

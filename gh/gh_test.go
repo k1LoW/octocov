@@ -1274,3 +1274,49 @@ func TestDeleteCompletedArtifactsBeforeRun(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestHasReports(t *testing.T) {
+	// A report an earlier run wrote is told by its signature, which is the key's.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposIssuesCommentsByOwnerByRepoByIssueNumber,
+			[]*github.IssueComment{{ID: new(int64(1)), Body: new("report\n<!-- octocov:sub -->")}},
+			[]*github.IssueComment{{ID: new(int64(1)), Body: new("report\n<!-- octocov:sub -->")}},
+		),
+		mock.WithRequestMatch( //nostyle:funcfmt
+			mock.GetReposPullsByOwnerByRepoByPullNumber,
+			github.PullRequest{Body: new("text\n<!-- octocov -->\nreport\n<!-- octocov -->")},
+			github.PullRequest{Body: new("text\n<!-- octocov -->\nreport\n<!-- octocov -->")},
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	for _, tt := range []struct {
+		name string
+		has  func(key string) (bool, error)
+		key  string
+		want bool
+	}{
+		{"a comment of the key", func(k string) (bool, error) { return g.HasCommentReport(t.Context(), "owner", "repo", 1, k) }, "sub", true},
+		{"a comment of another key", func(k string) (bool, error) { return g.HasCommentReport(t.Context(), "owner", "repo", 1, k) }, "", false},
+		{"a body of the key", func(k string) (bool, error) { return g.HasBodyReport(t.Context(), "owner", "repo", 1, k) }, "", true},
+		{"a body of another key", func(k string) (bool, error) { return g.HasBodyReport(t.Context(), "owner", "repo", 1, k) }, "sub", false},
+	} {
+		got, err := tt.has(tt.key)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != tt.want {
+			t.Errorf("%s: got %v, want %v", tt.name, got, tt.want)
+		}
+	}
+}

@@ -40,19 +40,23 @@ func TestMayDeleteEarlierPages(t *testing.T) {
 		commentReady error
 		bodyReady    error
 		written      bool
+		left         bool
 		want         bool
 	}{
-		{"every output written", &config.Config{Comment: &config.Comment{}, Body: &config.Body{}}, nil, nil, true, true},
-		{"an output failed", &config.Config{Comment: &config.Comment{}}, nil, nil, false, false},
+		{"every output written", &config.Config{Comment: &config.Comment{}, Body: &config.Body{}}, nil, nil, true, false, true},
+		{"an output failed", &config.Config{Comment: &config.Comment{}}, nil, nil, false, false, false},
 		// The comment an earlier run wrote is left as it was, with its link.
-		{"a configured comment was not attempted", &config.Config{Comment: &config.Comment{}}, skipped, nil, true, false},
-		{"a configured body was not attempted", &config.Config{Body: &config.Body{}}, nil, skipped, true, false},
+		{"a configured comment was not attempted", &config.Config{Comment: &config.Comment{}}, skipped, nil, true, false, false},
+		{"a configured body was not attempted", &config.Config{Body: &config.Body{}}, nil, skipped, true, false, false},
 		// Nothing an earlier run wrote is there to keep a link.
-		{"no comment is configured", &config.Config{}, errors.New("comment: is not set"), errors.New("body: is not set"), true, true},
+		{"no comment or body is left", &config.Config{}, errors.New("comment: is not set"), errors.New("body: is not set"), true, false, true},
+		// One taken out of the config is still on the pull request with its link.
+		{"a comment is left from before", &config.Config{Body: &config.Body{}}, errors.New("comment: is not set"), nil, true, true, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := mayDeleteEarlierPages(tt.c, tt.commentReady, tt.bodyReady, tt.written); got != tt.want {
+			left := func() bool { return tt.left }
+			if got := mayDeleteEarlierPages(tt.c, tt.commentReady, tt.bodyReady, tt.written, left); got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
 		})

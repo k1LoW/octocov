@@ -910,6 +910,26 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 	return r.GetPrivate(), nil
 }
 
+// HasCommentReport reports whether the pull request has a comment octocov wrote a report of key
+// into.
+func (g *Gh) HasCommentReport(ctx context.Context, owner, repo string, number int, key string) (bool, error) {
+	id, err := g.findPreviousComment(ctx, owner, repo, number, generateSig(key))
+	if err != nil {
+		return false, err
+	}
+	return id != 0, nil
+}
+
+// HasBodyReport reports whether the body of the pull request carries a report of key octocov
+// inserted into it.
+func (g *Gh) HasBodyReport(ctx context.Context, owner, repo string, number int, key string) (bool, error) {
+	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
+	if err != nil {
+		return false, err
+	}
+	return strings.Contains(pr.GetBody(), generateSig(key)), nil
+}
+
 // DeleteRunArtifacts deletes the artifacts of the workflow run whose name match reports true
 // for, as the ones earlier attempts of a re-run uploaded.
 func (g *Gh) DeleteRunArtifacts(ctx context.Context, owner, repo string, runID int64, match func(name string) bool) error {

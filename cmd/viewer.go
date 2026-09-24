@@ -179,9 +179,11 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 // output that lasts past this run is left linking to one of them. written says whether every
 // output that was attempted got written. A comment or a body that is configured and was not
 // attempted, as where its if: does not hold on this run, is left as an earlier run wrote it,
-// with its links. The job summary is not counted, since each run has one of its own and this
-// run's leaves the earlier ones as they are either way.
-func mayDeleteEarlierPages(c *config.Config, commentReady, bodyReady error, written bool) bool {
+// with its links. One that is not configured may still be there from before it was taken out
+// of the config, which left reports whether it is, and is only asked when nothing else decides.
+// The job summary is not counted, since each run has one of its own and this run's leaves the
+// earlier ones as they are either way.
+func mayDeleteEarlierPages(c *config.Config, commentReady, bodyReady error, written bool, left func() bool) bool {
 	if !written {
 		return false
 	}
@@ -191,7 +193,40 @@ func mayDeleteEarlierPages(c *config.Config, commentReady, bodyReady error, writ
 	if c.Body != nil && bodyReady != nil {
 		return false
 	}
+	if (c.Comment == nil || c.Body == nil) && left() {
+		return false
+	}
 	return true
+}
+
+// earlierOutputsLeft reports whether the pull request still carries a comment or a body report
+// of r that an earlier run wrote while this config does not write it, answering true where
+// that cannot be told, since a page deleted under a link is worse than one left to its
+// retention.
+func earlierOutputsLeft(ctx context.Context, c *config.Config, r *report.Report) bool {
+	n, ok := pullRequestNumber(r)
+	if !ok {
+		return true
+	}
+	repo, err := gh.Parse(os.Getenv("GITHUB_REPOSITORY"))
+	if err != nil {
+		return true
+	}
+	g, err := gh.New()
+	if err != nil {
+		return true
+	}
+	if c.Comment == nil {
+		if found, err := g.HasCommentReport(ctx, repo.Owner, repo.Repo, n, r.Key()); err != nil || found {
+			return true
+		}
+	}
+	if c.Body == nil {
+		if found, err := g.HasBodyReport(ctx, repo.Owner, repo.Repo, n, r.Key()); err != nil || found {
+			return true
+		}
+	}
+	return false
 }
 
 // pageArtifactName returns the name the page is uploaded as on the given attempt of the run.
