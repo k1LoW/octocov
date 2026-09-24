@@ -115,7 +115,8 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 		RootPath: c.GitRoot,
 		// Where the patches could not be numbered like the report, the page draws no head
 		// gutter rather than one beside other lines.
-		Aligned: d.Unaligned == "",
+		Aligned:   d.Unaligned == "",
+		ServerURL: os.Getenv("GITHUB_SERVER_URL"),
 		Base: page.Base{
 			Report:   rPrev,
 			RootPath: c.GitRoot,

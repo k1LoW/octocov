@@ -92,7 +92,7 @@ func TestRenderChangesUnrenderable(t *testing.T) {
 		Report:  r,
 		Aligned: true,
 		Base:    Base{Report: testReport("b", 5), Label: "main", Aligned: true},
-		Files:  []*ChangedFile{{Filename: "report/report.go", Status: "modified", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"}},
+		Files:   []*ChangedFile{{Filename: "report/report.go", Status: "modified", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"}},
 	}
 	if _, err := RenderChanges(t.Context(), "", in); !errors.Is(err, ErrUnrenderable) {
 		t.Errorf("got %v, want %v", err, ErrUnrenderable)
@@ -116,6 +116,28 @@ func TestRenderChangesWithoutTheHeadGutter(t *testing.T) {
 	}
 	if !got.Anchors[report.FileAnchor("report/report.go")] {
 		t.Error("the card of the changed file is not drawn")
+	}
+}
+
+func TestRenderChangesLinksTheServerOfTheRepository(t *testing.T) {
+	// A GitHub Enterprise Server run links the commits to its own server, not to github.com.
+	in := &ChangesInput{
+		Report:    testReport("a", 7),
+		Aligned:   true,
+		ServerURL: "https://github.example.com",
+		Base:      Base{Report: testReport("b", 5), Label: "main", Aligned: true},
+		Files:     []*ChangedFile{{Filename: "report/report.go", Status: "modified", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"}},
+	}
+	got, err := RenderChanges(t.Context(), "", in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	page := string(got.HTML)
+	if want := `href="https://github.example.com/k1LoW/octocov/commit/` + strings.Repeat("a", 40) + `"`; !strings.Contains(page, want) {
+		t.Errorf("the page does not carry %s", want)
+	}
+	if strings.Contains(page, `href="https://github.com/`) {
+		t.Error("the page links to github.com")
 	}
 }
 
