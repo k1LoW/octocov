@@ -86,10 +86,10 @@ func TestArtifactName(t *testing.T) {
 		want       string
 		wantOK     bool
 	}{
-		{"the default artifact name of a pull request", []string{"artifact://k1LoW/octocov"}, "octocov-report@refs_pull_722", true},
-		{"a configured artifact name", []string{"artifact://k1LoW/octocov/mine"}, "mine@refs_pull_722", true},
-		{"the artifacts scheme spelled in the plural", []string{"artifacts://k1LoW/octocov"}, "octocov-report@refs_pull_722", true},
-		{"the first artifact datastore wins", []string{"s3://bucket/prefix", "artifact://k1LoW/octocov", "artifact://k1LoW/octocov/other"}, "octocov-report@refs_pull_722", true},
+		{"a pull request keeps the default artifact name", []string{"artifact://k1LoW/octocov"}, "octocov-report", true},
+		{"a configured artifact name", []string{"artifact://k1LoW/octocov/mine"}, "mine", true},
+		{"the artifacts scheme spelled in the plural", []string{"artifacts://k1LoW/octocov"}, "octocov-report", true},
+		{"the first artifact datastore wins", []string{"s3://bucket/prefix", "artifact://k1LoW/octocov", "artifact://k1LoW/octocov/other"}, "octocov-report", true},
 		{"no artifact datastore leaves no name", []string{"s3://bucket/prefix", "bq://project/dataset/table"}, "", false},
 		{"no datastore at all leaves no name", nil, "", false},
 		{"an unparsable datastore is passed over", []string{"artifact://k1LoW"}, "", false},
@@ -118,5 +118,68 @@ func TestArtifactName(t *testing.T) {
 				t.Errorf("got %v\nwant %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestMetadataArtifactName(t *testing.T) {
+	tests := []struct {
+		name        string
+		datastores  []string
+		ref         string
+		pullRequest int
+		want        string
+		wantOK      bool
+	}{
+		{"a pull request is looked up by its number", []string{"artifact://k1LoW/octocov"}, "refs/pull/722/merge", 722, "octocov-metadata-octocov-report@refs_pull_722", true},
+		{"the default branch is looked up by its name", []string{"artifact://k1LoW/octocov"}, "refs/heads/main", 0, "octocov-metadata-octocov-report@refs_heads_main", true},
+		{"a configured artifact name is carried whole", []string{"artifact://k1LoW/octocov/mine"}, "refs/heads/main", 0, "octocov-metadata-mine@refs_heads_main", true},
+		{"a run with no ref has no metadata", []string{"artifact://k1LoW/octocov"}, "", 0, "", false},
+		{"no artifact datastore has no metadata", []string{"s3://bucket/prefix"}, "refs/heads/main", 0, "", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+			r := &report.Report{
+				Repository:  "k1LoW/octocov",
+				Ref:         tt.ref,
+				BaseRef:     "refs/heads/main",
+				PullRequest: tt.pullRequest,
+			}
+			got, ok := MetadataArtifactName(tt.datastores, r)
+			if ok != tt.wantOK {
+				t.Fatalf("got ok %v\nwant %v", ok, tt.wantOK)
+			}
+			if got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPageArtifactBase(t *testing.T) {
+	// The pages of each pull request keep a name of their own, since the pages earlier runs
+	// uploaded are deleted by it.
+	t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+	r := &report.Report{
+		Repository:  "k1LoW/octocov",
+		Ref:         "refs/pull/722/merge",
+		BaseRef:     "refs/heads/main",
+		PullRequest: 722,
+	}
+	for _, tt := range []struct {
+		datastores []string
+		want       string
+	}{
+		{[]string{"artifact://k1LoW/octocov"}, "octocov-report@refs_pull_722"},
+		{[]string{"artifact://k1LoW/octocov/mine"}, "mine@refs_pull_722"},
+		{[]string{"s3://bucket/prefix"}, "octocov-report@refs_pull_722"},
+	} {
+		got, err := PageArtifactBase(tt.datastores, r)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got != tt.want {
+			t.Errorf("got %v\nwant %v", got, tt.want)
+		}
 	}
 }

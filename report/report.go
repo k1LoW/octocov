@@ -91,9 +91,10 @@ func New(ownerrepo string, opts ...Option) (*Report, error) {
 }
 
 // DetectRef fills in the pull request number and the base ref of the current run.
-// Both are recorded in the report and decide where it is stored, so that a report of
-// a ref other than the default branch does not overwrite the one that comparisons and
-// the central mode read.
+// Both are recorded in the report. They decide where a datastore storing by path puts it
+// and which ref an artifact datastore stores its metadata for, so that a report of a ref
+// other than the default branch is not read as the one that comparisons and the central
+// mode are after.
 func (r *Report) DetectRef(ctx context.Context) error {
 	if r.Repository == "" {
 		return fmt.Errorf("env %s is not set", "GITHUB_REPOSITORY")
@@ -138,6 +139,17 @@ func isPullRequestEvent() bool {
 	return os.Getenv("GITHUB_PULL_REQUEST_NUMBER") != "" ||
 		os.Getenv("GITHUB_HEAD_REF") != "" ||
 		strings.HasPrefix(os.Getenv("GITHUB_REF"), "refs/pull/")
+}
+
+// RunRef returns the ref the run that took the report was on, the pull request where it was
+// one and the branch or the tag otherwise. Unlike RefKey it names the default branch as well,
+// since it is what the metadata of a report stored as an artifact is looked up by, and the
+// default branch is the ref looked up most. It is empty when the run carried no ref.
+func (r *Report) RunRef() string {
+	if r.PullRequest > 0 {
+		return fmt.Sprintf("refs/pull/%d", r.PullRequest)
+	}
+	return NormalizeRef(r.Ref)
 }
 
 // RefKey returns the key that separates this report from the reports of other refs in

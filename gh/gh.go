@@ -826,13 +826,22 @@ func (g *Gh) DeleteCompletedArtifactsBeforeRun(ctx context.Context, owner, repo,
 }
 
 type ArtifactFile struct {
+	ID        int64
 	Name      string
 	Content   []byte
 	CreatedAt time.Time
 }
 
+// ErrArtifactNotFound is returned when no artifact holds the file asked for.
+var ErrArtifactNotFound = errors.New("artifact not found")
+
 func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*ArtifactFile, error) {
-	const maxRedirect = 5
+	return g.FetchLatestArtifactOfBranch(ctx, owner, repo, name, fp, "")
+}
+
+// FetchLatestArtifactOfBranch is FetchLatestArtifact for the artifacts that a workflow run on
+// branch uploaded, or for all of them when branch is empty.
+func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name, fp, branch string) (*ArtifactFile, error) {
 	page := 1
 	for {
 		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListArtifactsOptions{
@@ -847,59 +856,50 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 		}
 		page += 1
 		for _, a := range l.Artifacts {
-			u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), maxRedirect)
+			if branch != "" && a.GetWorkflowRun().GetHeadBranch() != branch {
+				continue
+			}
+			af, err := g.downloadArtifactFile(ctx, owner, repo, a, fp)
 			if err != nil {
 				return nil, err
 			}
-			resp, err := http.Get(u.String())
-			if err != nil {
-				return nil, err
-			}
-			buf := new(bytes.Buffer)
-			size, err := io.CopyN(buf, resp.Body, maxCopySize)
-			if !errors.Is(err, io.EOF) {
-				return nil, err
-			}
-			if size >= maxCopySize {
-				return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
-			}
-			reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
-			if err != nil {
-				return nil, err
-			}
-			for _, file := range reader.File {
-				if file.Name != fp {
-					continue
-				}
-				in, err := file.Open()
-				if err != nil {
-					return nil, err
-				}
-				out := new(bytes.Buffer)
-				size, err := io.CopyN(out, in, maxCopySize)
-				if !errors.Is(err, io.EOF) {
-					_ = in.Close() //nostyle:handlerrors
-					return nil, err
-				}
-				if size >= maxCopySize {
-					_ = in.Close() //nostyle:handlerrors
-					return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
-				}
-				if err := in.Close(); err != nil {
-					return nil, err
-				}
-				return &ArtifactFile{
-					Name:      file.Name,
-					Content:   out.Bytes(),
-					CreatedAt: a.CreatedAt.Time,
-				}, nil
+			if af != nil {
+				return af, nil
 			}
 		}
 		if res.NextPage == 0 {
 			break
 		}
 	}
-	return nil, errors.New("artifact not found")
+	return nil, ErrArtifactNotFound
+}
+
+// FetchArtifact returns the file fp of the artifact of the id.
+func (g *Gh) FetchArtifact(ctx context.Context, owner, repo string, id int64, fp string) (*ArtifactFile, error) {
+	a, _, err := g.client.Actions.GetArtifact(ctx, owner, repo, id)
+	if err != nil {
+		return nil, err
+	}
+	af, err := g.downloadArtifactFile(ctx, owner, repo, a, fp)
+	if err != nil {
+		return nil, err
+	}
+	if af == nil {
+		return nil, fmt.Errorf("%w: %s in artifact %d", ErrArtifactNotFound, fp, id)
+	}
+	return af, nil
+}
+
+// FetchRunArtifactID returns the ID of the artifact of the name the workflow run uploaded.
+func (g *Gh) FetchRunArtifactID(ctx context.Context, owner, repo string, runID int64, name string) (int64, error) {
+	a, err := g.findRunArtifact(ctx, owner, repo, runID, name)
+	if err != nil {
+		return 0, err
+	}
+	if a == nil {
+		return 0, fmt.Errorf("%w: %s in run %d", ErrArtifactNotFound, name, runID)
+	}
+	return a.GetID(), nil
 }
 
 func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
@@ -1035,6 +1035,62 @@ func (g *Gh) findRunArtifact(ctx context.Context, owner, repo string, runID int6
 		}
 		opts.Page = res.NextPage
 	}
+}
+
+// downloadArtifactFile returns the file fp of the artifact, or nil when the artifact does not
+// hold it.
+func (g *Gh) downloadArtifactFile(ctx context.Context, owner, repo string, a *github.Artifact, fp string) (*ArtifactFile, error) {
+	const maxRedirect = 5
+	u, _, err := g.client.Actions.DownloadArtifact(ctx, owner, repo, a.GetID(), maxRedirect)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+	buf := new(bytes.Buffer)
+	size, err := io.CopyN(buf, resp.Body, maxCopySize)
+	if !errors.Is(err, io.EOF) {
+		return nil, err
+	}
+	if size >= maxCopySize {
+		return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
+	}
+	reader, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+	if err != nil {
+		return nil, err
+	}
+	for _, file := range reader.File {
+		if file.Name != fp {
+			continue
+		}
+		in, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		out := new(bytes.Buffer)
+		size, err := io.CopyN(out, in, maxCopySize)
+		if !errors.Is(err, io.EOF) {
+			_ = in.Close() //nostyle:handlerrors
+			return nil, err
+		}
+		if size >= maxCopySize {
+			_ = in.Close() //nostyle:handlerrors
+			return nil, fmt.Errorf("too large file size to copy: %d >= %d", size, maxCopySize)
+		}
+		if err := in.Close(); err != nil {
+			return nil, err
+		}
+		return &ArtifactFile{
+			ID:        a.GetID(),
+			Name:      file.Name,
+			Content:   out.Bytes(),
+			CreatedAt: a.GetCreatedAt().Time,
+		}, nil
+	}
+	return nil, nil
 }
 
 // fetchMergeCommitFiles returns the files commit changes against its first parent, and that

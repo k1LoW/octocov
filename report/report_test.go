@@ -691,6 +691,29 @@ func TestRefKey(t *testing.T) {
 	}
 }
 
+func TestRunRef(t *testing.T) {
+	tests := []struct {
+		name        string
+		ref         string
+		pullRequest int
+		want        string
+	}{
+		{"the default branch is named like any other branch", "refs/heads/main", 0, "refs/heads/main"},
+		{"a pull request is named by its number", "refs/pull/123/merge", 123, "refs/pull/123"},
+		{"a pull_request_target run is named by its pull request, not by the base branch", "refs/heads/main", 123, "refs/pull/123"},
+		{"a tag is named as it is", "refs/tags/v1.0.0", 0, "refs/tags/v1.0.0"},
+		{"a run with no ref has none", "", 0, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Report{Ref: tt.ref, PullRequest: tt.pullRequest}
+			if got := r.RunRef(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestIsPullRequestEvent(t *testing.T) {
 	tests := []struct {
 		name     string
