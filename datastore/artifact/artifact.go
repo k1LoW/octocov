@@ -52,7 +52,12 @@ type Metadata struct {
 	// Ref is the ref the run that stored the report was on, as Report.RunRef names it.
 	Ref    string `json:"ref"`
 	Commit string `json:"commit"`
-	Report struct {
+	// HeadCommit is the commit the ref was at, which a reader compares against where the ref
+	// is now to tell whether the report is of it. On a pull request it is the head of the pull
+	// request, since Commit is the merge commit the run measured, which GitHub makes again
+	// whenever the base moves. It is empty where the event does not say.
+	HeadCommit string `json:"head_commit,omitempty"`
+	Report     struct {
 		ArtifactName string `json:"artifact_name"`
 		ArtifactID   int64  `json:"artifact_id"`
 	} `json:"report"`
@@ -185,7 +190,7 @@ func (a *Artifact) putMetadata(ctx context.Context, name, ref string, r *report.
 	if err != nil {
 		return err
 	}
-	m := &Metadata{Ref: ref, Commit: r.Commit}
+	m := &Metadata{Ref: ref, Commit: r.Commit, HeadCommit: headCommit(r)}
 	m.Report.ArtifactName = name
 	m.Report.ArtifactID = id
 	b, err := json.Marshal(m)
@@ -193,6 +198,18 @@ func (a *Artifact) putMetadata(ctx context.Context, name, ref string, r *report.
 		return err
 	}
 	return a.put(ctx, MetadataName(name, ref), metadataFilename, b)
+}
+
+// headCommit returns the commit the ref of the run that took r was at.
+func headCommit(r *report.Report) string {
+	if r.PullRequest == 0 {
+		return r.Commit
+	}
+	e, err := gh.DecodeGitHubEvent()
+	if err != nil || e.Number != r.PullRequest {
+		return ""
+	}
+	return e.HeadSHA
 }
 
 // fetchReport returns the report of the artifacts of the name that the ref FS() reads stored

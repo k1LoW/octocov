@@ -1331,9 +1331,12 @@ func PushUsingLocalGit(ctx context.Context, gitRoot string, addPaths []string, m
 }
 
 type GitHubEvent struct {
-	Name    string
-	Number  int
-	State   string
+	Name   string
+	Number int
+	State  string
+	// HeadSHA is the commit the head of the pull request is at, which on a pull request
+	// event is not the commit the run checks out, that being the merge of it onto the base.
+	HeadSHA string
 	Payload any
 }
 
@@ -1356,6 +1359,9 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 		PullRequest struct {
 			Number int    `json:"number,omitempty"`
 			State  string `json:"state,omitempty"`
+			Head   struct {
+				SHA string `json:"sha,omitempty"`
+			} `json:"head,omitzero"`
 		} `json:"pull_request,omitzero"`
 		Issue struct {
 			Number int    `json:"number,omitempty"`
@@ -1369,6 +1375,7 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 	case s.PullRequest.Number > 0:
 		i.Number = s.PullRequest.Number
 		i.State = s.PullRequest.State
+		i.HeadSHA = s.PullRequest.Head.SHA
 	case s.Issue.Number > 0:
 		i.Number = s.Issue.Number
 		i.State = s.Issue.State

@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"io/fs"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -155,31 +157,69 @@ func (c *fakeClient) add(name, fp, branch string, content []byte) int64 {
 }
 
 func TestStoreReportPutsTheMetadataOfTheRef(t *testing.T) {
-	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
-	t.Setenv("GITHUB_RUN_ID", "10")
-	c := newFakeClient()
-	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName}
-	r := &report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/main", PullRequest: 123, Commit: "abc"}
-	if err := a.StoreReport(t.Context(), r); err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name         string
+		report       *report.Report
+		event        string
+		wantMetadata string
+		want         Metadata
+	}{
+		{
+			"a pull request points at the head of the pull request, not at the merge commit measured",
+			&report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/main", PullRequest: 123, Commit: "merge"},
+			`{"pull_request":{"number":123,"head":{"sha":"head"}}}`,
+			"octocov-metadata-octocov-report@refs_pull_123",
+			Metadata{Ref: "refs/pull/123", Commit: "merge", HeadCommit: "head"},
+		},
+		{
+			"a pull request whose event says nothing of it leaves the head out",
+			&report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/main", PullRequest: 123, Commit: "merge"},
+			`{}`,
+			"octocov-metadata-octocov-report@refs_pull_123",
+			Metadata{Ref: "refs/pull/123", Commit: "merge"},
+		},
+		{
+			"a branch is at the commit measured",
+			&report.Report{Repository: "owner/repo", Ref: "refs/heads/main", BaseRef: "refs/heads/main", Commit: "abc"},
+			`{}`,
+			"octocov-metadata-octocov-report@refs_heads_main",
+			Metadata{Ref: "refs/heads/main", Commit: "abc", HeadCommit: "abc"},
+		},
 	}
-	stored, ok := c.uploaded["octocov-report"]
-	if !ok {
-		t.Fatal("want the report stored under the configured name")
-	}
-	mf, ok := c.uploaded["octocov-metadata-octocov-report@refs_pull_123"]
-	if !ok {
-		t.Fatal("want the metadata of the pull request")
-	}
-	got := &Metadata{}
-	if err := json.Unmarshal(mf.Content, got); err != nil {
-		t.Fatal(err)
-	}
-	want := &Metadata{Ref: "refs/pull/123", Commit: "abc"}
-	want.Report.ArtifactName = "octocov-report"
-	want.Report.ArtifactID = stored.ID
-	if diff := cmp.Diff(got, want); diff != "" {
-		t.Error(diff)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+			t.Setenv("GITHUB_RUN_ID", "10")
+			p := filepath.Join(t.TempDir(), "event.json")
+			if err := os.WriteFile(p, []byte(tt.event), 0600); err != nil {
+				t.Fatal(err)
+			}
+			t.Setenv("GITHUB_EVENT_NAME", "pull_request")
+			t.Setenv("GITHUB_EVENT_PATH", p)
+			c := newFakeClient()
+			a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName}
+			if err := a.StoreReport(t.Context(), tt.report); err != nil {
+				t.Fatal(err)
+			}
+			stored, ok := c.uploaded["octocov-report"]
+			if !ok {
+				t.Fatal("want the report stored under the configured name")
+			}
+			mf, ok := c.uploaded[tt.wantMetadata]
+			if !ok {
+				t.Fatalf("want the metadata stored as %s", tt.wantMetadata)
+			}
+			got := Metadata{}
+			if err := json.Unmarshal(mf.Content, &got); err != nil {
+				t.Fatal(err)
+			}
+			want := tt.want
+			want.Report.ArtifactName = "octocov-report"
+			want.Report.ArtifactID = stored.ID
+			if diff := cmp.Diff(got, want); diff != "" {
+				t.Error(diff)
+			}
+		})
 	}
 }
 
