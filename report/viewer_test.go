@@ -111,13 +111,17 @@ func TestLinkCell(t *testing.T) {
 
 func TestArtifactViewer(t *testing.T) {
 	const page = "https://github.com/k1LoW/octocov/actions/runs/1/artifacts/2"
-	v := NewArtifactViewer(page)
+	v := NewArtifactViewer(page, map[string]bool{"file-docs/my%20file.md": true})
 	r := &Report{Repository: "k1LoW/octocov"}
 	if got := v.CoverageURL(r); got != page {
 		t.Errorf("got %v\nwant %v", got, page)
 	}
 	if got, want := v.fileURL(r, "docs/my file.md"), page+"#file-docs/my%20file.md"; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
+	}
+	// A file past the page's budgets has no card, so it is linked to the page itself.
+	if got := v.fileURL(r, "not/drawn.go"); got != page {
+		t.Errorf("got %v\nwant %v", got, page)
 	}
 	// The page carries the coverage alone.
 	if got := v.CodeToTestRatioURL(r); got != "" {
@@ -126,7 +130,7 @@ func TestArtifactViewer(t *testing.T) {
 	if got := v.TestExecutionTimeURL(r); got != "" {
 		t.Errorf("got %v\nwant no link", got)
 	}
-	if NewArtifactViewer("") != nil {
+	if NewArtifactViewer("", nil) != nil {
 		t.Error("no page must be no viewer")
 	}
 }

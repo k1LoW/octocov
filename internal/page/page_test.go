@@ -55,7 +55,7 @@ func TestRenderChanges(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	page := string(got)
+	page := string(got.HTML)
 	for _, want := range []string{
 		"<!doctype html>",
 		"<title>Coverage of k1LoW/octocov#1</title>",
@@ -71,10 +71,16 @@ func TestRenderChanges(t *testing.T) {
 		if want := `id="` + report.FileAnchor(n) + `"`; !strings.Contains(page, want) {
 			t.Errorf("no card carries %s for %q", want, n)
 		}
+		if !got.Anchors[report.FileAnchor(n)] {
+			t.Errorf("the anchors drawn do not name the card of %q", n)
+		}
 	}
 	// A file the pull request did not touch, and whose coverage did not move, is not drawn.
 	if strings.Contains(page, "internal/icon.go") {
 		t.Error("the page draws a file the pull request did not touch")
+	}
+	if len(got.Anchors) != len(names) {
+		t.Errorf("got %d anchors\nwant %d, one per card", len(got.Anchors), len(names))
 	}
 }
 

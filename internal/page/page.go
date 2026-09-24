@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"html"
+	"regexp"
 	"strings"
 
 	spidermonkey "github.com/goccy/go-spidermonkey"
@@ -72,8 +73,18 @@ type answer struct {
 	Message string `json:"message"`
 }
 
+// Page is a rendered page and the anchors of the file cards drawn on it. The renderer
+// stops drawing cards at its own budgets, so a file of the pull request can have none.
+type Page struct {
+	HTML    []byte
+	Anchors map[string]bool
+}
+
+// fileIDRe matches the id of a file card, which is `file-` and the percent-encoded path.
+var fileIDRe = regexp.MustCompile(`id="(file-[^"]*)"`)
+
 // RenderChanges renders the changes page as a whole HTML document titled title.
-func RenderChanges(ctx context.Context, title string, in *ChangesInput) ([]byte, error) {
+func RenderChanges(ctx context.Context, title string, in *ChangesInput) (*Page, error) {
 	js, err := spidermonkey.New(spidermonkey.Config{MaxMemoryBytes: maxMemoryBytes})
 	if err != nil {
 		return nil, err
@@ -112,7 +123,13 @@ func RenderChanges(ctx context.Context, title string, in *ChangesInput) ([]byte,
 	if err != nil {
 		return nil, fmt.Errorf("failed to read the theme script: %w", err)
 	}
-	return document(title, a.HTML, themeScript), nil
+	// Read off the markup rather than worked out from the budgets, so the anchors are the
+	// cards that were drawn whatever the release of the package decides to leave out.
+	anchors := map[string]bool{}
+	for _, m := range fileIDRe.FindAllStringSubmatch(a.HTML, -1) {
+		anchors[html.UnescapeString(m[1])] = true
+	}
+	return &Page{HTML: document(title, a.HTML, themeScript), Anchors: anchors}, nil
 }
 
 func eval(ctx context.Context, js *spidermonkey.JS, src string) (string, error) {

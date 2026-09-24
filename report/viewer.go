@@ -63,8 +63,10 @@ func NewOctocovDevRefViewer() *Viewer {
 
 // NewArtifactViewer returns the viewer linking to the page of HTML uploaded as an artifact
 // at pageURL, or nil when there is no such page. A file is linked to its card on the page,
-// by the anchor the page gives it, which is worked out from the path alone.
-func NewArtifactViewer(pageURL string) *Viewer {
+// by the anchor the page gives it, which is worked out from the path alone. anchors holds
+// the cards the page drew, and a file it drew no card for is linked to the page itself,
+// since the renderer stops drawing cards at its own budgets.
+func NewArtifactViewer(pageURL string, anchors map[string]bool) *Viewer {
 	if pageURL == "" {
 		return nil
 	}
@@ -76,7 +78,11 @@ func NewArtifactViewer(pageURL string) *Viewer {
 			if path == "" {
 				return "", nil
 			}
-			return pageURL + "#" + FileAnchor(path), nil
+			a := FileAnchor(path)
+			if !anchors[a] {
+				return pageURL, nil
+			}
+			return pageURL + "#" + a, nil
 		},
 	}
 }
