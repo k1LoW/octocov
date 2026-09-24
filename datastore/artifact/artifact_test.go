@@ -155,6 +155,7 @@ func (c *fakeClient) add(name, fp, branch string, content []byte) int64 {
 }
 
 func TestStoreReportPutsTheMetadataOfTheRef(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	t.Setenv("GITHUB_RUN_ID", "10")
 	c := newFakeClient()
 	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName}
@@ -183,6 +184,7 @@ func TestStoreReportPutsTheMetadataOfTheRef(t *testing.T) {
 }
 
 func TestFSReadsTheReportTheMetadataOfTheBaseRefPointsAt(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	c := newFakeClient()
 	base := c.add("octocov-report", reportFilename, "main", []byte(`{"commit":"base"}`))
 	// A pull request stored the newer report under the same name.
@@ -206,6 +208,7 @@ func TestFSReadsTheReportTheMetadataOfTheBaseRefPointsAt(t *testing.T) {
 func TestFSFallsBackToTheNewestReportOfTheBaseBranch(t *testing.T) {
 	// A ref an older octocov stored has no metadata, so the report is looked for among the
 	// artifacts the runs on its branch uploaded.
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	c := newFakeClient()
 	c.add("octocov-report", reportFilename, "develop", []byte(`{"commit":"base"}`))
 	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", BaseRef: "refs/heads/develop"}}
@@ -219,6 +222,7 @@ func TestFSFallsBackToTheNewestReportOfTheBaseBranch(t *testing.T) {
 }
 
 func TestFSReadsTheDefaultBranchWithoutAReport(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	// As the central mode does, which has no report of its own to be compared.
 	c := newFakeClient()
 	c.defaultBranch = "develop"
