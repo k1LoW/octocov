@@ -1121,8 +1121,6 @@ artifact://[owner]/[repo]/[artifactName]
 
 The report of a ref other than the default branch is stored under an artifact of its own, named by appending `@` and the ref to the artifact name, with the characters an artifact name may not hold replaced by `_` ( e.g. `octocov-report@refs_pull_123`, `octocov-report@refs_heads_feat_x` ).
 
-An artifact is not overwritten by a later run, so once the report of a pull request is stored, the artifacts of the same name that earlier runs uploaded are deleted. This needs `actions: write`, and when the token does not have it the old artifacts are left until their retention runs out, with a warning. The artifacts of a branch are kept, since the report of a branch can be the base a pull request is compared against.
-
 > **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
 **Required environment variables:**

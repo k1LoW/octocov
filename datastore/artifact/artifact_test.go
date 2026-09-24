@@ -1,14 +1,9 @@
 package artifact
 
 import (
-	"bytes"
-	"context"
-	"errors"
 	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/k1LoW/octocov/gh"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -81,68 +76,5 @@ func TestStoreNameHasNoInvalidCharacter(t *testing.T) {
 		if strings.Contains(strings.TrimPrefix(got, "octocov-report"), c) {
 			t.Errorf("got %v\nwant no %q", got, c)
 		}
-	}
-}
-
-type fakeClient struct {
-	putErr    error
-	deleteErr error
-	calls     []string
-}
-
-func (c *fakeClient) PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error {
-	c.calls = append(c.calls, "put "+name)
-	return c.putErr
-}
-
-func (c *fakeClient) DeleteArtifactsBeforeRun(ctx context.Context, owner, repo, name string, runID int64) error {
-	c.calls = append(c.calls, "delete "+name)
-	return c.deleteErr
-}
-
-func (c *fakeClient) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*gh.ArtifactFile, error) {
-	return nil, errors.New("not implemented")
-}
-
-func TestStoreReport(t *testing.T) {
-	tests := []struct {
-		name        string
-		ref         string
-		pullRequest int
-		putErr      error
-		deleteErr   error
-		wantCalls   []string
-		wantErr     bool
-		wantStderr  string
-	}{
-		{"a pull request deletes the earlier reports after storing its own", "refs/pull/123/merge", 123, nil, nil, []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, ""},
-		{"a pull request whose number was not detected deletes them as well", "refs/pull/123/merge", 0, nil, nil, []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, ""},
-		{"a branch keeps the earlier reports", "refs/heads/feat/x", 0, nil, nil, []string{"put octocov-report@refs_heads_feat_x"}, false, ""},
-		{"a failed upload deletes nothing", "refs/pull/123/merge", 123, errors.New("upload failed"), nil, []string{"put octocov-report@refs_pull_123"}, true, ""},
-		{"a failed delete is a warning", "refs/pull/123/merge", 123, nil, errors.New("403 Resource not accessible by integration"), []string{"put octocov-report@refs_pull_123", "delete octocov-report@refs_pull_123"}, false, "Skip deleting the previous reports of octocov-report@refs_pull_123: 403 Resource not accessible by integration\n"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("GITHUB_REPOSITORY", "owner/repo")
-			t.Setenv("GITHUB_RUN_ID", "20")
-			c := &fakeClient{putErr: tt.putErr, deleteErr: tt.deleteErr}
-			stderr := new(bytes.Buffer)
-			a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, stderr: stderr}
-			err := a.StoreReport(context.TODO(), &report.Report{
-				Repository:  "owner/repo",
-				Ref:         tt.ref,
-				BaseRef:     "refs/heads/main",
-				PullRequest: tt.pullRequest,
-			})
-			if (err != nil) != tt.wantErr {
-				t.Errorf("got err %v, want err %v", err, tt.wantErr)
-			}
-			if diff := cmp.Diff(c.calls, tt.wantCalls, nil); diff != "" {
-				t.Error(diff)
-			}
-			if got := stderr.String(); got != tt.wantStderr {
-				t.Errorf("got %q\nwant %q", got, tt.wantStderr)
-			}
-		})
 	}
 }

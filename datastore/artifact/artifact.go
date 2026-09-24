@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -27,22 +26,11 @@ const refSeparator = "@"
 
 var keyRep = strings.NewReplacer(`"`, "_", ":", "_", "<", "_", ">", "_", "|", "_", "*", "_", "?", "_", "\r", "_", "\n", "_", "\\", "_", "/", "_")
 
-// client is the part of *gh.Gh this datastore uses. It is an interface so a test can stand
-// in for the upload, which otherwise needs the runtime of a GitHub Actions job.
-type client interface {
-	PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error
-	DeleteArtifactsBeforeRun(ctx context.Context, owner, repo, name string, runID int64) error
-	FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*gh.ArtifactFile, error)
-}
-
 type Artifact struct {
-	gh         client
+	gh         *gh.Gh
 	repository string
 	name       string
 	r          *report.Report
-	// stderr is where a failure to delete the previous reports of a pull request goes. It
-	// is a field so a test can read it back.
-	stderr io.Writer
 }
 
 func New(gh *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
@@ -54,7 +42,6 @@ func New(gh *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
 		repository: repo,
 		name:       name,
 		r:          r,
-		stderr:     os.Stderr,
 	}, nil
 }
 
@@ -71,24 +58,7 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	if err != nil {
 		return err
 	}
-	if err := a.put(ctx, name, reportFilename, r.Bytes()); err != nil {
-		return err
-	}
-	// The ref key rather than PullRequest decides it, since the key falls back to the ref of
-	// a pull request whose number could not be detected, and the report is stored under the
-	// name of that pull request all the same. The report of a branch can be the base a pull
-	// request is compared against, which is picked by the merge base commit rather than by
-	// being the newest, so the older ones are still read.
-	if !strings.HasPrefix(r.RefKey(), "refs/pull/") {
-		return nil
-	}
-	if err := a.deletePrevious(ctx, name); err != nil {
-		// Deleting needs actions: write, which a workflow may not grant and a pull request
-		// from a fork never has. The report is stored by now, so failing the run over the
-		// artifacts it leaves behind would be worse than leaving them.
-		fmt.Fprintf(a.stderr, "Skip deleting the previous reports of %s: %v\n", name, err) //nostyle:handlerrors
-	}
-	return nil
+	return a.put(ctx, name, reportFilename, r.Bytes())
 }
 
 func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
@@ -164,36 +134,13 @@ func (a *Artifact) put(ctx context.Context, name, path string, content []byte) e
 	if err != nil {
 		return err
 	}
-	runID, err := currentRunID()
-	if err != nil {
-		return err
-	}
-	return a.gh.PutArtifact(ctx, r.Owner, r.Repo, runID, name, path, content)
-}
-
-// deletePrevious deletes the artifacts of the name that earlier runs uploaded. Nothing reads
-// any but the newest, and unlike a datastore writing to a path fixed by the ref, a later
-// upload does not replace them.
-func (a *Artifact) deletePrevious(ctx context.Context, name string) error {
-	r, err := gh.Parse(a.repository)
-	if err != nil {
-		return err
-	}
-	runID, err := currentRunID()
-	if err != nil {
-		return err
-	}
-	return a.gh.DeleteArtifactsBeforeRun(ctx, r.Owner, r.Repo, name, runID)
-}
-
-func currentRunID() (int64, error) {
 	s := os.Getenv("GITHUB_RUN_ID")
 	if s == "" {
-		return 0, errors.New("env GITHUB_RUN_ID is not set")
+		return errors.New("env GITHUB_RUN_ID is not set")
 	}
 	runID, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
-		return 0, fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
+		return fmt.Errorf("failed to parse GITHUB_RUN_ID: %w", err)
 	}
-	return runID, nil
+	return a.gh.PutArtifact(ctx, r.Owner, r.Repo, runID, name, path, content)
 }
