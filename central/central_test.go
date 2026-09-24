@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -594,5 +595,30 @@ func TestCollectReportsKeepsWhatAWalkReachedBeforeItFailed(t *testing.T) {
 	}
 	if want := "Skip collecting reports from s3://bucket/reports: AccessDenied"; !strings.Contains(warned.String(), want) {
 		t.Errorf("got %v\nwant to contain %v", warned.String(), want)
+	}
+}
+
+func TestWriteIndexKeepsTheIndexWhenTheRenderFails(t *testing.T) {
+	// A custom badge link can fail on one repository after the rows before it are rendered,
+	// and the index already there has to survive that.
+	p := filepath.Join(t.TempDir(), "README.md")
+	if err := os.WriteFile(p, []byte("previous\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	err := writeIndex(p, func(w io.Writer) error {
+		if _, err := io.WriteString(w, "half of the rows"); err != nil {
+			return err
+		}
+		return errors.New("viewer.links.coverage: the link is int, not a string")
+	})
+	if err == nil {
+		t.Fatal("the render error was not returned")
+	}
+	b, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := string(b); got != "previous\n" {
+		t.Errorf("got %q\nwant the index left as it was", got)
 	}
 }

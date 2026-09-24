@@ -90,16 +90,23 @@ func (c *Central) Generate(ctx context.Context) ([]string, error) {
 	if err == nil && fi.IsDir() {
 		p = filepath.Join(c.config.Index, "README.md")
 	}
-	i, err := os.OpenFile(p, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644) // #nosec
-	if err != nil {
-		return nil, err
-	}
-	if err := c.renderIndex(i); err != nil {
+	if err := writeIndex(p, c.renderIndex); err != nil {
 		return nil, err
 	}
 	paths = append(paths, p)
 
 	return paths, nil
+}
+
+// writeIndex writes what render produces to p. It is rendered into memory first, so a render
+// that fails partway, as on a badge link a custom viewer cannot work out, leaves the index that
+// is already there rather than one cut off where the error was.
+func writeIndex(p string, render func(io.Writer) error) error {
+	buf := new(bytes.Buffer)
+	if err := render(buf); err != nil {
+		return err
+	}
+	return os.WriteFile(p, buf.Bytes(), 0644) // #nosec
 }
 
 func (c *Central) CollectedReports() []*report.Report {
