@@ -501,6 +501,13 @@ diff is too large for the API to include, and for files beyond the limit of the 
 default branch outside of a pull request). Such files lower neither the covered lines nor the total
 lines of `patch`.
 
+The changed lines are numbered as the lines of the commit the coverage was measured on. On a
+`pull_request` run that is the merge commit GitHub creates for the pull request, so they are taken
+from the diff of that merge commit against its first parent rather than from the diff of the pull
+request itself, whose line numbers differ wherever the base branch has changed a file above the
+lines the pull request changed. When the commit is neither the head of the pull request nor that
+merge commit, as on `pull_request_target`, the lines of the pull request are used as they are.
+
 The file coverage table that octocov reports for a pull request (in the pull request comment, the
 job summary, and the pull request body) includes a **Patch Coverage** column, and its heading shows
 the overall patch coverage. This needs no configuration and is independent of
