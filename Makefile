@@ -30,7 +30,9 @@ lint:
 	govulncheck ./...
 	go vet -vettool=`which gostyle` -gostyle.config=$(PWD)/.gostyle.yml ./...
 
-build:
+build: page_bundle go_build
+
+go_build:
 	go build -ldflags="$(BUILD_LDFLAGS)"
 
 build_badgen:
@@ -39,8 +41,10 @@ build_badgen:
 coverage: build
 	./octocov
 
+# node_modules is removed once the bundle is built, since npm ci empties it first anyway, and the
+# TypeScript sources it holds would otherwise be counted by the ratio tests' **/*.ts patterns.
 page_bundle:
-	cd internal/page/bundle && npm ci && npm run build && npm run credits
+	cd internal/page/bundle && npm ci && npm run build && npm run credits && rm -rf node_modules
 
 bqdoc:
 	cd docs/bq && tbls doc -f
@@ -66,4 +70,4 @@ prerelease_for_tagpr:
 	cat _EXTRA_CREDITS >> CREDITS
 	git add CHANGELOG.md CREDITS go.mod go.sum
 
-.PHONY: default test
+.PHONY: default test build go_build page_bundle

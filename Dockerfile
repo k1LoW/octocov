@@ -1,13 +1,21 @@
+FROM node:24 AS bundler
+
+WORKDIR /workdir/
+COPY . /workdir/
+
+RUN make page_bundle
+
 FROM golang:1.26.8 AS builder
 
 WORKDIR /workdir/
 COPY . /workdir/
+COPY --from=bundler /workdir/internal/page/bundle.js /workdir/internal/page/ssr.css /workdir/internal/page/
 
 RUN apt-get update
 
 RUN update-ca-certificates
 
-RUN make build
+RUN make go_build
 
 FROM debian:trixie-slim
 

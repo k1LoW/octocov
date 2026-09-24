@@ -27,6 +27,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
       - name: Run lint
         uses: reviewdog/action-golangci-lint@c76cceaaab89abe74e649d2e34c6c9adc26662d2 # v2.10.0
         with:
@@ -52,6 +57,13 @@ jobs:
 
       - name: Run tests
         run: make ci
+
+      - name: Check that the page bundle is the one its sources build
+        run: |
+          # make ci builds the binary with make build, which rebuilds the page bundle from
+          # internal/page/bundle/package-lock.json first. A committed bundle that differs from
+          # it is one somebody forgot to rebuild after changing the package it comes from.
+          git diff --exit-code -- internal/page _EXTRA_CREDITS
 
       - name: Run test_central
         if: ${{ github.event_name == 'pull_request' }}
@@ -138,6 +150,11 @@ jobs:
         with:
           go-version-file: go.mod
           check-latest: true
+
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
 
       - name: Run tests
         run: make ci
