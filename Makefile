@@ -40,7 +40,7 @@ coverage: build
 	./octocov
 
 page_bundle:
-	cd internal/page/bundle && npm ci && npm run build
+	cd internal/page/bundle && npm ci && npm run build && npm run credits
 
 bqdoc:
 	cd docs/bq && tbls doc -f

@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs",
+    "credits": "node credits.mjs"
   },
   "devDependencies": {
     "@octocov/ui": "0.3.0",
