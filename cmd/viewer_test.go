@@ -30,6 +30,51 @@ func TestChangedFilesLeaveOutWhatTheMergeDoesNotChange(t *testing.T) {
 	}
 }
 
+func TestPageArtifactName(t *testing.T) {
+	const base = "octocov-report@refs_pull_1"
+	tests := []struct {
+		attempt int
+		want    string
+	}{
+		{1, "octocov-report@refs_pull_1.html"},
+		{2, "octocov-report@refs_pull_1@attempt_2.html"},
+	}
+	for _, tt := range tests {
+		got := pageArtifactName(base, tt.attempt)
+		if got != tt.want {
+			t.Errorf("attempt %d: got %q\nwant %q", tt.attempt, got, tt.want)
+		}
+		if !isPageArtifactOf(base, got) {
+			t.Errorf("%q is not read as a page of %q", got, base)
+		}
+	}
+	// Not a page of this report: another report's, the report itself, and a name that only
+	// looks like an attempt.
+	for _, name := range []string{
+		"octocov-report-sub@refs_pull_1.html",
+		"octocov-report@refs_pull_1",
+		"octocov-report@refs_pull_10.html",
+		"octocov-report@refs_pull_1@attempt_x.html",
+		"octocov-report@refs_pull_1@attempt_1.html",
+	} {
+		if isPageArtifactOf(base, name) {
+			t.Errorf("%q is read as a page of %q", name, base)
+		}
+	}
+}
+
+func TestRunAttempt(t *testing.T) {
+	for _, tt := range []struct {
+		env  string
+		want int
+	}{{"", 1}, {"3", 3}, {"0", 1}, {"x", 1}} {
+		t.Setenv("GITHUB_RUN_ATTEMPT", tt.env)
+		if got := runAttempt(); got != tt.want {
+			t.Errorf("GITHUB_RUN_ATTEMPT=%q: got %d, want %d", tt.env, got, tt.want)
+		}
+	}
+}
+
 func TestBaseLabel(t *testing.T) {
 	tests := []struct {
 		name string

@@ -146,16 +146,25 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 	if c.Report != nil {
 		datastores = c.Report.Datastores
 	}
-	name, err := datastore.PageArtifactName(datastores, r)
+	base, err := datastore.PageArtifactBase(datastores, r)
 	if err != nil {
 		return "", nil, nil, err
 	}
+	name := pageArtifactName(base, runAttempt())
 	id, err := g.PutUnarchivedArtifact(ctx, repo.Owner, repo.Repo, runID, name, p.HTML)
 	if err != nil {
 		return "", nil, nil, err
 	}
 	cleanup := func() {
-		if err := g.DeleteArtifactsBeforeRun(ctx, repo.Owner, repo.Repo, name, runID); err != nil {
+		// The earlier attempts of this run, and the first attempt of each earlier run, which
+		// is the one nearly every run is. A page an earlier run uploaded on a re-run of its own
+		// is named for an attempt nothing here knows, so it is left to its retention.
+		if err := errors.Join(
+			g.DeleteRunArtifacts(ctx, repo.Owner, repo.Repo, runID, func(n string) bool {
+				return n != name && isPageArtifactOf(base, n)
+			}),
+			g.DeleteArtifactsBeforeRun(ctx, repo.Owner, repo.Repo, pageArtifactName(base, 1), runID),
+		); err != nil {
 			// Deleting needs actions: write, which a workflow may not grant and a pull request
 			// from a fork never has. The outputs are written by now, so failing the run over
 			// the pages it leaves behind would be worse than leaving them.
@@ -163,6 +172,45 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 		}
 	}
 	return gh.ArtifactURL(repo.Owner, repo.Repo, runID, id), p.Anchors, cleanup, nil
+}
+
+// pageArtifactName returns the name the page is uploaded as on the given attempt of the run.
+// A re-run keeps its run id, and a run cannot hold two artifacts of one name, so each attempt
+// uploads under a name of its own rather than deleting the one before it first, which would
+// take the link the outputs of that attempt still carry away with it. The first attempt keeps
+// the plain name, which is the one nearly every run uploads under.
+func pageArtifactName(base string, attempt int) string {
+	if attempt <= 1 {
+		return base + ".html"
+	}
+	return fmt.Sprintf("%s@attempt_%d.html", base, attempt)
+}
+
+// isPageArtifactOf reports whether name is the name of a page pageArtifactName builds on base,
+// on any attempt.
+func isPageArtifactOf(base, name string) bool {
+	if name == pageArtifactName(base, 1) {
+		return true
+	}
+	rest, ok := strings.CutPrefix(name, base+"@attempt_")
+	if !ok {
+		return false
+	}
+	n, ok := strings.CutSuffix(rest, ".html")
+	if !ok {
+		return false
+	}
+	attempt, err := strconv.Atoi(n)
+	return err == nil && attempt > 1
+}
+
+// runAttempt returns which attempt of the workflow run this is, counted from 1.
+func runAttempt() int {
+	n, err := strconv.Atoi(os.Getenv("GITHUB_RUN_ATTEMPT"))
+	if err != nil || n < 1 {
+		return 1
+	}
+	return n
 }
 
 // pullRequestNumber returns the number of the pull request the report is of. It is read

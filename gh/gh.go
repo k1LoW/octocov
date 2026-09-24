@@ -912,8 +912,38 @@ func (g *Gh) IsPrivate(ctx context.Context, owner, repo string) (bool, error) {
 	return r.GetPrivate(), nil
 }
 
-// deleteRunArtifact deletes the artifact of the name that an earlier attempt of the same
-// run uploaded, since a name can be used only once within a run.
+// DeleteRunArtifacts deletes the artifacts of the workflow run whose name match reports true
+// for, as the ones earlier attempts of a re-run uploaded.
+func (g *Gh) DeleteRunArtifacts(ctx context.Context, owner, repo string, runID int64, match func(name string) bool) error {
+	// Every page is read before anything is deleted, since deleting while paging shifts the
+	// artifacts that follow onto a page that has already been read.
+	var ids []int64
+	opts := &github.ListOptions{PerPage: 100}
+	for {
+		l, res, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, opts)
+		if err != nil {
+			return err
+		}
+		for _, a := range l.Artifacts {
+			if match(a.GetName()) {
+				ids = append(ids, a.GetID())
+			}
+		}
+		if res.NextPage == 0 {
+			break
+		}
+		opts.Page = res.NextPage
+	}
+	for _, id := range ids {
+		if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, id); err != nil {
+			return fmt.Errorf("failed to delete artifact %d: %w", id, err)
+		}
+	}
+	return nil
+}
+
+// deleteRunArtifact deletes the artifact of the name the run has already uploaded, since a name
+// can be used only once within a run.
 func (g *Gh) deleteRunArtifact(ctx context.Context, owner, repo string, runID int64, name string) error {
 	a, err := g.findRunArtifact(ctx, owner, repo, runID, name)
 	if err != nil || a == nil {

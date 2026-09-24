@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"path"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -1169,6 +1170,52 @@ func TestFetchChangedFilesCarryWhatTheFileCardsDraw(t *testing.T) {
 	}
 	want := []*PullRequestFile{{Filename: "a.go", Status: "added", Additions: 1, Patch: "@@ -0,0 +1 @@\n+x", ChangedLines: []int{1}}}
 	if diff := cmp.Diff(files, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestDeleteRunArtifacts(t *testing.T) {
+	// The pages earlier attempts of a re-run uploaded are on any page of the run's listing,
+	// and only the ones the match names are deleted.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	named := func(id int64, name string) *github.Artifact {
+		return &github.Artifact{ID: new(id), Name: new(name)}
+	}
+	var deleted []int64
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatchPages( //nostyle:funcfmt
+			mock.GetReposActionsRunsArtifactsByOwnerByRepoByRunId,
+			github.ArtifactList{Artifacts: []*github.Artifact{named(1, "page.html"), named(2, "report")}},
+			github.ArtifactList{Artifacts: []*github.Artifact{named(3, "page@attempt_2.html")}},
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.DeleteReposActionsArtifactsByOwnerByRepoByArtifactId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				deleted = append(deleted, id)
+				w.WriteHeader(http.StatusNoContent)
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	if err := g.DeleteRunArtifacts(t.Context(), "owner", "repo", 10, func(name string) bool {
+		return strings.HasPrefix(name, "page")
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if diff := cmp.Diff(deleted, []int64{1, 3}); diff != "" {
 		t.Error(diff)
 	}
 }
