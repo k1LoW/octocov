@@ -437,22 +437,29 @@ func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, numb
 // compareFilesLimit is the most files the compare API returns for one comparison.
 const compareFilesLimit = 300
 
-// alignChangedLines replaces the ChangedLines and the Patch of files with those of merged, the
-// diff of the merge commit against its first parent. The pull
+// alignChangedLines replaces the ChangedLines, the Patch and the rest of what describes the
+// change of each of files with those of merged, the diff of the merge commit against its first
+// parent. The pull
 // request files API still decides which files there are, because it returns up to 3000 files
 // where the compare API stops at compareFilesLimit. It returns how many files were left with the
 // lines of the pull request head because merged stopped at that limit.
 func alignChangedLines(files []*PullRequestFile, merged []*github.CommitFile) int {
-	patches := make(map[string]string, len(merged))
+	byName := make(map[string]*github.CommitFile, len(merged))
 	for _, f := range merged {
-		patches[f.GetFilename()] = f.GetPatch()
+		byName[f.GetFilename()] = f
 	}
 	truncated := len(merged) >= compareFilesLimit
 	kept := 0
 	for _, f := range files {
-		if p, ok := patches[f.Filename]; ok {
-			f.Patch = p
-			f.ChangedLines = parseChangedLinesFromPatch(p)
+		if m, ok := byName[f.Filename]; ok {
+			// Everything the diff says about the file together with its patch, since the page
+			// draws them side by side and reads the base report under the previous name.
+			f.PreviousFilename = m.GetPreviousFilename()
+			f.Status = m.GetStatus()
+			f.Additions = m.GetAdditions()
+			f.Deletions = m.GetDeletions()
+			f.Patch = m.GetPatch()
+			f.ChangedLines = parseChangedLinesFromPatch(f.Patch)
 			continue
 		}
 		if truncated {

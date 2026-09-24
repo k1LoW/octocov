@@ -820,7 +820,10 @@ func TestFetchPullRequestFiles(t *testing.T) {
 
 func TestAlignChangedLines(t *testing.T) {
 	merged := func(n int) []*github.CommitFile {
-		files := []*github.CommitFile{{Filename: new("a.go"), Patch: new("@@ -1,1 +1,2 @@\n l1\n+a")}}
+		files := []*github.CommitFile{{
+			Filename: new("a.go"), PreviousFilename: new("old.go"), Status: new("renamed"),
+			Additions: new(1), Deletions: new(0), Patch: new("@@ -1,1 +1,2 @@\n l1\n+a"),
+		}}
 		for i := len(files); i < n; i++ {
 			files = append(files, &github.CommitFile{Filename: new(strconv.Itoa(i) + ".go")})
 		}
@@ -847,7 +850,7 @@ func TestAlignChangedLines(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			files := []*PullRequestFile{
-				{Filename: "a.go", ChangedLines: []int{5}},
+				{Filename: "a.go", Status: "modified", Additions: 3, Deletions: 2, ChangedLines: []int{5}},
 				{Filename: "b.go", ChangedLines: []int{7}},
 			}
 			if kept := alignChangedLines(files, tt.merged); kept != tt.wantKept {
@@ -859,6 +862,11 @@ func TestAlignChangedLines(t *testing.T) {
 			}
 			if diff := cmp.Diff(got, tt.want); diff != "" {
 				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+			// The file the merge diff names is described by that diff throughout, since the page
+			// draws its counts and status beside the patch.
+			if a := files[0]; a.PreviousFilename != "old.go" || a.Status != "renamed" || a.Additions != 1 || a.Deletions != 0 {
+				t.Errorf("got %+v, want it described by the merge diff", a)
 			}
 			for _, f := range files {
 				// Only a file the merge diff leaves out while it is under the limit is one the
