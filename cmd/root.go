@@ -374,9 +374,16 @@ var rootCmd = &cobra.Command{
 		// The three pull request outputs and the patch coverage measurement all read the same
 		// changed file list, and each fetch is paginated over up to 3000 files. Fetch it at
 		// most once, and only if one of them actually asks for it.
-		pullRequestFiles := sync.OnceValues(func() ([]*gh.PullRequestFile, error) {
-			return fetchPullRequestFiles(ctx, cmd, c.Repository, r.Commit)
+		pullRequestDiff := sync.OnceValues(func() (*gh.PullRequestFiles, error) {
+			return fetchPullRequestDiff(ctx, cmd, c.Repository, r.Commit)
 		})
+		pullRequestFiles := func() ([]*gh.PullRequestFile, error) {
+			d, err := pullRequestDiff()
+			if err != nil {
+				return nil, err
+			}
+			return d.Files, nil
+		}
 
 		// Each readiness check reaches the API, and whether any output is going to be written
 		// decides whether there is anything to link from, so each is checked once up front.
@@ -385,7 +392,7 @@ var rootCmd = &cobra.Command{
 		bodyReady := c.BodyConfigReady()
 		var cur, prev *report.Viewer
 		if commentReady == nil || summaryReady == nil || bodyReady == nil {
-			cur, prev = resolveViewers(ctx, cmd.ErrOrStderr(), c, r, rPrev, comparedArtifact, pullRequestFiles)
+			cur, prev = resolveViewers(ctx, cmd.ErrOrStderr(), c, r, rPrev, comparedArtifact, pullRequestDiff)
 		}
 		viewerErr := func() error {
 			return errors.Join(cur.Err(), prev.Err())
@@ -567,6 +574,16 @@ var rootCmd = &cobra.Command{
 // over the changed lines it carries, so those are numbered as the lines of commit, the commit
 // the coverage was measured on.
 func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository, commit string) ([]*gh.PullRequestFile, error) {
+	d, err := fetchPullRequestDiff(ctx, cmd, repository, commit)
+	if err != nil {
+		return nil, err
+	}
+	return d.Files, nil
+}
+
+// fetchPullRequestDiff is fetchPullRequestFiles with what the page it is drawn on needs to know
+// besides the files, which is which commits the two sides of the patches are numbered as.
+func fetchPullRequestDiff(ctx context.Context, cmd *cobra.Command, repository, commit string) (*gh.PullRequestFiles, error) {
 	repo, err := gh.Parse(repository)
 	if err != nil {
 		return nil, err
@@ -584,19 +601,23 @@ func fetchPullRequestFiles(ctx context.Context, cmd *cobra.Command, repository, 
 			// simply is not a pull request, which is the ordinary way to reach this.
 			cmd.PrintErrf("Could not look up the current pull request, comparing against the default branch instead: %v\n", err)
 		}
-		return g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
+		files, err := g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
+		if err != nil {
+			return nil, err
+		}
+		return &gh.PullRequestFiles{Files: files, Unaligned: "the changed files are those since the default branch rather than those of a pull request"}, nil
 	}
-	files, unaligned, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
+	d, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
 	if err != nil {
 		return nil, err
 	}
-	if unaligned != "" {
+	if d.Unaligned != "" {
 		// The table and the `patch` variable still read these lines, so the job log is the one
 		// place that can say some of them may be other lines than the ones the pull request
 		// changed.
-		cmd.PrintErrf("Patch coverage may be measured over lines other than the changed ones, since some changed lines are numbered as the pull request head's rather than as commit %s's: %s\n", commit, unaligned)
+		cmd.PrintErrf("Patch coverage may be measured over lines other than the changed ones, since some changed lines are numbered as the pull request head's rather than as commit %s's: %s\n", commit, d.Unaligned)
 	}
-	return files, nil
+	return d, nil
 }
 
 func printMetrics(cmd *cobra.Command) error {

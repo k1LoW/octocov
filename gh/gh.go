@@ -373,53 +373,68 @@ func ChangedLinesByFile(files []*PullRequestFile) map[string][]int {
 	return m
 }
 
-// FetchPullRequestFiles returns the files a pull request changes, with ChangedLines numbered as
-// the lines of commit, the commit the coverage was measured on. When commit is the merge commit
-// GitHub creates for the pull request, the changed lines are taken from the diff of that commit
+// PullRequestFiles is the files a pull request changes, and which commits the two sides of
+// their patches are numbered as.
+type PullRequestFiles struct {
+	Files []*PullRequestFile
+	// Parent is the first parent of the merge commit when the patches are its diff against
+	// that parent, which is then the commit their old side is numbered as. It is empty where
+	// the patches are those of the pull request files API, whose old side is the merge base.
+	Parent string
+	// Unaligned says why some of the changed lines are left numbered as the pull request
+	// head's rather than as the commit the coverage was measured on, and is empty otherwise.
+	Unaligned string
+}
+
+// FetchPullRequestFiles returns the files a pull request changes, with ChangedLines and Patch
+// numbered as the lines of commit, the commit the coverage was measured on. When commit is the
+// merge commit GitHub creates for the pull request, they are taken from the diff of that commit
 // against its first parent, since the patches of the pull request files API number the lines of
 // the pull request head, which differ from those of the merge commit wherever the base branch has
 // changed a file above them since the pull request branched.
-//
-// Where some of the changed lines could not be numbered that way and are left numbered as the
-// pull request head's, the second return value says why, and is empty otherwise.
-func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, number int, commit string) ([]*PullRequestFile, string, error) {
+func (g *Gh) FetchPullRequestFiles(ctx context.Context, owner, repo string, number int, commit string) (*PullRequestFiles, error) {
 	files, err := g.listPullRequestFiles(ctx, owner, repo, number)
 	if err != nil {
-		return nil, "", err
+		return nil, err
 	}
+	out := &PullRequestFiles{Files: files}
 	if commit == "" {
-		return files, "", nil
+		return out, nil
 	}
 	// A failed lookup below leaves the head's lines rather than failing, because the whole file
 	// coverage table and the comment would go down with it over lines that are only wrong for
 	// the files the base branch has also changed.
 	pr, _, err := g.client.PullRequests.Get(ctx, owner, repo, number)
 	if err != nil {
-		return files, fmt.Sprintf("could not look up the head of pull request #%d: %v", number, err), nil
+		out.Unaligned = fmt.Sprintf("could not look up the head of pull request #%d: %v", number, err)
+		return out, nil
 	}
 	head := pr.GetHead().GetSHA()
 	if commit == head {
 		// The coverage was measured on the head, whose line numbers the patches already carry.
-		return files, "", nil
+		return out, nil
 	}
-	merged, ok, err := g.fetchMergeCommitFiles(ctx, owner, repo, commit, head)
+	merged, parent, ok, err := g.fetchMergeCommitFiles(ctx, owner, repo, commit, head)
 	if err != nil {
-		return files, fmt.Sprintf("could not diff commit %s against its first parent: %v", commit, err), nil
+		out.Unaligned = fmt.Sprintf("could not diff commit %s against its first parent: %v", commit, err)
+		return out, nil
 	}
 	if !ok {
-		return files, fmt.Sprintf("commit %s is neither the head of pull request #%d nor its merge commit", commit, number), nil
+		out.Unaligned = fmt.Sprintf("commit %s is neither the head of pull request #%d nor its merge commit", commit, number)
+		return out, nil
 	}
+	out.Parent = parent
 	if n := alignChangedLines(files, merged); n > 0 {
-		return files, fmt.Sprintf("the diff of merge commit %s stops at %d files and leaves out %d of the changed files", commit, compareFilesLimit, n), nil
+		out.Unaligned = fmt.Sprintf("the diff of merge commit %s stops at %d files and leaves out %d of the changed files", commit, compareFilesLimit, n)
 	}
-	return files, "", nil
+	return out, nil
 }
 
 // compareFilesLimit is the most files the compare API returns for one comparison.
 const compareFilesLimit = 300
 
-// alignChangedLines replaces the ChangedLines of files with the lines the patches of merged
-// number, where merged is the diff of the merge commit against its first parent. The pull
+// alignChangedLines replaces the ChangedLines and the Patch of files with those of merged, the
+// diff of the merge commit against its first parent. The pull
 // request files API still decides which files there are, because it returns up to 3000 files
 // where the compare API stops at compareFilesLimit. It returns how many files were left with the
 // lines of the pull request head because merged stopped at that limit.
@@ -432,6 +447,7 @@ func alignChangedLines(files []*PullRequestFile, merged []*github.CommitFile) in
 	kept := 0
 	for _, f := range files {
 		if p, ok := patches[f.Filename]; ok {
+			f.Patch = p
 			f.ChangedLines = parseChangedLinesFromPatch(p)
 			continue
 		}
@@ -444,6 +460,7 @@ func alignChangedLines(files []*PullRequestFile, merged []*github.CommitFile) in
 		}
 		// The merge changes nothing in the file, as when the base branch already carries the
 		// same change.
+		f.Patch = ""
 		f.ChangedLines = nil
 	}
 	return kept
@@ -465,9 +482,13 @@ func (g *Gh) FetchChangedFiles(ctx context.Context, owner, repo string) ([]*Pull
 	var files []*PullRequestFile
 	for _, f := range compare.Files {
 		files = append(files, &PullRequestFile{
-			Filename:     f.GetFilename(),
-			BlobURL:      f.GetBlobURL(),
-			ChangedLines: parseChangedLinesFromPatch(f.GetPatch()),
+			Filename:         f.GetFilename(),
+			PreviousFilename: f.GetPreviousFilename(),
+			BlobURL:          f.GetBlobURL(),
+			Additions:        f.GetAdditions(),
+			Deletions:        f.GetDeletions(),
+			Patch:            f.GetPatch(),
+			ChangedLines:     parseChangedLinesFromPatch(f.GetPatch()),
 		})
 	}
 	return files, nil
@@ -911,27 +932,28 @@ func (g *Gh) findRunArtifact(ctx context.Context, owner, repo string, runID int6
 	}
 }
 
-// fetchMergeCommitFiles returns the files commit changes against its first parent when commit is
-// the merge of head onto the base branch of a pull request, and false otherwise.
-func (g *Gh) fetchMergeCommitFiles(ctx context.Context, owner, repo, commit, head string) ([]*github.CommitFile, bool, error) {
+// fetchMergeCommitFiles returns the files commit changes against its first parent, and that
+// parent, when commit is the merge of head onto the base branch of a pull request, and false
+// otherwise.
+func (g *Gh) fetchMergeCommitFiles(ctx context.Context, owner, repo, commit, head string) ([]*github.CommitFile, string, bool, error) {
 	// The git data API rather than the commits API, which would also send the files of the
 	// commit only to have them thrown away. The parents cannot be read from the local checkout
 	// either, since a shallow checkout of the merge commit does not carry them.
 	c, _, err := g.client.Git.GetCommit(ctx, owner, repo, commit)
 	if err != nil {
-		return nil, false, err
+		return nil, "", false, err
 	}
 	if len(c.Parents) != 2 || c.Parents[1].GetSHA() != head {
 		// As on pull_request_target, or on a run the head has moved past since.
-		return nil, false, nil
+		return nil, "", false, nil
 	}
 	// Not paginated, because pages split the commits only. The files come on the first page,
 	// up to compareFilesLimit of them for the whole comparison.
 	comparison, _, err := g.client.Repositories.CompareCommits(ctx, owner, repo, c.Parents[0].GetSHA(), commit, &github.ListOptions{})
 	if err != nil {
-		return nil, false, err
+		return nil, "", false, err
 	}
-	return comparison.Files, true, nil
+	return comparison.Files, c.Parents[0].GetSHA(), true, nil
 }
 
 func (g *Gh) listPullRequestFiles(ctx context.Context, owner, repo string, number int) ([]*PullRequestFile, error) {

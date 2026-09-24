@@ -55,6 +55,29 @@ func TestPullRequestNumber(t *testing.T) {
 	}
 }
 
+func TestBaseAlignedOnTheMergeDiff(t *testing.T) {
+	// The patches of the merge diff number their old side as the first parent, which the base
+	// report has to have been taken at. No API call is made to tell.
+	rPrev := &report.Report{Commit: "parent"}
+	tests := []struct {
+		name string
+		d    *gh.PullRequestFiles
+		want bool
+	}{
+		{"taken at the first parent", &gh.PullRequestFiles{Parent: "parent"}, true},
+		{"taken at another commit", &gh.PullRequestFiles{Parent: "other"}, false},
+		// Some files kept the patches of the pull request, whose old side is the merge base.
+		{"some patches are not the merge diff's", &gh.PullRequestFiles{Parent: "parent", Unaligned: "past the limit"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := baseAligned(t.Context(), nil, nil, 1, tt.d, rPrev); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
 func TestAffectedSources(t *testing.T) {
 	root := t.TempDir()
 	for _, p := range []string{"moved.go", "changed.go", "same.go"} {

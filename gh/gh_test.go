@@ -707,6 +707,8 @@ func TestFetchPullRequestFiles(t *testing.T) {
 		parents     []string
 		commitFails bool
 		want        []int
+		wantPatch   string
+		wantParent  string
 		wantAligned bool
 	}{
 		{
@@ -714,30 +716,36 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			commit:      mergeSHA,
 			parents:     []string{baseSHA, headSHA},
 			want:        []int{8, 9},
+			wantPatch:   mergePatch,
+			wantParent:  baseSHA,
 			wantAligned: true,
 		},
 		{
 			name:        "the head keeps the lines of the pull request",
 			commit:      headSHA,
 			want:        []int{5, 6},
+			wantPatch:   prPatch,
 			wantAligned: true,
 		},
 		{
 			name:    "a merge of another head keeps the lines of the pull request",
 			commit:  mergeSHA,
-			parents: []string{baseSHA, "other"},
-			want:    []int{5, 6},
+			parents:   []string{baseSHA, "other"},
+			want:      []int{5, 6},
+			wantPatch: prPatch,
 		},
 		{
 			name:        "a merge commit that cannot be looked up keeps the lines of the pull request",
 			commit:      mergeSHA,
 			commitFails: true,
 			want:        []int{5, 6},
+			wantPatch:   prPatch,
 		},
 		{
 			name:        "no commit keeps the lines of the pull request",
 			commit:      "",
 			want:        []int{5, 6},
+			wantPatch:   prPatch,
 			wantAligned: true,
 		},
 	}
@@ -785,15 +793,23 @@ func TestFetchPullRequestFiles(t *testing.T) {
 			}
 			g.SetClient(client)
 
-			files, unaligned, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
+			got, err := g.FetchPullRequestFiles(t.Context(), "owner", "repo", 1, tt.commit)
 			if err != nil {
 				t.Fatal(err)
 			}
+			files, unaligned := got.Files, got.Unaligned
 			if len(files) != 1 {
 				t.Fatalf("got %d files, want 1", len(files))
 			}
 			if diff := cmp.Diff(files[0].ChangedLines, tt.want); diff != "" {
 				t.Errorf("got diff (-got +want):\n%s", diff)
+			}
+			// The page draws the patch beside the coverage, so it is numbered the same way.
+			if files[0].Patch != tt.wantPatch {
+				t.Errorf("got patch %q, want %q", files[0].Patch, tt.wantPatch)
+			}
+			if got.Parent != tt.wantParent {
+				t.Errorf("got parent %q, want %q", got.Parent, tt.wantParent)
 			}
 			if got := unaligned == ""; got != tt.wantAligned {
 				t.Errorf("got unaligned %q, want aligned %v", unaligned, tt.wantAligned)

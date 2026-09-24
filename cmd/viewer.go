@@ -30,12 +30,12 @@ const (
 // pull request body link through. cur links the report of this run and prev the one it is
 // compared against. A failure to work out where to link is not a reason to hold the
 // report back, so it is said on stderr and the values are left unlinked.
-func resolveViewers(ctx context.Context, stderr io.Writer, c *config.Config, r, rPrev *report.Report, comparedArtifact string, files func() ([]*gh.PullRequestFile, error)) (cur, prev *report.Viewer) {
+func resolveViewers(ctx context.Context, stderr io.Writer, c *config.Config, r, rPrev *report.Report, comparedArtifact string, diff func() (*gh.PullRequestFiles, error)) (cur, prev *report.Viewer) {
 	switch c.ResolveViewer(ctx) {
 	case config.ViewerOctocovDev:
 		return viewersFor(storedArtifactViewer(c, r), comparedArtifact)
 	case config.ViewerArtifact:
-		u, anchors, err := uploadChangesPage(ctx, c, r, rPrev, files)
+		u, anchors, err := uploadChangesPage(ctx, c, r, rPrev, diff)
 		if err != nil {
 			fmt.Fprintf(stderr, "Skip linking to the page of the report: %v\n", err) //nostyle:handlerrors
 			return nil, nil
@@ -79,7 +79,7 @@ func resolveBadgeViewer(ctx context.Context, stderr io.Writer, c *config.Config)
 //
 // It is uploaded before the comment, the job summary and the body are written, since the
 // URL carries the artifact ID, which is known only once the upload is finalized.
-func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.Report, fetchFiles func() ([]*gh.PullRequestFile, error)) (string, map[string]bool, error) {
+func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.Report, fetchDiff func() (*gh.PullRequestFiles, error)) (string, map[string]bool, error) {
 	// A branch has no changes to draw, and a page of every file with its source is too
 	// large and too slow to render on every push.
 	n, ok := pullRequestNumber(r)
@@ -104,17 +104,18 @@ func uploadChangesPage(ctx context.Context, c *config.Config, r, rPrev *report.R
 	if err != nil {
 		return "", nil, err
 	}
-	files, err := fetchFiles()
+	d, err := fetchDiff()
 	if err != nil {
 		return "", nil, err
 	}
-	aligned := false
-	if mb, err := g.FetchMergeBase(ctx, repo.Owner, repo.Repo, n); err == nil {
-		aligned = mb != "" && mb == rPrev.Commit
-	}
+	files := d.Files
+	aligned := baseAligned(ctx, g, repo, n, d, rPrev)
 	in := &page.ChangesInput{
 		Report:   r,
 		RootPath: c.GitRoot,
+		// Where the patches could not be numbered like the report, the page draws no head
+		// gutter rather than one beside other lines.
+		Aligned: d.Unaligned == "",
 		Base: page.Base{
 			Report:   rPrev,
 			RootPath: c.GitRoot,
@@ -164,6 +165,21 @@ func pullRequestNumber(r *report.Report) (int, bool) {
 		return 0, false
 	}
 	return n, true
+}
+
+// baseAligned reports whether the base report was taken at the commit the old side of the
+// patches is numbered as. That is the first parent of the merge commit where the patches are its
+// diff against that parent, and the merge base where they are those of the pull request files
+// API. Where some files have one and some the other, no one commit is the old side of all of them.
+func baseAligned(ctx context.Context, g *gh.Gh, repo *gh.Repository, n int, d *gh.PullRequestFiles, rPrev *report.Report) bool {
+	if d.Parent != "" {
+		return d.Unaligned == "" && d.Parent == rPrev.Commit
+	}
+	mb, err := g.FetchMergeBase(ctx, repo.Owner, repo.Repo, n)
+	if err != nil {
+		return false
+	}
+	return mb != "" && mb == rPrev.Commit
 }
 
 func changedFiles(files []*gh.PullRequestFile) []*page.ChangedFile {

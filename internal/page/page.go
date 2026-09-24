@@ -39,8 +39,11 @@ var ErrUnrenderable = errors.New("the report cannot be rendered as a page")
 type ChangesInput struct {
 	Report   *report.Report `json:"report"`
 	RootPath string         `json:"rootPath,omitempty"`
-	Base     Base           `json:"base"`
-	Files    []*ChangedFile `json:"files"`
+	// Aligned says the report's lines are the new side of the patches. No omitempty, since the
+	// page reads an absent value as true, and false is the one that has to reach it.
+	Aligned bool           `json:"aligned"`
+	Base    Base           `json:"base"`
+	Files   []*ChangedFile `json:"files"`
 	// Sources holds the text of the files whose coverage moved while their code did not,
 	// which carry no patch to draw them from.
 	Sources map[string]string `json:"sources,omitempty"`

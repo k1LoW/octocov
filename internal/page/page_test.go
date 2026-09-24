@@ -47,9 +47,10 @@ func TestRenderChanges(t *testing.T) {
 		})
 	}
 	in := &ChangesInput{
-		Report: testReport("a", 7),
-		Base:   Base{Report: testReport("b", 5), Label: "main", Aligned: true},
-		Files:  files,
+		Report:  testReport("a", 7),
+		Aligned: true,
+		Base:    Base{Report: testReport("b", 5), Label: "main", Aligned: true},
+		Files:   files,
 	}
 	got, err := RenderChanges(t.Context(), "Coverage of k1LoW/octocov#1", in)
 	if err != nil {
@@ -88,12 +89,33 @@ func TestRenderChangesUnrenderable(t *testing.T) {
 	r := testReport("a", 7)
 	r.Coverage.Files[0].Blocks[0].StartLine = new(-1)
 	in := &ChangesInput{
-		Report: r,
-		Base:   Base{Report: testReport("b", 5), Label: "main", Aligned: true},
+		Report:  r,
+		Aligned: true,
+		Base:    Base{Report: testReport("b", 5), Label: "main", Aligned: true},
 		Files:  []*ChangedFile{{Filename: "report/report.go", Status: "modified", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"}},
 	}
 	if _, err := RenderChanges(t.Context(), "", in); !errors.Is(err, ErrUnrenderable) {
 		t.Errorf("got %v, want %v", err, ErrUnrenderable)
+	}
+}
+
+func TestRenderChangesWithoutTheHeadGutter(t *testing.T) {
+	// Where the patches could not be numbered like the report, the report's lines are not read
+	// at all, so a block the page would refuse does not stop it either.
+	r := testReport("a", 7)
+	r.Coverage.Files[0].Blocks[0].StartLine = new(-1)
+	in := &ChangesInput{
+		Report:  r,
+		Aligned: false,
+		Base:    Base{Report: testReport("b", 5), Label: "main", Aligned: true},
+		Files:   []*ChangedFile{{Filename: "report/report.go", Status: "modified", Patch: "@@ -1,1 +1,2 @@\n x\n+y\n"}},
+	}
+	got, err := RenderChanges(t.Context(), "", in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.Anchors[report.FileAnchor("report/report.go")] {
+		t.Error("the card of the changed file is not drawn")
 	}
 }
 
