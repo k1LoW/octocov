@@ -28,6 +28,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -303,7 +304,6 @@ var rootCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			path := fmt.Sprintf("%s/%s/%s", repo.Owner, repo.Reponame(), report.Filename)
 
 			// Collect filesystem files once for normalizing all loaded reports
 			var gitRoot string
@@ -317,6 +317,7 @@ var rootCmd = &cobra.Command{
 				}
 			}
 
+			var stores []comparedDatastore
 			for _, s := range c.Diff.Datastores {
 				log.Printf("Get previous report from %s", s)
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
@@ -331,30 +332,11 @@ var rootCmd = &cobra.Command{
 					log.Printf("%s: %v", s, err)
 					continue
 				}
-				f, err := fsys.Open(path)
-				if err != nil {
-					log.Printf("%s: %v", s, err)
-					continue
-				}
-				defer f.Close()
-				b, err := io.ReadAll(f)
-				if err != nil {
-					log.Printf("%s: %v", s, err)
-					continue
-				}
-				rt := &report.Report{}
-				if err := json.Unmarshal(b, rt); err != nil {
-					log.Printf("%s: %v %s", s, err, string(b))
-					continue
-				}
-				if rt.Coverage != nil {
-					rt.Coverage.NormalizePaths(gitRoot, fsFiles)
-				}
-				// Select latest report
-				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
-					rPrev = rt
-					comparedArtifact = datastore.MetadataRead(d)
-				}
+				stores = append(stores, comparedDatastore{name: s, fsys: fsys, metadataRead: datastore.MetadataRead(d)})
+			}
+			rPrev, comparedArtifact = readBaseReport(stores, fmt.Sprintf("%s/%s", repo.Owner, repo.Reponame()), r.BaseKeys())
+			if rPrev != nil && rPrev.Coverage != nil {
+				rPrev.Coverage.NormalizePaths(gitRoot, fsFiles)
 			}
 			if c.Diff.Path != "" {
 				rt, err := report.New(c.Repository, report.Locale(c.Locale))
@@ -762,4 +744,50 @@ func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
+}
+
+// comparedDatastore is a datastore of diff.datastores: opened for reading the report compared.
+type comparedDatastore struct {
+	name string
+	fsys fs.FS
+	// metadataRead is the artifact holding the metadata its report was read through, if any.
+	metadataRead string
+}
+
+// readBaseReport returns the newest report stored under the first of keys that any of stores
+// holds a report under, and the metadata it was read through. It goes key by key across every
+// datastore rather than datastore by datastore, so that the report of the default branch in
+// one datastore does not win on timestamp over the report of the base branch in another.
+func readBaseReport(stores []comparedDatastore, prefix string, keys []string) (*report.Report, string) {
+	var (
+		rPrev        *report.Report
+		metadataRead string
+	)
+	for _, key := range keys {
+		path := fmt.Sprintf("%s/%s", prefix, report.Filename)
+		if key != "" {
+			path = fmt.Sprintf("%s/%s/%s", prefix, key, report.Filename)
+		}
+		for _, s := range stores {
+			b, err := fs.ReadFile(s.fsys, path)
+			if err != nil {
+				log.Printf("%s: %v", s.name, err)
+				continue
+			}
+			rt := &report.Report{}
+			if err := json.Unmarshal(b, rt); err != nil {
+				log.Printf("%s: %v %s", s.name, err, string(b))
+				continue
+			}
+			// Select latest report
+			if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
+				rPrev = rt
+				metadataRead = s.metadataRead
+			}
+		}
+		if rPrev != nil {
+			return rPrev, metadataRead
+		}
+	}
+	return nil, ""
 }

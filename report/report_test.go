@@ -691,6 +691,34 @@ func TestRefKey(t *testing.T) {
 	}
 }
 
+func TestBaseKeys(t *testing.T) {
+	tests := []struct {
+		name          string
+		ref           string
+		baseRef       string
+		pullRequest   int
+		defaultBranch string
+		want          []string
+	}{
+		{"a pull request is compared against its base branch, then the default branch", "refs/pull/123/merge", "refs/heads/develop", 123, "refs/heads/main", []string{"refs/heads/develop", ""}},
+		{"a pull_request_target run is compared against its base branch, not its ref", "refs/heads/develop", "refs/heads/develop", 123, "refs/heads/main", []string{"refs/heads/develop", ""}},
+		{"a pull request ref is read when the number was not detected", "refs/pull/123/merge", "refs/heads/develop", 0, "refs/heads/main", []string{"refs/heads/develop", ""}},
+		{"a pull request to the default branch reads the default branch alone", "refs/pull/123/merge", "refs/heads/main", 123, "refs/heads/main", []string{""}},
+		{"a pull request with the default branch unknown tries its base branch first", "refs/pull/123/merge", "refs/heads/main", 123, "", []string{"refs/heads/main", ""}},
+		{"a push is compared against the default branch", "refs/heads/feat/x", "refs/heads/main", 0, "refs/heads/main", []string{""}},
+		{"a push to the default branch is compared against itself", "refs/heads/main", "refs/heads/main", 0, "refs/heads/main", []string{""}},
+		{"a pull request without a base ref is compared against the default branch", "refs/pull/123/merge", "", 123, "refs/heads/main", []string{""}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Report{Ref: tt.ref, BaseRef: tt.baseRef, PullRequest: tt.pullRequest, defaultBranch: tt.defaultBranch}
+			if diff := cmp.Diff(r.BaseKeys(), tt.want); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
 func TestRunRef(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -775,6 +803,30 @@ func TestDetectRefTakesTheNumberOfAPullRequestTargetFromTheEvent(t *testing.T) {
 				t.Errorf("got %v\nwant %v", r.RunRef(), want)
 			}
 		})
+	}
+}
+
+func TestDetectRefTakesTheDefaultBranchFromTheEvent(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "event.json")
+	if err := os.WriteFile(p, []byte(`{"pull_request":{"number":123},"repository":{"default_branch":"main"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	t.Setenv("GITHUB_EVENT_NAME", "pull_request")
+	t.Setenv("GITHUB_EVENT_PATH", p)
+	t.Setenv("GITHUB_REF", "refs/pull/123/merge")
+	t.Setenv("GITHUB_HEAD_REF", "feat")
+	t.Setenv("GITHUB_BASE_REF", "develop")
+	t.Setenv("GITHUB_PULL_REQUEST_NUMBER", "")
+	r := &Report{Repository: "owner/repo", Ref: "refs/pull/123/merge"}
+	if err := r.DetectRef(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if want := "refs/heads/main"; r.DefaultBranch() != want {
+		t.Errorf("got %v\nwant %v", r.DefaultBranch(), want)
+	}
+	if diff := cmp.Diff(r.BaseKeys(), []string{"refs/heads/develop", ""}); diff != "" {
+		t.Error(diff)
 	}
 }
 

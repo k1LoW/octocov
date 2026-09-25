@@ -1362,7 +1362,10 @@ type GitHubEvent struct {
 	// HeadSHA is the commit the head of the pull request is at, which on a pull request
 	// event is not the commit the run checks out, that being the merge of it onto the base.
 	HeadSHA string
-	Payload any
+	// DefaultBranch is the default branch of the repository the event is of, which every
+	// event of a repository carries.
+	DefaultBranch string
+	Payload       any
 }
 
 func DecodeGitHubEvent() (*GitHubEvent, error) {
@@ -1392,6 +1395,9 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 			Number int    `json:"number,omitempty"`
 			State  string `json:"state,omitempty"`
 		} `json:"issue,omitzero"`
+		Repository struct {
+			DefaultBranch string `json:"default_branch,omitempty"`
+		} `json:"repository,omitzero"`
 	}{}
 	if err := json.Unmarshal(b, &s); err != nil {
 		return i, err
@@ -1405,6 +1411,7 @@ func DecodeGitHubEvent() (*GitHubEvent, error) {
 		i.Number = s.Issue.Number
 		i.State = s.Issue.State
 	}
+	i.DefaultBranch = s.Repository.DefaultBranch
 
 	var payload any
 

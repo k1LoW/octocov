@@ -51,6 +51,10 @@ type Report struct {
 	Timestamp         time.Time          `json:"timestamp"`
 	CustomMetrics     []*CustomMetricSet `json:"custom_metrics,omitempty"`
 
+	// defaultBranch is the ref of the default branch where the run knows it without asking
+	// the API. It is not recorded, since only the report of the run compares against it.
+	defaultBranch string
+
 	// coverage report paths
 	covPaths []string
 	opts     *Options
@@ -115,6 +119,9 @@ func (r *Report) DetectRef(ctx context.Context) error {
 		return err
 	}
 	r.BaseRef = base
+	if e, err := gh.DecodeGitHubEvent(); err == nil && e.DefaultBranch != "" {
+		r.defaultBranch = fmt.Sprintf("refs/heads/%s", e.DefaultBranch)
+	}
 	// Outside a pull request event, DetectCurrentPullRequestNumber falls back to the open
 	// pull request whose head is the current branch. On a push to the default branch that
 	// is a release pull request kept open against another branch, and the report of the
@@ -189,6 +196,31 @@ func (r *Report) RefKey() string {
 		return ""
 	}
 	return ref
+}
+
+// BaseKeys returns the keys, as RefKey gives them, of the reports this one is compared
+// against, the more preferred first. A pull request is compared against its base branch,
+// which leaves out whatever the base branch and the default branch differ by, and against
+// the default branch where the base branch has stored no report, as in a repository that
+// reports only from the default branch. Any other run is compared against the default
+// branch, which is the empty key.
+//
+// Where the default branch is not known, the key of the base branch is given even if the
+// base is the default branch, whose report is stored under the empty key instead, since
+// asking for the default branch would take a request on every run, where a read that misses
+// costs one only where a comparison is made.
+func (r *Report) BaseKeys() []string {
+	base := NormalizeRef(r.BaseRef)
+	if base == "" || base == r.defaultBranch || !strings.HasPrefix(r.RunRef(), "refs/pull/") {
+		return []string{""}
+	}
+	return []string{base, ""}
+}
+
+// DefaultBranch returns the ref of the default branch where the run knows it without asking
+// the API, and "" otherwise.
+func (r *Report) DefaultBranch() string {
+	return r.defaultBranch
 }
 
 // StorePath returns the path of the report file within a datastore.
