@@ -251,7 +251,7 @@ owner/repo/refs/pull/123/report.json    # pull request #123
 owner/repo/refs/heads/feat/x/report.json
 ```
 
-`diff.datastores:` reads the report of the default branch, so the comparison shown on a pull request is against the default branch whether or not the pull requests report as well. Reporting from every run is therefore the default, and `report.if: is_default_branch` is only needed to keep the reports of the other refs out of a datastore, which is worth doing for `github://`, where each report is a commit that stays.
+`diff.datastores:` reads the report of the base branch on a pull request, so the comparison shown is against the branch the pull request merges into and leaves out whatever that branch and the default branch differ by. Where no datastore holds a report of the base branch, as when only the default branch reports, the report of the default branch is read instead. Any other run is compared against the default branch. The pull requests reporting as well changes none of this, so reporting from every run is the default, and `report.if: is_default_branch` is only needed to keep the reports of the other refs out of a datastore, which is worth doing for `github://`, where each report is a commit that stays.
 
 ```yaml
 # .octocov.yml
@@ -974,7 +974,7 @@ When `viewer:` is not set, a public repository on github.com whose `report.datas
 
 #### `viewer: octocov.dev`
 
-The values link to [octocov.dev](https://octocov.dev/), where the report stored in a GitHub Actions artifact can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the default branch and the current one opens the pull request, and the coverage of each file opens that file. The compared column is linked only when `diff.datastores:` read it out of an artifact, since that is what the page it would open serves, and no column is linked at all unless this run stores its own report in one.
+The values link to [octocov.dev](https://octocov.dev/), where the report stored in a GitHub Actions artifact can be browsed. Each overall coverage opens the report of the ref it describes, so the compared column opens the base branch or the default branch it was read for and the current one opens the pull request, and the coverage of each file opens that file. The compared column is linked only when `diff.datastores:` read it out of an artifact, since that is what the page it would open serves, and no column is linked at all unless this run stores its own report in one.
 
 Opening the report of a private repository there means granting octocov.dev access to that repository.
 
@@ -1048,7 +1048,7 @@ diff:
 
 ### `diff.datastores:`
 
-Datastores where the report to be compared is stored.
+Datastores where the report to be compared is stored. The report of the base branch of a pull request is read where there is one, and the report of the default branch otherwise ( see [Store report to datastores](#store-report-to-datastores) ).
 
 ```yaml
 diff:
@@ -1121,7 +1121,7 @@ artifact://[owner]/[repo]/[artifactName]
 
 The report of every ref is stored under the artifact name as it is configured. Beside it, each run stores an artifact of metadata that points, by ID, at the artifact holding the report of the ref the run is on, and records the commit that ref was at, which on a pull request is its head rather than the merge commit measured. It is named `octocov-metadata-`, the artifact name, `@` and the ref, with the characters an artifact name may not hold replaced by `_` ( e.g. `octocov-metadata-octocov-report@refs_heads_main`, `octocov-metadata-octocov-report@refs_pull_123` ).
 
-`diff.datastores:` reads the report the metadata of the base branch points at, and the central mode the one of the default branch. Where that metadata is not there, as for a report stored by an octocov that did not write it, the newest artifact of the name that a run on that branch uploaded, other than a run of a pull request whose head is that branch, is read instead.
+`diff.datastores:` reads the report the metadata of the base branch points at, or of the default branch where the base branch has no report, and the central mode the one of the default branch. Where that metadata is not there, as for a report stored by an octocov that did not write it, the newest artifact of the name that a run on that branch uploaded, other than a run of a pull request whose head is that branch, is read instead.
 
 > **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 

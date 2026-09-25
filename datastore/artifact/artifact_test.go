@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -358,13 +359,54 @@ func TestFSReadsTheDefaultBranchWithoutAReport(t *testing.T) {
 	}
 }
 
+func TestFSReadsTheBaseBranchOfAPullRequest(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	c := newFakeClient()
+	c.add("octocov-report", reportFilename, "develop", []byte(`{"commit":"develop"}`))
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/develop", PullRequest: 123}}
+	// Under the key of the base branch, as the datastores storing by path hold it.
+	got := readReportAt(t, a, "owner/repo/refs/heads/develop/"+reportFilename)
+	if want := `{"commit":"develop"}`; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestFSFallsBackToTheDefaultBranchWhereTheBaseBranchHasNoReport(t *testing.T) {
+	// As in a repository reporting only from the default branch.
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	c := newFakeClient()
+	c.add("octocov-report", reportFilename, "main", []byte(`{"commit":"main"}`))
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/develop", PullRequest: 123}}
+	got := readReport(t, a)
+	if want := `{"commit":"main"}`; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if want := "main"; c.askedBranch != want {
+		t.Errorf("got %v\nwant %v", c.askedBranch, want)
+	}
+}
+
+func TestFSReportsNothingWhereNeitherBranchHasAReport(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	c := newFakeClient()
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/main", PullRequest: 123}}
+	if _, err := a.FS(); !errors.Is(err, gh.ErrArtifactNotFound) {
+		t.Errorf("got %v\nwant %v", err, gh.ErrArtifactNotFound)
+	}
+}
+
 func readReport(t *testing.T, a *Artifact) string {
+	t.Helper()
+	return readReportAt(t, a, "owner/repo/"+reportFilename)
+}
+
+func readReportAt(t *testing.T, a *Artifact, path string) string {
 	t.Helper()
 	fsys, err := a.FS()
 	if err != nil {
 		t.Fatal(err)
 	}
-	b, err := fs.ReadFile(fsys, "owner/repo/"+reportFilename)
+	b, err := fs.ReadFile(fsys, path)
 	if err != nil {
 		t.Fatal(err)
 	}

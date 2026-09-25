@@ -167,13 +167,19 @@ func (a *Artifact) FS() (fs.FS, error) {
 		}
 	}
 	log.Printf("artifact name: %s", name)
-	af, err := a.fetchReport(ctx, r, name)
+	af, key, err := a.fetchBaseReport(ctx, r, name)
 	if err != nil {
 		// An empty filesystem used to stand in for every failure here, which left a missing
 		// permission and an expired artifact looking exactly like a repository that had
 		// never reported. Saying so is what lets the caller decide, and the central mode
 		// turns it into a warning rather than stopping.
 		return nil, fmt.Errorf("failed to fetch artifact %s of %s/%s: %w", name, r.Owner, r.Repo, err)
+	}
+	// Laid out under the key of the ref it was read for, as the datastores storing by path
+	// hold it, so that the comparison can prefer the report of the base branch across every
+	// datastore rather than taking this one for the base branch's whichever ref it is of.
+	if key != "" {
+		path = fmt.Sprintf("%s/%s/%s/%s", r.Owner, r.Reponame(), key, reportFilename)
 	}
 	fsys := fstest.MapFS{
 		path: &fstest.MapFile{
@@ -237,17 +243,13 @@ func headCommit(r *report.Report) string {
 	return e.HeadSHA
 }
 
-// fetchReport returns the report of the artifacts of the name that the ref FS() reads stored
-// last, which is the one its metadata points at. A ref with no metadata, which is every ref
-// an octocov older than the metadata stored, or whose metadata points at a report no longer
-// there, is read from the newest artifact of the name a run on its branch uploaded, so the
-// reports of the other refs sharing the name stay out.
-func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name string) (*gh.ArtifactFile, error) {
+// fetchReport returns the report of the artifacts of the name that ref stored last, which is
+// the one its metadata points at. A ref with no metadata, which is every ref an octocov older
+// than the metadata stored, or whose metadata points at a report no longer there, is read from
+// the newest artifact of the name a run on its branch uploaded, so the reports of the other
+// refs sharing the name stay out.
+func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name, ref string) (*gh.ArtifactFile, error) {
 	a.metadataRead = ""
-	ref, err := a.readRef(ctx, r)
-	if err != nil {
-		return nil, err
-	}
 	metadataName := MetadataName(name, ref)
 	mf, err := a.gh.FetchLatestArtifact(ctx, r.Owner, r.Repo, metadataName, metadataFilename)
 	switch {
@@ -280,12 +282,49 @@ func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name strin
 	return a.gh.FetchLatestArtifactOfBranch(ctx, r.Owner, r.Repo, name, reportFilename, branch)
 }
 
-// readRef returns the ref FS() reads the report of, which is the one the report of this run
-// is compared against, and the default branch where there is no report of this run, as in
-// the central mode.
-func (a *Artifact) readRef(ctx context.Context, r *gh.Repository) (string, error) {
+// fetchBaseReport returns the report the report of this run is compared against, and the key
+// of the ref it was read for, as report.BaseKeys orders them. A ref with nothing to read gives
+// way to the next, and the default branch, the empty key, is also what is read where there is
+// no report of this run, as in the central mode.
+func (a *Artifact) fetchBaseReport(ctx context.Context, r *gh.Repository, name string) (*gh.ArtifactFile, string, error) {
+	keys := []string{""}
 	if a.r != nil {
-		if base := report.NormalizeRef(a.r.BaseRef); base != "" {
+		keys = a.r.BaseKeys()
+	}
+	var (
+		tried    string
+		notFound error
+	)
+	for _, key := range keys {
+		ref := key
+		if ref == "" {
+			var err error
+			ref, err = a.defaultRef(ctx, r)
+			if err != nil {
+				return nil, "", err
+			}
+		}
+		// The base branch is the default branch, already found to have nothing.
+		if ref == tried {
+			continue
+		}
+		af, err := a.fetchReport(ctx, r, name, ref)
+		if !errors.Is(err, gh.ErrArtifactNotFound) {
+			return af, key, err
+		}
+		tried, notFound = ref, err
+	}
+	return nil, "", notFound
+}
+
+// defaultRef returns the ref of the default branch. Outside a pull request the base ref of
+// the run is the default branch, so the API is asked only where the run knows neither.
+func (a *Artifact) defaultRef(ctx context.Context, r *gh.Repository) (string, error) {
+	if a.r != nil {
+		if d := a.r.DefaultBranch(); d != "" {
+			return d, nil
+		}
+		if base := report.NormalizeRef(a.r.BaseRef); base != "" && !strings.HasPrefix(a.r.RunRef(), "refs/pull/") {
 			return base, nil
 		}
 	}

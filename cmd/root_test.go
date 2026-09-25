@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 	"testing"
+	"testing/fstest"
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
@@ -85,6 +87,81 @@ func TestViewersFor(t *testing.T) {
 			}
 			if (prev != nil) != tt.wantPrev {
 				t.Errorf("got prev %v\nwant one: %v", prev, tt.wantPrev)
+			}
+		})
+	}
+}
+
+func TestReadBaseReport(t *testing.T) {
+	stored := func(commit string, ts int) *fstest.MapFile {
+		return &fstest.MapFile{Data: fmt.Appendf(nil, `{"commit":%q,"timestamp":"2026-09-%02dT00:00:00Z"}`, commit, ts)}
+	}
+	tests := []struct {
+		name             string
+		stores           []comparedDatastore
+		keys             []string
+		want             string
+		wantMetadataRead string
+	}{
+		{
+			"the report of the base branch is read",
+			[]comparedDatastore{{name: "s3", fsys: fstest.MapFS{
+				"owner/repo/report.json":                    stored("main", 2),
+				"owner/repo/refs/heads/develop/report.json": stored("develop", 1),
+			}}},
+			[]string{"refs/heads/develop", ""},
+			"develop",
+			"",
+		},
+		{
+			"the default branch is read where the base branch has no report",
+			[]comparedDatastore{{name: "s3", fsys: fstest.MapFS{
+				"owner/repo/report.json": stored("main", 1),
+			}}},
+			[]string{"refs/heads/develop", ""},
+			"main",
+			"",
+		},
+		{
+			"the base branch of one datastore wins over a newer default branch of another",
+			[]comparedDatastore{
+				{name: "s3", fsys: fstest.MapFS{"owner/repo/report.json": stored("main", 2)}},
+				{name: "artifact", fsys: fstest.MapFS{"owner/repo/refs/heads/develop/report.json": stored("develop", 1)}, metadataRead: "octocov-metadata-octocov-report@refs_heads_develop"},
+			},
+			[]string{"refs/heads/develop", ""},
+			"develop",
+			"octocov-metadata-octocov-report@refs_heads_develop",
+		},
+		{
+			"the newest of the datastores holding the key is read",
+			[]comparedDatastore{
+				{name: "artifact", fsys: fstest.MapFS{"owner/repo/report.json": stored("older", 1)}, metadataRead: "octocov-metadata-octocov-report@refs_heads_main"},
+				{name: "s3", fsys: fstest.MapFS{"owner/repo/report.json": stored("newer", 2)}},
+			},
+			[]string{""},
+			"newer",
+			"",
+		},
+		{
+			"nothing is read where no datastore holds a report",
+			[]comparedDatastore{{name: "s3", fsys: fstest.MapFS{}}},
+			[]string{"refs/heads/develop", ""},
+			"",
+			"",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, metadataRead := readBaseReport(tt.stores, "owner/repo", tt.keys)
+			var commit string
+			if got != nil {
+				commit = got.Commit
+			}
+			if commit != tt.want {
+				t.Errorf("got %v\nwant %v", commit, tt.want)
+			}
+			if metadataRead != tt.wantMetadataRead {
+				t.Errorf("got %v\nwant %v", metadataRead, tt.wantMetadataRead)
 			}
 		})
 	}
