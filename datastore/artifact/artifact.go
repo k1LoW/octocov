@@ -241,6 +241,12 @@ func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name strin
 		if err := json.Unmarshal(mf.Content, m); err != nil {
 			return nil, fmt.Errorf("failed to read the metadata of %s: %w", ref, err)
 		}
+		// The name carries the ref with its separators replaced, so two refs such as
+		// refs/heads/release/v1 and refs/heads/release_v1 share it, and the newest metadata of
+		// the name can be the other ref's. The fallback compares the branch unreplaced.
+		if m.Ref != ref {
+			break
+		}
 		af, err := a.gh.FetchArtifact(ctx, r.Owner, r.Repo, m.Report.ArtifactID, reportFilename)
 		// The report can be gone while its metadata is not. A re-run keeps the run id, and the
 		// upload of the report deletes the one the earlier attempt stored first, so an attempt

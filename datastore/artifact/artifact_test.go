@@ -297,6 +297,32 @@ func TestFSFallsBackWhereTheMetadataPointsAtAReportGone(t *testing.T) {
 	}
 }
 
+func TestFSFallsBackWhereTheMetadataIsOfAnotherRefSharingTheName(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	c := newFakeClient()
+	// The fake holds only the newest artifact of a name, which the fallback has to find.
+	other := c.add("octocov-report", reportFilename, "release_v1", []byte(`{"commit":"other"}`))
+	c.add("octocov-report", reportFilename, "release/v1", []byte(`{"commit":"base"}`))
+	m := &Metadata{Ref: "refs/heads/release_v1", Commit: "other"}
+	m.Report.ArtifactName = "octocov-report"
+	m.Report.ArtifactID = other
+	b, err := json.Marshal(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// refs/heads/release/v1 and refs/heads/release_v1 name the same metadata artifact.
+	c.add("octocov-metadata-octocov-report@refs_heads_release_v1", metadataFilename, "release_v1", b)
+
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", BaseRef: "refs/heads/release/v1"}}
+	got := readReport(t, a)
+	if want := `{"commit":"base"}`; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if got := a.MetadataRead(); got != "" {
+		t.Errorf("got %v\nwant no metadata", got)
+	}
+}
+
 func TestFSReadsTheDefaultBranchWithoutAReport(t *testing.T) {
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	// As the central mode does, which has no report of its own to be compared.
