@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.82.0](https://github.com/k1LoW/octocov/compare/v0.81.0...v0.82.0) - 2026-09-25
+
+### New Features 🎉
+- feat: link to the page where octocov.dev has no report of the run to open by @k1LoW in https://github.com/k1LoW/octocov/pull/790
+- feat: draw the changes page in the syntax colours octocov.dev draws by @k1LoW in https://github.com/k1LoW/octocov/pull/793
+### Other Changes
+- ci: render the page of viewer: artifact on octocov's own pull requests by @k1LoW in https://github.com/k1LoW/octocov/pull/792
+
 ## [v0.81.0](https://github.com/k1LoW/octocov/compare/v0.80.1...v0.81.0) - 2026-09-25
 
 ### Breaking Changes 🛠
