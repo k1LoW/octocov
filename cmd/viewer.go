@@ -37,8 +37,16 @@ const (
 func resolveViewers(ctx context.Context, stderr io.Writer, c *config.Config, r, rPrev *report.Report, comparedArtifact string, diff func() (*gh.PullRequestFiles, error)) (cur, prev *report.Viewer, cleanup func()) {
 	switch c.ResolveViewer(ctx) {
 	case config.ViewerOctocovDev:
-		cur, prev := viewersFor(storedArtifactViewer(c, r), comparedArtifact)
-		return cur, prev, nil
+		stored := storedArtifactViewer(c, r)
+		// octocov.dev has no report of this run to open where report.if: holds the storing
+		// back, as on the pull requests of a repository reporting only from the default
+		// branch. Chosen for the user rather than by them, it gives way to the page, which
+		// needs only the report it is compared against to be stored.
+		if stored != nil || c.Viewer != nil {
+			cur, prev := viewersFor(stored, comparedArtifact)
+			return cur, prev, nil
+		}
+		fallthrough
 	case config.ViewerArtifact:
 		u, anchors, cleanup, err := uploadChangesPage(ctx, c, r, rPrev, diff)
 		if err != nil {

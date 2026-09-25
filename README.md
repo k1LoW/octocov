@@ -968,7 +968,7 @@ viewer:
   type: artifact
 ```
 
-When `viewer:` is not set, a public repository on github.com whose `report.datastores:` has `artifact://` links to `octocov.dev`, and everything else ( a private repository, a report stored in no artifact, GitHub Enterprise Server ) links to `artifact`. `none` is only ever set explicitly.
+When `viewer:` is not set, a public repository on github.com whose `report.datastores:` has `artifact://` links to `octocov.dev`, and everything else ( a private repository, a report stored in no artifact, GitHub Enterprise Server ) links to `artifact`. A run that stores no report of its own in an artifact, as a pull request run where `report.if:` holds the storing back, links to `artifact` too, since the page needs only the report it is compared against to be stored. `none` is only ever set explicitly.
 
 `octocov.dev` and `artifact` link the overall coverage and the coverage of each file, and nothing else.
 
