@@ -1,0 +1,12 @@
+# Renders the same coverage as .octocov.yml through viewer: artifact, which the repository
+# itself does not get, since being public it links to octocov.dev.
+# It stores no report and writes no comment, so it leaves those of .octocov.yml as they are.
+coverage:
+  paths:
+    - ../coverage.out
+viewer: artifact
+diff:
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
+summary:
+  if: is_pull_request

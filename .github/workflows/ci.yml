@@ -125,6 +125,16 @@ jobs:
           OCTOCOV_CUSTOM_METRICS_CI: ./.tmp/custom_metrics.json
           GOTOOLCHAIN: 'go${{ steps.setup-go.outputs.go-version }}'
 
+      # Uploading the page needs ACTIONS_RUNTIME_TOKEN, which a run step is not given, so the
+      # binary built above runs in a container step. golang:latest is the image the action
+      # above is built from, so it is already pulled, and it has the CA certificates.
+      - name: Run octocov with viewer artifact
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: docker://golang:latest
+        with:
+          entrypoint: /github/workspace/.tmp/octocov
+          args: --config testdata/octocov_artifact_viewer.yml
+
       - name: Show rate limit
         run: |
           curl -sL -H "Authorization: token $GITHUB_TOKEN" -H "Accept: application/vnd.github.v3+json" https://api.github.com/rate_limit
