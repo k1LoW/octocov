@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -244,5 +247,59 @@ func TestAffectedSourcesStopAtThePageBudget(t *testing.T) {
 	got := affectedSources(root, head, base, nil)
 	if want := maxSourcesBytes / maxSourceBytes; len(got) != want {
 		t.Errorf("got %d sources\nwant %d", len(got), want)
+	}
+}
+
+func TestResolveViewersFallBackToThePageOnlyByDefault(t *testing.T) {
+	tests := []struct {
+		name     string
+		viewer   *config.Viewer
+		wantPage bool
+	}{
+		{"an unset viewer gives way to the page", nil, true},
+		{"an explicit octocov.dev stays unlinked", &config.Viewer{Type: config.ViewerOctocovDev}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// The unset viewer resolves to octocov.dev only for a public repository, which is
+			// asked of the API.
+			ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if r.URL.Path != "/repos/k1LoW/octocov" {
+					http.NotFound(w, r)
+					return
+				}
+				fmt.Fprint(w, `{"private":false}`)
+			}))
+			t.Cleanup(ts.Close)
+			t.Setenv("GH_HOST", "")
+			t.Setenv("GITHUB_API_URL", ts.URL)
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+			t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+			// Without an event report.if: cannot be evaluated, so this run stores no report and
+			// octocov.dev has none of its own to open.
+			t.Setenv("GITHUB_EVENT_NAME", "")
+			c := config.New()
+			c.Repository = "k1LoW/octocov"
+			c.Report = &config.Report{If: "is_default_branch", Datastores: []string{"artifact://k1LoW/octocov"}}
+			c.Viewer = tt.viewer
+			// A branch, on which the page refuses before reaching the API, so reaching it is
+			// told by the reason it gives.
+			r := &report.Report{
+				Repository: "k1LoW/octocov",
+				Ref:        "refs/heads/feat",
+				BaseRef:    "refs/heads/main",
+				Coverage:   &coverage.Coverage{Total: 100, Covered: 50},
+			}
+			stderr := &bytes.Buffer{}
+			cur, prev, cleanup := resolveViewers(t.Context(), stderr, c, r, nil, "", nil)
+			if cur != nil || prev != nil || cleanup != nil {
+				t.Errorf("got %v, %v, cleanup %v\nwant no link", cur, prev, cleanup != nil)
+			}
+			const want = "Skip linking to the page of the report: the page is rendered only for a pull request"
+			if got := strings.Contains(stderr.String(), want); got != tt.wantPage {
+				t.Errorf("got stderr %q\nwant the page tried: %v", stderr.String(), tt.wantPage)
+			}
+		})
 	}
 }
