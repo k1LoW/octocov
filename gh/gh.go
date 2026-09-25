@@ -721,15 +721,18 @@ func (g *Gh) PutCommentWithDeletion(ctx context.Context, owner, repo string, n i
 	return nil
 }
 
-func (g *Gh) PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error {
+// PutArtifact uploads content as an artifact holding the file fp, and returns the ID of the
+// artifact. The ID is 0 where the artifact is uploaded through the legacy API, which does not
+// answer with it, and it is left to a caller that needs it to look it up, since most do not.
+func (g *Gh) PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) (int64, error) {
 	current, _, err := g.client.Actions.ListWorkflowRunArtifacts(ctx, owner, repo, runID, &github.ListOptions{})
 	if err != nil {
-		return err
+		return 0, err
 	}
 	for _, a := range current.Artifacts {
 		if a.GetName() == name {
 			if _, err := g.client.Actions.DeleteArtifact(ctx, owner, repo, a.GetID()); err != nil {
-				return err
+				return 0, err
 			}
 			break
 		}
@@ -749,8 +752,9 @@ func (g *Gh) PutUnarchivedArtifact(ctx context.Context, owner, repo string, runI
 	if !errors.Is(err, artifact.ErrUnarchivedUploadNotSupported) {
 		return id, err
 	}
-	if err := artifact.Upload(ctx, name, name, bytes.NewReader(content)); err != nil {
-		return 0, err
+	id, err = artifact.Upload(ctx, name, name, bytes.NewReader(content))
+	if err != nil || id != 0 {
+		return id, err
 	}
 	// The legacy upload does not answer with the ID, so it is looked up by the name, which
 	// is unique within the run once the earlier one has been deleted.
