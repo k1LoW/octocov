@@ -691,6 +691,93 @@ func TestRefKey(t *testing.T) {
 	}
 }
 
+func TestRunRef(t *testing.T) {
+	tests := []struct {
+		name        string
+		ref         string
+		pullRequest int
+		want        string
+	}{
+		{"the default branch is named like any other branch", "refs/heads/main", 0, "refs/heads/main"},
+		{"a pull request is named by its number", "refs/pull/123/merge", 123, "refs/pull/123"},
+		{"a pull_request_target run is named by its pull request, not by the base branch", "refs/heads/main", 123, "refs/pull/123"},
+		{"a tag is named as it is", "refs/tags/v1.0.0", 0, "refs/tags/v1.0.0"},
+		{"a run with no ref has none", "", 0, ""},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Report{Ref: tt.ref, PullRequest: tt.pullRequest}
+			if got := r.RunRef(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestIsPullRequestEvent(t *testing.T) {
+	tests := []struct {
+		name     string
+		ref      string
+		headRef  string
+		prNumber string
+		want     bool
+	}{
+		{"a push to the default branch is not one, whatever pull request its head is", "refs/heads/main", "", "", false},
+		{"a push to another branch is not one", "refs/heads/feat/x", "", "", false},
+		{"pull_request", "refs/pull/123/merge", "feat/x", "", true},
+		{"pull_request_target names the base branch in GITHUB_REF", "refs/heads/main", "feat/x", "", true},
+		{"a number given explicitly", "refs/heads/main", "", "123", true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_REF", tt.ref)
+			t.Setenv("GITHUB_HEAD_REF", tt.headRef)
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.prNumber)
+			if got := isPullRequestEvent(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestDetectRefTakesTheNumberOfAPullRequestTargetFromTheEvent(t *testing.T) {
+	tests := []struct {
+		name     string
+		prNumber string
+		want     int
+	}{
+		// A pull request from the main branch of a fork, whose head names a branch of the
+		// base repository too.
+		{"a pull request from a fork", "", 123},
+		{"a number given explicitly wins", "456", 456},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := filepath.Join(t.TempDir(), "event.json")
+			if err := os.WriteFile(p, []byte(`{"pull_request":{"number":123,"head":{"sha":"head"}}}`), 0600); err != nil {
+				t.Fatal(err)
+			}
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_EVENT_NAME", "pull_request_target")
+			t.Setenv("GITHUB_EVENT_PATH", p)
+			t.Setenv("GITHUB_REF", "refs/heads/main")
+			t.Setenv("GITHUB_HEAD_REF", "main")
+			t.Setenv("GITHUB_BASE_REF", "main")
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.prNumber)
+			r := &Report{Repository: "owner/repo", Ref: "refs/heads/main"}
+			if err := r.DetectRef(t.Context()); err != nil {
+				t.Fatal(err)
+			}
+			if r.PullRequest != tt.want {
+				t.Errorf("got %v\nwant %v", r.PullRequest, tt.want)
+			}
+			if want := fmt.Sprintf("refs/pull/%d", tt.want); r.RunRef() != want {
+				t.Errorf("got %v\nwant %v", r.RunRef(), want)
+			}
+		})
+	}
+}
+
 func TestStorePath(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -744,7 +831,7 @@ func TestTableLinksCoverageToTheViewer(t *testing.T) {
 	r.Repository = "k1LoW/tbls"
 	r.PullRequest = 722
 
-	if got, want := r.Table(NewOctocovDevViewer("octocov-report@refs_pull_722")), "[68.4%](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
+	if got, want := r.Table(NewOctocovDevViewer("octocov-metadata-octocov-report@refs_pull_722")), "[68.4%](https://octocov.dev/k1LoW/tbls/pull/722)"; !strings.Contains(got, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
 	}
 	// The same table without a viewer keeps the cell as it has always been rendered.
@@ -761,12 +848,13 @@ func TestFileCoveragesTableLinksCoverageToTheViewer(t *testing.T) {
 	}
 	r.Repository = "k1LoW/tbls"
 	r.Commit = "0123456789abcdef"
+	r.PullRequest = 722
 	files := []*gh.PullRequestFile{
 		{Filename: r.Coverage.Files[0].File, BlobURL: "https://github.com/k1LoW/tbls/blob/0123456789abcdef/f"},
 	}
 
-	got := r.FileCoveragesTable(files, NewOctocovDevViewer("octocov-report@refs_pull_722"))
-	want := "?artifact_name=octocov-report%40refs_pull_722)"
+	got := r.FileCoveragesTable(files, NewOctocovDevViewer("octocov-metadata-octocov-report@refs_pull_722"))
+	want := "?metadata_name=octocov-metadata-octocov-report%40refs_pull_722&ref=refs%2Fpull%2F722)"
 	if !strings.Contains(got, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
 	}

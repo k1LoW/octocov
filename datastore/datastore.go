@@ -272,10 +272,47 @@ func ArtifactName(datastores []string, r *report.Report) (string, bool) {
 	return "", false
 }
 
+// MetadataArtifactName returns the name of the artifact holding the metadata of the ref of the
+// run that took r, for the first artifact:// entry of datastores, and reports whether there is
+// such an entry. That metadata is what says which of the artifacts sharing the name holds r.
+func MetadataArtifactName(datastores []string, r *report.Report) (string, bool) {
+	n, ok := ArtifactName(datastores, r)
+	if !ok {
+		return "", false
+	}
+	ref := r.RunRef()
+	if ref == "" {
+		return "", false
+	}
+	// Such metadata is never stored, so a link naming it would open nothing.
+	m := artifact.MetadataName(n, ref)
+	if len(m) > artifact.MaxNameLength {
+		return "", false
+	}
+	return m, true
+}
+
+// metadataDatastore is a datastore that can say which metadata it read its report through.
+type metadataDatastore interface {
+	Datastore
+	MetadataRead() string
+}
+
+// MetadataRead returns the name of the metadata artifact that d read its report through on its
+// last FS(), and an empty name where d is not an artifact datastore or read no metadata.
+func MetadataRead(d Datastore) string {
+	m, ok := d.(metadataDatastore)
+	if !ok {
+		return ""
+	}
+	return m.MetadataRead()
+}
+
 // PageArtifactBase returns what the names of the pages of the report uploaded as artifacts are
-// built on, which is the name the report is stored under. The report may be stored in no
-// artifact at all, and then it is the name an artifact:// entry naming no artifact of its own
-// would store it under.
+// built on, which is the name the report is stored under marked off by its ref. The pages of
+// every pull request would otherwise share one name, and the pages of earlier runs are deleted
+// by it. The report may be stored in no artifact at all, and then it is the name an
+// artifact:// entry naming no artifact of its own would store it under.
 func PageArtifactBase(datastores []string, r *report.Report) (string, error) {
 	n, ok := ArtifactName(datastores, r)
 	if !ok {
@@ -288,7 +325,7 @@ func PageArtifactBase(datastores []string, r *report.Report) (string, error) {
 			return "", fmt.Errorf("the report of %s cannot be named as an artifact", r.Repository)
 		}
 	}
-	return n, nil
+	return artifact.RefScopedName(n, r.RefKey()), nil
 }
 
 func NeedToShrink(u string) bool {

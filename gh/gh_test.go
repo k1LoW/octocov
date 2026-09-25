@@ -1,9 +1,13 @@
 package gh
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"path"
 	"strconv"
 	"strings"
@@ -1318,5 +1322,172 @@ func TestHasReports(t *testing.T) {
 		if got != tt.want {
 			t.Errorf("%s: got %v, want %v", tt.name, got, tt.want)
 		}
+	}
+}
+
+func TestFetchLatestArtifactOfBranch(t *testing.T) {
+	// Every ref shares the artifact name, so only the branch the run was on tells the report of
+	// the base apart from the ones pull requests stored under the same name later.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	zips := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buf := new(bytes.Buffer)
+		zw := zip.NewWriter(buf)
+		f, err := zw.Create("report.json")
+		if err != nil {
+			t.Error(err)
+		}
+		if _, err := f.Write([]byte(path.Base(r.URL.Path))); err != nil {
+			t.Error(err)
+		}
+		if err := zw.Close(); err != nil {
+			t.Error(err)
+		}
+		_, _ = w.Write(buf.Bytes()) //nostyle:handlerrors
+	}))
+	t.Cleanup(zips.Close)
+
+	// The run of an artifact pushed is numbered from 100 and the run of one of a pull request
+	// from 1000, which is how the mocked run below tells the event.
+	artifact := func(id int64, branch string) *github.Artifact {
+		return &github.Artifact{
+			ID:          new(id),
+			Name:        new("octocov-report"),
+			WorkflowRun: &github.ArtifactWorkflowRun{ID: new(id + 100), HeadBranch: new(branch)},
+		}
+	}
+	pullRequest := func(id int64, branch string) *github.Artifact {
+		a := artifact(id, branch)
+		a.WorkflowRun.ID = new(id + 1000)
+		return a
+	}
+	tests := []struct {
+		name    string
+		pages   []github.ArtifactList
+		branch  string
+		want    string
+		wantErr error
+	}{
+		{
+			"the newest artifact of the branch, past a newer one of a pull request",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(3, "feat"), artifact(2, "main"), artifact(1, "main")}}},
+			"main", "2", nil,
+		},
+		{
+			"a branch whose artifacts are on a later page",
+			[]github.ArtifactList{
+				{Artifacts: []*github.Artifact{artifact(4, "feat"), artifact(3, "feat")}},
+				{Artifacts: []*github.Artifact{artifact(2, "main")}},
+			},
+			"main", "2", nil,
+		},
+		{
+			"a run of a pull request whose head is the branch, as a release pull request's is",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "develop"), artifact(2, "develop")}}},
+			"develop", "2", nil,
+		},
+		{
+			"no artifact of the branch",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(2, "feat"), artifact(1, "fix")}}},
+			"main", "", ErrArtifactNotFound,
+		},
+		{
+			"an empty branch takes the newest of any",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(3, "feat"), artifact(2, "main")}}},
+			"", "3", nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pages := make([]any, 0, len(tt.pages))
+			for _, p := range tt.pages {
+				pages = append(pages, p)
+			}
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatchPages(mock.GetReposActionsArtifactsByOwnerByRepo, pages...),
+				mock.WithRequestMatchHandler( //nostyle:funcfmt
+					mock.GetReposActionsRunsByOwnerByRepoByRunId,
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+						if err != nil {
+							t.Error(err)
+						}
+						event := "push"
+						if id >= 1000 {
+							event = "pull_request"
+						}
+						_, _ = w.Write(mock.MustMarshal(github.WorkflowRun{ID: new(id), Event: new(event)})) //nostyle:handlerrors
+					}),
+				),
+				mock.WithRequestMatchHandler( //nostyle:funcfmt
+					mock.GetReposActionsArtifactsByOwnerByRepoByArtifactIdByArchiveFormat,
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						id, err := strconv.ParseInt(path.Base(path.Dir(r.URL.Path)), 10, 64)
+						if err != nil {
+							t.Error(err)
+						}
+						w.Header().Set("Location", fmt.Sprintf("%s/%d", zips.URL, id))
+						w.WriteHeader(http.StatusFound)
+					}),
+				),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+
+			got, err := g.FetchLatestArtifactOfBranch(t.Context(), "owner", "repo", "octocov-report", "report.json", tt.branch)
+			if tt.wantErr != nil {
+				if !errors.Is(err, tt.wantErr) {
+					t.Fatalf("got err %v\nwant %v", err, tt.wantErr)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if string(got.Content) != tt.want {
+				t.Errorf("got %v\nwant %v", string(got.Content), tt.want)
+			}
+		})
+	}
+}
+
+func TestFetchArtifactOfAnArtifactGone(t *testing.T) {
+	// Metadata can outlive the report it points at, and the reader falls back on this error.
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	tests := []struct {
+		name    string
+		handler http.HandlerFunc
+	}{
+		{"deleted", func(w http.ResponseWriter, r *http.Request) {
+			mock.WriteError(w, http.StatusNotFound, "Not Found")
+		}},
+		{"expired", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write(mock.MustMarshal(github.Artifact{ID: new(int64(1)), Expired: new(true)})) //nostyle:handlerrors
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+				mock.WithRequestMatchHandler(mock.GetReposActionsArtifactsByOwnerByRepoByArtifactId, tt.handler),
+			)
+			client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+			if err != nil {
+				t.Fatal(err)
+			}
+			g, err := New()
+			if err != nil {
+				t.Fatal(err)
+			}
+			g.SetClient(client)
+			if _, err := g.FetchArtifact(t.Context(), "owner", "repo", 1, "report.json"); !errors.Is(err, ErrArtifactNotFound) {
+				t.Errorf("got err %v\nwant %v", err, ErrArtifactNotFound)
+			}
+		})
 	}
 }

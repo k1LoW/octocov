@@ -13,7 +13,7 @@ import (
 func TestViewerReportURL(t *testing.T) {
 	tests := []struct {
 		name         string
-		artifactName string
+		metadataName string
 		serverURL    string
 		repository   string
 		ref          string
@@ -21,23 +21,23 @@ func TestViewerReportURL(t *testing.T) {
 		pullRequest  int
 		want         string
 	}{
-		{"a pull request has a page of its own", "octocov-report@refs_pull_722", "", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
-		{"the default branch is the repository itself", "octocov-report", "", "k1LoW/octocov", "refs/heads/main", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov"},
-		{"a branch has a tree page", "octocov-report@refs_heads_feat_x", "", "k1LoW/octocov", "refs/heads/feat/x", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov/tree/feat/x"},
-		{"a branch name is escaped segment by segment", "octocov-report", "", "k1LoW/octocov", "refs/heads/feat/a b", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov/tree/feat/a%20b"},
-		{"a tag has no page of its own", "octocov-report", "", "k1LoW/octocov", "refs/tags/v1.0.0", "refs/heads/main", 0, ""},
-		{"a report predating the base ref is read as the repository", "octocov-report", "", "k1LoW/octocov", "refs/heads/whatever", "", 0, "https://octocov.dev/k1LoW/octocov"},
-		{"a report of a sub directory is served under its repository", "octocov-report-sub@refs_pull_722", "", "k1LoW/octocov/sub", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"a pull request has a page of its own", "octocov-metadata-octocov-report@refs_pull_722", "", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"the default branch is the repository itself", "octocov-metadata-octocov-report@refs_heads_main", "", "k1LoW/octocov", "refs/heads/main", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov"},
+		{"a branch has a tree page", "octocov-metadata-octocov-report@refs_heads_feat_x", "", "k1LoW/octocov", "refs/heads/feat/x", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov/tree/feat/x"},
+		{"a branch name is escaped segment by segment", "octocov-metadata-octocov-report@refs_heads_main", "", "k1LoW/octocov", "refs/heads/feat/a b", "refs/heads/main", 0, "https://octocov.dev/k1LoW/octocov/tree/feat/a%20b"},
+		{"a tag has no page of its own", "octocov-metadata-octocov-report@refs_heads_main", "", "k1LoW/octocov", "refs/tags/v1.0.0", "refs/heads/main", 0, ""},
+		{"a report predating the base ref is read as the repository", "octocov-metadata-octocov-report@refs_heads_main", "", "k1LoW/octocov", "refs/heads/whatever", "", 0, "https://octocov.dev/k1LoW/octocov"},
+		{"a report of a sub directory is served under its repository", "octocov-metadata-octocov-report-sub@refs_pull_722", "", "k1LoW/octocov/sub", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
 		{"a report stored in no artifact links nowhere", "", "", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
-		{"a GitHub Enterprise Server run links nowhere", "octocov-report@refs_pull_722", "https://github.example.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
-		{"github.com stated explicitly is served", "octocov-report@refs_pull_722", "https://github.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"a GitHub Enterprise Server run links nowhere", "octocov-metadata-octocov-report@refs_pull_722", "https://github.example.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, ""},
+		{"github.com stated explicitly is served", "octocov-metadata-octocov-report@refs_pull_722", "https://github.com", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
 		// The same server either way, so the slash must not read as another host.
-		{"github.com with a trailing slash is served", "octocov-report@refs_pull_722", "https://github.com/", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
+		{"github.com with a trailing slash is served", "octocov-metadata-octocov-report@refs_pull_722", "https://github.com/", "k1LoW/octocov", "refs/pull/722/merge", "refs/heads/main", 722, "https://octocov.dev/k1LoW/octocov/pull/722"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
-			v := NewOctocovDevViewer(tt.artifactName)
+			v := NewOctocovDevViewer(tt.metadataName)
 			got := v.CoverageURL(&Report{Repository: tt.repository, Ref: tt.ref, BaseRef: tt.baseRef, PullRequest: tt.pullRequest, Commit: "0123456789abcdef"})
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)
@@ -73,25 +73,37 @@ func TestReportViewerURL(t *testing.T) {
 	}
 }
 
+func TestViewerFileURLCarriesTheRef(t *testing.T) {
+	// Two refs can share a metadata name, so the page is told which ref the metadata it opens
+	// has to record.
+	t.Setenv("GITHUB_SERVER_URL", "")
+	v := NewOctocovDevViewer("octocov-metadata-octocov-report@refs_heads_release_v1")
+	got := v.fileURL(&Report{Repository: "k1LoW/octocov", Ref: "refs/heads/release/v1", Commit: "0123456789abcdef"}, "report/report.go")
+	want := "https://octocov.dev/k1LoW/octocov/file/report/report.go?metadata_name=octocov-metadata-octocov-report%40refs_heads_release_v1&ref=refs%2Fheads%2Frelease%2Fv1"
+	if got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
 func TestViewerFileURL(t *testing.T) {
 	tests := []struct {
 		name         string
-		artifactName string
+		metadataName string
 		serverURL    string
 		path         string
 		want         string
 	}{
-		{"a file is named by the artifact holding its report", "octocov-report@refs_pull_722", "", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?artifact_name=octocov-report%40refs_pull_722"},
-		{"the default branch is addressed the same way", "octocov-report", "", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?artifact_name=octocov-report"},
-		{"a separator inside a name does not end the path", "octocov-report", "", "some dir/a#b.go", "https://octocov.dev/k1LoW/octocov/file/some%20dir/a%23b.go?artifact_name=octocov-report"},
-		{"an empty path links nowhere", "octocov-report", "", "", ""},
+		{"a file is named by the metadata of the ref of its report", "octocov-metadata-octocov-report@refs_pull_722", "", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?metadata_name=octocov-metadata-octocov-report%40refs_pull_722"},
+		{"the default branch is addressed the same way", "octocov-metadata-octocov-report@refs_heads_main", "", "report/report.go", "https://octocov.dev/k1LoW/octocov/file/report/report.go?metadata_name=octocov-metadata-octocov-report%40refs_heads_main"},
+		{"a separator inside a name does not end the path", "octocov-metadata-octocov-report@refs_heads_main", "", "some dir/a#b.go", "https://octocov.dev/k1LoW/octocov/file/some%20dir/a%23b.go?metadata_name=octocov-metadata-octocov-report%40refs_heads_main"},
+		{"an empty path links nowhere", "octocov-metadata-octocov-report@refs_heads_main", "", "", ""},
 		{"a report stored in no artifact links nowhere", "", "", "report/report.go", ""},
-		{"a GitHub Enterprise Server run links nowhere", "octocov-report", "https://github.example.com", "report/report.go", ""},
+		{"a GitHub Enterprise Server run links nowhere", "octocov-metadata-octocov-report@refs_heads_main", "https://github.example.com", "report/report.go", ""},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("GITHUB_SERVER_URL", tt.serverURL)
-			v := NewOctocovDevViewer(tt.artifactName)
+			v := NewOctocovDevViewer(tt.metadataName)
 			got := v.fileURL(&Report{Repository: "k1LoW/octocov", Commit: "0123456789abcdef"}, tt.path)
 			if got != tt.want {
 				t.Errorf("got %v\nwant %v", got, tt.want)

@@ -270,8 +270,8 @@ func runAttempt() int {
 
 // pullRequestNumber returns the number of the pull request the report is of. It is read
 // off the ref key rather than off PullRequest, since the key falls back to the ref of a
-// pull request whose number could not be detected, and the report and its page are named
-// after that pull request all the same.
+// pull request whose number could not be detected, and the page is named after that pull
+// request all the same.
 func pullRequestNumber(r *report.Report) (int, bool) {
 	n, err := strconv.Atoi(strings.TrimPrefix(r.RefKey(), "refs/pull/"))
 	if err != nil || n <= 0 {
@@ -423,7 +423,7 @@ func storedArtifactViewer(c *config.Config, r *report.Report) *report.Viewer {
 	if err := c.ReportConfigReady(); err != nil {
 		return nil
 	}
-	name, ok := datastore.ArtifactName(c.Report.Datastores, r)
+	name, ok := datastore.MetadataArtifactName(c.Report.Datastores, r)
 	if !ok {
 		return nil
 	}

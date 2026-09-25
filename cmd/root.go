@@ -292,9 +292,10 @@ var rootCmd = &cobra.Command{
 
 		// Get previous report for comparing reports
 		var rPrev *report.Report
-		// comparedArtifact names the artifact rPrev was read out of, and stays empty when it
-		// was read from anywhere else. The pages serve what an artifact holds, so a
-		// comparison that did not come from one has no page describing it to link at.
+		// comparedArtifact names the artifact holding the metadata rPrev was read through, and
+		// stays empty when it was read from anywhere but an artifact or without metadata. The
+		// pages find a report by its metadata, so a comparison no metadata points at has no
+		// page describing it to link at.
 		var comparedArtifact string
 		if err := c.DiffConfigReady(); err == nil {
 			log.Println("Get previous report for comparing reports")
@@ -352,7 +353,7 @@ var rootCmd = &cobra.Command{
 				// Select latest report
 				if rPrev == nil || rPrev.Timestamp.UnixNano() < rt.Timestamp.UnixNano() {
 					rPrev = rt
-					comparedArtifact, _ = datastore.ArtifactName([]string{s}, rt)
+					comparedArtifact = datastore.MetadataRead(d)
 				}
 			}
 			if c.Diff.Path != "" {

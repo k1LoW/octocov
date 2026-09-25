@@ -243,7 +243,7 @@ report:
     - s3://bucket/reports
 ```
 
-The report of the default branch is stored under the repository itself, and the report of any other ref is stored beside it under a key naming that ref.
+The report of the default branch is stored under the repository itself, and the report of any other ref is stored beside it under a key naming that ref. A report is taken as the report of a pull request only on a pull request event, so a push to a branch that is the head of an open pull request is stored as the report of that branch. GitHub Actions Artifacts are named differently, see [GitHub Actions Artifacts](#github-actions-artifacts).
 
 ```
 owner/repo/report.json                  # the default branch
@@ -1119,7 +1119,9 @@ artifact://[owner]/[repo]/[artifactName]
 - `artifact://[owner]/[repo]/[artifactName]`
 - `artifact://[owner]/[repo]` ( default artifactName: `octocov-report` )
 
-The report of a ref other than the default branch is stored under an artifact of its own, named by appending `@` and the ref to the artifact name, with the characters an artifact name may not hold replaced by `_` ( e.g. `octocov-report@refs_pull_123`, `octocov-report@refs_heads_feat_x` ).
+The report of every ref is stored under the artifact name as it is configured. Beside it, each run stores an artifact of metadata that points, by ID, at the artifact holding the report of the ref the run is on, and records the commit that ref was at, which on a pull request is its head rather than the merge commit measured. It is named `octocov-metadata-`, the artifact name, `@` and the ref, with the characters an artifact name may not hold replaced by `_` ( e.g. `octocov-metadata-octocov-report@refs_heads_main`, `octocov-metadata-octocov-report@refs_pull_123` ).
+
+`diff.datastores:` reads the report the metadata of the base branch points at, and the central mode the one of the default branch. Where that metadata is not there, as for a report stored by an octocov that did not write it, the newest artifact of the name that a run on that branch uploaded, other than a run of a pull request whose head is that branch, is read instead.
 
 > **Note** that reporting to the artifact can only be sent from the GitHub Actions of the same repository.
 
