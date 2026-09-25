@@ -1,6 +1,7 @@
 import { copyFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { build } from "esbuild";
+import { stubUnlicensedGrammars } from "./grammars.mjs";
 
 await build({
   entryPoints: ["entry.js"],
@@ -14,6 +15,7 @@ await build({
   define: {
     "process.env.NODE_ENV": JSON.stringify("production"),
   },
+  plugins: [stubUnlicensedGrammars],
 });
 
 // Compiled by the package's own build, since there is no Tailwind to run here.

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -138,6 +139,43 @@ func TestRenderChangesLinksTheServerOfTheRepository(t *testing.T) {
 	}
 	if strings.Contains(page, `href="https://github.com/`) {
 		t.Error("the page links to github.com")
+	}
+}
+
+func TestRenderChangesInSyntaxColors(t *testing.T) {
+	in := &ChangesInput{
+		Report:  testReport("a", 7),
+		Aligned: true,
+		Base:    Base{Report: testReport("b", 5), Label: "main", Aligned: true},
+		Files: []*ChangedFile{
+			{Filename: "report/report.go", Status: "modified", Additions: 1, Deletions: 1, Patch: "@@ -1,2 +1,2 @@\n package report\n-func old() {}\n+func a() {}\n"},
+			{Filename: "notes.txt", Status: "modified", Additions: 1, Patch: "@@ -1,1 +1,2 @@\n package notes\n+more\n"},
+			{Filename: "web/index.php", Status: "modified", Additions: 1, Patch: "@@ -1,1 +1,2 @@\n <?php\n+echo \"hi\";\n"},
+		},
+	}
+	got, err := RenderChanges(t.Context(), "", in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	page := string(got.HTML)
+	// `package` in github-light's keyword color, with github-dark's beside it for a reader
+	// whose scheme is dark
+	if want := "--code-light:#D73A49;--code-dark:#F97583"; !strings.Contains(page, want) {
+		t.Errorf("the Go card is not colored: the page does not carry %s", want)
+	}
+	// Both sides of the patch, since the deleted line is only on the old one
+	if !regexp.MustCompile(`--code-light:[^"]*">old<`).MatchString(page) {
+		t.Error("the old side of the patch is not colored")
+	}
+	// A file in no language the page carries a grammar for is drawn plain
+	notes := strings.Index(page, `id="`+report.FileAnchor("notes.txt")+`"`)
+	php := strings.Index(page, `id="`+report.FileAnchor("web/index.php")+`"`)
+	if strings.Contains(page[notes:php], "--code-light") {
+		t.Error("a text file is colored")
+	}
+	// PHP, which octocov.dev colors since @octocov/ui v0.7.0
+	if !strings.Contains(page[php:], "--code-light") {
+		t.Error("the PHP card is not colored")
 	}
 }
 
