@@ -129,7 +129,6 @@ jobs:
       # binary built above runs in a container step. golang:latest is the image the action
       # above is built from, so it is already pulled, and it has the CA certificates.
       - name: Run octocov with viewer artifact
-        if: ${{ github.event_name == 'pull_request' }}
         uses: docker://golang:latest
         with:
           entrypoint: /github/workspace/.tmp/octocov

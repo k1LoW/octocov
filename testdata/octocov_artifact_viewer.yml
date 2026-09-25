@@ -1,12 +1,20 @@
 # Renders the same coverage as .octocov.yml through viewer: artifact, which the repository
 # itself does not get, since being public it links to octocov.dev.
-# It stores no report and writes no comment, so it leaves those of .octocov.yml as they are.
+# The key of its own keeps its comment apart from the one of .octocov.yml, and the report it
+# stores from main is what its pull requests are compared against under that key.
+repository: k1LoW/octocov/artifact-viewer
 coverage:
   paths:
     - ../coverage.out
 viewer: artifact
+comment:
+  if: is_pull_request
+summary:
+  if: is_pull_request
+report:
+  if: is_default_branch
+  datastores:
+    - artifact://${GITHUB_REPOSITORY}
 diff:
   datastores:
     - artifact://${GITHUB_REPOSITORY}
-summary:
-  if: is_pull_request
