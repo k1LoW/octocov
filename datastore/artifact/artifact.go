@@ -208,8 +208,8 @@ func (a *Artifact) StoreName(r *report.Report) (string, error) {
 	return name, nil
 }
 
-// putMetadata stores the metadata of ref, pointing at the artifact of the name this run has
-// just stored the report in as id. It points by ID, since the reports of every ref share the
+// putMetadata stores the metadata of ref, pointing at id, the artifact of the name this run
+// has just stored the report in. It points by ID, since the reports of every ref share the
 // name. An id of 0, which the legacy upload answers with, is looked up by the name, which is
 // unique within the run once the upload has replaced the earlier one.
 func (a *Artifact) putMetadata(ctx context.Context, name string, id int64, ref string, r *report.Report) error {
