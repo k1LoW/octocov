@@ -7,7 +7,7 @@
     "credits": "node credits.mjs"
   },
   "devDependencies": {
-    "@octocov/ui": "0.6.0",
+    "@octocov/ui": "0.7.0",
     "@shikijs/langs-precompiled": "3.23.0",
     "esbuild": "0.28.2",
     "react": "19.3.0",

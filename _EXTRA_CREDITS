@@ -1716,7 +1716,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ================================================================
 
-TextMate grammars: c, cpp, cpp-macro, csharp, css, go, html, java, javascript, json, jsx, lua, markdown, python, ruby, rust, shellscript, sql, tsx, typescript, xml
+TextMate grammars: c, cpp, cpp-macro, csharp, css, go, html, java, javascript, json, jsx, lua, markdown, php, python, ruby, rust, shellscript, sql, tsx, typescript, xml
 https://www.npmjs.com/package/tm-grammars
 ----------------------------------------------------------------
 License: https://raw.githubusercontent.com/microsoft/vscode/main/LICENSE.txt

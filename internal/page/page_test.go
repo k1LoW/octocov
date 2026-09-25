@@ -150,6 +150,7 @@ func TestRenderChangesInSyntaxColors(t *testing.T) {
 		Files: []*ChangedFile{
 			{Filename: "report/report.go", Status: "modified", Additions: 1, Deletions: 1, Patch: "@@ -1,2 +1,2 @@\n package report\n-func old() {}\n+func a() {}\n"},
 			{Filename: "notes.txt", Status: "modified", Additions: 1, Patch: "@@ -1,1 +1,2 @@\n package notes\n+more\n"},
+			{Filename: "web/index.php", Status: "modified", Additions: 1, Patch: "@@ -1,1 +1,2 @@\n <?php\n+echo \"hi\";\n"},
 		},
 	}
 	got, err := RenderChanges(t.Context(), "", in)
@@ -167,9 +168,14 @@ func TestRenderChangesInSyntaxColors(t *testing.T) {
 		t.Error("the old side of the patch is not colored")
 	}
 	// A file in no language the page carries a grammar for is drawn plain
-	card := page[strings.Index(page, `id="`+report.FileAnchor("notes.txt")+`"`):]
-	if strings.Contains(card, "--code-light") {
+	notes := strings.Index(page, `id="`+report.FileAnchor("notes.txt")+`"`)
+	php := strings.Index(page, `id="`+report.FileAnchor("web/index.php")+`"`)
+	if strings.Contains(page[notes:php], "--code-light") {
 		t.Error("a text file is colored")
+	}
+	// PHP, which octocov.dev colors since @octocov/ui v0.7.0
+	if !strings.Contains(page[php:], "--code-light") {
+		t.Error("the PHP card is not colored")
 	}
 }
 
