@@ -24,7 +24,9 @@ export const stubUnlicensedGrammars = {
   setup(build) {
     const names = Object.keys(unlicensedGrammars).join("|");
     build.onResolve({ filter: new RegExp(`/(${names})\\.mjs$`) }, (args) => {
-      if (!args.importer.includes("@shikijs/langs-precompiled")) return undefined;
+      // Either separator, since the importer is a path of the host's and on Windows that is
+      // a backslash. Matched with a slash only, the grammar was bundled there after all.
+      if (!/[\\/]@shikijs[\\/]langs-precompiled[\\/]/.test(args.importer)) return undefined;
       const name = args.path.match(/([^/]+)\.mjs$/)[1];
       return { path: name, namespace: "unlicensed-grammar" };
     });
