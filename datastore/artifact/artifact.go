@@ -29,8 +29,8 @@ const (
 	metadataFilename = "metadata.json"
 )
 
-// maxNameLength is the longest name GitHub Actions accepts for an artifact.
-const maxNameLength = 255
+// MaxNameLength is the longest name GitHub Actions accepts for an artifact.
+const MaxNameLength = 255
 
 // refSeparator marks off the ref key an artifact name carries. It is not one of the
 // characters an artifact name may not contain, keyRep never produces it, and it needs
@@ -128,8 +128,8 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	// A shortened name would be one more rule every reader has to share. Without the metadata
 	// the readers take the branch fallback, which reads the same report, so the report stored
 	// is worth more than failing the run over it.
-	if n := MetadataName(name, ref); len(n) > maxNameLength {
-		fmt.Fprintf(a.stderr, "Skip storing the metadata of %s: the artifact name %s is longer than %d characters\n", ref, n, maxNameLength) //nostyle:handlerrors
+	if n := MetadataName(name, ref); len(n) > MaxNameLength {
+		fmt.Fprintf(a.stderr, "Skip storing the metadata of %s: the artifact name %s is longer than %d characters\n", ref, n, MaxNameLength) //nostyle:handlerrors
 		return nil
 	}
 	return a.putMetadata(ctx, name, ref, r)

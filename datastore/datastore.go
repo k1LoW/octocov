@@ -284,7 +284,12 @@ func MetadataArtifactName(datastores []string, r *report.Report) (string, bool) 
 	if ref == "" {
 		return "", false
 	}
-	return artifact.MetadataName(n, ref), true
+	// Such metadata is never stored, so a link naming it would open nothing.
+	m := artifact.MetadataName(n, ref)
+	if len(m) > artifact.MaxNameLength {
+		return "", false
+	}
+	return m, true
 }
 
 // metadataDatastore is a datastore that can say which metadata it read its report through.

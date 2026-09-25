@@ -3,6 +3,7 @@ package datastore
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -134,6 +135,7 @@ func TestMetadataArtifactName(t *testing.T) {
 		{"the default branch is looked up by its name", []string{"artifact://k1LoW/octocov"}, "refs/heads/main", 0, "octocov-metadata-octocov-report@refs_heads_main", true},
 		{"a configured artifact name is carried whole", []string{"artifact://k1LoW/octocov/mine"}, "refs/heads/main", 0, "octocov-metadata-mine@refs_heads_main", true},
 		{"a run with no ref has no metadata", []string{"artifact://k1LoW/octocov"}, "", 0, "", false},
+		{"a ref too long to name the metadata by has none", []string{"artifact://k1LoW/octocov"}, "refs/heads/" + strings.Repeat("a", 230), 0, "", false},
 		{"no artifact datastore has no metadata", []string{"s3://bucket/prefix"}, "refs/heads/main", 0, "", false},
 	}
 	for _, tt := range tests {
