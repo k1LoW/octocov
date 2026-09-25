@@ -848,12 +848,13 @@ func TestFileCoveragesTableLinksCoverageToTheViewer(t *testing.T) {
 	}
 	r.Repository = "k1LoW/tbls"
 	r.Commit = "0123456789abcdef"
+	r.PullRequest = 722
 	files := []*gh.PullRequestFile{
 		{Filename: r.Coverage.Files[0].File, BlobURL: "https://github.com/k1LoW/tbls/blob/0123456789abcdef/f"},
 	}
 
 	got := r.FileCoveragesTable(files, NewOctocovDevViewer("octocov-metadata-octocov-report@refs_pull_722"))
-	want := "?metadata_name=octocov-metadata-octocov-report%40refs_pull_722)"
+	want := "?metadata_name=octocov-metadata-octocov-report%40refs_pull_722&ref=refs%2Fpull%2F722)"
 	if !strings.Contains(got, want) {
 		t.Errorf("got\n%v\nwant it to contain\n%v", got, want)
 	}

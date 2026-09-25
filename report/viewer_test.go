@@ -73,6 +73,18 @@ func TestReportViewerURL(t *testing.T) {
 	}
 }
 
+func TestViewerFileURLCarriesTheRef(t *testing.T) {
+	// Two refs can share a metadata name, so the page is told which ref the metadata it opens
+	// has to record.
+	t.Setenv("GITHUB_SERVER_URL", "")
+	v := NewOctocovDevViewer("octocov-metadata-octocov-report@refs_heads_release_v1")
+	got := v.fileURL(&Report{Repository: "k1LoW/octocov", Ref: "refs/heads/release/v1", Commit: "0123456789abcdef"}, "report/report.go")
+	want := "https://octocov.dev/k1LoW/octocov/file/report/report.go?metadata_name=octocov-metadata-octocov-report%40refs_heads_release_v1&ref=refs%2Fheads%2Frelease%2Fv1"
+	if got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
 func TestViewerFileURL(t *testing.T) {
 	tests := []struct {
 		name         string

@@ -223,9 +223,9 @@ func (r *Report) ViewerURL() string {
 
 // octocovDevFileURL returns the octocov.dev page of one file's coverage. The pull request
 // path carries no per-file page, so the report is named in the query by the artifact holding
-// the metadata of its ref. The artifact holding the report itself shares its name with the
-// reports of every other ref, and its ID is known only once the report is stored, which is
-// after the links are written.
+// the metadata of its ref, beside the ref itself. The artifact holding the report itself
+// shares its name with the reports of every other ref, and its ID is known only once the
+// report is stored, which is after the links are written.
 func octocovDevFileURL(metadataName string, r *Report, path string) string {
 	if r == nil || path == "" {
 		return ""
@@ -236,6 +236,11 @@ func octocovDevFileURL(metadataName string, r *Report, path string) string {
 	}
 	q := url.Values{}
 	q.Set("metadata_name", metadataName)
+	// The metadata name carries the ref with its separators replaced, which two refs can
+	// share, so the page is also told the ref the metadata it opens has to record.
+	if ref := r.RunRef(); ref != "" {
+		q.Set("ref", ref)
+	}
 	return fmt.Sprintf("%s/%s/%s/file/%s?%s", viewerBaseURL, repo.Owner, repo.Repo, escapePath(path), q.Encode())
 }
 
