@@ -1,5 +1,23 @@
 # Changelog
 
+## [v0.81.0](https://github.com/k1LoW/octocov/compare/v0.80.1...v0.81.0) - 2026-09-25
+
+### Breaking Changes 🛠
+- feat: choose where the values in the tables link to with viewer: by @k1LoW in https://github.com/k1LoW/octocov/pull/777
+- feat: store artifact reports under the configured name and find each ref's by metadata by @k1LoW in https://github.com/k1LoW/octocov/pull/787
+### Fix bug 🐛
+- fix: number the changed lines of a pull request as the lines of the commit measured by @k1LoW in https://github.com/k1LoW/octocov/pull/779
+- fix: compare a pull request against its base branch, then the default branch by @k1LoW in https://github.com/k1LoW/octocov/pull/788
+### Other Changes
+- ci: report the build size of octocov as a custom metric by @k1LoW in https://github.com/k1LoW/octocov/pull/771
+- feat: delete the reports earlier runs of a pull request stored as artifacts by @k1LoW in https://github.com/k1LoW/octocov/pull/775
+- chore: rebuild the page bundle in make build and check it in CI by @k1LoW in https://github.com/k1LoW/octocov/pull/780
+- ci: rebuild the page bundle before goreleaser builds the release assets by @k1LoW in https://github.com/k1LoW/octocov/pull/781
+- chore: build without cgo by @k1LoW in https://github.com/k1LoW/octocov/pull/782
+- ci: build every release asset from one goreleaser config on one runner by @k1LoW in https://github.com/k1LoW/octocov/pull/784
+- revert: stop deleting the reports earlier runs of a pull request stored as artifacts by @k1LoW in https://github.com/k1LoW/octocov/pull/786
+- perf: point the metadata at the ID the upload answers with by @k1LoW in https://github.com/k1LoW/octocov/pull/789
+
 ## [v0.80.1](https://github.com/k1LoW/octocov/compare/v0.80.0...v0.80.1) - 2026-09-21
 
 ### Breaking Changes 🛠
