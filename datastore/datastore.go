@@ -287,6 +287,22 @@ func MetadataArtifactName(datastores []string, r *report.Report) (string, bool) 
 	return artifact.MetadataName(n, ref), true
 }
 
+// metadataDatastore is a datastore that can say which metadata it read its report through.
+type metadataDatastore interface {
+	Datastore
+	MetadataRead() string
+}
+
+// MetadataRead returns the name of the metadata artifact that d read its report through on its
+// last FS(), and an empty name where d is not an artifact datastore or read no metadata.
+func MetadataRead(d Datastore) string {
+	m, ok := d.(metadataDatastore)
+	if !ok {
+		return ""
+	}
+	return m.MetadataRead()
+}
+
 // PageArtifactBase returns what the names of the pages of the report uploaded as artifacts are
 // built on, which is the name the report is stored under marked off by its ref. The pages of
 // every pull request would otherwise share one name, and the pages of earlier runs are deleted

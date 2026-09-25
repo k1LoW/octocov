@@ -243,6 +243,9 @@ func TestFSReadsTheReportTheMetadataOfTheBaseRefPointsAt(t *testing.T) {
 	if want := `{"commit":"base"}`; got != want {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
+	if want := "octocov-metadata-octocov-report@refs_heads_main"; a.MetadataRead() != want {
+		t.Errorf("got %v\nwant %v", a.MetadataRead(), want)
+	}
 }
 
 func TestFSFallsBackToTheNewestReportOfTheBaseBranch(t *testing.T) {
@@ -258,6 +261,10 @@ func TestFSFallsBackToTheNewestReportOfTheBaseBranch(t *testing.T) {
 	}
 	if want := "develop"; c.askedBranch != want {
 		t.Errorf("got %v\nwant %v", c.askedBranch, want)
+	}
+	// Linking the metadata of the ref would open the report it points at, not this one.
+	if got := a.MetadataRead(); got != "" {
+		t.Errorf("got %v\nwant no metadata", got)
 	}
 }
 
@@ -283,6 +290,10 @@ func TestFSFallsBackWhereTheMetadataPointsAtAReportGone(t *testing.T) {
 	}
 	if want := "main"; c.askedBranch != want {
 		t.Errorf("got %v\nwant %v", c.askedBranch, want)
+	}
+	// Linking the metadata of the ref would open the report it points at, not this one.
+	if got := a.MetadataRead(); got != "" {
+		t.Errorf("got %v\nwant no metadata", got)
 	}
 }
 

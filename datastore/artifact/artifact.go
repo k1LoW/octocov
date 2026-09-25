@@ -68,6 +68,9 @@ type Artifact struct {
 	repository string
 	name       string
 	r          *report.Report
+	// metadataRead is the name of the metadata artifact the last FS() read the report
+	// through, and empty where it read the branch fallback instead.
+	metadataRead string
 }
 
 func New(g *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
@@ -85,6 +88,13 @@ func New(g *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
 		a.gh = g
 	}
 	return a, nil
+}
+
+// MetadataRead returns the name of the metadata artifact the last FS() read the report through,
+// or an empty name where no metadata led to it. A link naming metadata is only good for a
+// report some metadata points at, and the report the branch fallback reads is not one.
+func (a *Artifact) MetadataRead() string {
+	return a.metadataRead
 }
 
 // IsArtifact reports that this datastore reads its reports out of GitHub Actions artifacts,
@@ -218,11 +228,13 @@ func headCommit(r *report.Report) string {
 // there, is read from the newest artifact of the name a run on its branch uploaded, so the
 // reports of the other refs sharing the name stay out.
 func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name string) (*gh.ArtifactFile, error) {
+	a.metadataRead = ""
 	ref, err := a.readRef(ctx, r)
 	if err != nil {
 		return nil, err
 	}
-	mf, err := a.gh.FetchLatestArtifact(ctx, r.Owner, r.Repo, MetadataName(name, ref), metadataFilename)
+	metadataName := MetadataName(name, ref)
+	mf, err := a.gh.FetchLatestArtifact(ctx, r.Owner, r.Repo, metadataName, metadataFilename)
 	switch {
 	case err == nil:
 		m := &Metadata{}
@@ -233,6 +245,9 @@ func (a *Artifact) fetchReport(ctx context.Context, r *gh.Repository, name strin
 		// The report can be gone while its metadata is not. A re-run keeps the run id, and the
 		// upload of the report deletes the one the earlier attempt stored first, so an attempt
 		// that fails before storing the metadata leaves the earlier metadata pointing at nothing.
+		if err == nil {
+			a.metadataRead = metadataName
+		}
 		if !errors.Is(err, gh.ErrArtifactNotFound) {
 			return af, err
 		}
