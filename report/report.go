@@ -122,6 +122,10 @@ func (r *Report) DetectRef(ctx context.Context) error {
 	if !isPullRequestEvent() {
 		return nil
 	}
+	if n := pullRequestTargetNumber(); n > 0 {
+		r.PullRequest = n
+		return nil
+	}
 	n, err := g.DetectCurrentPullRequestNumber(ctx, repo.Owner, repo.Repo)
 	switch {
 	case err == nil:
@@ -139,6 +143,23 @@ func isPullRequestEvent() bool {
 	return os.Getenv("GITHUB_PULL_REQUEST_NUMBER") != "" ||
 		os.Getenv("GITHUB_HEAD_REF") != "" ||
 		strings.HasPrefix(os.Getenv("GITHUB_REF"), "refs/pull/")
+}
+
+// pullRequestTargetNumber returns the number of the pull request a pull_request_target run is
+// of, as the event payload says it, and 0 on any other run or where a number is given
+// explicitly. GITHUB_REF names the base branch on this event, so the number would otherwise
+// come from the search for the open pull request whose head is GITHUB_HEAD_REF, which a pull
+// request from a fork is never found by, and the report of the fork's pull request would be
+// taken for the base branch's.
+func pullRequestTargetNumber() int {
+	if os.Getenv("GITHUB_EVENT_NAME") != "pull_request_target" || os.Getenv("GITHUB_PULL_REQUEST_NUMBER") != "" {
+		return 0
+	}
+	e, err := gh.DecodeGitHubEvent()
+	if err != nil {
+		return 0
+	}
+	return e.Number
 }
 
 // RunRef returns the ref the run that took the report was on, the pull request where it was

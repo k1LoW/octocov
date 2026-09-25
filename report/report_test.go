@@ -740,6 +740,44 @@ func TestIsPullRequestEvent(t *testing.T) {
 	}
 }
 
+func TestDetectRefTakesTheNumberOfAPullRequestTargetFromTheEvent(t *testing.T) {
+	tests := []struct {
+		name     string
+		prNumber string
+		want     int
+	}{
+		// A pull request from the main branch of a fork, whose head names a branch of the
+		// base repository too.
+		{"a pull request from a fork", "", 123},
+		{"a number given explicitly wins", "456", 456},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			p := filepath.Join(t.TempDir(), "event.json")
+			if err := os.WriteFile(p, []byte(`{"pull_request":{"number":123,"head":{"sha":"head"}}}`), 0600); err != nil {
+				t.Fatal(err)
+			}
+			t.Setenv("GITHUB_TOKEN", "dummy")
+			t.Setenv("GITHUB_EVENT_NAME", "pull_request_target")
+			t.Setenv("GITHUB_EVENT_PATH", p)
+			t.Setenv("GITHUB_REF", "refs/heads/main")
+			t.Setenv("GITHUB_HEAD_REF", "main")
+			t.Setenv("GITHUB_BASE_REF", "main")
+			t.Setenv("GITHUB_PULL_REQUEST_NUMBER", tt.prNumber)
+			r := &Report{Repository: "owner/repo", Ref: "refs/heads/main"}
+			if err := r.DetectRef(t.Context()); err != nil {
+				t.Fatal(err)
+			}
+			if r.PullRequest != tt.want {
+				t.Errorf("got %v\nwant %v", r.PullRequest, tt.want)
+			}
+			if want := fmt.Sprintf("refs/pull/%d", tt.want); r.RunRef() != want {
+				t.Errorf("got %v\nwant %v", r.RunRef(), want)
+			}
+		})
+	}
+}
+
 func TestStorePath(t *testing.T) {
 	tests := []struct {
 		name        string
