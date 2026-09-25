@@ -32,7 +32,7 @@ require (
 	github.com/k1LoW/errors v1.2.0
 	github.com/k1LoW/expand v0.16.7
 	github.com/k1LoW/ghfs v1.5.3
-	github.com/k1LoW/go-github-actions v0.4.0
+	github.com/k1LoW/go-github-actions v0.5.0
 	github.com/k1LoW/go-github-client/v67 v67.0.23
 	github.com/k1LoW/repin v0.4.1
 	github.com/lestrrat-go/backoff/v2 v2.0.8

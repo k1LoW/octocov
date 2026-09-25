@@ -43,7 +43,7 @@ var keyRep = strings.NewReplacer(`"`, "_", ":", "_", "<", "_", ">", "_", "|", "_
 // client is the part of *gh.Gh this datastore uses. It is an interface so a test can stand
 // in for the upload, which otherwise needs the runtime of a GitHub Actions job.
 type client interface {
-	PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error
+	PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) (int64, error)
 	FetchRunArtifactID(ctx context.Context, owner, repo string, runID int64, name string) (int64, error)
 	FetchLatestArtifact(ctx context.Context, owner, repo, name, fp string) (*gh.ArtifactFile, error)
 	FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name, fp, branch string) (*gh.ArtifactFile, error)
@@ -118,7 +118,8 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	if err != nil {
 		return err
 	}
-	if err := a.put(ctx, name, reportFilename, r.Bytes()); err != nil {
+	id, err := a.put(ctx, name, reportFilename, r.Bytes())
+	if err != nil {
 		return err
 	}
 	ref := r.RunRef()
@@ -132,11 +133,12 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 		fmt.Fprintf(a.stderr, "Skip storing the metadata of %s: the artifact name %s is longer than %d characters\n", ref, n, MaxNameLength) //nostyle:handlerrors
 		return nil
 	}
-	return a.putMetadata(ctx, name, ref, r)
+	return a.putMetadata(ctx, name, id, ref, r)
 }
 
 func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
-	return a.put(ctx, a.name, path, content)
+	_, err := a.put(ctx, a.name, path, content)
+	return err
 }
 
 func (a *Artifact) FS() (fs.FS, error) {
@@ -207,19 +209,23 @@ func (a *Artifact) StoreName(r *report.Report) (string, error) {
 }
 
 // putMetadata stores the metadata of ref, pointing at the artifact of the name this run has
-// just stored the report in. It points by ID, since the reports of every ref share the name.
-func (a *Artifact) putMetadata(ctx context.Context, name, ref string, r *report.Report) error {
-	repo, err := gh.Parse(a.repository)
-	if err != nil {
-		return err
-	}
-	runID, err := currentRunID()
-	if err != nil {
-		return err
-	}
-	id, err := a.gh.FetchRunArtifactID(ctx, repo.Owner, repo.Repo, runID, name)
-	if err != nil {
-		return err
+// just stored the report in as id. It points by ID, since the reports of every ref share the
+// name. An id of 0, which the legacy upload answers with, is looked up by the name, which is
+// unique within the run once the upload has replaced the earlier one.
+func (a *Artifact) putMetadata(ctx context.Context, name string, id int64, ref string, r *report.Report) error {
+	if id == 0 {
+		repo, err := gh.Parse(a.repository)
+		if err != nil {
+			return err
+		}
+		runID, err := currentRunID()
+		if err != nil {
+			return err
+		}
+		id, err = a.gh.FetchRunArtifactID(ctx, repo.Owner, repo.Repo, runID, name)
+		if err != nil {
+			return err
+		}
 	}
 	m := &Metadata{Ref: ref, Commit: r.Commit, HeadCommit: headCommit(r)}
 	m.Report.ArtifactName = name
@@ -228,7 +234,8 @@ func (a *Artifact) putMetadata(ctx context.Context, name, ref string, r *report.
 	if err != nil {
 		return err
 	}
-	return a.put(ctx, MetadataName(name, ref), metadataFilename, b)
+	_, err = a.put(ctx, MetadataName(name, ref), metadataFilename, b)
+	return err
 }
 
 // headCommit returns the commit the ref of the run that took r was at.
@@ -350,14 +357,14 @@ func MetadataName(name, ref string) string {
 	return RefScopedName(fmt.Sprintf("%s-%s", metadataPrefix, name), ref)
 }
 
-func (a *Artifact) put(ctx context.Context, name, path string, content []byte) error {
+func (a *Artifact) put(ctx context.Context, name, path string, content []byte) (int64, error) {
 	r, err := gh.Parse(a.repository)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	runID, err := currentRunID()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	return a.gh.PutArtifact(ctx, r.Owner, r.Repo, runID, name, path, content)
 }

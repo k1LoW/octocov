@@ -100,6 +100,9 @@ type fakeClient struct {
 	branches      map[int64]string
 	defaultBranch string
 	askedBranch   string
+	// legacy answers an upload with no ID, as the legacy API does.
+	legacy    bool
+	idLookups int
 }
 
 func newFakeClient() *fakeClient {
@@ -111,12 +114,16 @@ func newFakeClient() *fakeClient {
 	}
 }
 
-func (c *fakeClient) PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) error {
-	c.add(name, fp, "", content)
-	return nil
+func (c *fakeClient) PutArtifact(ctx context.Context, owner, repo string, runID int64, name, fp string, content []byte) (int64, error) {
+	id := c.add(name, fp, "", content)
+	if c.legacy {
+		return 0, nil
+	}
+	return id, nil
 }
 
 func (c *fakeClient) FetchRunArtifactID(ctx context.Context, owner, repo string, runID int64, name string) (int64, error) {
+	c.idLookups++
 	af, ok := c.uploaded[name]
 	if !ok {
 		return 0, gh.ErrArtifactNotFound
@@ -220,6 +227,39 @@ func TestStoreReportPutsTheMetadataOfTheRef(t *testing.T) {
 			want.Report.ArtifactID = stored.ID
 			if diff := cmp.Diff(got, want); diff != "" {
 				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestStoreReportPointsTheMetadataAtTheIDTheUploadAnswers(t *testing.T) {
+	tests := []struct {
+		name          string
+		legacy        bool
+		wantIDLookups int
+	}{
+		{"the ID the upload answers with is taken as it is", false, 0},
+		{"the legacy upload, answering with no ID, has it looked up", true, 1},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+			t.Setenv("GITHUB_RUN_ID", "10")
+			c := newFakeClient()
+			c.legacy = tt.legacy
+			a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName}
+			if err := a.StoreReport(t.Context(), &report.Report{Repository: "owner/repo", Ref: "refs/heads/main", BaseRef: "refs/heads/main", Commit: "abc"}); err != nil {
+				t.Fatal(err)
+			}
+			if c.idLookups != tt.wantIDLookups {
+				t.Errorf("got %v\nwant %v", c.idLookups, tt.wantIDLookups)
+			}
+			got := Metadata{}
+			if err := json.Unmarshal(c.uploaded["octocov-metadata-octocov-report@refs_heads_main"].Content, &got); err != nil {
+				t.Fatal(err)
+			}
+			if want := c.uploaded["octocov-report"].ID; got.Report.ArtifactID != want {
+				t.Errorf("got %v\nwant %v", got.Report.ArtifactID, want)
 			}
 		})
 	}
