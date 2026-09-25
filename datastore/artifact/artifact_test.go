@@ -1,6 +1,7 @@
 package artifact
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io/fs"
@@ -220,6 +221,27 @@ func TestStoreReportPutsTheMetadataOfTheRef(t *testing.T) {
 				t.Error(diff)
 			}
 		})
+	}
+}
+
+func TestStoreReportSkipsTheMetadataOfARefTooLongToName(t *testing.T) {
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	t.Setenv("GITHUB_RUN_ID", "10")
+	c := newFakeClient()
+	stderr := new(bytes.Buffer)
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, stderr: stderr}
+	ref := "refs/heads/" + strings.Repeat("a", 230)
+	if err := a.StoreReport(t.Context(), &report.Report{Repository: "owner/repo", Ref: ref, BaseRef: "refs/heads/main", Commit: "abc"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, ok := c.uploaded["octocov-report"]; !ok {
+		t.Error("want the report stored all the same")
+	}
+	if len(c.uploaded) != 1 {
+		t.Errorf("got %d artifacts\nwant the report alone", len(c.uploaded))
+	}
+	if want := "Skip storing the metadata of " + ref; !strings.Contains(stderr.String(), want) {
+		t.Errorf("got %q\nwant it to contain %q", stderr.String(), want)
 	}
 }
 

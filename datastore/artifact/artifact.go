@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -27,6 +28,9 @@ const (
 	metadataPrefix   = "octocov-metadata"
 	metadataFilename = "metadata.json"
 )
+
+// maxNameLength is the longest name GitHub Actions accepts for an artifact.
+const maxNameLength = 255
 
 // refSeparator marks off the ref key an artifact name carries. It is not one of the
 // characters an artifact name may not contain, keyRep never produces it, and it needs
@@ -71,6 +75,9 @@ type Artifact struct {
 	// metadataRead is the name of the metadata artifact the last FS() read the report
 	// through, and empty where it read the branch fallback instead.
 	metadataRead string
+	// stderr is where storing no metadata for a ref whose name is too long is said. It is a
+	// field so a test can read it back.
+	stderr io.Writer
 }
 
 func New(g *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
@@ -81,6 +88,7 @@ func New(g *gh.Gh, repo, name string, r *report.Report) (*Artifact, error) {
 		repository: repo,
 		name:       name,
 		r:          r,
+		stderr:     os.Stderr,
 	}
 	// Left nil rather than holding a nil *gh.Gh, which as a client would compare unequal
 	// to nil and fail only once it is called.
@@ -115,6 +123,13 @@ func (a *Artifact) StoreReport(ctx context.Context, r *report.Report) error {
 	}
 	ref := r.RunRef()
 	if ref == "" {
+		return nil
+	}
+	// A shortened name would be one more rule every reader has to share. Without the metadata
+	// the readers take the branch fallback, which reads the same report, so the report stored
+	// is worth more than failing the run over it.
+	if n := MetadataName(name, ref); len(n) > maxNameLength {
+		fmt.Fprintf(a.stderr, "Skip storing the metadata of %s: the artifact name %s is longer than %d characters\n", ref, n, maxNameLength) //nostyle:handlerrors
 		return nil
 	}
 	return a.putMetadata(ctx, name, ref, r)
