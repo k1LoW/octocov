@@ -21,6 +21,7 @@ FROM debian:trixie-slim
 
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /workdir/octocov ./usr/bin
+COPY --from=builder /workdir/CREDITS /usr/share/doc/octocov/CREDITS
 
 ENTRYPOINT ["/entrypoint.sh"]
 

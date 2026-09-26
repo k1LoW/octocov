@@ -56,6 +56,9 @@ nfpms:
       - rpm
       - apk
     bindir: /usr/bin
+    contents:
+      - src: CREDITS
+        dst: /usr/share/doc/octocov/CREDITS
     epoch: 1
 release:
   draft: true
