@@ -21,6 +21,14 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Set up Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Install gocredits
+        run: go install github.com/Songmu/gocredits/cmd/gocredits@v0.5.0
+
       - id: run-tagpr
         name: Run tagpr
         uses: Songmu/tagpr@7ebae2dcc300132baa7cc9dd108c8923b07fc366 # v1.20.3
