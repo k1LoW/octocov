@@ -67,6 +67,7 @@ prerelease:
 
 prerelease_for_tagpr:
 	cd internal/page/bundle && npm ci && npm run credits && rm -rf node_modules
+	go mod download
 	gocredits -skip-missing -w
 	cat _EXTRA_CREDITS >> CREDITS
 	git add CHANGELOG.md CREDITS _EXTRA_CREDITS go.mod go.sum
