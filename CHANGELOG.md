@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.82.1](https://github.com/k1LoW/octocov/compare/v0.82.0...v0.82.1) - 2026-09-26
+
+### Other Changes
+- ci: install gocredits before tagpr prepares the release pull request by @k1LoW in https://github.com/k1LoW/octocov/pull/795
+
 ## [v0.82.0](https://github.com/k1LoW/octocov/compare/v0.81.0...v0.82.0) - 2026-09-25
 
 ### New Features 🎉
