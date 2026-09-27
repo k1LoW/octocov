@@ -58,6 +58,6 @@ func (s *S3) Put(ctx context.Context, p string, content []byte) error {
 	return nil
 }
 
-func (s *S3) FS() (fs.FS, error) {
+func (s *S3) FS(ctx context.Context) (fs.FS, error) {
 	return fs.Sub(s3fs.New(s.client, s.bucket), s.prefix)
 }

@@ -47,7 +47,7 @@ func TestCollectReports(t *testing.T) {
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -102,7 +102,7 @@ func TestCollectReportsSkipsReportsOfOtherRefs(t *testing.T) {
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
 
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -135,7 +135,7 @@ func TestGenerateBadges(t *testing.T) {
 		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -197,7 +197,7 @@ func TestGenerateBadgesUsesTheConfiguredBadge(t *testing.T) {
 		CodeToTestRatioBadge:   b.RenderCodeToTestRatio,
 		TestExecutionTimeBadge: b.RenderTestExecutionTime,
 	})
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := ctr.generateBadges(); err != nil {
@@ -258,7 +258,7 @@ func TestRenderIndex(t *testing.T) {
 		CodeToTestRatioBadge:   testBadge.RenderCodeToTestRatio,
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 	})
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -290,7 +290,7 @@ func (s *artifactStub) Put(_ context.Context, _ string, _ []byte) error { return
 
 func (s *artifactStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
 
-func (s *artifactStub) FS() (fs.FS, error) { return s.fsys, nil }
+func (s *artifactStub) FS(_ context.Context) (fs.FS, error) { return s.fsys, nil }
 
 func (s *artifactStub) IsArtifact() bool { return true }
 
@@ -352,7 +352,7 @@ func TestCollectReportsTracksWhichDatastoreSuppliedTheReport(t *testing.T) {
 		BadgeViewer:            report.NewOctocovDevRefViewer(),
 	})
 
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -419,7 +419,7 @@ func TestRenderIndexLinksOnlyArtifactBackedReports(t *testing.T) {
 		TestExecutionTimeBadge: testBadge.RenderTestExecutionTime,
 		BadgeViewer:            report.NewOctocovDevRefViewer(),
 	})
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -459,7 +459,7 @@ func (s *failingStub) Put(_ context.Context, _ string, _ []byte) error { return 
 
 func (s *failingStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
 
-func (s *failingStub) FS() (fs.FS, error) { return nil, s.err }
+func (s *failingStub) FS(_ context.Context) (fs.FS, error) { return nil, s.err }
 
 // One datastore that cannot be read must not cost the index the repositories the others
 // describe, and the warning has to name the datastore, since an index silently short of a
@@ -489,7 +489,7 @@ func TestCollectReportsWarnsAndContinuesWhenADatastoreCannotBeRead(t *testing.T)
 	warned := new(bytes.Buffer)
 	ctr.stderr = warned
 
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 
@@ -529,7 +529,7 @@ func TestCollectReportsFailsWhenNoDatastoreCanBeRead(t *testing.T) {
 	})
 	ctr.stderr = new(bytes.Buffer)
 
-	if err := ctr.collectReports(); err == nil {
+	if err := ctr.collectReports(t.Context()); err == nil {
 		t.Error("want error when no datastore could be read")
 	}
 }
@@ -582,7 +582,7 @@ func TestCollectReportsKeepsWhatAWalkReachedBeforeItFailed(t *testing.T) {
 
 	// The only datastore configured is the one that failed, and a report was still collected
 	// from it, so the index has something to be written from and the run is not an error.
-	if err := ctr.collectReports(); err != nil {
+	if err := ctr.collectReports(t.Context()); err != nil {
 		t.Fatal(err)
 	}
 

@@ -53,7 +53,7 @@ func (fsys *FS) Open(name string) (fs.File, error) { //nostyle:recvnames
 	return fsys.gscfs.Open(path.Join(fsys.prefix, name))
 }
 
-func (g *GCS) FS() (fs.FS, error) {
+func (g *GCS) FS(ctx context.Context) (fs.FS, error) {
 	return &FS{
 		prefix: g.prefix,
 		gscfs:  gcsfs.NewWithClient(g.client, g.bucket),

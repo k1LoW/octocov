@@ -79,7 +79,7 @@ func (m *Mackerel) Put(ctx context.Context, path string, content []byte) error {
 	return errors.New("not implemented")
 }
 
-func (m *Mackerel) FS() (fs.FS, error) {
+func (m *Mackerel) FS(ctx context.Context) (fs.FS, error) {
 	return nil, errors.New("not implemented")
 }
 

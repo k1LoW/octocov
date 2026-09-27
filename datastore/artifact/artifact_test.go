@@ -136,6 +136,10 @@ func (c *fakeClient) FetchLatestArtifact(ctx context.Context, owner, repo, name,
 }
 
 func (c *fakeClient) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name, fp, branch string) (*gh.ArtifactFile, error) {
+	// The real client abandons its requests once ctx ends.
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	c.askedBranch = branch
 	af, ok := c.uploaded[name]
 	if !ok || af.Name != fp || (branch != "" && c.branches[af.ID] != branch) {
@@ -430,8 +434,21 @@ func TestFSReportsNothingWhereNeitherBranchHasAReport(t *testing.T) {
 	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
 	c := newFakeClient()
 	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/main", PullRequest: 123}}
-	if _, err := a.FS(); !errors.Is(err, gh.ErrArtifactNotFound) {
+	if _, err := a.FS(t.Context()); !errors.Is(err, gh.ErrArtifactNotFound) {
 		t.Errorf("got %v\nwant %v", err, gh.ErrArtifactNotFound)
+	}
+}
+
+func TestFSGivesUpWhenTheContextEnds(t *testing.T) {
+	// A lookup of the base report that outlives the run would leave the run no time to store its own.
+	t.Setenv("GITHUB_REPOSITORY", "owner/repo")
+	c := newFakeClient()
+	c.add("octocov-report", reportFilename, "main", []byte(`{"commit":"main"}`))
+	a := &Artifact{gh: c, repository: "owner/repo", name: defaultArtifactName, r: &report.Report{Repository: "owner/repo", Ref: "refs/pull/123/merge", BaseRef: "refs/heads/main", PullRequest: 123}}
+	ctx, cancel := context.WithCancel(t.Context())
+	cancel()
+	if _, err := a.FS(ctx); !errors.Is(err, context.Canceled) {
+		t.Errorf("got %v\nwant %v", err, context.Canceled)
 	}
 }
 
@@ -442,7 +459,7 @@ func readReport(t *testing.T, a *Artifact) string {
 
 func readReportAt(t *testing.T, a *Artifact, path string) string {
 	t.Helper()
-	fsys, err := a.FS()
+	fsys, err := a.FS(t.Context())
 	if err != nil {
 		t.Fatal(err)
 	}

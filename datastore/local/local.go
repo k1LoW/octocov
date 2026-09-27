@@ -52,6 +52,6 @@ func (l *Local) Put(ctx context.Context, path string, content []byte) error {
 	return os.WriteFile(p, content, os.ModePerm) // #nosec
 }
 
-func (l *Local) FS() (fs.FS, error) {
+func (l *Local) FS(ctx context.Context) (fs.FS, error) {
 	return os.DirFS(l.root), nil
 }
