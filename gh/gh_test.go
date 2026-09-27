@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path"
+	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"testing"
@@ -1346,8 +1348,9 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 	}))
 	t.Cleanup(zips.Close)
 
-	// The run of an artifact pushed is numbered from 100 and the run of one of a pull request
-	// from 1000, which is how the mocked run below tells the event.
+	// The run of an artifact pushed is numbered from 100, the run of one of a pull request from
+	// 1000 and the run of one scheduled from 2000, which is how the mocked runs below tell the
+	// event.
 	artifact := func(id int64, branch string) *github.Artifact {
 		return &github.Artifact{
 			ID:          new(id),
@@ -1360,17 +1363,36 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 		a.WorkflowRun.ID = new(id + 1000)
 		return a
 	}
+	scheduled := func(id int64, branch string) *github.Artifact {
+		a := artifact(id, branch)
+		a.WorkflowRun.ID = new(id + 2000)
+		return a
+	}
+	eventOf := func(runID int64) string {
+		switch {
+		case runID >= 2000:
+			return "schedule"
+		case runID >= 1000:
+			return "pull_request"
+		default:
+			return "push"
+		}
+	}
 	tests := []struct {
 		name    string
 		pages   []github.ArtifactList
 		branch  string
 		want    string
 		wantErr error
+		// unlisted are the runs the listing of the branch leaves out.
+		unlisted []int64
+		// wantLookups is how many runs are asked for one by one.
+		wantLookups int
 	}{
 		{
 			"the newest artifact of the branch, past a newer one of a pull request",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(3, "feat"), artifact(2, "main"), artifact(1, "main")}}},
-			"main", "2", nil,
+			"main", "2", nil, nil, 0,
 		},
 		{
 			"a branch whose artifacts are on a later page",
@@ -1378,22 +1400,42 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 				{Artifacts: []*github.Artifact{artifact(4, "feat"), artifact(3, "feat")}},
 				{Artifacts: []*github.Artifact{artifact(2, "main")}},
 			},
-			"main", "2", nil,
+			"main", "2", nil, nil, 0,
 		},
 		{
 			"a run of a pull request whose head is the branch, as a release pull request's is",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "develop"), artifact(2, "develop")}}},
-			"develop", "2", nil,
+			"develop", "2", nil, nil, 0,
+		},
+		{
+			"many runs of pull requests on the branch cost no request each",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(5, "develop"), pullRequest(4, "develop"), pullRequest(3, "develop"), artifact(2, "develop")}}},
+			"develop", "2", nil, nil, 0,
+		},
+		{
+			"a scheduled run is on the branch as a push is",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "main"), scheduled(2, "main")}}},
+			"main", "2", nil, nil, 0,
+		},
+		{
+			"a run the listing of the branch leaves out is asked for on its own",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "develop"), artifact(2, "develop")}}},
+			"develop", "2", nil, []int64{102}, 1,
+		},
+		{
+			"only pull requests on the branch",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(2, "develop"), pullRequest(1, "develop")}}},
+			"develop", "", ErrArtifactNotFound, nil, 0,
 		},
 		{
 			"no artifact of the branch",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(2, "feat"), artifact(1, "fix")}}},
-			"main", "", ErrArtifactNotFound,
+			"main", "", ErrArtifactNotFound, nil, 0,
 		},
 		{
 			"an empty branch takes the newest of any",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(3, "feat"), artifact(2, "main")}}},
-			"", "3", nil,
+			"", "3", nil, nil, 0,
 		},
 	}
 	for _, tt := range tests {
@@ -1402,20 +1444,36 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 			for _, p := range tt.pages {
 				pages = append(pages, p)
 			}
+			lookups := 0
 			mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
 				mock.WithRequestMatchPages(mock.GetReposActionsArtifactsByOwnerByRepo, pages...),
 				mock.WithRequestMatchHandler( //nostyle:funcfmt
+					mock.GetReposActionsRunsByOwnerByRepo,
+					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						branch := r.URL.Query().Get("branch")
+						var runs []*github.WorkflowRun
+						for _, p := range tt.pages {
+							for _, a := range p.Artifacts {
+								id := a.GetWorkflowRun().GetID()
+								if a.GetWorkflowRun().GetHeadBranch() != branch || slices.Contains(tt.unlisted, id) {
+									continue
+								}
+								runs = append(runs, &github.WorkflowRun{ID: new(id), Event: new(eventOf(id))})
+							}
+						}
+						sort.Slice(runs, func(i, j int) bool { return runs[i].GetID() > runs[j].GetID() })
+						_, _ = w.Write(mock.MustMarshal(github.WorkflowRuns{TotalCount: new(len(runs)), WorkflowRuns: runs})) //nostyle:handlerrors
+					}),
+				),
+				mock.WithRequestMatchHandler( //nostyle:funcfmt
 					mock.GetReposActionsRunsByOwnerByRepoByRunId,
 					http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+						lookups++
 						id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
 						if err != nil {
 							t.Error(err)
 						}
-						event := "push"
-						if id >= 1000 {
-							event = "pull_request"
-						}
-						_, _ = w.Write(mock.MustMarshal(github.WorkflowRun{ID: new(id), Event: new(event)})) //nostyle:handlerrors
+						_, _ = w.Write(mock.MustMarshal(github.WorkflowRun{ID: new(id), Event: new(eventOf(id))})) //nostyle:handlerrors
 					}),
 				),
 				mock.WithRequestMatchHandler( //nostyle:funcfmt
@@ -1441,6 +1499,9 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 			g.SetClient(client)
 
 			got, err := g.FetchLatestArtifactOfBranch(t.Context(), "owner", "repo", "octocov-report", "report.json", tt.branch)
+			if lookups != tt.wantLookups {
+				t.Errorf("got %d runs asked for one by one\nwant %d", lookups, tt.wantLookups)
+			}
 			if tt.wantErr != nil {
 				if !errors.Is(err, tt.wantErr) {
 					t.Fatalf("got err %v\nwant %v", err, tt.wantErr)
