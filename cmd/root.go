@@ -34,6 +34,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
@@ -318,13 +319,15 @@ var rootCmd = &cobra.Command{
 			}
 
 			var stores []comparedDatastore
+			diffCtx, cancelDiff := comparisonContext(ctx)
+			defer cancelDiff()
 			for _, s := range c.Diff.Datastores {
 				log.Printf("Get previous report from %s", s)
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
 				if err != nil {
 					return err
 				}
-				fsys, err := d.FS()
+				fsys, err := d.FS(diffCtx)
 				if err != nil {
 					// The previous report simply may not be there yet, which the artifact
 					// datastore now says rather than answering with an empty filesystem, so
@@ -752,6 +755,17 @@ type comparedDatastore struct {
 	fsys fs.FS
 	// metadataRead is the artifact holding the metadata its report was read through, if any.
 	metadataRead string
+}
+
+// comparisonContext returns the context the previous report is looked up under, which runs
+// out at half of what is left of ctx. Missing the previous report only skips the comparison,
+// while running out of ctx fails storing the report, so a slow lookup must not take all of it.
+func comparisonContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		return context.WithCancel(ctx)
+	}
+	return context.WithTimeout(ctx, time.Until(deadline)/2)
 }
 
 // readBaseReport returns the newest report stored under the first of keys that any of stores

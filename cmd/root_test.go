@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"testing"
 	"testing/fstest"
+	"time"
 
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
@@ -165,4 +167,38 @@ func TestReadBaseReport(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestComparisonContext(t *testing.T) {
+	t.Run("the lookup is left half of what remains, so storing keeps the rest", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+		defer cancel()
+		parent, _ := ctx.Deadline()
+		diffCtx, cancelDiff := comparisonContext(ctx)
+		defer cancelDiff()
+		got, ok := diffCtx.Deadline()
+		if !ok {
+			t.Fatal("the lookup has no deadline")
+		}
+		remaining := time.Until(parent)
+		if left := parent.Sub(got); left < remaining/2-time.Second || left > remaining/2+time.Second {
+			t.Errorf("the lookup leaves %v of %v to the rest of the run, want about half", left, remaining)
+		}
+	})
+	t.Run("the end of the lookup does not end the run", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(t.Context(), 10*time.Second)
+		defer cancel()
+		_, cancelDiff := comparisonContext(ctx)
+		cancelDiff()
+		if err := ctx.Err(); err != nil {
+			t.Errorf("the run's context ended with the lookup: %v", err)
+		}
+	})
+	t.Run("a run without a deadline gives the lookup none", func(t *testing.T) {
+		diffCtx, cancelDiff := comparisonContext(t.Context())
+		defer cancelDiff()
+		if _, ok := diffCtx.Deadline(); ok {
+			t.Error("the lookup has a deadline the run does not")
+		}
+	})
 }
