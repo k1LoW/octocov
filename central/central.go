@@ -371,8 +371,6 @@ type artifactDatastore interface {
 	IsArtifact() bool
 }
 
-// isArtifact reports whether d reads its reports out of GitHub Actions artifacts, which is
-// the same place the pages that browse a report read it from.
 // collectFrom returns the reports of the default branch that ds holds, in the order it walks
 // them.
 func collectFrom(ctx context.Context, ds datastore.Datastore) collected {
@@ -413,6 +411,8 @@ func collectFrom(ctx context.Context, ds datastore.Datastore) collected {
 	return collected{reports: rs, err: err}
 }
 
+// isArtifact reports whether d reads its reports out of GitHub Actions artifacts, which is
+// the same place the pages that browse a report read it from.
 func isArtifact(d datastore.Datastore) bool {
 	a, ok := d.(artifactDatastore)
 	return ok && a.IsArtifact()
