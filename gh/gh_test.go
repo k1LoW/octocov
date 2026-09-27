@@ -1518,6 +1518,114 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 	}
 }
 
+func TestFetchLatestArtifactOfBranchListsTheRunsOnlyAsFarBackAsAsked(t *testing.T) {
+	t.Setenv("GITHUB_TOKEN", "dummy")
+	zips := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		buf := new(bytes.Buffer)
+		zw := zip.NewWriter(buf)
+		f, err := zw.Create("report.json")
+		if err != nil {
+			t.Error(err)
+		}
+		if _, err := f.Write([]byte(path.Base(r.URL.Path))); err != nil {
+			t.Error(err)
+		}
+		if err := zw.Close(); err != nil {
+			t.Error(err)
+		}
+		_, _ = w.Write(buf.Bytes()) //nostyle:handlerrors
+	}))
+	t.Cleanup(zips.Close)
+
+	// 300 runs on the branch, newest first, of which only 150 is of a push. The others are of
+	// the pull request whose head is the branch, and most of them uploaded nothing. 260 is left
+	// out of the listing, so it is asked for on its own once the first page has gone past it.
+	const perPage = 100
+	var runs []*github.WorkflowRun
+	for id := int64(300); id >= 1; id-- {
+		if id == 260 {
+			continue
+		}
+		event := "pull_request"
+		if id == 150 {
+			event = "push"
+		}
+		runs = append(runs, &github.WorkflowRun{ID: new(id), Event: new(event)})
+	}
+	artifacts := github.ArtifactList{Artifacts: []*github.Artifact{
+		{ID: new(int64(2)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(260)), HeadBranch: new("develop")}},
+		{ID: new(int64(1)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(150)), HeadBranch: new("develop")}},
+	}}
+	var pagesListed []int
+	lookups := 0
+	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
+		mock.WithRequestMatch(mock.GetReposActionsArtifactsByOwnerByRepo, artifacts),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposActionsRunsByOwnerByRepo,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				page, err := strconv.Atoi(r.URL.Query().Get("page"))
+				if err != nil {
+					t.Error(err)
+				}
+				pagesListed = append(pagesListed, page)
+				start := (page - 1) * perPage
+				end := min(start+perPage, len(runs))
+				if end < len(runs) {
+					w.Header().Set("Link", fmt.Sprintf(`<https://api.github.com/repos/owner/repo/actions/runs?page=%d>; rel="next"`, page+1))
+				}
+				_, _ = w.Write(mock.MustMarshal(github.WorkflowRuns{TotalCount: new(len(runs)), WorkflowRuns: runs[start:end]})) //nostyle:handlerrors
+			}),
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposActionsRunsByOwnerByRepoByRunId,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				lookups++
+				id, err := strconv.ParseInt(path.Base(r.URL.Path), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				_, _ = w.Write(mock.MustMarshal(github.WorkflowRun{ID: new(id), Event: new("pull_request")})) //nostyle:handlerrors
+			}),
+		),
+		mock.WithRequestMatchHandler( //nostyle:funcfmt
+			mock.GetReposActionsArtifactsByOwnerByRepoByArtifactIdByArchiveFormat,
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				id, err := strconv.ParseInt(path.Base(path.Dir(r.URL.Path)), 10, 64)
+				if err != nil {
+					t.Error(err)
+				}
+				w.Header().Set("Location", fmt.Sprintf("%s/%d", zips.URL, id))
+				w.WriteHeader(http.StatusFound)
+			}),
+		),
+	)
+	client, err := factory.NewGithubClient(factory.HTTPClient(mockedHTTPClient), factory.Timeout(10*time.Second))
+	if err != nil {
+		t.Fatal(err)
+	}
+	g, err := New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	g.SetClient(client)
+
+	got, err := g.FetchLatestArtifactOfBranch(t.Context(), "owner", "repo", "octocov-report", "report.json", "develop")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "1"; string(got.Content) != want {
+		t.Errorf("got %v\nwant %v", string(got.Content), want)
+	}
+	// Run 260 is given up on after the first page rather than after the last, and run 150 is
+	// on the second, so the third, holding only runs older than any asked about, is not listed.
+	if diff := cmp.Diff([]int{1, 2}, pagesListed); diff != "" {
+		t.Error(diff)
+	}
+	if lookups != 1 {
+		t.Errorf("got %d runs asked for one by one\nwant 1", lookups)
+	}
+}
+
 func TestFetchArtifactOfAnArtifactGone(t *testing.T) {
 	// Metadata can outlive the report it points at, and the reader falls back on this error.
 	t.Setenv("GITHUB_TOKEN", "dummy")
