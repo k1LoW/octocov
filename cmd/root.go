@@ -752,10 +752,12 @@ type comparedDatastore struct {
 	metadataRead string
 }
 
-// maxComparisonTimeout bounds the lookup of the previous report across every datastore of
-// diff.datastores. A report there is found in a few requests through its metadata, and what
-// takes longer is the branch fallback of the artifact datastore scanning to the end without
-// finding one, so a longer wait would rarely find more while taking the time storing needs.
+// maxComparisonTimeout bounds FS of the datastores of diff.datastores, which is where the
+// artifact and bq datastores fetch the previous report. A report there is found in a few
+// requests through its metadata, and what takes longer is the branch fallback of the artifact
+// datastore scanning to the end without finding one, so a longer wait would rarely find more
+// while taking the time storing needs. The datastores reading lazily, such as s3 and gcs, read
+// in readBaseReport after this, through file systems that take no context.
 const maxComparisonTimeout = 5 * time.Second
 
 // comparisonTimeout returns how long the previous report is looked up for: half of what is
