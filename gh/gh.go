@@ -848,7 +848,7 @@ func (g *Gh) FetchLatestArtifact(ctx context.Context, owner, repo, name, fp stri
 // since its head branch is the branch it merges from: a release pull request from the default
 // branch runs on it as a push does, and measures the merge onto another branch.
 func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name, fp, branch string) (*ArtifactFile, error) {
-	pullRequestRun := map[int64]bool{}
+	runs := &branchRuns{g: g, owner: owner, repo: repo, branch: branch, pullRequest: map[int64]bool{}}
 	page := 1
 	for {
 		l, res, err := g.client.Actions.ListArtifacts(ctx, owner, repo, &github.ListArtifactsOptions{
@@ -867,15 +867,9 @@ func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name,
 				if a.GetWorkflowRun().GetHeadBranch() != branch {
 					continue
 				}
-				id := a.GetWorkflowRun().GetID()
-				pr, seen := pullRequestRun[id]
-				if !seen {
-					run, _, err := g.client.Actions.GetWorkflowRunByID(ctx, owner, repo, id)
-					if err != nil {
-						return nil, err
-					}
-					pr = run.GetEvent() == "pull_request" || run.GetEvent() == "pull_request_target"
-					pullRequestRun[id] = pr
+				pr, err := runs.isPullRequest(ctx, a.GetWorkflowRun().GetID())
+				if err != nil {
+					return nil, err
 				}
 				if pr {
 					continue
@@ -894,6 +888,74 @@ func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name,
 		}
 	}
 	return nil, ErrArtifactNotFound
+}
+
+// branchRuns tells whether a workflow run on a branch is of a pull request. An artifact names
+// its run but not the event of it, and asking for each run took a request per artifact, which a
+// branch that is also the head of a long-lived pull request has hundreds of (#796). The runs
+// of the branch are listed a page at a time instead, only as far back as the runs asked about.
+type branchRuns struct {
+	g                   *Gh
+	owner, repo, branch string
+	pullRequest         map[int64]bool
+	page                int
+	oldest              int64
+	listed              bool
+}
+
+func (b *branchRuns) isPullRequest(ctx context.Context, id int64) (bool, error) {
+	for {
+		if pr, ok := b.pullRequest[id]; ok {
+			return pr, nil
+		}
+		// The runs are listed newest first, so id is not among those left to list once an
+		// older one has been listed.
+		if b.listed || (b.oldest != 0 && b.oldest < id) {
+			break
+		}
+		if err := b.listNext(ctx); err != nil {
+			return false, err
+		}
+	}
+	// Not listed under the branch, which the order the IDs are given in does not promise
+	// against, so asked for on its own rather than taken to be of a push.
+	run, _, err := b.g.client.Actions.GetWorkflowRunByID(ctx, b.owner, b.repo, id)
+	if err != nil {
+		return false, err
+	}
+	pr := isPullRequestEvent(run.GetEvent())
+	b.pullRequest[id] = pr
+	return pr, nil
+}
+
+func (b *branchRuns) listNext(ctx context.Context) error {
+	b.page++
+	l, res, err := b.g.client.Actions.ListRepositoryWorkflowRuns(ctx, b.owner, b.repo, &github.ListWorkflowRunsOptions{
+		Branch: b.branch,
+		ListOptions: github.ListOptions{
+			Page:    b.page,
+			PerPage: 100,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	for _, r := range l.WorkflowRuns {
+		b.pullRequest[r.GetID()] = isPullRequestEvent(r.GetEvent())
+		if b.oldest == 0 || r.GetID() < b.oldest {
+			b.oldest = r.GetID()
+		}
+	}
+	if res.NextPage == 0 {
+		b.listed = true
+	}
+	return nil
+}
+
+// isPullRequestEvent reports whether a run of event has the head branch of a pull request as
+// its branch. Every other event, such as schedule or workflow_dispatch, runs on the branch.
+func isPullRequestEvent(event string) bool {
+	return event == "pull_request" || event == "pull_request_target"
 }
 
 // FetchArtifact returns the file fp of the artifact of the id. An artifact deleted or expired
