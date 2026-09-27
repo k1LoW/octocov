@@ -34,6 +34,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/k1LoW/octocov/central"
 	"github.com/k1LoW/octocov/config"
@@ -317,23 +318,20 @@ var rootCmd = &cobra.Command{
 				}
 			}
 
-			var stores []comparedDatastore
+			var (
+				ds    []datastore.Datastore
+				names []string
+			)
 			for _, s := range c.Diff.Datastores {
 				log.Printf("Get previous report from %s", s)
 				d, err := datastore.New(ctx, s, datastore.Root(c.Root()), datastore.Report(r))
 				if err != nil {
 					return err
 				}
-				fsys, err := d.FS()
-				if err != nil {
-					// The previous report simply may not be there yet, which the artifact
-					// datastore now says rather than answering with an empty filesystem, so
-					// this is the same kind of miss the reads below already carry on from.
-					log.Printf("%s: %v", s, err)
-					continue
-				}
-				stores = append(stores, comparedDatastore{name: s, fsys: fsys, metadataRead: datastore.MetadataRead(d)})
+				ds = append(ds, d)
+				names = append(names, s)
 			}
+			stores := openComparedDatastores(ctx, comparisonTimeout(ctx), ds, names)
 			rPrev, comparedArtifact = readBaseReport(stores, fmt.Sprintf("%s/%s", repo.Owner, repo.Reponame()), r.BaseKeys())
 			if rPrev != nil && rPrev.Coverage != nil {
 				rPrev.Coverage.NormalizePaths(gitRoot, fsFiles)
@@ -752,6 +750,55 @@ type comparedDatastore struct {
 	fsys fs.FS
 	// metadataRead is the artifact holding the metadata its report was read through, if any.
 	metadataRead string
+}
+
+// maxComparisonTimeout bounds FS of the datastores of diff.datastores, which is where the
+// artifact and bq datastores fetch the previous report. A report there is found in a few
+// requests through its metadata, and what takes longer is the branch fallback of the artifact
+// datastore scanning to the end without finding one, so a longer wait would rarely find more
+// while taking the time storing needs. The datastores reading lazily, such as s3 and gcs, read
+// in readBaseReport after this, through file systems that take no context.
+const maxComparisonTimeout = 5 * time.Second
+
+// comparisonTimeout returns how long the previous report is looked up for: half of what is
+// left of ctx, and at most maxComparisonTimeout. Half, so that a small timeout: still leaves
+// storing the report as long as the lookup took.
+func comparisonTimeout(ctx context.Context) time.Duration {
+	deadline, ok := ctx.Deadline()
+	if !ok {
+		return maxComparisonTimeout
+	}
+	return min(maxComparisonTimeout, time.Until(deadline)/2)
+}
+
+// openComparedDatastores opens ds, named by names, for reading the report compared, all at
+// once and within timeout, and leaves out the ones that fail, keeping the order of ds.
+func openComparedDatastores(ctx context.Context, timeout time.Duration, ds []datastore.Datastore, names []string) []comparedDatastore {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+	opened := make([]*comparedDatastore, len(ds))
+	var wg sync.WaitGroup
+	for i, d := range ds {
+		wg.Go(func() {
+			fsys, err := d.FS(ctx)
+			if err != nil {
+				// The previous report simply may not be there yet, which the artifact
+				// datastore now says rather than answering with an empty filesystem, so
+				// this is the same kind of miss the reads after already carry on from.
+				log.Printf("%s: %v", names[i], err)
+				return
+			}
+			opened[i] = &comparedDatastore{name: names[i], fsys: fsys, metadataRead: datastore.MetadataRead(d)}
+		})
+	}
+	wg.Wait()
+	var stores []comparedDatastore
+	for _, o := range opened {
+		if o != nil {
+			stores = append(stores, *o)
+		}
+	}
+	return stores
 }
 
 // readBaseReport returns the newest report stored under the first of keys that any of stores

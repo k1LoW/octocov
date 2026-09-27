@@ -125,8 +125,7 @@ func (b *BQ) CreateTable(ctx context.Context) error {
 	return nil
 }
 
-func (b *BQ) FS() (fs.FS, error) {
-	ctx := context.Background()
+func (b *BQ) FS(ctx context.Context) (fs.FS, error) {
 	fsys := fstest.MapFS{}
 	t := fmt.Sprintf("`%s.%s`", b.dataset, b.table)
 	// Grouped by the pull request as well as by the ref, which together are as fine a key

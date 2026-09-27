@@ -57,7 +57,7 @@ var (
 type Datastore interface {
 	Put(ctx context.Context, path string, content []byte) error
 	StoreReport(ctx context.Context, r *report.Report) error
-	FS() (fs.FS, error)
+	FS(ctx context.Context) (fs.FS, error)
 }
 
 func New(ctx context.Context, u string, hints ...HintFunc) (Datastore, error) {

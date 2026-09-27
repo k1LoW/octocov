@@ -74,7 +74,7 @@ func New(c *Config) *Central {
 
 func (c *Central) Generate(ctx context.Context) ([]string, error) {
 	// collect reports
-	if err := c.collectReports(); err != nil {
+	if err := c.collectReports(ctx); err != nil {
 		return nil, err
 	}
 
@@ -113,7 +113,7 @@ func (c *Central) CollectedReports() []*report.Report {
 	return c.reports
 }
 
-func (c *Central) collectReports() error {
+func (c *Central) collectReports(ctx context.Context) error {
 	rsMap := map[string]*report.Report{}
 	backed := map[string]bool{}
 
@@ -121,7 +121,7 @@ func (c *Central) collectReports() error {
 	failed := 0
 	for _, rd := range c.config.Reports {
 		fromArtifact := isArtifact(rd.Datastore)
-		fsys, err := rd.Datastore.FS()
+		fsys, err := rd.Datastore.FS(ctx)
 		if err != nil {
 			c.warnSkippedDatastore(rd.URL, err)
 			failed++

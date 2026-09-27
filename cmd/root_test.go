@@ -1,13 +1,19 @@
 package cmd
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"io/fs"
 	"strings"
 	"testing"
 	"testing/fstest"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/k1LoW/octocov/config"
 	"github.com/k1LoW/octocov/coverage"
+	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/report"
 )
 
@@ -165,4 +171,80 @@ func TestReadBaseReport(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestComparisonTimeout(t *testing.T) {
+	tests := []struct {
+		name      string
+		remaining time.Duration
+		want      time.Duration
+	}{
+		{"a run with plenty of time left looks up for at most the cap", time.Minute, maxComparisonTimeout},
+		{"a run short of time leaves storing half of it", 6 * time.Second, 3 * time.Second},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx, cancel := context.WithTimeout(t.Context(), tt.remaining)
+			defer cancel()
+			if got := comparisonTimeout(ctx); got > tt.want || got < tt.want-time.Second {
+				t.Errorf("got %v\nwant about %v", got, tt.want)
+			}
+		})
+	}
+	t.Run("a run without a deadline looks up for the cap", func(t *testing.T) {
+		if got := comparisonTimeout(t.Context()); got != maxComparisonTimeout {
+			t.Errorf("got %v\nwant %v", got, maxComparisonTimeout)
+		}
+	})
+}
+
+func TestOpenComparedDatastores(t *testing.T) {
+	slow := &fsStub{wait: true}
+	ds := []datastore.Datastore{
+		&fsStub{fsys: fstest.MapFS{"a": {}}, delay: 30 * time.Millisecond},
+		&fsStub{err: errors.New("not found")},
+		slow,
+		&fsStub{fsys: fstest.MapFS{"d": {}}},
+	}
+	names := []string{"a", "failing", "slow", "d"}
+	start := time.Now()
+	got := openComparedDatastores(t.Context(), 200*time.Millisecond, ds, names)
+	// Each one waits for the slowest rather than for the sum of all, and the one that never
+	// answers is given up on at the timeout.
+	if elapsed := time.Since(start); elapsed > time.Second {
+		t.Errorf("took %v", elapsed)
+	}
+	var gotNames []string
+	for _, s := range got {
+		gotNames = append(gotNames, s.name)
+	}
+	// In the order of diff.datastores, which readBaseReport breaks timestamp ties by.
+	if diff := cmp.Diff([]string{"a", "d"}, gotNames); diff != "" {
+		t.Error(diff)
+	}
+	if err := slow.ctxErr; !errors.Is(err, context.DeadlineExceeded) {
+		t.Errorf("got %v\nwant %v", err, context.DeadlineExceeded)
+	}
+}
+
+type fsStub struct {
+	fsys   fs.FS
+	err    error
+	delay  time.Duration
+	wait   bool
+	ctxErr error
+}
+
+func (s *fsStub) Put(_ context.Context, _ string, _ []byte) error { return nil }
+
+func (s *fsStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
+
+func (s *fsStub) FS(ctx context.Context) (fs.FS, error) {
+	if s.wait {
+		<-ctx.Done()
+		s.ctxErr = ctx.Err()
+		return nil, s.ctxErr
+	}
+	time.Sleep(s.delay)
+	return s.fsys, s.err
 }

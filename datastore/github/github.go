@@ -48,7 +48,7 @@ func (g *Github) Put(ctx context.Context, p string, content []byte) error {
 	return g.gh.PushContent(ctx, repo.Owner, repo.Repo, branch, string(content), cp, message)
 }
 
-func (g *Github) FS() (fs.FS, error) {
+func (g *Github) FS(ctx context.Context) (fs.FS, error) {
 	r, err := gh.Parse(g.repository)
 	if err != nil {
 		return nil, err

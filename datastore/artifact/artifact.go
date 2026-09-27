@@ -141,8 +141,7 @@ func (a *Artifact) Put(ctx context.Context, path string, content []byte) error {
 	return err
 }
 
-func (a *Artifact) FS() (fs.FS, error) {
-	ctx := context.Background()
+func (a *Artifact) FS(ctx context.Context) (fs.FS, error) {
 	var (
 		path, name string
 		r          *gh.Repository
