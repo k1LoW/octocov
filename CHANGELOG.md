@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.83.0](https://github.com/k1LoW/octocov/compare/v0.82.1...v0.83.0) - 2026-09-27
+
+### Breaking Changes 🛠
+- fix: bound the lookup of the previous report so storing the report keeps its time by @k1LoW in https://github.com/k1LoW/octocov/pull/799
+### Other Changes
+- ci: generate CREDITS with gocredits v1.0.0 from a make target by @k1LoW in https://github.com/k1LoW/octocov/pull/797
+- perf: tell the pull request runs of a branch from its listing of runs by @k1LoW in https://github.com/k1LoW/octocov/pull/800
+- perf: read the datastores of the central mode at once by @k1LoW in https://github.com/k1LoW/octocov/pull/801
+
 ## [v0.82.1](https://github.com/k1LoW/octocov/compare/v0.82.0...v0.82.1) - 2026-09-26
 
 ### Other Changes
