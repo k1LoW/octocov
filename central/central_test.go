@@ -681,8 +681,8 @@ func TestCollectReportsReadsTheDatastoresAtOnce(t *testing.T) {
 }
 
 // Two reports of a repository as new as each other are decided by the order central.reports
-// lists their datastores in, as they were when the datastores were read one after another,
-// whichever of them answers first.
+// lists their datastores in, as they were when the datastores were read one after another.
+// Which of them answers first has no say in it.
 func TestCollectReportsMergesInTheOrderTheDatastoresAreListed(t *testing.T) {
 	ts := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
 	first := centralReport("owner/repo", ts)
