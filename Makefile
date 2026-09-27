@@ -51,22 +51,26 @@ bqdoc:
 
 depsdev:
 	go install github.com/Songmu/ghch/cmd/ghch@latest
-	go install github.com/Songmu/gocredits/cmd/gocredits@latest
 	go install golang.org/x/vuln/cmd/govulncheck@latest
 	go install github.com/k1LoW/gostyle@latest
+
+credits:
+	go install github.com/Songmu/gocredits/cmd/gocredits@v1.0.0
+	gocredits -skip-missing . > CREDITS
+	cat _EXTRA_CREDITS >> CREDITS
 
 prerelease:
 	git pull origin main --tag
 	go mod tidy
 	ghch -w -N ${VER}
-	./scripts/credits.sh
+	$(MAKE) credits
 	git add CHANGELOG.md CREDITS go.mod go.sum
 	git commit -m'Bump up version number'
 	git tag ${VER}
 
 prerelease_for_tagpr:
 	cd internal/page/bundle && npm ci && npm run credits && rm -rf node_modules
-	./scripts/credits.sh
+	$(MAKE) credits
 	git add CHANGELOG.md CREDITS _EXTRA_CREDITS go.mod go.sum
 
-.PHONY: default test build go_build page_bundle
+.PHONY: default test build go_build page_bundle credits
