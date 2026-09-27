@@ -5,11 +5,13 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -620,5 +622,91 @@ func TestWriteIndexKeepsTheIndexWhenTheRenderFails(t *testing.T) {
 	}
 	if got := string(b); got != "previous\n" {
 		t.Errorf("got %q\nwant the index left as it was", got)
+	}
+}
+
+// slowStub is a datastore taking delay to open, counting how many are open at once.
+type slowStub struct {
+	fsys     fs.FS
+	delay    time.Duration
+	inFlight *atomic.Int32
+	maxSeen  *atomic.Int32
+}
+
+func (s *slowStub) Put(_ context.Context, _ string, _ []byte) error { return nil }
+
+func (s *slowStub) StoreReport(_ context.Context, _ *report.Report) error { return nil }
+
+func (s *slowStub) FS(_ context.Context) (fs.FS, error) {
+	n := s.inFlight.Add(1)
+	defer s.inFlight.Add(-1)
+	for {
+		m := s.maxSeen.Load()
+		if n <= m || s.maxSeen.CompareAndSwap(m, n) {
+			break
+		}
+	}
+	time.Sleep(s.delay)
+	return s.fsys, nil
+}
+
+// A central repository lists a datastore per repository, and reading them one after another
+// took the whole of timeout: on one listing dozens of them.
+func TestCollectReportsReadsTheDatastoresAtOnce(t *testing.T) {
+	const n, delay = 24, 100 * time.Millisecond
+	var inFlight, maxSeen atomic.Int32
+	var rds []ReportDatastore
+	for i := range n {
+		repo := fmt.Sprintf("owner/repo%02d", i)
+		fsys := fstest.MapFS{repo + "/report.json": &fstest.MapFile{Data: centralReport(repo, time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)).Bytes()}}
+		rds = append(rds, ReportDatastore{URL: "artifact://" + repo, Datastore: &slowStub{fsys: fsys, delay: delay, inFlight: &inFlight, maxSeen: &maxSeen}})
+	}
+	ctr := New(&Config{Repository: "owner/central", Reports: rds})
+	ctr.stderr = io.Discard
+
+	start := time.Now()
+	if err := ctr.collectReports(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if elapsed := time.Since(start); elapsed >= n*delay/2 {
+		t.Errorf("took %v, as long as reading them one after another", elapsed)
+	}
+	if got := len(ctr.reports); got != n {
+		t.Errorf("got %d reports\nwant %d", got, n)
+	}
+	// GitHub limits the requests it takes at once from one token.
+	if got := maxSeen.Load(); got > maxConcurrentCollects {
+		t.Errorf("got %d datastores read at once\nwant at most %d", got, maxConcurrentCollects)
+	}
+}
+
+// Two reports of a repository as new as each other are decided by the order central.reports
+// lists their datastores in, as they were when the datastores were read one after another.
+// Which of them answers first has no say in it.
+func TestCollectReportsMergesInTheOrderTheDatastoresAreListed(t *testing.T) {
+	ts := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
+	first := centralReport("owner/repo", ts)
+	first.Commit = "first"
+	second := centralReport("owner/repo", ts)
+	second.Commit = "second"
+	var inFlight, maxSeen atomic.Int32
+	ctr := New(&Config{
+		Repository: "owner/central",
+		Reports: []ReportDatastore{
+			{URL: "artifact://owner/first", Datastore: &slowStub{fsys: fstest.MapFS{"owner/repo/report.json": &fstest.MapFile{Data: first.Bytes()}}, delay: 100 * time.Millisecond, inFlight: &inFlight, maxSeen: &maxSeen}},
+			{URL: "s3://bucket/second", Datastore: &slowStub{fsys: fstest.MapFS{"owner/repo/report.json": &fstest.MapFile{Data: second.Bytes()}}, inFlight: &inFlight, maxSeen: &maxSeen}},
+		},
+	})
+	out := new(bytes.Buffer)
+	ctr.stderr = out
+
+	if err := ctr.collectReports(t.Context()); err != nil {
+		t.Fatal(err)
+	}
+	if got := ctr.reports[0].Commit; got != "first" {
+		t.Errorf("got the report of %v\nwant the one of first", got)
+	}
+	if got, want := out.String(), "Collect report of owner/repo\n"; got != want {
+		t.Errorf("got %q\nwant %q", got, want)
 	}
 }

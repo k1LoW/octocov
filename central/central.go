@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -113,46 +114,42 @@ func (c *Central) CollectedReports() []*report.Report {
 	return c.reports
 }
 
+// maxConcurrentCollects bounds how many datastores of central.reports are read at once. A
+// central repository lists an artifact datastore per repository, each taking a few requests
+// to the GitHub API, and GitHub limits the requests it takes at once from one token.
+const maxConcurrentCollects = 8
+
+// collected is what a datastore of central.reports gave: the reports of the default branch it
+// holds, and the error it stopped at, if any, with whatever it reached before.
+type collected struct {
+	reports []*report.Report
+	err     error
+}
+
 func (c *Central) collectReports(ctx context.Context) error {
 	rsMap := map[string]*report.Report{}
 	backed := map[string]bool{}
 
-	// collect reports
+	// Read at once, since one after another the datastores took the whole of timeout: on
+	// a central repository listing dozens of them, and merged in the order they are listed
+	// in, so that which of two reports as new as each other wins and the order of the lines
+	// written stay as they were.
+	results := make([]collected, len(c.config.Reports))
+	sem := make(chan struct{}, maxConcurrentCollects)
+	var wg sync.WaitGroup
+	for i, rd := range c.config.Reports {
+		wg.Go(func() {
+			sem <- struct{}{}
+			defer func() { <-sem }()
+			results[i] = collectFrom(ctx, rd.Datastore)
+		})
+	}
+	wg.Wait()
+
 	failed := 0
-	for _, rd := range c.config.Reports {
+	for i, rd := range c.config.Reports {
 		fromArtifact := isArtifact(rd.Datastore)
-		fsys, err := rd.Datastore.FS(ctx)
-		if err != nil {
-			c.warnSkippedDatastore(rd.URL, err)
-			failed++
-			continue
-		}
-		if err := fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
-			if err != nil {
-				return err
-			}
-			if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
-				return nil
-			}
-			r := &report.Report{}
-			f, err := fsys.Open(path)
-			if err != nil {
-				return nil
-			}
-			defer f.Close()
-			b, err := io.ReadAll(f)
-			if err != nil {
-				return nil
-			}
-			if err := json.Unmarshal(b, r); err != nil {
-				return nil
-			}
-			// The datastore also holds the reports of the pull requests and the branches
-			// of each repository. The index describes the state of the default branch, so
-			// only the reports stored under its key belong in it.
-			if r.RefKey() != "" {
-				return nil
-			}
+		for _, r := range results[i].reports {
 			current, ok := rsMap[r.Repository]
 			if !ok {
 				if _, err := fmt.Fprintf(c.stderr, "Collect report of %s\n", r.Repository); err != nil {
@@ -160,19 +157,18 @@ func (c *Central) collectReports(ctx context.Context) error {
 				}
 				rsMap[r.Repository] = r
 				backed[r.Repository] = fromArtifact
-				return nil
+				continue
 			}
 			if current.Timestamp.UnixNano() < r.Timestamp.UnixNano() {
 				rsMap[r.Repository] = r
 				backed[r.Repository] = fromArtifact
 			}
-			return nil
-		}); err != nil {
-			// Whatever the walk reached before it stopped is kept, since a half-collected
-			// datastore still describes the repositories it did reach.
+		}
+		// Whatever the walk reached before it stopped is kept above, since a half-collected
+		// datastore still describes the repositories it did reach.
+		if err := results[i].err; err != nil {
 			c.warnSkippedDatastore(rd.URL, err)
 			failed++
-			continue
 		}
 	}
 
@@ -373,6 +369,46 @@ func (c *Central) funcs() map[string]any {
 type artifactDatastore interface {
 	datastore.Datastore
 	IsArtifact() bool
+}
+
+// collectFrom returns the reports of the default branch that ds holds, in the order it walks
+// them.
+func collectFrom(ctx context.Context, ds datastore.Datastore) collected {
+	fsys, err := ds.FS(ctx)
+	if err != nil {
+		return collected{err: err}
+	}
+	var rs []*report.Report
+	err = fs.WalkDir(fsys, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(d.Name(), ".json") {
+			return nil
+		}
+		r := &report.Report{}
+		f, err := fsys.Open(path)
+		if err != nil {
+			return nil
+		}
+		defer f.Close()
+		b, err := io.ReadAll(f)
+		if err != nil {
+			return nil
+		}
+		if err := json.Unmarshal(b, r); err != nil {
+			return nil
+		}
+		// The datastore also holds the reports of the pull requests and the branches of
+		// each repository. The index describes the state of the default branch, so only
+		// the reports stored under its key belong in it.
+		if r.RefKey() != "" {
+			return nil
+		}
+		rs = append(rs, r)
+		return nil
+	})
+	return collected{reports: rs, err: err}
 }
 
 // isArtifact reports whether d reads its reports out of GitHub Actions artifacts, which is
