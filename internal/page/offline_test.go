@@ -71,7 +71,7 @@ func refsOf(key, val string) []string {
 		return []string{val}
 	}
 	var refs []string
-	for _, f := range strings.Fields(val) {
+	for f := range strings.FieldsSeq(val) {
 		f = strings.Trim(f, ",")
 		if f == "" || (key == "srcset" && srcsetDescriptorRe.MatchString(f)) {
 			continue
