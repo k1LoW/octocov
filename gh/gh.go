@@ -867,7 +867,7 @@ func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name,
 				if a.GetWorkflowRun().GetHeadBranch() != branch {
 					continue
 				}
-				pr, err := runs.isPullRequest(ctx, a.GetWorkflowRun().GetID())
+				pr, err := runs.isPullRequest(ctx, a.GetWorkflowRun().GetID(), a.GetCreatedAt().Time)
 				if err != nil {
 					return nil, err
 				}
@@ -890,20 +890,42 @@ func (g *Gh) FetchLatestArtifactOfBranch(ctx context.Context, owner, repo, name,
 	return nil, ErrArtifactNotFound
 }
 
+// runsAskedFirst is how many runs are asked for one by one before the runs of the branch are
+// listed. The newest artifact of the branch is most often of a push, which one request answers,
+// while the listing starts at the newest run of every workflow on the branch, and a busy branch
+// has hundreds of them newer than the artifact.
+const runsAskedFirst = 3
+
 // branchRuns tells whether a workflow run on a branch is of a pull request. An artifact names
 // its run but not the event of it, and asking for each run took a request per artifact, which a
-// branch that is also the head of a long-lived pull request has hundreds of (#796). The runs
-// of the branch are listed a page at a time instead, only as far back as the runs asked about.
+// branch that is also the head of a long-lived pull request has hundreds of (#796). The first
+// few are asked for one by one, and past them the runs of the branch are listed a page at a
+// time instead, from the time of the artifact that started the listing and only as far back as
+// the runs asked about.
 type branchRuns struct {
 	g                   *Gh
 	owner, repo, branch string
 	pullRequest         map[int64]bool
-	page                int
-	oldest              int64
-	listed              bool
+	asked               int
+	// created bounds the listing to the runs created by then, which is set by the first
+	// artifact the listing is started for. The artifacts come newest first, so every later one
+	// is of a run created before it as well.
+	created time.Time
+	page    int
+	oldest  int64
+	listed  bool
 }
 
-func (b *branchRuns) isPullRequest(ctx context.Context, id int64) (bool, error) {
+// isPullRequest reports whether the run id is of a pull request. uploaded is when its artifact
+// was created, which is after the run was.
+func (b *branchRuns) isPullRequest(ctx context.Context, id int64, uploaded time.Time) (bool, error) {
+	if b.page == 0 && b.asked < runsAskedFirst {
+		b.asked++
+		return b.ask(ctx, id)
+	}
+	if b.page == 0 {
+		b.created = uploaded
+	}
 	for {
 		if pr, ok := b.pullRequest[id]; ok {
 			return pr, nil
@@ -919,6 +941,10 @@ func (b *branchRuns) isPullRequest(ctx context.Context, id int64) (bool, error) 
 	}
 	// Not listed under the branch, which the order the IDs are given in does not promise
 	// against, so asked for on its own rather than taken to be of a push.
+	return b.ask(ctx, id)
+}
+
+func (b *branchRuns) ask(ctx context.Context, id int64) (bool, error) {
 	run, _, err := b.g.client.Actions.GetWorkflowRunByID(ctx, b.owner, b.repo, id)
 	if err != nil {
 		return false, err
@@ -930,13 +956,17 @@ func (b *branchRuns) isPullRequest(ctx context.Context, id int64) (bool, error) 
 
 func (b *branchRuns) listNext(ctx context.Context) error {
 	b.page++
-	l, res, err := b.g.client.Actions.ListRepositoryWorkflowRuns(ctx, b.owner, b.repo, &github.ListWorkflowRunsOptions{
+	opts := &github.ListWorkflowRunsOptions{
 		Branch: b.branch,
 		ListOptions: github.ListOptions{
 			Page:    b.page,
 			PerPage: 100,
 		},
-	})
+	}
+	if !b.created.IsZero() {
+		opts.Created = "<=" + b.created.UTC().Format(time.RFC3339)
+	}
+	l, res, err := b.g.client.Actions.ListRepositoryWorkflowRuns(ctx, b.owner, b.repo, opts)
 	if err != nil {
 		return err
 	}
