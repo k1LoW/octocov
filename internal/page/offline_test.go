@@ -47,10 +47,11 @@ var (
 )
 
 // inPage reports whether a reference resolves within the page itself, which a page opened
-// on its own can do without asking anything of the network.
+// on its own can do without asking anything of the network. An empty reference is not one,
+// since it resolves to the document itself, which an <iframe> or a <link> fetches again.
 func inPage(ref string) bool {
 	ref = strings.TrimSpace(ref)
-	return ref == "" || strings.HasPrefix(ref, "#") || strings.HasPrefix(strings.ToLower(ref), "data:")
+	return strings.HasPrefix(ref, "#") || strings.HasPrefix(strings.ToLower(ref), "data:")
 }
 
 func TestRenderChangesLoadsNothingFromOutside(t *testing.T) {
