@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.83.1](https://github.com/k1LoW/octocov/compare/v0.83.0...v0.83.1) - 2026-09-28
+
+### Other Changes
+- test: hold the changes page to loading nothing from outside itself by @k1LoW in https://github.com/k1LoW/octocov/pull/802
+- perf: ask for the first runs of the branch fallback one by one by @k1LoW in https://github.com/k1LoW/octocov/pull/806
+- chore(deps): bump Songmu/tagpr from 1.20.3 to 1.21.0 in the dependencies group by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/804
+- chore(deps): bump the dependencies group with 9 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/803
+
 ## [v0.83.0](https://github.com/k1LoW/octocov/compare/v0.82.1...v0.83.0) - 2026-09-27
 
 ### Breaking Changes 🛠
