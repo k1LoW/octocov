@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k1LoW/octocov/report"
 	"golang.org/x/net/html"
 )
 
@@ -70,6 +71,18 @@ func TestRenderChangesLoadsNothingFromOutside(t *testing.T) {
 	got, err := RenderChanges(t.Context(), "Coverage of k1LoW/octocov#1", in)
 	if err != nil {
 		t.Fatal(err)
+	}
+	// Were the cards left out, the walk below would pass without ever meeting the URLs the
+	// patches carry.
+	for _, f := range in.Files {
+		if !got.Anchors[report.FileAnchor(f.Filename)] {
+			t.Fatalf("the card of %q is not drawn", f.Filename)
+		}
+	}
+	for _, u := range []string{"https://example.com/a.png", "https://example.com/a.js"} {
+		if !strings.Contains(string(got.HTML), u) {
+			t.Fatalf("the page does not show %s as text", u)
+		}
 	}
 	doc, err := html.Parse(strings.NewReader(string(got.HTML)))
 	if err != nil {
