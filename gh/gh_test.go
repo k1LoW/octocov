@@ -1392,7 +1392,7 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 		{
 			"the newest artifact of the branch, past a newer one of a pull request",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{artifact(3, "feat"), artifact(2, "main"), artifact(1, "main")}}},
-			"main", "2", nil, nil, 0,
+			"main", "2", nil, nil, 1,
 		},
 		{
 			"a branch whose artifacts are on a later page",
@@ -1400,32 +1400,32 @@ func TestFetchLatestArtifactOfBranch(t *testing.T) {
 				{Artifacts: []*github.Artifact{artifact(4, "feat"), artifact(3, "feat")}},
 				{Artifacts: []*github.Artifact{artifact(2, "main")}},
 			},
-			"main", "2", nil, nil, 0,
+			"main", "2", nil, nil, 1,
 		},
 		{
 			"a run of a pull request whose head is the branch, as a release pull request's is",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "develop"), artifact(2, "develop")}}},
-			"develop", "2", nil, nil, 0,
+			"develop", "2", nil, nil, 2,
 		},
 		{
-			"many runs of pull requests on the branch cost no request each",
-			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(5, "develop"), pullRequest(4, "develop"), pullRequest(3, "develop"), artifact(2, "develop")}}},
-			"develop", "2", nil, nil, 0,
+			"past the runs asked for first, runs of pull requests on the branch cost no request each",
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(7, "develop"), pullRequest(6, "develop"), pullRequest(5, "develop"), pullRequest(4, "develop"), pullRequest(3, "develop"), artifact(2, "develop")}}},
+			"develop", "2", nil, nil, 3,
 		},
 		{
 			"a scheduled run is on the branch as a push is",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "main"), scheduled(2, "main")}}},
-			"main", "2", nil, nil, 0,
+			"main", "2", nil, nil, 2,
 		},
 		{
 			"a run the listing of the branch leaves out is asked for on its own",
-			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(3, "develop"), artifact(2, "develop")}}},
-			"develop", "2", nil, []int64{102}, 1,
+			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(5, "develop"), pullRequest(4, "develop"), pullRequest(3, "develop"), artifact(2, "develop")}}},
+			"develop", "2", nil, []int64{102}, 4,
 		},
 		{
 			"only pull requests on the branch",
 			[]github.ArtifactList{{Artifacts: []*github.Artifact{pullRequest(2, "develop"), pullRequest(1, "develop")}}},
-			"develop", "", ErrArtifactNotFound, nil, 0,
+			"develop", "", ErrArtifactNotFound, nil, 2,
 		},
 		{
 			"no artifact of the branch",
@@ -1538,9 +1538,12 @@ func TestFetchLatestArtifactOfBranchListsTheRunsOnlyAsFarBackAsAsked(t *testing.
 	t.Cleanup(zips.Close)
 
 	// 300 runs on the branch, newest first, of which only 150 is of a push. The others are of
-	// the pull request whose head is the branch, and most of them uploaded nothing. 260 is left
-	// out of the listing, so it is asked for on its own once the first page has gone past it.
+	// the pull request whose head is the branch, and most of them uploaded nothing. The artifacts
+	// of 299, 298 and 297 are the ones asked for first, so the listing starts at 260, whose
+	// artifact bounds it. 260 is left out of the listing, so it is asked for on its own once the
+	// first page has gone past it.
 	const perPage = 100
+	uploaded := time.Date(2026, 9, 15, 5, 8, 15, 0, time.UTC)
 	var runs []*github.WorkflowRun
 	for id := int64(300); id >= 1; id-- {
 		if id == 260 {
@@ -1553,10 +1556,14 @@ func TestFetchLatestArtifactOfBranchListsTheRunsOnlyAsFarBackAsAsked(t *testing.
 		runs = append(runs, &github.WorkflowRun{ID: new(id), Event: new(event)})
 	}
 	artifacts := github.ArtifactList{Artifacts: []*github.Artifact{
-		{ID: new(int64(2)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(260)), HeadBranch: new("develop")}},
-		{ID: new(int64(1)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(150)), HeadBranch: new("develop")}},
+		{ID: new(int64(5)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(299)), HeadBranch: new("develop")}},
+		{ID: new(int64(4)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(298)), HeadBranch: new("develop")}},
+		{ID: new(int64(3)), Name: new("octocov-report"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(297)), HeadBranch: new("develop")}},
+		{ID: new(int64(2)), Name: new("octocov-report"), CreatedAt: &github.Timestamp{Time: uploaded}, WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(260)), HeadBranch: new("develop")}},
+		{ID: new(int64(1)), Name: new("octocov-report"), CreatedAt: &github.Timestamp{Time: uploaded.Add(-time.Hour)}, WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(150)), HeadBranch: new("develop")}},
 	}}
 	var pagesListed []int
+	var createdListed []string
 	lookups := 0
 	mockedHTTPClient := mock.NewMockedHTTPClient( //nostyle:funcfmt
 		mock.WithRequestMatch(mock.GetReposActionsArtifactsByOwnerByRepo, artifacts),
@@ -1568,6 +1575,7 @@ func TestFetchLatestArtifactOfBranchListsTheRunsOnlyAsFarBackAsAsked(t *testing.
 					t.Error(err)
 				}
 				pagesListed = append(pagesListed, page)
+				createdListed = append(createdListed, r.URL.Query().Get("created"))
 				start := (page - 1) * perPage
 				end := min(start+perPage, len(runs))
 				if end < len(runs) {
@@ -1621,8 +1629,14 @@ func TestFetchLatestArtifactOfBranchListsTheRunsOnlyAsFarBackAsAsked(t *testing.
 	if diff := cmp.Diff([]int{1, 2}, pagesListed); diff != "" {
 		t.Error(diff)
 	}
-	if lookups != 1 {
-		t.Errorf("got %d runs asked for one by one\nwant 1", lookups)
+	// Every page is of the runs created by the time the artifact of 260 was, rather than of the
+	// runs newer than it, which a busy branch has hundreds of.
+	if diff := cmp.Diff([]string{"<=2026-09-15T05:08:15Z", "<=2026-09-15T05:08:15Z"}, createdListed); diff != "" {
+		t.Error(diff)
+	}
+	// 299, 298 and 297, then 260
+	if lookups != 4 {
+		t.Errorf("got %d runs asked for one by one\nwant 4", lookups)
 	}
 }
 
