@@ -30,10 +30,20 @@ var loadingAttrs = map[string]bool{
 	"dynsrc":     true,
 }
 
+// listAttrs are the loading attributes holding more than one URL, separated by whitespace.
+// srcset separates its candidates by commas as well, but a data: URL can carry commas of
+// its own, so the value is split on whitespace alone and the commas are trimmed off.
+var listAttrs = map[string]bool{
+	"srcset":  true,
+	"ping":    true,
+	"archive": true,
+}
+
 var (
-	cssURLRe     = regexp.MustCompile(`(?i)url\(\s*['"]?([^'")\s]*)`)
-	cssImportRe  = regexp.MustCompile(`(?i)@import`)
-	scriptNetRes = []*regexp.Regexp{
+	srcsetDescriptorRe = regexp.MustCompile(`^[0-9.]+[wxh]$`)
+	cssURLRe           = regexp.MustCompile(`(?i)url\(\s*['"]?([^'")\s]*)`)
+	cssImportRe        = regexp.MustCompile(`(?i)@import`)
+	scriptNetRes       = []*regexp.Regexp{
 		regexp.MustCompile(`\bfetch\s*\(`),
 		regexp.MustCompile(`\bXMLHttpRequest\b`),
 		regexp.MustCompile(`\bWebSocket\b`),
@@ -53,6 +63,25 @@ var (
 func inPage(ref string) bool {
 	ref = strings.TrimSpace(ref)
 	return strings.HasPrefix(ref, "#") || strings.HasPrefix(strings.ToLower(ref), "data:")
+}
+
+// refsOf returns the URLs the attribute key holds.
+func refsOf(key, val string) []string {
+	if !listAttrs[key] {
+		return []string{val}
+	}
+	var refs []string
+	for _, f := range strings.Fields(val) {
+		f = strings.Trim(f, ",")
+		if f == "" || (key == "srcset" && srcsetDescriptorRe.MatchString(f)) {
+			continue
+		}
+		refs = append(refs, f)
+	}
+	if len(refs) == 0 {
+		return []string{val}
+	}
+	return refs
 }
 
 func TestRenderChangesLoadsNothingFromOutside(t *testing.T) {
@@ -114,8 +143,12 @@ func TestRenderChangesLoadsNothingFromOutside(t *testing.T) {
 				switch {
 				case key == "href" && tag == "a":
 					// Followed only when the reader clicks it.
-				case loadingAttrs[key] && !inPage(a.Val):
-					t.Errorf("<%s %s=%q> loads from outside the page", tag, key, a.Val)
+				case loadingAttrs[key]:
+					for _, ref := range refsOf(key, a.Val) {
+						if !inPage(ref) {
+							t.Errorf("<%s %s=%q> loads %q from outside the page", tag, key, a.Val, ref)
+						}
+					}
 				case key == "http-equiv":
 					t.Errorf("<%s http-equiv=%q> can send the reader elsewhere", tag, a.Val)
 				case key == "style":
