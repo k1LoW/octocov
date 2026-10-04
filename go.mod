@@ -5,12 +5,12 @@ go 1.26.8
 require (
 	cloud.google.com/go/auth v0.24.0
 	cloud.google.com/go/bigquery v1.85.0
-	cloud.google.com/go/storage v1.68.0
+	cloud.google.com/go/storage v1.69.0
 	github.com/antchfx/xmlquery v1.5.1
 	github.com/aws/aws-sdk-go-v2 v1.47.1
 	github.com/aws/aws-sdk-go-v2/config v1.33.6
-	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.23.10
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.113.4
+	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.23.11
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.0
 	github.com/bmatcuk/doublestar/v4 v4.10.2
 	github.com/chainguard-dev/git-urls v1.0.2
 	github.com/expr-lang/expr v1.17.8
@@ -18,7 +18,7 @@ require (
 	github.com/go-enry/go-enry/v2 v2.9.6
 	github.com/go-git/go-git/v5 v5.19.2
 	github.com/goark/gnkf v0.7.9
-	github.com/goccy/go-json v0.10.6
+	github.com/goccy/go-json v0.11.2
 	github.com/goccy/go-spidermonkey v0.5.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
@@ -31,10 +31,10 @@ require (
 	github.com/k1LoW/duration v1.2.0
 	github.com/k1LoW/errors v1.2.1
 	github.com/k1LoW/expand v0.16.7
-	github.com/k1LoW/ghfs v1.5.3
+	github.com/k1LoW/ghfs v1.6.0
 	github.com/k1LoW/go-github-actions v0.5.0
-	github.com/k1LoW/go-github-client/v67 v67.0.23
-	github.com/k1LoW/repin v0.4.1
+	github.com/k1LoW/go-github-client/v67 v67.0.24
+	github.com/k1LoW/repin v0.4.2
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.4.1
 	github.com/mackerelio/mackerel-client-go v0.47.0
@@ -54,15 +54,15 @@ require (
 	golang.org/x/oauth2 v0.37.0
 	golang.org/x/text v0.42.0
 	golang.org/x/tools v0.50.0
-	google.golang.org/api v0.299.0
+	google.golang.org/api v0.300.0
 	gopkg.in/ini.v1 v1.67.3
 )
 
 require (
 	cel.dev/expr v0.25.2 // indirect
 	cloud.google.com/go v0.123.0 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
-	cloud.google.com/go/compute/metadata v0.9.1 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.3.0 // indirect
+	cloud.google.com/go/compute/metadata v0.10.0 // indirect
 	cloud.google.com/go/iam v1.12.0 // indirect
 	cloud.google.com/go/monitoring v1.30.0 // indirect
 	connectrpc.com/connect v1.21.0 // indirect
@@ -70,7 +70,7 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/azcore v1.23.1 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/internal v1.12.0 // indirect
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.8.1 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.35.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.57.0 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.57.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
@@ -120,15 +120,17 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-github/v73 v73.0.0 // indirect
 	github.com/google/go-github/v88 v88.0.0 // indirect
+	github.com/google/go-github/v90 v90.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/s2a-go v0.1.10 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.3.22 // indirect
-	github.com/googleapis/gax-go/v2 v2.24.1 // indirect
+	github.com/googleapis/gax-go/v2 v2.26.2 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
+	github.com/k1LoW/go-github-client/v90 v90.0.24 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.19.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect
@@ -157,7 +159,7 @@ require (
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	github.com/zhangyunhao116/fastrand v0.3.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/detectors/gcp v1.44.0 // indirect
+	go.opentelemetry.io/contrib/detectors/gcp v1.45.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.68.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0 // indirect
 	go.opentelemetry.io/otel v1.45.0 // indirect
