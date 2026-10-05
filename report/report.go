@@ -490,6 +490,15 @@ func (r *Report) IsMeasuredCoverage() bool {
 	return r.Coverage != nil
 }
 
+// IsMeasuredBranchCoverage reports whether the coverage report carries branches, which only
+// some formats do.
+func (r *Report) IsMeasuredBranchCoverage() bool {
+	if r == nil || r.Coverage == nil {
+		return false
+	}
+	return r.Coverage.BranchTotal > 0
+}
+
 func (r *Report) IsMeasuredCodeToTestRatio() bool {
 	return r.CodeToTestRatio != nil
 }
@@ -741,6 +750,13 @@ func (r *Report) CoveragePercent() float64 {
 		return 0.0
 	}
 	return float64(r.Coverage.Covered) / float64(r.Coverage.Total) * 100
+}
+
+func (r *Report) BranchCoveragePercent() float64 {
+	if !r.IsMeasuredBranchCoverage() {
+		return 0.0
+	}
+	return float64(r.Coverage.BranchCovered) / float64(r.Coverage.BranchTotal) * 100
 }
 
 // PatchCoverage calculates the coverage of the given changed lines (e.g. lines changed in a
