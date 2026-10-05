@@ -838,3 +838,69 @@ func TestReCalcRepairsTotalsNeverFoldedFromBlocks(t *testing.T) {
 		t.Errorf("got %v\nwant %v", got, want)
 	}
 }
+
+func TestMergeFoldsBranchesPerLine(t *testing.T) {
+	// Two reports observing the same line each see all of its branches, so the merged line
+	// counts its branches once, as covered as the better of the two observations.
+	a := &Coverage{Type: TypeLOC, Files: FileCoverages{
+		&FileCoverage{File: "a.py", Type: TypeLOC, Branches: BranchCoverages{
+			{Line: 1, Total: 2, Covered: 1},
+			{Line: 3, Total: 2, Covered: 0},
+		}},
+	}}
+	b := &Coverage{Type: TypeLOC, Files: FileCoverages{
+		&FileCoverage{File: "a.py", Type: TypeLOC, Branches: BranchCoverages{
+			{Line: 1, Total: 2, Covered: 2},
+			{Line: 3, Total: 2, Covered: 1},
+		}},
+		&FileCoverage{File: "b.py", Type: TypeLOC, Branches: BranchCoverages{
+			{Line: 5, Total: 4, Covered: 1},
+		}},
+	}}
+	if err := a.Merge(b); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{a.Files[0].BranchTotal, a.Files[0].BranchCovered}, [2]int{4, 3}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if got, want := [2]int{a.BranchTotal, a.BranchCovered}, [2]int{8, 4}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestMergeKeepsBranchesUnmeasured(t *testing.T) {
+	// A format that reports no branches leaves the branch totals at 0 however it is merged.
+	a := &Coverage{Type: TypeStmt, Files: FileCoverages{
+		&FileCoverage{File: "a.go", Type: TypeStmt, Blocks: BlockCoverages{
+			newBlockCoverage(TypeStmt, 1, 1, 1, 10, 1, 1),
+		}},
+	}}
+	if err := a.Merge(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{a.BranchTotal, a.BranchCovered}, [2]int{0, 0}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestReCalcKeepsBranchTotalsOfShrunkReport(t *testing.T) {
+	// DeleteBlockCoverages drops Branches along with Blocks, but the totals folded from them
+	// must survive a recalculation, so a shrunk report can still be compared against.
+	fc := &FileCoverage{File: "a.py", Type: TypeLOC, Branches: BranchCoverages{
+		{Line: 1, Total: 2, Covered: 1},
+	}}
+	c := &Coverage{Type: TypeStmt, Files: FileCoverages{fc}}
+	if err := c.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	c.DeleteBlockCoverages()
+	if fc.Branches != nil {
+		t.Errorf("got %v\nwant nil", fc.Branches)
+	}
+	if err := c.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{c.BranchTotal, c.BranchCovered}, [2]int{2, 1}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}

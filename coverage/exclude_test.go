@@ -220,3 +220,29 @@ func TestExclude(t *testing.T) {
 		}
 	}
 }
+
+func TestExcludeDropsBranchesOfExcludedFiles(t *testing.T) {
+	c := &Coverage{
+		Type: TypeLOC,
+		Files: FileCoverages{
+			&FileCoverage{File: "a.py", Type: TypeLOC, Branches: BranchCoverages{
+				{Line: 1, Total: 2, Covered: 1},
+			}},
+			&FileCoverage{File: "tests/test_a.py", Type: TypeLOC, Branches: BranchCoverages{
+				{Line: 1, Total: 4, Covered: 4},
+			}},
+		},
+	}
+	if err := c.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{c.BranchTotal, c.BranchCovered}, [2]int{6, 5}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if err := c.Exclude([]string{"tests/**"}); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{c.BranchTotal, c.BranchCovered}, [2]int{2, 1}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}

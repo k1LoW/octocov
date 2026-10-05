@@ -31,6 +31,9 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 			}
 			// Merged coverage should be counted as LOC as duplicate blocks may be stacked.
 			fc.Blocks = append(fc.Blocks, fc2.Blocks...)
+			// Each entry is a complete view of its line, so foldBranches takes the larger of
+			// the two reports per line rather than adding them up.
+			fc.Branches = append(fc.Branches, fc2.Branches...)
 		} else {
 			c.Files = append(c.Files, fc2)
 		}
@@ -41,6 +44,8 @@ func (c *Coverage) Merge(c2 *Coverage) error {
 func (c *Coverage) reCalc() error {
 	total := 0
 	covered := 0
+	branchTotal := 0
+	branchCovered := 0
 	for _, f := range c.Files {
 		var fileTotal, fileCovered int
 
@@ -78,9 +83,19 @@ func (c *Coverage) reCalc() error {
 		f.Covered = fileCovered
 		total += fileTotal
 		covered += fileCovered
+
+		// A shrunk report has no Branches left but keeps the totals folded from them, so
+		// only a file that still has them is folded again.
+		if len(f.Branches) > 0 {
+			f.foldBranches()
+		}
+		branchTotal += f.BranchTotal
+		branchCovered += f.BranchCovered
 	}
 	c.Total = total
 	c.Covered = covered
+	c.BranchTotal = branchTotal
+	c.BranchCovered = branchCovered
 
 	return nil
 }
