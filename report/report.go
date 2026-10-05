@@ -291,6 +291,10 @@ func (r *Report) Table(v *Viewer) string {
 		h = append(h, "Coverage")
 		m = append(m, linkCell(fmt.Sprintf("%.1f%%", floor1(r.CoveragePercent())), v.CoverageURL(r)))
 	}
+	if r.IsMeasuredBranchCoverage() {
+		h = append(h, "Branch Coverage")
+		m = append(m, fmt.Sprintf("%.1f%%", floor1(r.BranchCoveragePercent())))
+	}
 	if r.IsMeasuredCodeToTestRatio() {
 		h = append(h, "Code to Test Ratio")
 		m = append(m, linkCell(fmt.Sprintf("1:%.1f", floor1(r.CodeToTestRatioRatio())), v.CodeToTestRatioURL(r)))
@@ -329,6 +333,12 @@ func (r *Report) Out(w io.Writer) error {
 		table.Append([]string{"  Files", fmt.Sprintf("%d", len(r.Coverage.Files))})
 		table.Append([]string{"  Lines", fmt.Sprintf("%d", r.Coverage.Total)})
 		table.Append([]string{"  Covered", fmt.Sprintf("%d", r.Coverage.Covered)})
+	}
+
+	if r.IsMeasuredBranchCoverage() {
+		table.Rich([]string{"Branch Coverage", fmt.Sprintf("%.1f%%", floor1(r.BranchCoveragePercent()))}, []tablewriter.Colors{tablewriter.Colors{tablewriter.Bold}, tablewriter.Colors{}})
+		table.Append([]string{"  Branches", fmt.Sprintf("%d", r.Coverage.BranchTotal)})
+		table.Append([]string{"  Covered", fmt.Sprintf("%d", r.Coverage.BranchCovered)})
 	}
 
 	if r.IsMeasuredCodeToTestRatio() {

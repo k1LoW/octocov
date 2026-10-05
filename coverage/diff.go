@@ -1,12 +1,17 @@
 package coverage
 
 type DiffCoverage struct {
-	A         float64           `json:"a"`
-	B         float64           `json:"b"`
-	Diff      float64           `json:"diff"`
-	CoverageA *Coverage         `json:"-"`
-	CoverageB *Coverage         `json:"-"`
-	Files     DiffFileCoverages `json:"files"`
+	A    float64 `json:"a"`
+	B    float64 `json:"b"`
+	Diff float64 `json:"diff"`
+	// BranchA and BranchB are nil for a side that carries no branches, and all three are nil
+	// when neither does.
+	BranchA    *float64          `json:"branch_a,omitempty"`
+	BranchB    *float64          `json:"branch_b,omitempty"`
+	BranchDiff *float64          `json:"branch_diff,omitempty"`
+	CoverageA  *Coverage         `json:"-"`
+	CoverageB  *Coverage         `json:"-"`
+	Files      DiffFileCoverages `json:"files"`
 }
 
 type DiffFileCoverage struct {
@@ -38,6 +43,26 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 	d.A = coverA
 	d.B = coverB
 	d.Diff = coverA - coverB
+	if c != nil && c.BranchTotal > 0 {
+		v := float64(c.BranchCovered) / float64(c.BranchTotal) * 100
+		d.BranchA = &v
+	}
+	if c2 != nil && c2.BranchTotal > 0 {
+		v := float64(c2.BranchCovered) / float64(c2.BranchTotal) * 100
+		d.BranchB = &v
+	}
+	if d.BranchA != nil || d.BranchB != nil {
+		// A side without branches counts as 0, as a side without coverage does for Diff.
+		var a, b float64
+		if d.BranchA != nil {
+			a = *d.BranchA
+		}
+		if d.BranchB != nil {
+			b = *d.BranchB
+		}
+		dd := a - b
+		d.BranchDiff = &dd
+	}
 
 	// m maps path keys to DiffFileCoverage. A single DiffFileCoverage may be
 	// registered under multiple keys (EffectivePath and File) so that lookups

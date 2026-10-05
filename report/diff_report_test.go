@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/tenntenn/golden"
 )
@@ -229,5 +230,70 @@ func TestDiffTableExpandDetails(t *testing.T) {
 				t.Errorf("got %d closing tags\nwant 1\n%v", n, got)
 			}
 		})
+	}
+}
+
+// branchReport is a report of coverage_branch.xml, whose branches are 3 covered out of 6.
+func branchReport(t *testing.T, commit string) *Report {
+	t.Helper()
+	cov, _, err := coverage.NewCobertura().ParseReport(filepath.Join(coverageTestdataDir(t), "cobertura", "coverage_branch.xml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &Report{
+		Repository: "k1LoW/octocov",
+		Ref:        "refs/heads/main",
+		Commit:     commit,
+		Coverage:   cov,
+	}
+}
+
+func TestDiffBranchCoverage(t *testing.T) {
+	t.Setenv("GITHUB_SERVER_URL", "https://github.com")
+	t.Setenv("GITHUB_REPOSITORY", "k1LoW/octocov")
+	tests := []struct {
+		name string
+		prev func(r *Report)
+	}{
+		// The previous report took one branch fewer.
+		{"diff_table_branch", func(r *Report) { r.Coverage.BranchCovered = 2 }},
+		// The previous report carries no branches, as one of an older octocov does not.
+		{"diff_table_branch_prev_unmeasured", func(r *Report) {
+			r.Coverage.BranchTotal = 0
+			r.Coverage.BranchCovered = 0
+		}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			a := branchReport(t, "896d3c59e6595e582eedbc7d7a05b4922ea88064")
+			b := branchReport(t, "5d1e926b41be6660d138ba73846c29e42784b473")
+			tt.prev(b)
+			got := a.Compare(b).Table(nil, nil, false)
+			if os.Getenv("UPDATE_GOLDEN") != "" {
+				golden.Update(t, testdataDir(t), tt.name, got)
+				return
+			}
+			if diff := golden.Diff(t, testdataDir(t), tt.name, got); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
+
+func TestDiffTableOmitsBranchCoverageWithoutBranches(t *testing.T) {
+	a := &Report{}
+	if err := a.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report2.json")); err != nil {
+		t.Fatal(err)
+	}
+	b := &Report{}
+	if err := b.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "awspec", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	d := a.Compare(b)
+	if d.Coverage.BranchA != nil || d.Coverage.BranchB != nil || d.Coverage.BranchDiff != nil {
+		t.Errorf("got %v, %v, %v\nwant nil", d.Coverage.BranchA, d.Coverage.BranchB, d.Coverage.BranchDiff)
+	}
+	if got := d.Table(nil, nil, false); strings.Contains(got, "Branch Coverage") {
+		t.Errorf("got\n%v\nwant no Branch Coverage", got)
 	}
 }

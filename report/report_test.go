@@ -1036,3 +1036,30 @@ func TestBranchCoverageRoundTrip(t *testing.T) {
 		}
 	}
 }
+
+func TestTableWithBranchCoverage(t *testing.T) {
+	r := branchReport(t, "896d3c59e6595e582eedbc7d7a05b4922ea88064")
+	want := `| Coverage | Branch Coverage |
+|---------:|----------------:|
+| 77.7%    | 50.0%           |
+`
+	if got := r.Table(nil); got != want {
+		t.Errorf("got\n%v\nwant\n%v", got, want)
+	}
+}
+
+func TestOutWithBranchCoverage(t *testing.T) {
+	r := branchReport(t, "896d3c59e6595e582eedbc7d7a05b4922ea88064")
+	got := new(bytes.Buffer)
+	if err := r.Out(got); err != nil {
+		t.Fatal(err)
+	}
+	f := "out_branch"
+	if os.Getenv("UPDATE_GOLDEN") != "" {
+		golden.Update(t, testdataDir(t), f, got)
+		return
+	}
+	if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+		t.Error(diff)
+	}
+}
