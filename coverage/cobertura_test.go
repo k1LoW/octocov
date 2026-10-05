@@ -202,3 +202,119 @@ func TestCoberturaCountsSharedLineOnce(t *testing.T) {
 		t.Errorf("got %v\nwant %v", len(got.Files[0].Blocks), want)
 	}
 }
+
+func TestCoberturaBranches(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "cobertura", "coverage_branch.xml")
+	got, _, err := NewCobertura().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.Total, got.Covered}, [2]int{9, 7}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	// app/util.py line 4 says branch="true" with no condition-coverage, and is skipped.
+	if got, want := [2]int{got.BranchTotal, got.BranchCovered}, [2]int{6, 3}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	want := map[string][2]int{
+		"app/calc.py": {4, 3},
+		"app/util.py": {2, 0},
+	}
+	for _, f := range got.Files {
+		if got, want := [2]int{f.BranchTotal, f.BranchCovered}, want[f.File]; got != want {
+			t.Errorf("%s: got %v\nwant %v", f.File, got, want)
+		}
+	}
+}
+
+func TestCoberturaWithoutBranches(t *testing.T) {
+	// A report generated without branch coverage leaves the branch totals at 0.
+	path := filepath.Join(testdataDir(t), "cobertura")
+	got, _, err := NewCobertura().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.BranchTotal, got.BranchCovered}, [2]int{0, 0}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	for _, f := range got.Files {
+		if len(f.Branches) != 0 {
+			t.Errorf("%s: got %v\nwant none", f.File, f.Branches)
+		}
+	}
+}
+
+func TestCoberturaCountsSharedBranchesOnce(t *testing.T) {
+	// A line listed under two <class> elements of one file reports its branches under both,
+	// and they count once, as covered as the better of the two.
+	dir := t.TempDir()
+	path := filepath.Join(dir, "coverage.xml")
+	content := `<?xml version="1.0" ?>
+<coverage>
+  <packages>
+    <package name="com.example">
+      <classes>
+        <class filename="com/example/Foo.kt" name="Foo">
+          <lines>
+            <line number="1" hits="1" branch="true" condition-coverage="50% (1/2)"/>
+            <line number="2" hits="1" branch="true" condition-coverage="25% (1/4)"/>
+          </lines>
+        </class>
+        <class filename="com/example/Foo.kt" name="Foo.bar.1">
+          <lines>
+            <line number="1" hits="1" branch="true" condition-coverage="0% (0/2)"/>
+            <line number="2" hits="1" branch="true" condition-coverage="50% (2/4)"/>
+          </lines>
+        </class>
+      </classes>
+    </package>
+  </packages>
+</coverage>
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewCobertura().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.BranchTotal, got.BranchCovered}, [2]int{6, 3}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if want := 4; len(got.Files[0].Branches) != want {
+		t.Errorf("got %v\nwant %v", len(got.Files[0].Branches), want)
+	}
+	// Exclude() refolds the branches, and must reach the same totals.
+	if err := got.Exclude(nil); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.BranchTotal, got.BranchCovered}, [2]int{6, 3}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestParseCoberturaBranch(t *testing.T) {
+	tests := []struct {
+		branch            string
+		conditionCoverage string
+		want              *BranchCoverage
+	}{
+		{"true", "50% (1/2)", &BranchCoverage{Line: 1, Total: 2, Covered: 1}},
+		{"true", "100% (4/4)", &BranchCoverage{Line: 1, Total: 4, Covered: 4}},
+		{"true", "0% (0/2)", &BranchCoverage{Line: 1, Total: 2, Covered: 0}},
+		{"true", "(3/2)", &BranchCoverage{Line: 1, Total: 2, Covered: 2}},
+		{"false", "50% (1/2)", nil},
+		{"", "", nil},
+		{"true", "", nil},
+		{"true", "50%", nil},
+		{"true", "0% (0/0)", nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.branch+" "+tt.conditionCoverage, func(t *testing.T) {
+			got, _ := parseCoberturaBranch(1, tt.branch, tt.conditionCoverage)
+			if diff := cmp.Diff(got, tt.want); diff != "" {
+				t.Error(diff)
+			}
+		})
+	}
+}
