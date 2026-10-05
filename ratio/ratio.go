@@ -2,6 +2,7 @@ package ratio
 
 import (
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 	"path/filepath"
@@ -76,11 +77,11 @@ func Measure(root string, code, test []string) (*Ratio, error) {
 		test[i] = filepath.FromSlash(p)
 	}
 
-	if err := filepath.Walk(root, func(path string, fi os.FileInfo, err error) error {
+	if err := filepath.WalkDir(root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if fi.IsDir() {
+		if d.IsDir() {
 			if ignore(path) {
 				return filepath.SkipDir
 			}

@@ -2,6 +2,7 @@ package internal
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -122,18 +123,18 @@ func CollectFiles(root string) ([]string, error) {
 		return nil, err
 	}
 	var files []string
-	err = filepath.Walk(absRoot, func(path string, info os.FileInfo, err error) error {
+	err = filepath.WalkDir(absRoot, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
-			if _, skip := defaultSkipDirs[info.Name()]; skip {
+		if d.IsDir() {
+			if _, skip := defaultSkipDirs[d.Name()]; skip {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 		// Skip .git file (present in git worktrees instead of .git directory)
-		if info.Name() == ".git" {
+		if d.Name() == ".git" {
 			return nil
 		}
 		files = append(files, path)
