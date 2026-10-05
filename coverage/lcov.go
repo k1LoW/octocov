@@ -40,6 +40,7 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = l.Name()
 	parsed := false
 	blocks := BlockCoverages{}
+	branches := newLcovBranches()
 	for scanner.Scan() {
 		l := scanner.Text()
 		if l == "end_of_record" {
@@ -54,8 +55,13 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 			// Coverage.Merge does, instead of replacing the earlier record and listing the
 			// file twice.
 			fcov.Blocks = append(fcov.Blocks, blocks...)
+			// A record lists each line's branches as a whole, so another record of the file
+			// observes the same branches again, and foldBranches takes the larger of them per
+			// line rather than adding them up.
+			fcov.Branches = append(fcov.Branches, branches.coverages()...)
 			parsed = true
 			blocks = BlockCoverages{}
+			branches = newLcovBranches()
 			continue
 		}
 		// The value may itself contain ':' (e.g. SF:C:\path\to\file), so split only once.
@@ -96,8 +102,13 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 				EndLine:   &line,
 				Count:     &c,
 			})
+		case "BRDA":
+			// BRDA:<line>,<block>,<branch>,<taken>
+			// A line that cannot be read is skipped rather than failing the report, since
+			// branches are read on top of the lines.
+			branches.add(splitted[1])
 		default:
-			// not implemented
+			// not implemented (BRF and BRH are summaries, as LF and LH are)
 		}
 	}
 	if err := r.Close(); err != nil {
@@ -113,10 +124,80 @@ func (l *Lcov) ParseReport(path string) (*Coverage, string, error) {
 	// times.
 	for _, fcov := range cov.Files {
 		fcov.foldLines()
+		fcov.foldBranches()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
+		cov.BranchTotal += fcov.BranchTotal
+		cov.BranchCovered += fcov.BranchCovered
 	}
 	return cov, rp, nil
+}
+
+// lcovBranches collects the BRDA lines of one record. Within a record each BRDA line is a
+// distinct branch of its line, so they add up into one BranchCoverage per line, and a branch
+// listed twice under the same block and branch counts once.
+type lcovBranches struct {
+	lines map[int]*BranchCoverage
+	order []int
+	taken map[string]bool
+}
+
+func newLcovBranches() *lcovBranches {
+	return &lcovBranches{
+		lines: map[int]*BranchCoverage{},
+		taken: map[string]bool{},
+	}
+}
+
+func (b *lcovBranches) add(v string) {
+	// The line comes first and the taken count last. The block may carry a prefix (lcov 2.x
+	// writes "e" for an exception branch) and the branch may be an expression, so what lies
+	// between is used only to tell branches apart.
+	ls, rest, ok := strings.Cut(v, ",")
+	if !ok {
+		return
+	}
+	i := strings.LastIndex(rest, ",")
+	if i < 0 {
+		return
+	}
+	id, ts := rest[:i], rest[i+1:]
+	line, err := strconv.Atoi(ls)
+	if err != nil || id == "" {
+		return
+	}
+	// "-" means the block holding the branch was never executed.
+	taken := false
+	if ts != "-" {
+		t, err := strconv.ParseUint(ts, 10, 64)
+		if err != nil && !errors.Is(err, strconv.ErrRange) {
+			return
+		}
+		taken = t > 0
+	}
+	bc, ok := b.lines[line]
+	if !ok {
+		bc = &BranchCoverage{Line: line}
+		b.lines[line] = bc
+		b.order = append(b.order, line)
+	}
+	key := strconv.Itoa(line) + "," + id
+	prev, seen := b.taken[key]
+	if !seen {
+		bc.Total++
+	}
+	if taken && !prev {
+		bc.Covered++
+	}
+	b.taken[key] = prev || taken
+}
+
+func (b *lcovBranches) coverages() BranchCoverages {
+	bcs := make(BranchCoverages, 0, len(b.order))
+	for _, l := range b.order {
+		bcs = append(bcs, b.lines[l])
+	}
+	return bcs
 }
 
 func (l *Lcov) detectReportPath(path string) (string, error) {
