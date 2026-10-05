@@ -41,7 +41,6 @@ import (
 	"github.com/k1LoW/octocov/coverage"
 	"github.com/k1LoW/octocov/datastore"
 	"github.com/k1LoW/octocov/gh"
-	"github.com/k1LoW/octocov/internal"
 	"github.com/k1LoW/octocov/report"
 	"github.com/k1LoW/octocov/version"
 	"github.com/spf13/cobra"
@@ -306,17 +305,8 @@ var rootCmd = &cobra.Command{
 				return err
 			}
 
-			// Collect filesystem files once for normalizing all loaded reports
-			var gitRoot string
-			var fsFiles []string
-			if wd, err := os.Getwd(); err == nil {
-				if gr, err := internal.GitRoot(wd); err == nil {
-					if fs, err := internal.CollectFiles(gr); err == nil {
-						gitRoot = gr
-						fsFiles = fs
-					}
-				}
-			}
+			// Reuse the files collected while measuring coverage for normalizing all loaded reports
+			gitRoot, fsFiles := r.NormalizationFiles()
 
 			var (
 				ds    []datastore.Datastore

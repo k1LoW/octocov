@@ -58,6 +58,15 @@ type Report struct {
 	// coverage report paths
 	covPaths []string
 	opts     *Options
+
+	// normalization caches the files collected for path normalization, so the git root is
+	// listed at most once per report.
+	normalization *normalizationFiles
+}
+
+type normalizationFiles struct {
+	gitRoot string
+	files   []string
 }
 
 func New(ownerrepo string, opts ...Option) (*Report, error) {
@@ -537,7 +546,7 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 	}
 
 	// Collect filesystem files for path normalization
-	gitRoot, fsFiles := collectFSFilesForNormalization()
+	gitRoot, fsFiles := r.NormalizationFiles()
 
 	var errs error
 	for _, path := range paths {
@@ -582,6 +591,17 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 	return nil
 }
 
+// NormalizationFiles returns the git root and the files under it used for coverage path
+// normalization. It collects them on the first call and returns the same result afterwards.
+// It returns empty values when the collection fails (graceful degradation).
+func (r *Report) NormalizationFiles() (string, []string) {
+	if r.normalization == nil {
+		gitRoot, files := collectFSFilesForNormalization()
+		r.normalization = &normalizationFiles{gitRoot: gitRoot, files: files}
+	}
+	return r.normalization.gitRoot, r.normalization.files
+}
+
 // collectFSFilesForNormalization detects git root and collects filesystem files.
 // Returns empty values on failure (graceful degradation).
 func collectFSFilesForNormalization() (string, []string) {
@@ -606,7 +626,7 @@ func (r *Report) NormalizeCoveragePaths() {
 	if r.Coverage == nil {
 		return
 	}
-	gitRoot, fsFiles := collectFSFilesForNormalization()
+	gitRoot, fsFiles := r.NormalizationFiles()
 	r.Coverage.NormalizePaths(gitRoot, fsFiles)
 }
 
