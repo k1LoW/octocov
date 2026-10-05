@@ -547,7 +547,8 @@ previous report, so `branch_diff` is `branch_current` itself.
 A line reported more than once, by several `<class>` elements of one file, by several LCOV records of
 one file, or by several merged coverage reports, counts its branches once, as covered as the most
 covered of those reports of it. Branch coverage is also shown next to the coverage in the pull
-request comment, the job summary and the output of octocov when a report carries branches.
+request comment, the job summary and the output of octocov when a report carries branches. Where
+the compared report carries none, its branch coverage and the difference are shown as `-`.
 
 It is also possible to omit the expression as follows
 

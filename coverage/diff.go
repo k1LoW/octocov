@@ -4,8 +4,8 @@ type DiffCoverage struct {
 	A    float64 `json:"a"`
 	B    float64 `json:"b"`
 	Diff float64 `json:"diff"`
-	// BranchA and BranchB are nil for a side that carries no branches, and all three are nil
-	// when neither does.
+	// BranchA and BranchB are nil for a side that carries no branches, and BranchDiff is nil
+	// unless both sides carry them.
 	BranchA    *float64          `json:"branch_a,omitempty"`
 	BranchB    *float64          `json:"branch_b,omitempty"`
 	BranchDiff *float64          `json:"branch_diff,omitempty"`
@@ -51,16 +51,11 @@ func (c *Coverage) Compare(c2 *Coverage) *DiffCoverage {
 		v := float64(c2.BranchCovered) / float64(c2.BranchTotal) * 100
 		d.BranchB = &v
 	}
-	if d.BranchA != nil || d.BranchB != nil {
-		// A side without branches counts as 0, as a side without coverage does for Diff.
-		var a, b float64
-		if d.BranchA != nil {
-			a = *d.BranchA
-		}
-		if d.BranchB != nil {
-			b = *d.BranchB
-		}
-		dd := a - b
+	// A side without branches, such as one stored before its format reported them, leaves the
+	// difference untold rather than counting as 0, which would show the whole branch coverage
+	// as gained or lost.
+	if d.BranchA != nil && d.BranchB != nil {
+		dd := *d.BranchA - *d.BranchB
 		d.BranchDiff = &dd
 	}
 

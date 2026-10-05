@@ -319,15 +319,18 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 				table.Append([]string{"  Covered", fmt.Sprintf("%d", d.Coverage.CoverageB.Covered), fmt.Sprintf("%d", d.Coverage.CoverageA.Covered), ds})
 			}
 		}
-		if d.Coverage.BranchDiff != nil {
-			dd := *d.Coverage.BranchDiff
-			ds := fmt.Sprintf("%.1f%%", floor1(dd))
+		if d.Coverage.BranchA != nil || d.Coverage.BranchB != nil {
+			ds := "-"
 			cc := tablewriter.Colors{}
-			if dd > 0 {
-				ds = fmt.Sprintf("+%.1f%%", floor1(dd))
-				cc = g
-			} else if dd < 0 {
-				cc = r
+			if d.Coverage.BranchDiff != nil {
+				dd := *d.Coverage.BranchDiff
+				ds = fmt.Sprintf("%.1f%%", floor1(dd))
+				if dd > 0 {
+					ds = fmt.Sprintf("+%.1f%%", floor1(dd))
+					cc = g
+				} else if dd < 0 {
+					cc = r
+				}
 			}
 			// A side without branches, such as one stored before its format reported them,
 			// reads as "-" rather than as 0%.
