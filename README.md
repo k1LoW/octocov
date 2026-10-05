@@ -463,12 +463,15 @@ coverage:
 
 The variables that can be used are as follows.
 
-| value     | description                                                                  |
-| --------- | ---------------------------------------------------------------------------- |
-| `current` | Current code metrics value                                                   |
-| `prev`    | Previous value. This value is taken from `diff.datastores:`.                  |
-| `diff`    | The result of `current - prev`                                               |
-| `patch`   | Coverage of the lines changed in the current pull request ("patch coverage")  |
+| value            | description                                                                  |
+| ---------------- | ---------------------------------------------------------------------------- |
+| `current`        | Current code metrics value                                                   |
+| `prev`           | Previous value. This value is taken from `diff.datastores:`.                 |
+| `diff`           | The result of `current - prev`                                               |
+| `patch`          | Coverage of the lines changed in the current pull request ("patch coverage") |
+| `branch_current` | Current branch coverage                                                      |
+| `branch_prev`    | Previous branch coverage. This value is taken from `diff.datastores:`.       |
+| `branch_diff`    | The result of `branch_current - branch_prev`                                 |
 
 ```yaml
 coverage:
@@ -525,6 +528,26 @@ including its patch coverage column, fetching the changed files and lines via th
 that touches no instrumented file is not a failure, so that case reports why the table is missing
 and still exits successfully. Without `--patch`, `octocov diff` makes no GitHub API calls, as
 before.
+
+`branch_current`, `branch_prev` and `branch_diff` are measured in branches rather than lines. They
+are read from the coverage reports that carry branches: Cobertura (`branch="true"` lines with
+`condition-coverage`, as written by e.g. coverage.py with `branch = True`) and LCOV (`BRDA:` lines).
+The other formats carry none.
+
+```yaml
+coverage:
+  acceptable: current >= 80% && branch_current >= 70%
+```
+
+When the current report carries no branches, `branch_current` is treated as `100%` rather than
+failing the build, and as with `patch`, only the branch part of the condition is relaxed. When the
+previous report is missing or carries no branches, `branch_prev` is `0%`, as `prev` is for a missing
+previous report, so `branch_diff` is `branch_current` itself.
+
+A line reported more than once, by several `<class>` elements of one file, by several LCOV records of
+one file, or by several merged coverage reports, counts its branches once, as covered as the most
+covered of those reports of it. Branch coverage is also shown next to the coverage in the pull
+request comment, the job summary and the output of octocov when a report carries branches.
 
 It is also possible to omit the expression as follows
 
@@ -1536,7 +1559,7 @@ coverage:
 
 **Default path:** `coverage/lcov.info`
 
-Support `SF` `DA` only
+Support `SF` `DA` `BRDA` only
 
 ### SimpleCov
 
