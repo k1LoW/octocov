@@ -62,7 +62,10 @@ type Coverage struct {
 	If         string   `yaml:"if,omitempty"`
 }
 
-var patchVarRe = regexp.MustCompile(`\bpatch\b`)
+var (
+	patchVarRe  = regexp.MustCompile(`\bpatch\b`)
+	branchVarRe = regexp.MustCompile(`\bbranch_(current|prev|diff)\b`)
+)
 
 // AcceptableReferencesPatch reports whether the `coverage.acceptable:` condition
 // references the `patch` variable.
@@ -206,6 +209,8 @@ func (c *Config) Loaded() bool {
 
 type Reporter interface {
 	CoveragePercent() float64
+	IsMeasuredBranchCoverage() bool
+	BranchCoveragePercent() float64
 	CodeToTestRatioRatio() float64
 	TestExecutionTimeNano() float64
 	IsMeasuredTestExecutionTime() bool
@@ -228,7 +233,7 @@ func (c *Config) Acceptable(r, rPrev Reporter, pc *cov.PatchCoverage) error {
 		if c.Coverage.AcceptableReferencesPatch() {
 			patch = buildPatchAcceptableVar(pc)
 		}
-		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
+		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch, buildBranchAcceptableVars(r, rPrev)); err != nil {
 			errs = errors.Join(errs, err)
 		}
 	}
@@ -329,7 +334,31 @@ func buildPatchAcceptableVar(pc *cov.PatchCoverage) *float64 {
 	return &rate
 }
 
-func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) error {
+// defaultBranchCoverage is substituted for the `branch_current` variable when the current report
+// carries no branches, as defaultPatchCoverage is for `patch`: only the branch terms of the
+// condition are relaxed, and the rest of it keeps being enforced.
+const defaultBranchCoverage = 100.0
+
+// branchAcceptableVars is the branch coverage of the current and the previous report, for the
+// `branch_current`, `branch_prev` and `branch_diff` variables of `coverage.acceptable:`. Either
+// is nil when its report carries no branches.
+type branchAcceptableVars struct {
+	current *big.Rat
+	prev    *big.Rat
+}
+
+func buildBranchAcceptableVars(r, rPrev Reporter) branchAcceptableVars {
+	var b branchAcceptableVars
+	if r.IsMeasuredBranchCoverage() {
+		b.current = big.NewRat(int64(r.BranchCoveragePercent()*10000), 10000)
+	}
+	if rPrev.IsMeasuredBranchCoverage() {
+		b.prev = big.NewRat(int64(rPrev.BranchCoveragePercent()*10000), 10000)
+	}
+	return b
+}
+
+func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64, branch branchAcceptableVars) error {
 	if cond == "" {
 		return nil
 	}
@@ -347,11 +376,27 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) err
 	if patch != nil {
 		patchF = *patch
 	}
+	// A previous report without branches reads as 0, as a missing previous report does for
+	// `prev`, so `branch_diff` is then `branch_current` itself.
+	branchCurrent := big.NewRat(int64(defaultBranchCoverage), 1)
+	if branch.current != nil {
+		branchCurrent = branch.current
+	}
+	branchPrev := new(big.Rat)
+	if branch.prev != nil {
+		branchPrev = branch.prev
+	}
+	branchDiffF, _ := new(big.Rat).Sub(branchCurrent, branchPrev).Float64()
+	branchCurrentF, _ := branchCurrent.Float64()
+	branchPrevF, _ := branchPrev.Float64()
 	variables := map[string]any{
-		"current": currentF,
-		"prev":    prevF,
-		"diff":    diffF,
-		"patch":   patchF,
+		"current":        currentF,
+		"prev":           prevF,
+		"diff":           diffF,
+		"patch":          patchF,
+		"branch_current": branchCurrentF,
+		"branch_prev":    branchPrevF,
+		"branch_diff":    branchDiffF,
 	}
 	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
@@ -363,13 +408,17 @@ func coverageAcceptable(current, prev *big.Rat, cond string, patch *float64) err
 		return fmt.Errorf("invalid condition `%s`", cond)
 	}
 	if !tf {
-		// Report the measured patch coverage as well, so that a condition failing on the `patch`
-		// term shows the value it failed against. patch == nil means it could not be measured
-		// (defaultPatchCoverage was substituted), in which case there is no value to report.
+		// Report the measured patch and branch coverage as well, so that a condition failing on
+		// their terms shows the value it failed against. A nil one could not be measured (a
+		// default was substituted), in which case there is no value to report.
+		measured := []string{fmt.Sprintf("code coverage is %.1f%%", floor1(currentF))}
 		if patch != nil && patchVarRe.MatchString(org) {
-			return fmt.Errorf("code coverage is %.1f%% and patch coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), floor1(patchF), org)
+			measured = append(measured, fmt.Sprintf("patch coverage is %.1f%%", floor1(patchF)))
 		}
-		return fmt.Errorf("code coverage is %.1f%%. the condition in the `coverage.acceptable:` section is not met (`%s`)", floor1(currentF), org)
+		if branch.current != nil && branchVarRe.MatchString(org) {
+			measured = append(measured, fmt.Sprintf("branch coverage is %.1f%%", floor1(branchCurrentF)))
+		}
+		return fmt.Errorf("%s. the condition in the `coverage.acceptable:` section is not met (`%s`)", strings.Join(measured, " and "), org)
 	}
 	return nil
 }

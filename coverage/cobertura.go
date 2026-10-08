@@ -5,11 +5,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 )
 
 var _ Processor = (*Cobertura)(nil)
 
 const CoberturaDefaultPath = "coverage.xml"
+
+// conditionCoverageRe reads the branches a line took out of its condition-coverage attribute,
+// ex. "50% (1/2)".
+var conditionCoverageRe = regexp.MustCompile(`\((\d+)/(\d+)\)`)
 
 type Cobertura struct{}
 
@@ -61,8 +67,10 @@ type CoberturaReportPackage struct {
 			} `xml:"methods"`
 			Lines struct {
 				Line []struct {
-					Number int `xml:"number,attr"`
-					Hits   int `xml:"hits,attr"`
+					Number            int    `xml:"number,attr"`
+					Hits              int    `xml:"hits,attr"`
+					Branch            string `xml:"branch,attr"`
+					ConditionCoverage string `xml:"condition-coverage,attr"`
 				} `xml:"line"`
 			} `xml:"lines"`
 		} `xml:"class"`
@@ -99,6 +107,7 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 	cov.Format = c.Name()
 
 	flm := map[string]BlockCoverages{}
+	fbm := map[string]BranchCoverages{}
 	// A file can be split over several <class> elements (e.g. one class per inner class), so
 	// keep the order of first appearance instead of ranging over flm, whose iteration order Go
 	// randomizes and which would churn the files array of a stored report on every run.
@@ -123,6 +132,9 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 					EndLine:   &el,
 					Count:     &c,
 				})
+				if b, ok := parseCoberturaBranch(l.Number, l.Branch, l.ConditionCoverage); ok {
+					fbm[n] = append(fbm[n], b)
+				}
 			}
 			flm[n] = f
 		}
@@ -138,12 +150,45 @@ func (c *Cobertura) ParseReport(path string) (*Coverage, string, error) {
 		// Counting one line per block would count such a line twice and return a total the
 		// blocks do not support.
 		fcov.foldLines()
+		// The same line under two <class> elements reports the same branches twice, which
+		// foldBranches counts once. The branch-rate attributes of the report are not read,
+		// for the same reason the line totals are folded from the lines.
+		fcov.Branches = fbm[f]
+		fcov.foldBranches()
 		cov.Total += fcov.Total
 		cov.Covered += fcov.Covered
+		cov.BranchTotal += fcov.BranchTotal
+		cov.BranchCovered += fcov.BranchCovered
 		cov.Files = append(cov.Files, fcov)
 	}
 
 	return cov, rp, nil
+}
+
+// parseCoberturaBranch reads the branches of a line with branch="true". A line whose
+// condition-coverage is missing or does not read as "(covered/total)" is skipped rather than
+// failing the report, since the line itself is still counted.
+func parseCoberturaBranch(number int, branch, conditionCoverage string) (*BranchCoverage, bool) {
+	if branch != "true" {
+		return nil, false
+	}
+	m := conditionCoverageRe.FindStringSubmatch(conditionCoverage)
+	if len(m) != 3 {
+		return nil, false
+	}
+	covered, err := strconv.Atoi(m[1])
+	if err != nil {
+		return nil, false
+	}
+	total, err := strconv.Atoi(m[2])
+	if err != nil || total == 0 {
+		return nil, false
+	}
+	return &BranchCoverage{
+		Line:    number,
+		Total:   total,
+		Covered: min(covered, total),
+	}, true
 }
 
 func (c *Cobertura) detectReportPath(path string) (string, error) {

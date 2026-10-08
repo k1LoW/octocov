@@ -106,6 +106,13 @@ func (d *DiffReport) Table(cur, prev *Viewer, expandDetails bool) string {
 			}
 		}
 	}
+	if d.Coverage != nil && d.Coverage.BranchDiff != nil {
+		if *d.Coverage.BranchDiff > 0 {
+			t2 = strings.Replace(t2, "  | Branch Coverage", "+ | Branch Coverage", 1)
+		} else if *d.Coverage.BranchDiff < 0 {
+			t2 = strings.Replace(t2, "  | Branch Coverage", "- | Branch Coverage", 1)
+		}
+	}
 	if d.CodeToTestRatio != nil {
 		if d.CodeToTestRatio.Diff > 0 {
 			t2 = strings.Replace(t2, "  | Code to", "+ | Code to", 1)
@@ -312,7 +319,35 @@ func (d *DiffReport) renderTable(table *tablewriter.Table, g, r, b tablewriter.C
 				table.Append([]string{"  Covered", fmt.Sprintf("%d", d.Coverage.CoverageB.Covered), fmt.Sprintf("%d", d.Coverage.CoverageA.Covered), ds})
 			}
 		}
-
+		if d.Coverage.BranchA != nil || d.Coverage.BranchB != nil {
+			ds := "-"
+			cc := tablewriter.Colors{}
+			if d.Coverage.BranchDiff != nil {
+				dd := *d.Coverage.BranchDiff
+				ds = fmt.Sprintf("%.1f%%", floor1(dd))
+				if dd > 0 {
+					ds = fmt.Sprintf("+%.1f%%", floor1(dd))
+					cc = g
+				} else if dd < 0 {
+					cc = r
+				}
+			}
+			// A side without branches, such as one stored before its format reported them,
+			// reads as "-" rather than as 0%.
+			ba := "-"
+			bb := "-"
+			if d.Coverage.BranchA != nil {
+				ba = fmt.Sprintf("%.1f%%", floor1(*d.Coverage.BranchA))
+			}
+			if d.Coverage.BranchB != nil {
+				bb = fmt.Sprintf("%.1f%%", floor1(*d.Coverage.BranchB))
+			}
+			t := "Branch Coverage"
+			if !detail {
+				t = "**Branch Coverage**"
+			}
+			table.Rich([]string{t, bb, ba, ds}, []tablewriter.Colors{b, tablewriter.Colors{}, tablewriter.Colors{}, cc})
+		}
 	}
 	if d.CodeToTestRatio != nil {
 		dd := d.CodeToTestRatio.Diff

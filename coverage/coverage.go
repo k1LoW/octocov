@@ -35,11 +35,15 @@ const (
 )
 
 type Coverage struct {
-	Type    Type          `json:"type"`
-	Format  string        `json:"format"`
-	Total   int           `json:"total"`
-	Covered int           `json:"covered"`
-	Files   FileCoverages `json:"files"`
+	Type    Type   `json:"type"`
+	Format  string `json:"format"`
+	Total   int    `json:"total"`
+	Covered int    `json:"covered"`
+	// BranchTotal and BranchCovered count branches rather than lines, and stay 0 for a format
+	// that does not report branches, so a report without them stores neither.
+	BranchTotal   int           `json:"branch_total,omitempty"`
+	BranchCovered int           `json:"branch_covered,omitempty"`
+	Files         FileCoverages `json:"files"`
 }
 
 type FileCoverage struct {
@@ -55,7 +59,12 @@ type FileCoverage struct {
 	Total          int            `json:"total"`
 	Covered        int            `json:"covered"`
 	Blocks         BlockCoverages `json:"blocks,omitempty"`
-	cache          map[int]BlockCoverages
+	// BranchTotal and BranchCovered are folded from Branches by foldBranches. They are kept
+	// when DeleteBlockCoverages drops Branches, so a shrunk report still carries them.
+	BranchTotal   int             `json:"branch_total,omitempty"`
+	BranchCovered int             `json:"branch_covered,omitempty"`
+	Branches      BranchCoverages `json:"branches,omitempty"`
+	cache         map[int]BlockCoverages
 	// foldedBlocks is len(Blocks) at the moment Total and Covered were last folded from them,
 	// or 0 when they never were, as in a report decoded from JSON. It is a count rather than a
 	// flag because Blocks is exported and can be appended to without going through any method,
@@ -319,6 +328,19 @@ func (bc *BlockCoverage) walkable() bool {
 
 type BlockCoverages []*BlockCoverage
 
+// BranchCoverage is the branches of one line as one observation of it reports them: Total
+// branches, of which Covered were taken. A line can be observed more than once, by two
+// <class> elements of one file, by two LCOV records or by two merged reports, so each entry
+// is a complete view of the line rather than a share of it, and foldBranches takes the
+// largest of them instead of adding them up.
+type BranchCoverage struct {
+	Line    int `json:"line"`
+	Total   int `json:"total"`
+	Covered int `json:"covered"`
+}
+
+type BranchCoverages []*BranchCoverage
+
 type Processor interface {
 	Name() string
 	ParseReport(path string) (*Coverage, string, error)
@@ -333,6 +355,8 @@ func New() *Coverage {
 func (c *Coverage) DeleteBlockCoverages() {
 	for _, f := range c.Files {
 		f.Blocks = BlockCoverages{}
+		// BranchTotal and BranchCovered are kept, as Total and Covered are.
+		f.Branches = nil
 		// Drop the line cache too. Leaving it would keep FindBlocksByLine answering from
 		// blocks that no longer exist.
 		f.cache = nil
@@ -578,6 +602,32 @@ func (fc *FileCoverage) foldLines() {
 	fc.Total = lcs.Total()
 	fc.Covered = lcs.Covered()
 	fc.foldedBlocks = len(fc.Blocks)
+}
+
+// foldBranches folds Branches per line into BranchTotal and BranchCovered. A line observed
+// more than once counts its largest total and its largest covered count, capped at that total,
+// so a repeated observation does not count the line twice.
+func (fc *FileCoverage) foldBranches() {
+	lines := map[int]*BranchCoverage{}
+	for _, b := range fc.Branches {
+		if b == nil || b.Total <= 0 {
+			continue
+		}
+		l, ok := lines[b.Line]
+		if !ok {
+			l = &BranchCoverage{Line: b.Line}
+			lines[b.Line] = l
+		}
+		l.Total = max(l.Total, b.Total)
+		l.Covered = max(l.Covered, b.Covered)
+	}
+	total, covered := 0, 0
+	for _, l := range lines {
+		total += l.Total
+		covered += min(l.Covered, l.Total)
+	}
+	fc.BranchTotal = total
+	fc.BranchCovered = covered
 }
 
 func (bc BlockCoverages) ToLineCoverages() LineCoverages { //nostyle:recvtype

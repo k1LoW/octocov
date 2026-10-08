@@ -955,3 +955,111 @@ func TestMakeHeadTitleWithLink(t *testing.T) {
 		})
 	}
 }
+
+func TestBranchCoveragePercent(t *testing.T) {
+	tests := []struct {
+		name         string
+		r            *Report
+		wantMeasured bool
+		want         float64
+	}{
+		{"nil report", nil, false, 0},
+		{"no coverage", &Report{}, false, 0},
+		{"no branches", &Report{Coverage: &coverage.Coverage{Total: 4, Covered: 2}}, false, 0},
+		{"branches", &Report{Coverage: &coverage.Coverage{Total: 4, Covered: 2, BranchTotal: 8, BranchCovered: 6}}, true, 75},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.r.IsMeasuredBranchCoverage(); got != tt.wantMeasured {
+				t.Errorf("got %v\nwant %v", got, tt.wantMeasured)
+			}
+			if got := tt.r.BranchCoveragePercent(); got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBytesOmitsBranchFieldsWithoutBranches(t *testing.T) {
+	// A report stored by an older octocov, or of a format without branches, reads as
+	// unmeasured and is written back without any branch field.
+	r := &Report{}
+	if err := r.Load(filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")); err != nil {
+		t.Fatal(err)
+	}
+	if r.IsMeasuredBranchCoverage() {
+		t.Error("got measured, want unmeasured")
+	}
+	got := string(r.Bytes())
+	for _, k := range []string{"branch_total", "branch_covered", "branches"} {
+		if strings.Contains(got, k) {
+			t.Errorf("got %s, want none", k)
+		}
+	}
+}
+
+func TestBranchCoverageRoundTrip(t *testing.T) {
+	cov, _, err := coverage.NewCobertura().ParseReport(filepath.Join(coverageTestdataDir(t), "cobertura", "coverage_branch.xml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := &Report{Coverage: cov}
+	path := filepath.Join(t.TempDir(), "report.json")
+	if err := os.WriteFile(path, r.Bytes(), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got := &Report{}
+	if err := got.Load(path); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.Coverage.BranchTotal, got.Coverage.BranchCovered}, [2]int{6, 3}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	if got, want := got.BranchCoveragePercent(), 50.0; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	// A shrunk report drops the branches of each line and keeps their totals.
+	got.Coverage.DeleteBlockCoverages()
+	if err := os.WriteFile(path, got.Bytes(), 0600); err != nil {
+		t.Fatal(err)
+	}
+	shrunk := &Report{}
+	if err := shrunk.Load(path); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := shrunk.BranchCoveragePercent(), 50.0; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	for _, f := range shrunk.Coverage.Files {
+		if len(f.Branches) != 0 {
+			t.Errorf("%s: got %v\nwant none", f.File, f.Branches)
+		}
+	}
+}
+
+func TestTableWithBranchCoverage(t *testing.T) {
+	r := branchReport(t, "896d3c59e6595e582eedbc7d7a05b4922ea88064")
+	want := `| Coverage | Branch Coverage |
+|---------:|----------------:|
+| 77.7%    | 50.0%           |
+`
+	if got := r.Table(nil); got != want {
+		t.Errorf("got\n%v\nwant\n%v", got, want)
+	}
+}
+
+func TestOutWithBranchCoverage(t *testing.T) {
+	r := branchReport(t, "896d3c59e6595e582eedbc7d7a05b4922ea88064")
+	got := new(bytes.Buffer)
+	if err := r.Out(got); err != nil {
+		t.Fatal(err)
+	}
+	f := "out_branch"
+	if os.Getenv("UPDATE_GOLDEN") != "" {
+		golden.Update(t, testdataDir(t), f, got)
+		return
+	}
+	if diff := golden.Diff(t, testdataDir(t), f, got); diff != "" {
+		t.Error(diff)
+	}
+}

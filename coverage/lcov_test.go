@@ -270,3 +270,164 @@ end_of_record
 		t.Errorf("got %v\nwant %v", got.Covered, want)
 	}
 }
+
+func TestLcovBranches(t *testing.T) {
+	// Written out here rather than kept under testdata, where the **/*.info patterns of the
+	// report tests would pick it up as one more report.
+	path := filepath.Join(t.TempDir(), "lcov.info")
+	content := `TN:
+SF:src/calc.ts
+FN:1,add
+FNDA:1,add
+FNF:1
+FNH:1
+DA:1,1
+DA:2,1
+DA:3,1
+DA:4,0
+DA:6,0
+DA:7,0
+LF:6
+LH:3
+BRDA:2,0,0,1
+BRDA:2,0,1,0
+BRDA:3,1,0,2
+BRDA:3,1,1,1
+BRDA:3,2,0,0
+BRDA:6,3,0,-
+BRDA:6,3,1,-
+BRF:7
+BRH:3
+end_of_record
+TN:
+SF:src/util.ts
+DA:1,1
+DA:2,1
+LF:2
+LH:2
+BRDA:2,e0,0,1
+BRDA:2,e0,1,0
+BRF:2
+BRH:1
+end_of_record
+`
+	if err := os.WriteFile(path, []byte(content), 0600); err != nil {
+		t.Fatal(err)
+	}
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.BranchTotal, got.BranchCovered}, [2]int{9, 4}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+	// The BRDA lines of src/calc.ts on line 6 read "-", as the block holding them never ran.
+	want := map[string][2]int{
+		"src/calc.ts": {7, 3},
+		"src/util.ts": {2, 1},
+	}
+	for _, f := range got.Files {
+		if got, want := [2]int{f.BranchTotal, f.BranchCovered}, want[f.File]; got != want {
+			t.Errorf("%s: got %v\nwant %v", f.File, got, want)
+		}
+	}
+}
+
+func TestLcovWithoutBranches(t *testing.T) {
+	path := filepath.Join(testdataDir(t), "lcov")
+	got, _, err := NewLcov().ParseReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, want := [2]int{got.BranchTotal, got.BranchCovered}, [2]int{0, 0}; got != want {
+		t.Errorf("got %v\nwant %v", got, want)
+	}
+}
+
+func TestLcovBranchesOfRecords(t *testing.T) {
+	tests := []struct {
+		name    string
+		content string
+		want    [2]int
+	}{
+		{
+			"branches of one line add up within a record",
+			`SF:src/a.ts
+BRDA:1,0,0,1
+BRDA:1,0,1,0
+BRDA:1,1,0,3
+end_of_record
+`,
+			[2]int{3, 2},
+		},
+		{
+			"a branch listed twice in a record counts once",
+			`SF:src/a.ts
+BRDA:1,0,0,0
+BRDA:1,0,1,0
+BRDA:1,0,0,1
+end_of_record
+`,
+			[2]int{2, 1},
+		},
+		{
+			"a line observed by two records counts once, as covered as the better of them",
+			`SF:src/a.ts
+BRDA:1,0,0,1
+BRDA:1,0,1,0
+BRDA:2,1,0,0
+BRDA:2,1,1,0
+end_of_record
+SF:src/a.ts
+BRDA:1,0,0,0
+BRDA:1,0,1,1
+BRDA:2,1,0,0
+BRDA:2,1,1,2
+end_of_record
+`,
+			[2]int{4, 2},
+		},
+		{
+			"a branch whose block never ran is not covered",
+			`SF:src/a.ts
+BRDA:1,0,0,-
+BRDA:1,0,1,-
+end_of_record
+`,
+			[2]int{2, 0},
+		},
+		{
+			"an unreadable line is skipped",
+			`SF:src/a.ts
+BRDA:1,0,0,1
+BRDA:x,0,1,1
+BRDA:1,0,1,y
+BRDA:1,0
+end_of_record
+`,
+			[2]int{1, 1},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "lcov.info")
+			if err := os.WriteFile(path, []byte(tt.content), 0600); err != nil {
+				t.Fatal(err)
+			}
+			got, _, err := NewLcov().ParseReport(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := [2]int{got.BranchTotal, got.BranchCovered}; got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+			// Exclude() refolds the branches, and must reach the same totals.
+			if err := got.Exclude(nil); err != nil {
+				t.Fatal(err)
+			}
+			if got := [2]int{got.BranchTotal, got.BranchCovered}; got != tt.want {
+				t.Errorf("got %v\nwant %v", got, tt.want)
+			}
+		})
+	}
+}

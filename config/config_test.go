@@ -228,7 +228,7 @@ func TestCoverageAcceptable(t *testing.T) {
 				prevRat = big.NewRat(int64(tt.prev*10000), 10000)
 			}
 
-			if err := coverageAcceptable(covRat, prevRat, tt.cond, nil); err != nil {
+			if err := coverageAcceptable(covRat, prevRat, tt.cond, nil, branchAcceptableVars{}); err != nil {
 				if !tt.wantErr {
 					t.Errorf("got %v\nwantErr %v", err, tt.wantErr)
 				}
@@ -290,7 +290,7 @@ func TestCoverageAcceptablePatchVariables(t *testing.T) {
 	prev := big.NewRat(800000, 10000)
 	for _, tt := range tests {
 		t.Run(tt.cond, func(t *testing.T) {
-			err := coverageAcceptable(cov, prev, tt.cond, &tt.patch)
+			err := coverageAcceptable(cov, prev, tt.cond, &tt.patch, branchAcceptableVars{})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
 			}
@@ -316,9 +316,88 @@ func TestCoverageAcceptableUnavailablePatch(t *testing.T) {
 	prev := big.NewRat(800000, 10000)
 	for _, tt := range tests {
 		t.Run(tt.cond, func(t *testing.T) {
-			err := coverageAcceptable(tt.current, prev, tt.cond, nil)
+			err := coverageAcceptable(tt.current, prev, tt.cond, nil, branchAcceptableVars{})
 			if (err != nil) != tt.wantErr {
 				t.Errorf("got %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestCoverageAcceptableBranchVariables(t *testing.T) {
+	tests := []struct {
+		name    string
+		cond    string
+		branch  branchAcceptableVars
+		wantErr bool
+		errMsg  string
+	}{
+		{"measured, above the threshold", "branch_current >= 70%", branchAcceptableVars{big.NewRat(75, 1), big.NewRat(80, 1)}, false, ""},
+		{"measured, below the threshold", "branch_current >= 80%", branchAcceptableVars{big.NewRat(75, 1), big.NewRat(80, 1)}, true, "code coverage is 80.0% and branch coverage is 75.0%. the condition in the `coverage.acceptable:` section is not met (`branch_current >= 80%`)"},
+		{"measured, compared against prev", "branch_current >= branch_prev", branchAcceptableVars{big.NewRat(75, 1), big.NewRat(80, 1)}, true, "code coverage is 80.0% and branch coverage is 75.0%. the condition in the `coverage.acceptable:` section is not met (`branch_current >= branch_prev`)"},
+		{"measured, diff", "branch_diff >= -5%", branchAcceptableVars{big.NewRat(75, 1), big.NewRat(80, 1)}, false, ""},
+		{"measured, diff below the threshold", "branch_diff >= 0%", branchAcceptableVars{big.NewRat(75, 1), big.NewRat(80, 1)}, true, "code coverage is 80.0% and branch coverage is 75.0%. the condition in the `coverage.acceptable:` section is not met (`branch_diff >= 0%`)"},
+		// The previous report carries no branches, so branch_prev reads as 0 as prev does.
+		{"prev not measured", "branch_prev == 0 && branch_diff == branch_current", branchAcceptableVars{big.NewRat(75, 1), nil}, false, ""},
+		// The current report carries no branches, so branch_current falls back to defaultBranchCoverage,
+		{"current not measured", "branch_current >= 80%", branchAcceptableVars{}, false, ""},
+		{"current not measured, diff", "branch_diff >= 0%", branchAcceptableVars{nil, big.NewRat(80, 1)}, false, ""},
+		// ... while the non-branch part keeps being enforced, and no branch coverage is reported.
+		{"current not measured, non-branch term still enforced", "current >= 90% && branch_current >= 80%", branchAcceptableVars{}, true, "code coverage is 80.0%. the condition in the `coverage.acceptable:` section is not met (`current >= 90% && branch_current >= 80%`)"},
+		// Branch coverage is reported only by a condition referencing it.
+		{"measured, not referenced", "current >= 90%", branchAcceptableVars{big.NewRat(75, 1), nil}, true, "code coverage is 80.0%. the condition in the `coverage.acceptable:` section is not met (`current >= 90%`)"},
+	}
+	cov := big.NewRat(800000, 10000)
+	prev := big.NewRat(800000, 10000)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := coverageAcceptable(cov, prev, tt.cond, nil, tt.branch)
+			if (err != nil) != tt.wantErr {
+				t.Fatalf("got %v, wantErr %v", err, tt.wantErr)
+			}
+			if tt.errMsg != "" && err.Error() != tt.errMsg {
+				t.Errorf("got %v\nwant %v", err.Error(), tt.errMsg)
+			}
+		})
+	}
+}
+
+func TestCoverageAcceptablePatchAndBranchMessage(t *testing.T) {
+	patch := 60.0
+	cov := big.NewRat(800000, 10000)
+	err := coverageAcceptable(cov, cov, "patch >= 70% && branch_current >= 70%", &patch, branchAcceptableVars{big.NewRat(50, 1), nil})
+	want := "code coverage is 80.0% and patch coverage is 60.0% and branch coverage is 50.0%. the condition in the `coverage.acceptable:` section is not met (`patch >= 70% && branch_current >= 70%`)"
+	if err == nil || err.Error() != want {
+		t.Errorf("got %v\nwant %v", err, want)
+	}
+}
+
+// TestAcceptableBranchCoverage pins how `coverage.acceptable:` reads the branch coverage of the
+// current and the previous report.
+func TestAcceptableBranchCoverage(t *testing.T) {
+	tests := []struct {
+		name    string
+		cond    string
+		r       *patchReporter
+		rPrev   Reporter
+		wantErr bool
+	}{
+		{"measured, above the threshold", "branch_current >= 70%", &patchReporter{coverage: 85.0, branch: new(75.0)}, &patchReporter{}, false},
+		{"measured, below the threshold", "branch_current >= 80%", &patchReporter{coverage: 85.0, branch: new(75.0)}, &patchReporter{}, true},
+		{"measured, down from prev", "branch_diff >= 0", &patchReporter{coverage: 85.0, branch: new(75.0)}, &patchReporter{branch: new(80.0)}, true},
+		{"measured, prev not measured", "branch_diff >= 0", &patchReporter{coverage: 85.0, branch: new(75.0)}, &patchReporter{}, false},
+		{"not measured", "branch_current >= 80%", &patchReporter{coverage: 85.0}, &patchReporter{branch: new(90.0)}, false},
+		{"not measured, non-branch term still enforced", "current >= 90% && branch_current >= 80%", &patchReporter{coverage: 85.0}, &patchReporter{}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{Coverage: &Coverage{Paths: []string{"."}, Acceptable: tt.cond}}
+			err := c.Acceptable(tt.r, tt.rPrev, nil)
+			if tt.wantErr && err == nil {
+				t.Error("got nil, want error")
+			}
+			if !tt.wantErr && err != nil {
+				t.Errorf("got %v, want nil", err)
 			}
 		})
 	}
@@ -574,10 +653,19 @@ func TestAcceptablePatchCoverage(t *testing.T) {
 
 type patchReporter struct {
 	coverage float64
+	// branch is nil when the report carries no branches.
+	branch *float64
 }
 
-func (r *patchReporter) CoveragePercent() float64               { return r.coverage }
-func (r *patchReporter) CodeToTestRatioRatio() float64          { return 0 }
+func (r *patchReporter) CoveragePercent() float64       { return r.coverage }
+func (r *patchReporter) IsMeasuredBranchCoverage() bool { return r.branch != nil }
+func (r *patchReporter) CodeToTestRatioRatio() float64  { return 0 }
+func (r *patchReporter) BranchCoveragePercent() float64 {
+	if r.branch == nil {
+		return 0
+	}
+	return *r.branch
+}
 func (r *patchReporter) TestExecutionTimeNano() float64         { return 0 }
 func (r *patchReporter) IsMeasuredTestExecutionTime() bool      { return false }
 func (r *patchReporter) CustomMetricsAcceptable(Reporter) error { return nil }
