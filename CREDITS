@@ -13206,8 +13206,8 @@ https://github.com/google/flatbuffers
 
 ================================================================
 
-github.com/google/go-github/v67
-https://github.com/google/go-github/v67
+github.com/google/go-github/v88
+https://github.com/google/go-github/v88
 ----------------------------------------------------------------
 Copyright (c) 2013 The go-github AUTHORS. All rights reserved.
 
@@ -13239,8 +13239,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ================================================================
 
-github.com/google/go-github/v88
-https://github.com/google/go-github/v88
+github.com/google/go-github/v90
+https://github.com/google/go-github/v90
 ----------------------------------------------------------------
 Copyright (c) 2013 The go-github AUTHORS. All rights reserved.
 
@@ -14240,8 +14240,8 @@ THE SOFTWARE.
 
 ================================================================
 
-github.com/k1LoW/go-github-client/v67
-https://github.com/k1LoW/go-github-client/v67
+github.com/k1LoW/go-github-client/v90
+https://github.com/k1LoW/go-github-client/v90
 ----------------------------------------------------------------
 The MIT License (MIT)
 
