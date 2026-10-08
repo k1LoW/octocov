@@ -51,6 +51,8 @@ type Config struct {
 	// config file path
 	path string
 	gh   *gh.Gh
+	// ifVars caches the variables of `if:` conditions, since building them asks the GitHub API
+	ifVars map[string]any
 }
 
 type Coverage struct {
@@ -463,11 +465,15 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 	if cond == "" {
 		return true, nil
 	}
-	variables, err := c.ifVariables()
-	if err != nil {
-		return false, err
+	// Build the variables once per run, keeping only a success so a failure is retried
+	if c.ifVars == nil {
+		variables, err := c.ifVariables()
+		if err != nil {
+			return false, err
+		}
+		c.ifVars = variables
 	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), c.ifVars)
 	if err != nil {
 		return false, err
 	}
