@@ -23,7 +23,7 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/google/go-cmp v0.7.0
-	github.com/google/go-github/v67 v67.0.0
+	github.com/google/go-github/v90 v90.0.0
 	github.com/h2non/go-is-svg v0.0.0-20160927212452-35e8c4b0612c
 	github.com/hhatto/gocloc v0.7.0
 	github.com/josharian/txtarfs v0.0.0-20240408113805-5dc76b8fe6bf
@@ -33,7 +33,7 @@ require (
 	github.com/k1LoW/expand v0.16.7
 	github.com/k1LoW/ghfs v1.6.0
 	github.com/k1LoW/go-github-actions v0.5.0
-	github.com/k1LoW/go-github-client/v67 v67.0.24
+	github.com/k1LoW/go-github-client/v90 v90.0.24
 	github.com/k1LoW/repin v0.4.2
 	github.com/lestrrat-go/backoff/v2 v2.0.8
 	github.com/lucasb-eyer/go-colorful v1.4.1
@@ -120,7 +120,6 @@ require (
 	github.com/google/flatbuffers v25.12.19+incompatible // indirect
 	github.com/google/go-github/v73 v73.0.0 // indirect
 	github.com/google/go-github/v88 v88.0.0 // indirect
-	github.com/google/go-github/v90 v90.0.0 // indirect
 	github.com/google/go-querystring v1.2.0 // indirect
 	github.com/google/s2a-go v0.1.10 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -130,7 +129,6 @@ require (
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/josharian/mapfs v0.0.0-20210615234106-095c008854e6 // indirect
-	github.com/k1LoW/go-github-client/v90 v90.0.24 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/klauspost/compress v1.19.2 // indirect
 	github.com/klauspost/cpuid/v2 v2.4.0 // indirect

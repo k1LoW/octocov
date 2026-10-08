@@ -17,8 +17,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-github/v67/github"
-	"github.com/k1LoW/go-github-client/v67/factory"
+	"github.com/google/go-github/v90/github"
+	"github.com/k1LoW/go-github-client/v90/factory"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
 
@@ -465,14 +465,14 @@ func TestListWorkflowJobs(t *testing.T) {
 			github.Jobs{
 				TotalCount: new(3),
 				Jobs: []*github.WorkflowJob{
-					{ID: github.Int64(1), Name: new("test (1)")},
-					{ID: github.Int64(2), Name: new("test (2)")},
+					{ID: new(int64(1)), Name: new("test (1)")},
+					{ID: new(int64(2)), Name: new("test (2)")},
 				},
 			},
 			github.Jobs{
 				TotalCount: new(3),
 				Jobs: []*github.WorkflowJob{
-					{ID: github.Int64(3), Name: new("test (3)")},
+					{ID: new(int64(3)), Name: new("test (3)")},
 				},
 			},
 		),
@@ -516,7 +516,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 		{
 			name: "no job has a step with the given name",
 			jobs: []*github.WorkflowJob{
-				{ID: github.Int64(1), Steps: []*github.TaskStep{
+				{ID: new(int64(1)), Steps: []*github.TaskStep{
 					{
 						Name:        new("Run test"),
 						StartedAt:   &github.Timestamp{Time: base},
@@ -530,7 +530,7 @@ func TestFetchStepsByNameErrors(t *testing.T) {
 		{
 			name: "the named step never completes",
 			jobs: []*github.WorkflowJob{
-				{ID: github.Int64(1), Steps: []*github.TaskStep{
+				{ID: new(int64(1)), Steps: []*github.TaskStep{
 					{
 						Name:      new("Run test"),
 						StartedAt: &github.Timestamp{Time: base},
@@ -978,7 +978,7 @@ func TestDeleteArtifactsBeforeRun(t *testing.T) {
 				Artifacts: []*github.Artifact{
 					artifact(3, 10),
 					artifact(4, 0),
-					{ID: github.Int64(5), Name: new("octocov-report@refs_pull_10"), WorkflowRun: &github.ArtifactWorkflowRun{ID: github.Int64(10)}},
+					{ID: new(int64(5)), Name: new("octocov-report@refs_pull_10"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(10))}},
 				},
 			},
 		),
@@ -1023,7 +1023,7 @@ func TestDeleteArtifactsBeforeRunFails(t *testing.T) {
 			mock.GetReposActionsArtifactsByOwnerByRepo,
 			github.ArtifactList{
 				Artifacts: []*github.Artifact{
-					{ID: github.Int64(1), Name: new("octocov-report@refs_pull_1"), WorkflowRun: &github.ArtifactWorkflowRun{ID: github.Int64(10)}},
+					{ID: new(int64(1)), Name: new("octocov-report@refs_pull_1"), WorkflowRun: &github.ArtifactWorkflowRun{ID: new(int64(10))}},
 				},
 			},
 		),

@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	giturls "github.com/chainguard-dev/git-urls"
-	"github.com/google/go-github/v67/github"
-	"github.com/k1LoW/go-github-client/v67/factory"
+	"github.com/google/go-github/v90/github"
+	"github.com/k1LoW/go-github-client/v90/factory"
 	"gopkg.in/ini.v1"
 )
 
