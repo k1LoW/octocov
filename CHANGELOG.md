@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.83.2](https://github.com/k1LoW/octocov/compare/v0.83.1...v0.83.2) - 2026-10-08
+
+### New Features 🎉
+- perf: walk the tree with filepath.WalkDir instead of filepath.Walk by @wreulicke in https://github.com/k1LoW/octocov/pull/812
+### Other Changes
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/807
+- chore(deps): bump the dependencies group with 8 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/808
+
 ## [v0.83.1](https://github.com/k1LoW/octocov/compare/v0.83.0...v0.83.1) - 2026-09-28
 
 ### Other Changes
