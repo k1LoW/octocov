@@ -22,9 +22,9 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	ghttp "github.com/go-git/go-git/v5/plumbing/transport/http"
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v90/github"
 	"github.com/k1LoW/go-github-actions/artifact"
-	"github.com/k1LoW/go-github-client/v67/factory"
+	"github.com/k1LoW/go-github-client/v90/factory"
 	"github.com/k1LoW/repin"
 	"github.com/lestrrat-go/backoff/v2"
 	"github.com/shurcooL/githubv4"
@@ -79,7 +79,7 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 	var tree *github.Tree
 
 	if cp != "" {
-		blob := &github.Blob{
+		blob := github.Blob{
 			Content:  new(content),
 			Encoding: new("utf-8"),
 			Size:     new(len(content)),
@@ -110,7 +110,7 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 		}
 	}
 
-	commit := &github.Commit{
+	commit := github.Commit{
 		Message: new(message),
 		Tree:    tree,
 		Parents: []*github.Commit{parent},
@@ -120,14 +120,11 @@ func (g *Gh) PushContent(ctx context.Context, owner, repo, branch, content, cp, 
 		return err
 	}
 
-	nref := &github.Reference{
-		Ref: new(path.Join("refs", "heads", branch)),
-		Object: &github.GitObject{
-			Type: new("commit"),
-			SHA:  resC.SHA,
-		},
+	nref := github.UpdateRef{
+		SHA:   resC.GetSHA(),
+		Force: new(false),
 	}
-	if _, _, err := srv.UpdateRef(ctx, owner, repo, nref, false); err != nil {
+	if _, _, err := srv.UpdateRef(ctx, owner, repo, path.Join("heads", branch), nref); err != nil {
 		return err
 	}
 

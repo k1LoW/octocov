@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/google/go-github/v67/github"
+	"github.com/google/go-github/v90/github"
 	"github.com/josharian/txtarfs"
-	"github.com/k1LoW/go-github-client/v67/factory"
+	"github.com/k1LoW/go-github-client/v90/factory"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 	"golang.org/x/tools/txtar"
 )

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/goccy/go-yaml"
-	"github.com/google/go-github/v67/github"
-	"github.com/k1LoW/go-github-client/v67/factory"
+	"github.com/google/go-github/v90/github"
+	"github.com/k1LoW/go-github-client/v90/factory"
 	"github.com/k1LoW/octocov/gh"
 	"github.com/migueleliasweb/go-github-mock/src/mock"
 )
