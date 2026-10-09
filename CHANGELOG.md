@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.83.3](https://github.com/k1LoW/octocov/compare/v0.83.2...v0.83.3) - 2026-10-09
+
+### Other Changes
+- perf: build the variables of if conditions once per run by @wreulicke in https://github.com/k1LoW/octocov/pull/814
+- chore: bump go directive to 1.26.9 and x/net to v0.60.0 by @k1LoW in https://github.com/k1LoW/octocov/pull/817
+- perf: let viewer: custom reuse the variables of if conditions by @k1LoW in https://github.com/k1LoW/octocov/pull/816
+
 ## [v0.83.2](https://github.com/k1LoW/octocov/compare/v0.83.1...v0.83.2) - 2026-10-08
 
 ### New Features 🎉
