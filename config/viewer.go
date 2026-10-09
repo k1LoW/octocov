@@ -150,7 +150,7 @@ func (c *Config) CustomLinks() (*CustomLinks, error) {
 	if c.Viewer == nil || c.Viewer.Type != ViewerCustom {
 		return nil, nil
 	}
-	vars, err := c.ifVariables()
+	vars, err := c.cachedIfVariables()
 	if err != nil {
 		return nil, err
 	}
