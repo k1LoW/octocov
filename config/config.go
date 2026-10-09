@@ -465,15 +465,11 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 	if cond == "" {
 		return true, nil
 	}
-	// Build the variables once per run, keeping only a success so a failure is retried
-	if c.ifVars == nil {
-		variables, err := c.ifVariables()
-		if err != nil {
-			return false, err
-		}
-		c.ifVars = variables
+	variables, err := c.cachedIfVariables()
+	if err != nil {
+		return false, err
 	}
-	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), c.ifVars)
+	ok, err := expr.Eval(fmt.Sprintf("(%s) == true", cond), variables)
 	if err != nil {
 		return false, err
 	}
@@ -482,6 +478,19 @@ func (c *Config) CheckIf(cond string) (bool, error) {
 		return false, fmt.Errorf("invalid condition `%s`", cond)
 	}
 	return tf, nil
+}
+
+// cachedIfVariables returns the variables of ifVariables, building them once per run.
+func (c *Config) cachedIfVariables() (map[string]any, error) {
+	// Keep only a success so a failure is retried
+	if c.ifVars == nil {
+		variables, err := c.ifVariables()
+		if err != nil {
+			return nil, err
+		}
+		c.ifVars = variables
+	}
+	return c.ifVars, nil
 }
 
 // ifVariables returns the variables an `if:` condition is evaluated with.
