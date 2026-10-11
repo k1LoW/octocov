@@ -28,12 +28,12 @@ jobs:
           go-version-file: go.mod
 
       - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
 
       - name: Run lint
-        uses: reviewdog/action-golangci-lint@db65103266f304d8ac929ad6c0cd02d14f6837ba # v2.10.1
+        uses: reviewdog/action-golangci-lint@284129a3ac23bc5d8ac1522e0b6511df74a8836d # v2.10.2
         with:
           go_version_file: go.mod
           cache: false
@@ -161,7 +161,7 @@ jobs:
           check-latest: true
 
       - name: Set up Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
 
