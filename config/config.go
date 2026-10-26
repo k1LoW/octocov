@@ -208,6 +208,7 @@ func (c *Config) Loaded() bool {
 
 type Reporter interface {
 	CoveragePercent() float64
+	IsMeasuredCoverage() bool
 	CodeToTestRatioRatio() float64
 	TestExecutionTimeNano() float64
 	IsMeasuredTestExecutionTime() bool
@@ -231,6 +232,11 @@ func (c *Config) Acceptable(r, rPrev Reporter, pc *cov.PatchCoverage) error {
 			patch = buildPatchAcceptableVar(pc)
 		}
 		if err := coverageAcceptable(curr, prev, c.Coverage.Acceptable, patch); err != nil {
+			if !r.IsMeasuredCoverage() {
+				// The condition was evaluated against 0%, which reads as if the tests covered
+				// nothing, while the reason is the measurement that was skipped earlier in the log.
+				err = fmt.Errorf("code coverage could not be measured and is taken as 0%%: %w", err)
+			}
 			errs = errors.Join(errs, err)
 		}
 	}
