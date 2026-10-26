@@ -61,6 +61,8 @@ var dumpCmd = &cobra.Command{
 		} else {
 			if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
+			} else if err := r.SkippedCoverageReports(); err != nil {
+				cmd.PrintErrf("Skip some of the code coverage reports: %v\n", err)
 			}
 		}
 

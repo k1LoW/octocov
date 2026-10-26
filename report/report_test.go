@@ -151,6 +151,58 @@ func TestMeasureCoverage(t *testing.T) {
 	}
 }
 
+func TestMeasureCoverageSkippedCoverageReports(t *testing.T) {
+	log.SetOutput(io.Discard) // Disable log in challengeParseReport()
+
+	broken := filepath.Join(t.TempDir(), "broken.info")
+	if err := os.WriteFile(broken, []byte("this is not a coverage report\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name        string
+		paths       []string
+		wantSkipped bool
+	}{
+		{
+			"every report is parsed",
+			[]string{filepath.Join(coverageTestdataDir(t), "gocover")},
+			false,
+		},
+		{
+			"one of the reports cannot be parsed",
+			[]string{filepath.Join(coverageTestdataDir(t), "gocover"), broken},
+			true,
+		},
+		{
+			"the only path is a report.json",
+			[]string{filepath.Join(testdataDir(t), "reports", "k1LoW", "tbls", "report.json")},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			r := &Report{}
+			if err := r.MeasureCoverage(tt.paths, nil); err != nil {
+				t.Fatal(err)
+			}
+			err := r.SkippedCoverageReports()
+			if tt.wantSkipped {
+				if err == nil {
+					t.Fatal("got nil, want the reason the broken report was skipped")
+				}
+				if !strings.Contains(err.Error(), broken) {
+					t.Errorf("got %v, want it to name %s", err, broken)
+				}
+				return
+			}
+			if err != nil {
+				t.Errorf("got %v, want nil", err)
+			}
+		})
+	}
+}
+
 func TestCollectCustomMetrics(t *testing.T) {
 	tests := []struct {
 		envs    map[string]string

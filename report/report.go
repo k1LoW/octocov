@@ -57,7 +57,11 @@ type Report struct {
 
 	// coverage report paths
 	covPaths []string
-	opts     *Options
+	// covSkipErr holds why the coverage reports that MeasureCoverage left out could not be
+	// parsed, when others could. It is not returned as an error, because a glob such as
+	// `**/*.out` matching a file that is not a coverage report is an ordinary configuration.
+	covSkipErr error
+	opts       *Options
 }
 
 func New(ownerrepo string, opts ...Option) (*Report, error) {
@@ -565,6 +569,9 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 		}
 		if r.Coverage != nil {
 			r.Coverage.NormalizePaths(gitRoot, fsFiles)
+			// The only path is a report.json, which every coverage parser rejecting it was
+			// how this branch was reached, so nothing was left out.
+			errs = nil
 		}
 	}
 
@@ -578,8 +585,15 @@ func (r *Report) MeasureCoverage(patterns, exclude []string) error {
 	if err := r.Coverage.Exclude(exclude); err != nil {
 		return errors.Join(errs, err)
 	}
+	r.covSkipErr = errs
 
 	return nil
+}
+
+// SkippedCoverageReports returns why some of the coverage reports matched by the last
+// MeasureCoverage could not be parsed while the others were measured, or nil if none was left out.
+func (r *Report) SkippedCoverageReports() error {
+	return r.covSkipErr
 }
 
 // collectFSFilesForNormalization detects git root and collects filesystem files.

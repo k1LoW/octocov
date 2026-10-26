@@ -838,3 +838,7 @@ func readBaseReport(stores []comparedDatastore, prefix string, keys []string) (*
 	}
 	return nil, ""
 }
+			} else if err := r.SkippedCoverageReports(); err != nil {
+				cmd.PrintErrf("Skip some of the code coverage reports: %v\n", err)
+		} else if err := r.SkippedCoverageReports(); err != nil {
+			cmd.PrintErrf("Skip some of the code coverage reports: %v\n", err)
