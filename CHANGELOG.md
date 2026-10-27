@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.83.4](https://github.com/k1LoW/octocov/compare/v0.83.3...v0.83.4) - 2026-10-27
+
+### Fix bug 🐛
+- fix: explain the measurements and fetches that a run skips by @k1LoW in https://github.com/k1LoW/octocov/pull/824
+### Other Changes
+- chore: bump go directive to 1.26.10 by @k1LoW in https://github.com/k1LoW/octocov/pull/825
+- chore(deps): bump the dependencies group across 1 directory with 15 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/822
+- chore(deps): bump the dependencies group across 1 directory with 6 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/820
+
 ## [v0.83.3](https://github.com/k1LoW/octocov/compare/v0.83.2...v0.83.3) - 2026-10-09
 
 ### Other Changes
