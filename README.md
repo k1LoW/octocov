@@ -184,6 +184,16 @@ $ octocov
 Error: test execution time is 1m15s, the condition in the `testExecutionTime.acceptable:` section is not met (`1 min`)
 ```
 
+#### Exit status
+
+The `acceptable:` conditions are what decide whether octocov fails a run on its metrics. Measuring the metrics and writing the report to the pull request are done on a best-effort basis, so a failure in either is logged as `Skip ...` and the run goes on.
+
+- A metric that cannot be measured, such as a coverage report that no parser accepts, is left out of the report. The run fails only when none of the configured metrics could be measured. The `acceptable:` condition of a metric left out is evaluated against `0`, so `coverage.acceptable: 60%` still fails the run when the coverage report cannot be read. For the test execution time, `0` meets any upper bound.
+- `comment:`, `summary:` and `body:` do not fail the run when they cannot be written, since they often fail for reasons of the environment rather than of the configuration, such as a pull request from a fork whose token cannot comment.
+- Generating a badge, storing the report to `report.path:` or `report.datastores:`, and `push:` fail the run when they cannot be done, since what they write is read after the run, by the next run comparing against the report or by whoever shows the badge.
+
+To make a run fail when the code coverage or the code to test ratio cannot be measured, set its `acceptable:` condition.
+
 ### Generate report badges self.
 
 By setting `*.badge.path:`, generate badges self.

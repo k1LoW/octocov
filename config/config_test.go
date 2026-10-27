@@ -573,11 +573,45 @@ func TestAcceptablePatchCoverage(t *testing.T) {
 }
 
 type patchReporter struct {
-	coverage float64
+	coverage   float64
+	unmeasured bool
 }
 
 func (r *patchReporter) CoveragePercent() float64               { return r.coverage }
+func (r *patchReporter) IsMeasuredCoverage() bool               { return !r.unmeasured }
 func (r *patchReporter) CodeToTestRatioRatio() float64          { return 0 }
 func (r *patchReporter) TestExecutionTimeNano() float64         { return 0 }
 func (r *patchReporter) IsMeasuredTestExecutionTime() bool      { return false }
 func (r *patchReporter) CustomMetricsAcceptable(Reporter) error { return nil }
+
+func TestAcceptableUnmeasuredCoverage(t *testing.T) {
+	tests := []struct {
+		name       string
+		cond       string
+		r          *patchReporter
+		wantErr    bool
+		wantReason bool
+	}{
+		{"measured, below the threshold", "current >= 80%", &patchReporter{coverage: 0}, true, false},
+		{"not measured", "current >= 80%", &patchReporter{unmeasured: true}, true, true},
+		{"not measured, condition met at 0%", "current >= 0%", &patchReporter{unmeasured: true}, false, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &Config{Coverage: &Coverage{Paths: []string{"."}, Acceptable: tt.cond}}
+			err := c.Acceptable(tt.r, &patchReporter{}, nil)
+			if !tt.wantErr {
+				if err != nil {
+					t.Errorf("got %v, want nil", err)
+				}
+				return
+			}
+			if err == nil {
+				t.Fatal("got nil, want error")
+			}
+			if got := strings.Contains(err.Error(), "could not be measured"); got != tt.wantReason {
+				t.Errorf("got %v, want the reason to be named: %v", err, tt.wantReason)
+			}
+		})
+	}
+}

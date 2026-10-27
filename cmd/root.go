@@ -181,6 +181,8 @@ var rootCmd = &cobra.Command{
 		} else {
 			if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 				cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
+			} else if err := r.SkippedCoverageReports(); err != nil {
+				cmd.PrintErrf("Skip some of the code coverage reports: %v\n", err)
 			}
 		}
 
@@ -502,7 +504,7 @@ var rootCmd = &cobra.Command{
 				changedFiles := gh.ChangedLinesByFile(files)
 				switch {
 				case err != nil:
-					cmd.PrintErrf("Skip measuring patch coverage: %v\n", err)
+					cmd.PrintErrf("Skip measuring patch coverage, taking `patch` as 100%%: %v\n", err)
 				case len(files) == 0:
 					cmd.PrintErrln("Skip measuring patch coverage: no changed files were fetched")
 				case len(changedFiles) == 0:
@@ -600,13 +602,15 @@ func fetchPullRequestDiff(ctx context.Context, cmd *cobra.Command, repository, c
 		}
 		files, err := g.FetchChangedFiles(ctx, repo.Owner, repo.Repo)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("could not fetch the files changed since the default branch: %w", err)
 		}
 		return &gh.PullRequestFiles{Files: files, Unaligned: "the changed files are those since the default branch rather than those of a pull request"}, nil
 	}
 	d, err := g.FetchPullRequestFiles(ctx, repo.Owner, repo.Repo, n, commit)
 	if err != nil {
-		return nil, err
+		// Named apart from the default branch comparison, since the pull request is known here
+		// and a failure means the token or the API, not that there is nothing to measure.
+		return nil, fmt.Errorf("could not fetch the changed files of pull request #%d: %w", n, err)
 	}
 	if d.Unaligned != "" {
 		// The table and the `patch` variable still read these lines, so the job log is the one
@@ -637,6 +641,8 @@ func printMetrics(cmd *cobra.Command) error {
 	if err := c.CoverageConfigReadyOnLocal(); err == nil {
 		if err := r.MeasureCoverage(c.Coverage.Paths, c.Coverage.Exclude); err != nil {
 			cmd.PrintErrf("Skip measuring code coverage: %v\n", err)
+		} else if err := r.SkippedCoverageReports(); err != nil {
+			cmd.PrintErrf("Skip some of the code coverage reports: %v\n", err)
 		}
 	}
 
