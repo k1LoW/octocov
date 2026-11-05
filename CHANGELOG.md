@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.83.5](https://github.com/k1LoW/octocov/compare/v0.83.4...v0.83.5) - 2026-11-05
+
+### Other Changes
+- chore(deps): bump github.com/go-jose/go-jose/v4 from 4.1.4 to 4.1.6 by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/829
+- chore(deps): bump the dependencies group with 11 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/828
+- chore(deps): bump the dependencies group with 2 updates by @dependabot[bot] in https://github.com/k1LoW/octocov/pull/827
+
 ## [v0.83.4](https://github.com/k1LoW/octocov/compare/v0.83.3...v0.83.4) - 2026-10-27
 
 ### Fix bug 🐛
